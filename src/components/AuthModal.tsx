@@ -318,8 +318,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden">
-              <div className="animate-scroll-left flex gap-3">
+            <div className="absolute bottom-8 left-0 right-0 h-20 overflow-hidden">
+              <div className="animate-scroll-left-fast flex gap-2">
                 {[
                   { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
                   { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
@@ -337,22 +337,22 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[280px] flex-shrink-0">
-                    <div className="flex gap-1 mb-1">
+                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 min-w-[200px] max-w-[200px] flex-shrink-0">
+                    <div className="flex gap-0.5 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-xs text-foreground mb-1">{testimonial.text}</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                    <p className="text-[10px] text-foreground mb-1 line-clamp-2">{testimonial.text}</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs font-semibold">{testimonial.name}</div>
-                        <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                        <div className="text-[10px] font-semibold">{testimonial.name}</div>
+                        <div className="text-[9px] text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
                   </div>
@@ -375,22 +375,22 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[280px] flex-shrink-0">
-                    <div className="flex gap-1 mb-1">
+                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 min-w-[200px] max-w-[200px] flex-shrink-0">
+                    <div className="flex gap-0.5 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-xs text-foreground mb-1">{testimonial.text}</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                    <p className="text-[10px] text-foreground mb-1 line-clamp-2">{testimonial.text}</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs font-semibold">{testimonial.name}</div>
-                        <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                        <div className="text-[10px] font-semibold">{testimonial.name}</div>
+                        <div className="text-[9px] text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
                   </div>
@@ -429,7 +429,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Main Heading */}
-            <div className="mb-5">
+            <div className="mb-5 text-center">
               <h2 className="text-2xl font-bold leading-tight">
                 Log In and Get Smart
               </h2>

@@ -274,6 +274,11 @@ All colors MUST be HSL.
   animation: scroll-left 60s linear infinite;
 }
 
-.animate-scroll-left:hover {
+.animate-scroll-left-fast {
+  animation: scroll-left 40s linear infinite;
+}
+
+.animate-scroll-left:hover,
+.animate-scroll-left-fast:hover {
   animation-play-state: paused;
 }
