@@ -266,8 +266,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profile?.signup_method === 'google' || profile?.signup_method === 'apple') {
         console.log(`🔐 OAuth account detected (${profile.signup_method}), sending password setup email...`);
         
-        // Send password reset email so they can add a password to their OAuth account
-        const redirectUrl = `${window.location.origin}/reset-password`;
+        // Use production domain to avoid security warnings
+        const redirectUrl = 'https://www.chatl.ai/reset-password';
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: redirectUrl
         });
@@ -295,8 +295,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Continue with signup if check fails
     }
     
-    // Use current origin for redirects (works in test and production)
-    const redirectUrl = window.location.origin + '/';
+    // Use production domain for email confirmation
+    const redirectUrl = 'https://www.chatl.ai/';
     
     const { error, data } = await supabase.auth.signUp({
       email,
@@ -366,8 +366,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (profile?.signup_method === 'google' || profile?.signup_method === 'apple') {
           console.log(`🔐 Detected ${profile.signup_method} account without password, sending reset link...`);
           
-          // Send password reset email so they can set a password
-          const redirectUrl = `${window.location.origin}/reset-password`;
+          // Use production domain to avoid security warnings
+          const redirectUrl = 'https://www.chatl.ai/reset-password';
           const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: redirectUrl
           });
@@ -400,7 +400,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const redirectUrl = window.location.origin + '/';
+    // Use production domain
+    const redirectUrl = 'https://www.chatl.ai/';
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -416,7 +417,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithApple = async () => {
-    const redirectUrl = window.location.origin + '/';
+    // Use production domain
+    const redirectUrl = 'https://www.chatl.ai/';
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
@@ -432,7 +434,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/reset-password`;
+    // Use production domain to avoid security warnings
+    const redirectUrl = 'https://www.chatl.ai/reset-password';
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl
