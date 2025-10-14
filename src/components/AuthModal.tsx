@@ -314,8 +314,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               </div>
             </div>
 
-            {/* Trusted by Millions */}
-            <div className="text-center mb-6 z-10">
+            {/* Trusted by Millions - Centered between icons and comments */}
+            <div className="absolute bottom-56 left-0 right-0 text-center z-10">
               <h3 className="text-lg font-bold">Trusted by Millions</h3>
             </div>
 
