@@ -260,9 +260,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         <div className="flex flex-col md:flex-row min-h-[420px]">
           {/* Left Panel - Social Proof */}
-          <div className="w-full md:w-1/2 bg-gradient-to-br from-background to-muted/30 p-5 md:p-7 flex flex-col items-center justify-center border-r border-border">
+          <div className="w-full md:w-1/2 bg-gradient-to-br from-background to-muted/30 p-5 md:p-7 flex flex-col items-center justify-center border-r border-border overflow-hidden relative">
             {/* Badge and Rating */}
-            <div className="text-center mb-5">
+            <div className="text-center mb-5 z-10">
               <div className="inline-flex items-center gap-2 mb-2">
                 <img src="/chatl-logo-black.png" alt="ChatLearn" className="w-6 h-6 dark:hidden" />
                 <img src="/chatl-logo-white.png" alt="ChatLearn" className="w-6 h-6 hidden dark:block" />
@@ -281,7 +281,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Available On */}
-            <div className="text-center mb-5">
+            <div className="text-center mb-5 z-10">
               <div className="text-xs text-muted-foreground mb-2">Available on</div>
               <div className="flex justify-center">
                 <div className="inline-flex gap-1.5 items-center flex-wrap p-2 border-2 border-border rounded-full">
@@ -315,8 +315,89 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Trusted by Millions */}
-            <div className="text-center">
+            <div className="text-center mb-5 z-10">
               <h3 className="text-xl font-bold">Trusted by Millions</h3>
+            </div>
+
+            {/* Scrolling Testimonials */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
+              <div className="animate-scroll-up space-y-2">
+                {[
+                  { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
+                  { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
+                  { name: "Emma Thompson", role: "Marketing Manager", text: "I've tried many AI tools, but this one stands out. The interface is intuitive and the results are phenomenal.", stars: 5 },
+                  { name: "Michael Chen", role: "Student", text: "As a student, this has become my go-to study companion. It explains complex topics in ways I can understand.", stars: 5 },
+                  { name: "Lisa Anderson", role: "Business Owner", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7.", stars: 5 },
+                  { name: "David Kumar", role: "Writer", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on!", stars: 5 },
+                  { name: "Sophie Martin", role: "Designer", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow.", stars: 5 },
+                  { name: "Alex Johnson", role: "Data Analyst", text: "The AI's ability to process and explain complex data is remarkable. Highly recommend!", stars: 5 },
+                  { name: "Maria Garcia", role: "Teacher", text: "I use this daily for lesson planning and creating engaging content for my students. Absolutely brilliant!", stars: 5 },
+                  { name: "Ryan Peterson", role: "Entrepreneur", text: "Best AI investment I've made for my business. The ROI is undeniable.", stars: 5 },
+                  { name: "Nina Patel", role: "Researcher", text: "The depth and accuracy of information this AI provides has significantly enhanced my research projects.", stars: 5 },
+                  { name: "Tom Wilson", role: "Consultant", text: "Client presentations have never been easier to prepare. This AI gets the job done right.", stars: 5 },
+                  { name: "Jessica Lee", role: "Freelancer", text: "Game-changer for my freelance work! I can handle more projects with better quality now.", stars: 5 },
+                  { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
+                  { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
+                ].map((testimonial, index) => (
+                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 mx-3">
+                    <div className="flex gap-1 mb-1">
+                      {[...Array(testimonial.stars)].map((_, i) => (
+                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-xs text-foreground mb-1">{testimonial.text}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                        {testimonial.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {/* Duplicate for seamless loop */}
+                {[
+                  { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
+                  { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
+                  { name: "Emma Thompson", role: "Marketing Manager", text: "I've tried many AI tools, but this one stands out. The interface is intuitive and the results are phenomenal.", stars: 5 },
+                  { name: "Michael Chen", role: "Student", text: "As a student, this has become my go-to study companion. It explains complex topics in ways I can understand.", stars: 5 },
+                  { name: "Lisa Anderson", role: "Business Owner", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7.", stars: 5 },
+                  { name: "David Kumar", role: "Writer", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on!", stars: 5 },
+                  { name: "Sophie Martin", role: "Designer", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow.", stars: 5 },
+                  { name: "Alex Johnson", role: "Data Analyst", text: "The AI's ability to process and explain complex data is remarkable. Highly recommend!", stars: 5 },
+                  { name: "Maria Garcia", role: "Teacher", text: "I use this daily for lesson planning and creating engaging content for my students. Absolutely brilliant!", stars: 5 },
+                  { name: "Ryan Peterson", role: "Entrepreneur", text: "Best AI investment I've made for my business. The ROI is undeniable.", stars: 5 },
+                  { name: "Nina Patel", role: "Researcher", text: "The depth and accuracy of information this AI provides has significantly enhanced my research projects.", stars: 5 },
+                  { name: "Tom Wilson", role: "Consultant", text: "Client presentations have never been easier to prepare. This AI gets the job done right.", stars: 5 },
+                  { name: "Jessica Lee", role: "Freelancer", text: "Game-changer for my freelance work! I can handle more projects with better quality now.", stars: 5 },
+                  { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
+                  { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
+                ].map((testimonial, index) => (
+                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 mx-3">
+                    <div className="flex gap-1 mb-1">
+                      {[...Array(testimonial.stars)].map((_, i) => (
+                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-xs text-foreground mb-1">{testimonial.text}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                        {testimonial.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -328,7 +409,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               <div className="flex justify-center">
                 <div className="inline-flex gap-3 items-center p-2 border-2 border-border rounded-2xl">
                   <div className="flex items-center gap-1.5">
-                    <img src="/chatgpt-logo.png" alt="ChatGPT" className="w-4 h-4" />
+                    <img src="/chatgpt-logo-light.png" alt="ChatGPT" className="w-4 h-4 hidden dark:block" />
+                    <img src="/chatgpt-logo.png" alt="ChatGPT" className="w-4 h-4 dark:hidden brightness-0" />
                     <span className="text-xs font-medium">OpenAI</span>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -424,7 +506,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     onClick={handleAppleSignIn}
                     disabled={googleLoading || appleLoading || loading}
                     variant="outline"
-                    className="w-full h-10 mb-3"
+                    className="w-full h-10 mb-3 border-2"
                   >
                     {appleLoading ? (
                       <>

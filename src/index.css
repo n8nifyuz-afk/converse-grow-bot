@@ -259,3 +259,21 @@ All colors MUST be HSL.
     opacity: 1;
   }
 }
+
+/* Scrolling testimonials animation */
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.animate-scroll-up {
+  animation: scroll-up 30s linear infinite;
+}
+
+.animate-scroll-up:hover {
+  animation-play-state: paused;
+}
