@@ -5,10 +5,13 @@ interface SEOProps {
   description: string;
   canonical?: string;
   noindex?: boolean;
+  ogImage?: string;
 }
 
-const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex = false }) => {
+const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex = false, ogImage }) => {
   const fullTitle = `${title} | ChatLearn`;
+  const defaultOgImage = 'https://chatl.ai/og-image.png';
+  const ogImageUrl = ogImage || defaultOgImage;
 
   useEffect(() => {
     // Update title
@@ -60,6 +63,7 @@ const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex = fals
     updateMetaProperty('og:description', description);
     updateMetaProperty('og:url', canonical || window.location.href);
     updateMetaProperty('og:type', 'website');
+    updateMetaProperty('og:image', ogImageUrl);
 
     // Update Twitter Card tags
     const updateTwitterMeta = (name: string, content: string) => {
@@ -75,13 +79,14 @@ const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex = fals
     updateTwitterMeta('twitter:card', 'summary_large_image');
     updateTwitterMeta('twitter:title', fullTitle);
     updateTwitterMeta('twitter:description', description);
+    updateTwitterMeta('twitter:image', ogImageUrl);
 
     // Cleanup function
     return () => {
       // Note: We don't clean up meta tags on unmount as they should persist
       // for the lifetime of the page
     };
-  }, [fullTitle, description, canonical, noindex]);
+  }, [fullTitle, description, canonical, noindex, ogImageUrl]);
 
   return null; // This component doesn't render anything
 };
