@@ -320,7 +320,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-10 left-0 right-0 h-44 overflow-hidden pointer-events-none">
+            <div className="absolute bottom-4 left-0 right-0 h-44 overflow-hidden pointer-events-none">
               <div className="animate-seamless-scroll flex gap-2">
                 {(() => {
                   const testimonials = [
