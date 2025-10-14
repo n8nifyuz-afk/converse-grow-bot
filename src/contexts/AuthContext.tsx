@@ -350,22 +350,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('email', email)
           .maybeSingle();
         
-        if (profile?.signup_method === 'google') {
+        if (profile?.signup_method === 'google' || profile?.signup_method === 'apple') {
+          console.log(`🔐 Detected ${profile.signup_method} account without password, sending reset link...`);
+          
+          // Send password reset email so they can set a password
+          const redirectUrl = `${window.location.origin}/reset-password`;
+          const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: redirectUrl
+          });
+          
+          if (resetError) {
+            console.error('❌ Failed to send password reset:', resetError);
+            return { 
+              error: { 
+                message: `This email is registered via ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. Please use "Continue with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}" to sign in.`,
+                code: 'oauth_only_account'
+              } 
+            };
+          }
+          
+          console.log('✅ Password reset email sent');
           return { 
             error: { 
-              message: 'This email is registered via Google. Please use "Continue with Google" to sign in.',
-              code: 'oauth_only_account'
-            } 
-          };
-        } else if (profile?.signup_method === 'apple') {
-          return { 
-            error: { 
-              message: 'This email is registered via Apple. Please use "Continue with Apple" to sign in.',
-              code: 'oauth_only_account'
+              message: `This account was created with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. We've sent you an email to set up a password so you can sign in with email too.`,
+              code: 'password_reset_sent'
             } 
           };
         }
       } catch (checkError) {
+        console.error('❌ Error checking signup method:', checkError);
         // If check fails, return original error
       }
     }

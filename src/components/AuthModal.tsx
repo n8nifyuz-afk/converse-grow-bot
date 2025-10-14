@@ -70,6 +70,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         // Check if this is an OAuth-only account
         if (signInError.code === 'oauth_only_account') {
           setError(signInError.message);
+        } else if (signInError.code === 'password_reset_sent') {
+          // Password reset email was sent
+          toast({
+            title: "Check your email",
+            description: signInError.message,
+            duration: 10000,
+          });
+          setEmail('');
+          setPassword('');
         } else {
           setError("Email or password is incorrect");
         }
