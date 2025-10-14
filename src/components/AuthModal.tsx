@@ -516,7 +516,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                        required
                        className="h-10 border-2 border-gray-400 dark:border-gray-600"
                      />
-                     {showPassword && (
+                     
+                     <div className={`transition-all duration-300 ease-in-out ${showPassword ? 'opacity-100 max-h-20' : 'opacity-0 max-h-0 overflow-hidden'}`}>
                        <Input
                          type="password"
                          placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'}
@@ -529,13 +530,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                          minLength={6}
                          className="h-10 border-2 border-gray-400 dark:border-gray-600"
                        />
-                     )}
+                     </div>
+                     
                      {error && (
-                       <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
+                       <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md animate-fade-in">
                          {error}
                        </div>
                      )}
-                     {showPassword && (
+                     
+                     <div className={`transition-all duration-300 ease-in-out ${showPassword ? 'opacity-100 max-h-20' : 'opacity-0 max-h-0 overflow-hidden'}`}>
                        <Button
                          type="submit"
                          disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)}
@@ -552,7 +555,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                           'Continue with Email'
                         )}
                       </Button>
-                     )}
+                     </div>
                   </form>
 
                   <div className="mt-3 text-center space-x-2 text-xs">
