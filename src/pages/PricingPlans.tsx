@@ -222,21 +222,21 @@ export default function PricingPlans() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-7xl">
       {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Pricing Plan</h1>
-        <p className="text-muted-foreground text-lg mb-8">
+      <div className="text-center mb-8 sm:mb-10 md:mb-12">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Pricing Plan</h1>
+        <p className="text-muted-foreground text-sm sm:text-base md:text-lg mb-6 sm:mb-8 px-2 sm:px-0">
           Unlock the full potential of Chatbot App with advanced plans.
         </p>
 
         {/* Billing Period Selector */}
-        <div className="inline-flex bg-muted rounded-lg p-1 mb-8">
+        <div className="inline-flex bg-muted rounded-lg p-1 mb-6 sm:mb-8 w-full max-w-sm sm:w-auto">
           <Button
             variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setBillingPeriod('monthly')}
-            className="rounded-md"
+            className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
           >
             Monthly
           </Button>
@@ -244,7 +244,7 @@ export default function PricingPlans() {
             variant={billingPeriod === 'quarterly' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setBillingPeriod('quarterly')}
-            className="rounded-md"
+            className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
           >
             Quarterly
           </Button>
@@ -252,7 +252,7 @@ export default function PricingPlans() {
             variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setBillingPeriod('yearly')}
-            className="rounded-md"
+            className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
           >
             Yearly
           </Button>
@@ -260,62 +260,62 @@ export default function PricingPlans() {
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid md:grid-cols-3 gap-8 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-10 sm:mb-12 md:mb-16">
         {/* Free Plan */}
         <Card className="relative border border-border/40 bg-background/50 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <Zap className="w-6 h-6 text-blue-600" />
+          <CardHeader className="text-center pb-4 sm:pb-6">
+            <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
-            <CardTitle className="text-2xl">Free</CardTitle>
-            <div className="text-3xl font-bold mt-4">$0</div>
-            <CardDescription className="mt-2">
+            <CardTitle className="text-xl sm:text-2xl">Free</CardTitle>
+            <div className="text-2xl sm:text-3xl font-bold mt-3 sm:mt-4">$0</div>
+            <CardDescription className="mt-2 text-xs sm:text-sm">
               Start free, upgrade anytime.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button 
               variant="outline" 
-              className="w-full mb-6"
+              className="w-full mb-4 sm:mb-6 h-9 sm:h-10 text-sm"
               disabled
             >
               Current Plan
             </Button>
 
-            <div className="space-y-4">
-              <h4 className="font-semibold">What's included:</h4>
-              <ul className="space-y-3 text-sm">
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="font-semibold text-sm sm:text-base">What's included:</h4>
+              <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Access to OpenAI GPT-4.1 Mini
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Access to OpenAI GPT-4.1 Mini</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <X className="w-4 h-4" />
-                  Access to multiple top AI models
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Access to multiple top AI models</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <X className="w-4 h-4" />
-                  Unlimited chats with all models
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Unlimited chats with all models</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <X className="w-4 h-4" />
-                  Custom bots built for specific use cases
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Custom bots built for specific use cases</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <X className="w-4 h-4" />
-                  Unlimited file uploads
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Unlimited file uploads</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <X className="w-4 h-4" />
-                  Advanced web search capabilities
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Advanced web search capabilities</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <X className="w-4 h-4" />
-                  Image Generation
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Image Generation</span>
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground">
-                  <X className="w-4 h-4" />
-                  Chat with PDF files
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Chat with PDF files</span>
                 </li>
               </ul>
             </div>
@@ -324,28 +324,28 @@ export default function PricingPlans() {
 
         {/* Pro Plan */}
         <Card className="relative border border-primary/40 bg-background/50 backdrop-blur-sm">
-          <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
+          <Badge className="absolute -top-2 sm:-top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground text-xs">
             Most Popular
           </Badge>
-          <CardHeader className="text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <Star className="w-6 h-6 text-purple-600" />
+          <CardHeader className="text-center pb-4 sm:pb-6">
+            <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             </div>
-            <CardTitle className="text-2xl">Pro</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">Pro</CardTitle>
             <div className="mt-2">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 ${(getPricing('pro').price / 30 * 1).toFixed(2)} Per Day
               </span>
             </div>
-            <div className="text-3xl font-bold">${getPricing('pro').price}</div>
-            <CardDescription className="mt-2">
+            <div className="text-2xl sm:text-3xl font-bold">${getPricing('pro').price}</div>
+            <CardDescription className="mt-2 text-xs sm:text-sm">
               {getPricing('pro').note ? `${getPricing('pro').period}/${getPricing('pro').note}` : `${getPricing('pro').period}/billed ${billingPeriod}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button 
               onClick={() => handleSubscribe('pro')}
-              className="w-full mb-6 bg-primary hover:bg-primary/90"
+              className="w-full mb-4 sm:mb-6 bg-primary hover:bg-primary/90 h-9 sm:h-10 text-sm"
               disabled={subscriptionStatus.product_id && productToPlanMap[subscriptionStatus.product_id] === 'Pro'}
             >
               {subscriptionStatus.product_id && productToPlanMap[subscriptionStatus.product_id] === 'Pro' 
@@ -353,36 +353,36 @@ export default function PricingPlans() {
                 : 'Subscribe'}
             </Button>
 
-            <div className="space-y-4">
-              <h4 className="font-semibold">What's included:</h4>
-              <ul className="space-y-3 text-sm">
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="font-semibold text-sm sm:text-base">What's included:</h4>
+              <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Access to multiple AI models, including OpenAI GPT-5, Anthropic Claude, Google Gemini and DeepSeek
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Access to multiple AI models, including OpenAI GPT-5, Anthropic Claude, Google Gemini and DeepSeek</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Unlimited chats with all models
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Unlimited chats with all models</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Extended limits on messages, file uploads, advanced data analysis, and image generation
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Extended limits on messages, file uploads, advanced data analysis, and image generation</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Text-to-speech voice mode
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Text-to-speech voice mode</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Custom bots built for specific use cases
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Custom bots built for specific use cases</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Unlimited file uploads
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Unlimited file uploads</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Advanced web search capabilities
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Advanced web search capabilities</span>
                 </li>
               </ul>
             </div>
@@ -391,25 +391,25 @@ export default function PricingPlans() {
 
         {/* Ultra Pro Plan */}
         <Card className="relative border border-border/40 bg-background/50 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-              <Gem className="w-6 h-6 text-orange-600" />
+          <CardHeader className="text-center pb-4 sm:pb-6">
+            <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+              <Gem className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
             </div>
-            <CardTitle className="text-2xl">Ultra Pro</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">Ultra Pro</CardTitle>
             <div className="mt-2">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 ${(getPricing('ultra_pro').price / 30 * 1).toFixed(2)} Per Day
               </span>
             </div>
-            <div className="text-3xl font-bold">${getPricing('ultra_pro').price}</div>
-            <CardDescription className="mt-2">
+            <div className="text-2xl sm:text-3xl font-bold">${getPricing('ultra_pro').price}</div>
+            <CardDescription className="mt-2 text-xs sm:text-sm">
               {getPricing('ultra_pro').note ? `${getPricing('ultra_pro').period}/${getPricing('ultra_pro').note}` : `${getPricing('ultra_pro').period}/billed ${billingPeriod}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button 
               onClick={() => handleSubscribe('ultra_pro')}
-              className="w-full mb-6 bg-primary hover:bg-primary/90"
+              className="w-full mb-4 sm:mb-6 bg-primary hover:bg-primary/90 h-9 sm:h-10 text-sm"
               disabled={subscriptionStatus.product_id && productToPlanMap[subscriptionStatus.product_id] === 'Ultra Pro'}
             >
               {subscriptionStatus.product_id && productToPlanMap[subscriptionStatus.product_id] === 'Ultra Pro'
@@ -417,36 +417,36 @@ export default function PricingPlans() {
                 : 'Subscribe'}
             </Button>
 
-            <div className="space-y-4">
-              <h4 className="font-semibold">What's included:</h4>
-              <ul className="space-y-3 text-sm">
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="font-semibold text-sm sm:text-base">What's included:</h4>
+              <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Access to multiple AI models, including OpenAI GPT-5, Anthropic Claude, Google Gemini and DeepSeek
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Access to multiple AI models, including OpenAI GPT-5, Anthropic Claude, Google Gemini and DeepSeek</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Unlimited chats with all models
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Unlimited chats with all models</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Extended limits on messages, file uploads, advanced data analysis, and image generation
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Extended limits on messages, file uploads, advanced data analysis, and image generation</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Text-to-speech voice mode
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Text-to-speech voice mode</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Custom bots built for specific use cases
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Custom bots built for specific use cases</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Unlimited file uploads
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Unlimited file uploads</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  Advanced web search capabilities
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Advanced web search capabilities</span>
                 </li>
               </ul>
             </div>
@@ -455,53 +455,53 @@ export default function PricingPlans() {
       </div>
 
       {/* Compare Plans Table */}
-      <div className="mb-16">
-        <h2 className="text-2xl font-bold text-center mb-8">Compare Plans</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-background rounded-lg overflow-hidden shadow-sm">
+      <div className="mb-10 sm:mb-12 md:mb-16">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 sm:mb-8">Compare Plans</h2>
+        <div className="overflow-x-auto -mx-3 sm:mx-0">
+          <table className="w-full min-w-[600px] sm:min-w-0 border-collapse bg-background rounded-lg overflow-hidden shadow-sm">
             <thead>
               <tr className="border-b bg-muted/30">
-                <th className="text-left p-4 font-semibold">Features</th>
-                <th className="text-center p-4 font-semibold">Free</th>
-                <th className="text-center p-4 font-semibold">Pro</th>
-                <th className="text-center p-4 font-semibold">Ultra Pro</th>
+                <th className="text-left p-2 sm:p-3 md:p-4 font-semibold text-xs sm:text-sm md:text-base">Features</th>
+                <th className="text-center p-2 sm:p-3 md:p-4 font-semibold text-xs sm:text-sm md:text-base">Free</th>
+                <th className="text-center p-2 sm:p-3 md:p-4 font-semibold text-xs sm:text-sm md:text-base">Pro</th>
+                <th className="text-center p-2 sm:p-3 md:p-4 font-semibold text-xs sm:text-sm md:text-base">Ultra Pro</th>
               </tr>
             </thead>
             <tbody>
               {features.map((feature, index) => (
                 <tr key={index} className="border-b border-border/20">
-                  <td className="p-4 font-medium">{feature.name}</td>
-                  <td className="text-center p-4">
+                  <td className="p-2 sm:p-3 md:p-4 font-medium text-xs sm:text-sm">{feature.name}</td>
+                  <td className="text-center p-2 sm:p-3 md:p-4">
                     {typeof feature.free === 'boolean' ? (
                       feature.free ? (
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                        <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mx-auto" />
                       ) : (
-                        <X className="w-5 h-5 text-muted-foreground mx-auto" />
+                        <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mx-auto" />
                       )
                     ) : (
-                      <span className="text-sm text-muted-foreground">{feature.free}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">{feature.free}</span>
                     )}
                   </td>
-                  <td className="text-center p-4">
+                  <td className="text-center p-2 sm:p-3 md:p-4">
                     {typeof feature.pro === 'boolean' ? (
                       feature.pro ? (
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                        <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mx-auto" />
                       ) : (
-                        <X className="w-5 h-5 text-muted-foreground mx-auto" />
+                        <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mx-auto" />
                       )
                     ) : (
-                      <span className="text-sm">{feature.pro}</span>
+                      <span className="text-xs sm:text-sm">{feature.pro}</span>
                     )}
                   </td>
-                  <td className="text-center p-4">
+                  <td className="text-center p-2 sm:p-3 md:p-4">
                     {typeof feature.ultraPro === 'boolean' ? (
                       feature.ultraPro ? (
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                        <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mx-auto" />
                       ) : (
-                        <X className="w-5 h-5 text-muted-foreground mx-auto" />
+                        <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mx-auto" />
                       )
                     ) : (
-                      <span className="text-sm">{feature.ultraPro}</span>
+                      <span className="text-xs sm:text-sm">{feature.ultraPro}</span>
                     )}
                   </td>
                 </tr>
@@ -513,18 +513,18 @@ export default function PricingPlans() {
 
       {/* FAQ Section */}
       <div>
-        <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
-        <p className="text-center text-muted-foreground mb-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4 sm:mb-6 md:mb-8">Frequently Asked Questions</h2>
+        <p className="text-center text-muted-foreground mb-6 sm:mb-8 text-sm sm:text-base px-2 sm:px-0">
           Find answers to your questions about plans, pricing, and features.
         </p>
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="w-full">
             {faqData.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left">
+                <AccordionTrigger className="text-left text-sm sm:text-base">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent>
+                <AccordionContent className="text-xs sm:text-sm text-muted-foreground">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
