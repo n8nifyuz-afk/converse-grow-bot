@@ -378,6 +378,19 @@ export default function ProjectPage() {
       hasSubscription: subscriptionStatus.subscribed
     });
     
+    // Check limit BEFORE creating chat or saving message
+    if (!subscriptionStatus.subscribed && isAtLimit) {
+      console.log('[PROJECT-MESSAGE-LIMIT] ❌ User at limit - showing upgrade message');
+      toast.error('Message limit reached', {
+        description: 'You have reached your free message limit. Please upgrade to Pro to continue chatting.',
+        action: {
+          label: 'Upgrade',
+          onClick: () => navigate('/pricing-plans')
+        }
+      });
+      return;
+    }
+    
     setLoading(true);
     const userMessage = input.trim();
     const files = [...selectedFiles];
@@ -432,40 +445,7 @@ export default function ProjectPage() {
         file_attachments: uploadedFiles
       });
       
-      // Track message for free users
-      console.log('[PROJECT-MESSAGE-LIMIT] Message saved, tracking for free user...');
-      
-      // If anonymous user, save to anonymous_messages table
-      if (!user && sessionId) {
-        console.log('[PROJECT-MESSAGE-LIMIT] Saving anonymous message to tracking table');
-        try {
-          await supabase
-            .from('anonymous_messages')
-            .insert({
-              session_id: sessionId,
-              content: userMessage,
-              role: 'user',
-              file_attachments: uploadedFiles
-            });
-          console.log('[PROJECT-MESSAGE-LIMIT] Anonymous message tracked successfully');
-        } catch (anonError) {
-          console.error('[PROJECT-MESSAGE-LIMIT] Error tracking anonymous message:', anonError);
-        }
-      }
-      
-      // Check message limit AFTER saving the message
-      if (!subscriptionStatus.subscribed && !canSendMessage) {
-        console.log('[PROJECT-MESSAGE-LIMIT] ❌ Free user at limit - NOT sending to webhook');
-        // Navigate to chat page with a flag to show limit warning
-        navigate(`/chat/${newChat.id}`, {
-          state: {
-            showLimitWarning: true
-          }
-        });
-        return;
-      }
-      
-      // Increment message count for free users
+      // Increment message count for free users (limit already checked above)
       if (!subscriptionStatus.subscribed) {
         incrementMessageCount();
         console.log('[PROJECT-MESSAGE-LIMIT] Message count incremented');
