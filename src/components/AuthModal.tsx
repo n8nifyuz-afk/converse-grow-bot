@@ -284,8 +284,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             <div className="text-center mb-5 z-10">
               <div className="text-xs text-muted-foreground mb-2">Available on</div>
               <div className="flex justify-center">
-                <div className="inline-flex gap-1.5 items-center flex-wrap p-2 border-2 border-border rounded-full">
-                  <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
+                <div className="inline-flex gap-1.5 items-center flex-wrap p-2 rounded-full">
+                  <div className="w-10 h-10 rounded-lg bg-background hover:shadow-lg transition-shadow flex items-center justify-center shadow-md">
                     <svg className="w-6 h-6" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -293,19 +293,19 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
                   </div>
-                  <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-background hover:shadow-lg transition-shadow flex items-center justify-center shadow-md">
                     <img src="/whatsapp-icon.svg" alt="WhatsApp" className="w-6 h-6 object-contain" />
                   </div>
-                  <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-background hover:shadow-lg transition-shadow flex items-center justify-center shadow-md">
                     <img src="/chrome-icon.svg" alt="Chrome" className="w-6 h-6 object-contain" />
                   </div>
-                  <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-background hover:shadow-lg transition-shadow flex items-center justify-center shadow-md">
                     <img src="/firefox-icon.svg" alt="Firefox" className="w-6 h-6 object-contain" />
                   </div>
-                  <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-background hover:shadow-lg transition-shadow flex items-center justify-center shadow-md">
                     <img src="/edge-icon-new.svg" alt="Edge" className="w-6 h-6 object-contain" />
                   </div>
-                  <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-background hover:shadow-lg transition-shadow flex items-center justify-center shadow-md">
                     <img src="/safari-icon-new-final.svg" alt="Safari" className="w-6 h-6 object-contain" />
                   </div>
                 </div>
@@ -318,40 +318,41 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden">
-              <div className="animate-scroll-left flex gap-3">
+            <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
+              <div className="animate-scroll-right flex gap-4">
                 {[
-                  { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
-                  { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
-                  { name: "Emma Thompson", role: "Marketing Manager", text: "I've tried many AI tools, but this one stands out. The interface is intuitive and the results are phenomenal.", stars: 5 },
-                  { name: "Michael Chen", role: "Student", text: "As a student, this has become my go-to study companion. It explains complex topics in ways I can understand.", stars: 5 },
-                  { name: "Lisa Anderson", role: "Business Owner", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7.", stars: 5 },
-                  { name: "David Kumar", role: "Writer", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on!", stars: 5 },
-                  { name: "Sophie Martin", role: "Designer", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow.", stars: 5 },
-                  { name: "Alex Johnson", role: "Data Analyst", text: "The AI's ability to process and explain complex data is remarkable. Highly recommend!", stars: 5 },
-                  { name: "Maria Garcia", role: "Teacher", text: "I use this daily for lesson planning and creating engaging content for my students. Absolutely brilliant!", stars: 5 },
-                  { name: "Ryan Peterson", role: "Entrepreneur", text: "Best AI investment I've made for my business. The ROI is undeniable.", stars: 5 },
-                  { name: "Nina Patel", role: "Researcher", text: "The depth and accuracy of information this AI provides has significantly enhanced my research projects.", stars: 5 },
-                  { name: "Tom Wilson", role: "Consultant", text: "Client presentations have never been easier to prepare. This AI gets the job done right.", stars: 5 },
-                  { name: "Jessica Lee", role: "Freelancer", text: "Game-changer for my freelance work! I can handle more projects with better quality now.", stars: 5 },
-                  { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
-                  { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
+                  { title: "Perfect AI Tool", name: "Sophia Brown", role: "Customer Support Manager", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch...", stars: 5 },
+                  { title: "Very Cool", name: "William Davis", role: "Software Developer", text: "It is amazing app for fun and useful generating content, creating great ideas! This AI chatbot saves me in sad evenings", stars: 5 },
+                  { title: "Crazy Good!!!", name: "Isabella Davis", role: "Data Analyst", text: "So crazy how complicated and intelligent this is, the excellent feel you get to inspire", stars: 5 },
+                  { title: "Game Changer", name: "Marcus Johnson", role: "Marketing Director", text: "This platform has revolutionized how our team collaborates. The AI responses are incredibly accurate and helpful.", stars: 5 },
+                  { title: "Highly Recommended", name: "Emily Chen", role: "Product Designer", text: "The interface is intuitive and the results are consistently impressive. Best AI tool I've used this year!", stars: 5 },
+                  { title: "Outstanding", name: "James Wilson", role: "Content Creator", text: "I can't imagine working without this now. It saves me hours every single day and the quality is top-notch.", stars: 5 },
+                  { title: "Simply Amazing", name: "Olivia Martinez", role: "Business Analyst", text: "The accuracy and speed of responses is incredible. This has become an essential part of my daily workflow.", stars: 5 },
+                  { title: "Love It!", name: "Daniel Lee", role: "Entrepreneur", text: "As a business owner, this AI assistant has been invaluable. It's like having an expert on every topic available instantly.", stars: 5 },
+                  { title: "Fantastic Tool", name: "Ava Thompson", role: "Researcher", text: "The depth of knowledge and ability to understand context is remarkable. This has transformed how I conduct research.", stars: 5 },
+                  { title: "Exceptional", name: "Noah Garcia", role: "Consultant", text: "My clients are always impressed with the insights I can provide thanks to this amazing AI platform.", stars: 5 },
+                  { title: "Mind Blowing", name: "Mia Rodriguez", role: "Writer", text: "The creative suggestions and writing assistance are phenomenal. My productivity has doubled since I started using this.", stars: 5 },
+                  { title: "Superb", name: "Liam Anderson", role: "Project Manager", text: "From planning to execution, this AI helps at every stage. It's become indispensable for managing complex projects.", stars: 5 },
+                  { title: "Brilliant", name: "Charlotte Taylor", role: "Teacher", text: "Creating engaging lesson plans and educational content has never been easier. My students love the materials I create!", stars: 5 },
+                  { title: "Impressive", name: "Benjamin Moore", role: "Financial Advisor", text: "The analytical capabilities are outstanding. This tool helps me provide better insights to my clients every day.", stars: 5 },
+                  { title: "Top Notch", name: "Amelia White", role: "UX Designer", text: "The AI understands design principles and user experience concepts brilliantly. It's like having a design partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[280px] flex-shrink-0">
-                    <div className="flex gap-1 mb-1">
+                  <div key={index} className="bg-white dark:bg-card rounded-2xl p-4 min-w-[300px] flex-shrink-0 shadow-lg">
+                    <h4 className="text-sm font-bold text-foreground mb-2">{testimonial.title}</h4>
+                    <div className="flex gap-0.5 mb-2">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-xs text-foreground mb-1">{testimonial.text}</p>
+                    <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{testimonial.text}</p>
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-xs font-semibold text-foreground">{testimonial.name}</div>
                         <div className="text-xs text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
@@ -359,37 +360,38 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                 ))}
                 {/* Duplicate for seamless loop */}
                 {[
-                  { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
-                  { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
-                  { name: "Emma Thompson", role: "Marketing Manager", text: "I've tried many AI tools, but this one stands out. The interface is intuitive and the results are phenomenal.", stars: 5 },
-                  { name: "Michael Chen", role: "Student", text: "As a student, this has become my go-to study companion. It explains complex topics in ways I can understand.", stars: 5 },
-                  { name: "Lisa Anderson", role: "Business Owner", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7.", stars: 5 },
-                  { name: "David Kumar", role: "Writer", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on!", stars: 5 },
-                  { name: "Sophie Martin", role: "Designer", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow.", stars: 5 },
-                  { name: "Alex Johnson", role: "Data Analyst", text: "The AI's ability to process and explain complex data is remarkable. Highly recommend!", stars: 5 },
-                  { name: "Maria Garcia", role: "Teacher", text: "I use this daily for lesson planning and creating engaging content for my students. Absolutely brilliant!", stars: 5 },
-                  { name: "Ryan Peterson", role: "Entrepreneur", text: "Best AI investment I've made for my business. The ROI is undeniable.", stars: 5 },
-                  { name: "Nina Patel", role: "Researcher", text: "The depth and accuracy of information this AI provides has significantly enhanced my research projects.", stars: 5 },
-                  { name: "Tom Wilson", role: "Consultant", text: "Client presentations have never been easier to prepare. This AI gets the job done right.", stars: 5 },
-                  { name: "Jessica Lee", role: "Freelancer", text: "Game-changer for my freelance work! I can handle more projects with better quality now.", stars: 5 },
-                  { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
-                  { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
+                  { title: "Perfect AI Tool", name: "Sophia Brown", role: "Customer Support Manager", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch...", stars: 5 },
+                  { title: "Very Cool", name: "William Davis", role: "Software Developer", text: "It is amazing app for fun and useful generating content, creating great ideas! This AI chatbot saves me in sad evenings", stars: 5 },
+                  { title: "Crazy Good!!!", name: "Isabella Davis", role: "Data Analyst", text: "So crazy how complicated and intelligent this is, the excellent feel you get to inspire", stars: 5 },
+                  { title: "Game Changer", name: "Marcus Johnson", role: "Marketing Director", text: "This platform has revolutionized how our team collaborates. The AI responses are incredibly accurate and helpful.", stars: 5 },
+                  { title: "Highly Recommended", name: "Emily Chen", role: "Product Designer", text: "The interface is intuitive and the results are consistently impressive. Best AI tool I've used this year!", stars: 5 },
+                  { title: "Outstanding", name: "James Wilson", role: "Content Creator", text: "I can't imagine working without this now. It saves me hours every single day and the quality is top-notch.", stars: 5 },
+                  { title: "Simply Amazing", name: "Olivia Martinez", role: "Business Analyst", text: "The accuracy and speed of responses is incredible. This has become an essential part of my daily workflow.", stars: 5 },
+                  { title: "Love It!", name: "Daniel Lee", role: "Entrepreneur", text: "As a business owner, this AI assistant has been invaluable. It's like having an expert on every topic available instantly.", stars: 5 },
+                  { title: "Fantastic Tool", name: "Ava Thompson", role: "Researcher", text: "The depth of knowledge and ability to understand context is remarkable. This has transformed how I conduct research.", stars: 5 },
+                  { title: "Exceptional", name: "Noah Garcia", role: "Consultant", text: "My clients are always impressed with the insights I can provide thanks to this amazing AI platform.", stars: 5 },
+                  { title: "Mind Blowing", name: "Mia Rodriguez", role: "Writer", text: "The creative suggestions and writing assistance are phenomenal. My productivity has doubled since I started using this.", stars: 5 },
+                  { title: "Superb", name: "Liam Anderson", role: "Project Manager", text: "From planning to execution, this AI helps at every stage. It's become indispensable for managing complex projects.", stars: 5 },
+                  { title: "Brilliant", name: "Charlotte Taylor", role: "Teacher", text: "Creating engaging lesson plans and educational content has never been easier. My students love the materials I create!", stars: 5 },
+                  { title: "Impressive", name: "Benjamin Moore", role: "Financial Advisor", text: "The analytical capabilities are outstanding. This tool helps me provide better insights to my clients every day.", stars: 5 },
+                  { title: "Top Notch", name: "Amelia White", role: "UX Designer", text: "The AI understands design principles and user experience concepts brilliantly. It's like having a design partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[280px] flex-shrink-0">
-                    <div className="flex gap-1 mb-1">
+                  <div key={`dup-${index}`} className="bg-white dark:bg-card rounded-2xl p-4 min-w-[300px] flex-shrink-0 shadow-lg">
+                    <h4 className="text-sm font-bold text-foreground mb-2">{testimonial.title}</h4>
+                    <div className="flex gap-0.5 mb-2">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-xs text-foreground mb-1">{testimonial.text}</p>
+                    <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{testimonial.text}</p>
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-xs font-semibold text-foreground">{testimonial.name}</div>
                         <div className="text-xs text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
