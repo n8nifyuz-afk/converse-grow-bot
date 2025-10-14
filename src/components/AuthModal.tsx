@@ -318,8 +318,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-16 left-0 right-0 h-20 overflow-hidden">
-              <div className="animate-scroll-left-faster flex gap-2">
+            <div className="absolute bottom-20 left-0 right-0 h-26 overflow-hidden">
+              <div className="animate-scroll-left-fastest flex gap-2">
                 {[
                   { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
                   { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
