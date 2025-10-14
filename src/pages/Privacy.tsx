@@ -1,403 +1,506 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Sparkles, Shield, Users } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Shield, Lock, Eye, FileText, Globe, Scale, Trash2, Mail } from 'lucide-react';
+import SEO from '@/components/SEO';
+
 export default function Privacy() {
-  const navigate = useNavigate();
-  const NavBar = () => <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      
-    </nav>;
-  const Footer = () => <footer className="py-12 px-4 bg-muted/20 border-t">
-      <div className="container max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <span className="text-lg font-semibold text-foreground">ChatLearn</span>
-            </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Professional AI solutions for businesses and individuals.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Product</h3>
-            <div className="space-y-2">
-              <button onClick={() => navigate('/features')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Features</button>
-              <button onClick={() => navigate('/pricing')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
-              <button onClick={() => navigate('/models')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">AI Models</button>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Company</h3>
-            <div className="space-y-2">
-              <a href="/help" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">About</a>
-              <a href="/explore-tools" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Explore Tools</a>
-              <a href="/help" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Help Center</a>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Legal</h3>
-            <div className="space-y-2">
-              <a href="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-              <a href="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-              <a href="/cookie-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</a>
-            </div>
-          </div>
-        </div>
-        
-        
-      </div>
-    </footer>;
-  return <div className="min-h-screen bg-background">
-      <NavBar />
+  return (
+    <div className="min-h-screen bg-background">
+      <SEO 
+        title="Privacy Policy - ChatLearn" 
+        description="Learn how ChatLearn collects, uses, and protects your personal data. GDPR compliant privacy policy."
+        canonical="https://chatl.ai/privacy"
+      />
       
       {/* Hero Section */}
-      <section className="py-16 px-4 border-b">
-        <div className="container max-w-4xl mx-auto text-center">
-          <Badge variant="outline" className="mb-6 border-muted-foreground/20 text-muted-foreground">
+      <section className="py-12 sm:py-16 md:py-20 px-4 border-b bg-gradient-to-b from-muted/30 to-background">
+        <div className="container max-w-5xl mx-auto text-center">
+          <Badge variant="outline" className="mb-4 sm:mb-6">
+            <Shield className="h-3 w-3 mr-2" />
             Legal Document
           </Badge>
-          <h1 className="text-5xl font-bold mb-6 text-foreground">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
             Privacy Policy
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })}
+          <p className="text-base sm:text-lg text-muted-foreground mb-2">
+            Last Updated: October 3, 2025
+          </p>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+            ChatLearn is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and disclose your personal data.
           </p>
         </div>
       </section>
 
-      {/* Content Section */}
-      <section className="py-12 px-4">
-        <div className="container max-w-4xl mx-auto">
-          <div className="space-y-6">
-            <Card className="border-2 hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl text-foreground">Introduction</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="leading-relaxed text-muted-foreground">
-                  This Privacy Policy describes how ChatLearn ("we," "our," or "us") collects, uses, and protects your personal information when you use our AI chat service. We are committed to protecting your privacy and ensuring transparency about our data practices.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl text-foreground">Controller Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p><strong>Data Controller:</strong> ChatLearn</p>
-                <p><strong>Contact Email:</strong> privacy@adamai.chat</p>
-                <p><strong>Data Protection Officer:</strong> dpo@adamai.chat</p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl text-foreground">Information We Collect</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-foreground">Account Information</h3>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    <li>Email address (required for account creation)</li>
-                    <li>Display name</li>
-                    <li>Profile avatar (if provided)</li>
-                    <li>Authentication method (email or Google OAuth)</li>
-                  </ul>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-foreground">Chat and Content Data</h3>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    <li>Chat messages and conversations</li>
-                    <li>File attachments (documents, images, audio, video)</li>
-                    <li>Image analyses and AI-generated content</li>
-                    <li>Project titles and descriptions</li>
-                    <li>Message timestamps and metadata</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 text-foreground">Technical Information</h3>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    <li>IP address and device information</li>
-                    <li>Browser type and version</li>
-                    <li>Usage patterns and preferences</li>
-                    <li>Session information</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* ... keep existing cards with similar conservative styling ... */}
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">How We Use Your Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <h3 className="text-xl font-semibold text-primary">Legal Bases and Purposes:</h3>
-                <div className="space-y-6">
-                  <div className="p-6 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
-                    <p className="text-lg font-semibold mb-3 text-green-600 dark:text-green-400">Contract Performance:</p>
-                    <ul className="list-disc pl-6 mt-2 space-y-1">
-                      <li>Providing AI chat services</li>
-                      <li>Processing your messages and files</li>
-                      <li>Maintaining your account and preferences</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="p-6 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                    <p className="text-lg font-semibold mb-3 text-blue-600 dark:text-blue-400">Legitimate Interest:</p>
-                    <ul className="list-disc pl-6 mt-2 space-y-1">
-                      <li>Improving our AI models and services</li>
-                      <li>Ensuring platform security and preventing abuse</li>
-                      <li>Technical maintenance and optimization</li>
-                    </ul>
-                  </div>
-
-                  <div className="p-6 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-                    <p className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Consent:</p>
-                    <ul className="list-disc pl-6 mt-2 space-y-1">
-                      <li>Non-essential cookies and analytics (where applicable)</li>
-                      <li>Marketing communications (if opted in)</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Third-Party Processors</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="p-6 rounded-xl bg-muted/50 hover:bg-muted/80 transition-colors">
-                    <h3 className="text-lg font-semibold mb-3">Supabase</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Location: United States</p>
-                    <p className="text-sm mb-2">Purpose: Database hosting, authentication, file storage</p>
-                    <p className="text-sm">Privacy Policy: <a href="https://supabase.com/privacy" className="text-primary hover:underline" target="_blank" rel="noopener">supabase.com/privacy</a></p>
-                  </div>
-
-                  <div className="p-6 rounded-xl bg-muted/50 hover:bg-muted/80 transition-colors">
-                    <h3 className="text-lg font-semibold mb-3">OpenAI</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Location: United States</p>
-                    <p className="text-sm mb-2">Purpose: AI chat responses, image generation and analysis</p>
-                    <p className="text-sm">Privacy Policy: <a href="https://openai.com/privacy" className="text-primary hover:underline" target="_blank" rel="noopener">openai.com/privacy</a></p>
-                  </div>
-
-                  <div className="p-6 rounded-xl bg-muted/50 hover:bg-muted/80 transition-colors md:col-span-2">
-                    <h3 className="text-lg font-semibold mb-3">Google OAuth</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Location: Global</p>
-                    <p className="text-sm mb-2">Purpose: Google sign-in authentication</p>
-                    <p className="text-sm">Privacy Policy: <a href="https://policies.google.com/privacy" className="text-primary hover:underline" target="_blank" rel="noopener">policies.google.com/privacy</a></p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Data Retention</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <p className="font-semibold mb-2">Account Data</p>
-                    <p className="text-sm">Retained while your account is active and for 30 days after deletion</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                    <p className="font-semibold mb-2">Chat Messages</p>
-                    <p className="text-sm">Retained while your account is active, deleted when you delete chats or account</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                    <p className="font-semibold mb-2">File Uploads</p>
-                    <p className="text-sm">Retained for the lifetime of associated chats</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                    <p className="font-semibold mb-2">Usage Logs</p>
-                    <p className="text-sm">Retained for 90 days for security and performance monitoring</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Your Rights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-lg">Under GDPR and CCPA, you have the following rights:</p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                    <h3 className="font-semibold text-primary">Access & Portability</h3>
-                    <p className="text-sm text-muted-foreground mt-2">Request a copy of your personal data</p>
-                  </div>
-                  <div className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                    <h3 className="font-semibold text-primary">Rectification</h3>
-                    <p className="text-sm text-muted-foreground mt-2">Correct inaccurate personal data</p>
-                  </div>
-                  <div className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                    <h3 className="font-semibold text-primary">Erasure</h3>
-                    <p className="text-sm text-muted-foreground mt-2">Delete your personal data</p>
-                  </div>
-                  <div className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                    <h3 className="font-semibold text-primary">Restrict Processing</h3>
-                    <p className="text-sm text-muted-foreground mt-2">Limit how we use your data</p>
-                  </div>
-                  <div className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                    <h3 className="font-semibold text-primary">Object</h3>
-                    <p className="text-sm text-muted-foreground mt-2">Object to certain processing activities</p>
-                  </div>
-                  <div className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                    <h3 className="font-semibold text-primary">Withdraw Consent</h3>
-                    <p className="text-sm text-muted-foreground mt-2">Withdraw consent for optional processing</p>
-                  </div>
-                </div>
-                
-                <Separator className="my-6" />
-                
-                <div className="p-6 rounded-xl bg-primary/10 border border-primary/20">
-                  <h3 className="font-semibold mb-3 text-primary">How to Exercise Your Rights</h3>
-                  <p className="mb-4">To exercise any of these rights, please contact us at:</p>
-                  <ul className="list-disc pl-6 space-y-2">
-                    <li>Email: <a href="mailto:privacy@adamai.chat" className="text-primary hover:underline">privacy@adamai.chat</a></li>
-                    <li>Account Settings: Use the delete account feature in your profile</li>
-                  </ul>
-                  <p className="text-sm text-muted-foreground mt-4">
-                    We will respond to your request within 30 days and may need to verify your identity before processing.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Cookies and Tracking</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">We use minimal cookies to provide our service:</p>
-                <div className="space-y-4">
-                  <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                    <p className="font-semibold text-green-600 dark:text-green-400">Essential Cookies:</p>
-                    <p className="text-sm mt-2">Required for authentication, security, and basic functionality</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <p className="font-semibold text-blue-600 dark:text-blue-400">Preference Cookies:</p>
-                    <p className="text-sm mt-2">Remember your theme and interface preferences</p>
-                  </div>
-                </div>
-                <p className="text-lg">
-                  For detailed information about cookies, please see our{' '}
-                  <a href="/cookie-policy" className="text-primary hover:underline">Cookie Policy</a>.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">International Transfers</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">
-                  Your data may be transferred to and processed in the United States and other countries where our service providers operate. We ensure appropriate safeguards are in place, including:
-                </p>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>Standard Contractual Clauses (SCCs)</li>
-                  <li>Adequate country decisions</li>
-                  <li>Vendor security and privacy certifications</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Security</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">
-                  We implement appropriate technical and organizational measures to protect your personal data, including:
-                </p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <p className="font-semibold">🔐 Encryption</p>
-                    <p className="text-sm mt-2">In transit and at rest</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <p className="font-semibold">🔑 Access Controls</p>
-                    <p className="text-sm mt-2">Authentication and authorization</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <p className="font-semibold">🛡️ Security Assessments</p>
-                    <p className="text-sm mt-2">Regular security reviews</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <p className="font-semibold">👥 Employee Training</p>
-                    <p className="text-sm mt-2">Data protection education</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Changes to This Policy</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">
-                  We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the "Last updated" date. For significant changes, we may also send you a notification via email.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5 hover:border-primary/40 transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Contact Us</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-white text-sm">✉</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Email</p>
-                      <a href="mailto:privacy@adamai.chat" className="text-primary hover:underline">privacy@adamai.chat</a>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-white text-sm">🛡</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Data Protection Officer</p>
-                      <a href="mailto:dpo@adamai.chat" className="text-primary hover:underline">dpo@adamai.chat</a>
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mt-6 p-4 rounded-lg bg-muted/50">
-                  You also have the right to lodge a complaint with your local data protection authority if you believe we have not handled your personal data in accordance with applicable law.
-                </p>
-              </CardContent>
-            </Card>
+      {/* Quick Links Navigation */}
+      <section className="py-8 px-4 bg-muted/20 border-b">
+        <div className="container max-w-5xl mx-auto">
+          <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <a href="#definitions" className="text-primary hover:underline">Definitions and Key Terms</a>
+            <a href="#data-categories" className="text-primary hover:underline">Categories of Personal Data</a>
+            <a href="#how-we-use" className="text-primary hover:underline">How We Use Your Information</a>
+            <a href="#how-we-disclose" className="text-primary hover:underline">How We Disclose Information</a>
+            <a href="#international" className="text-primary hover:underline">International Transfers</a>
+            <a href="#retention" className="text-primary hover:underline">Data Retention</a>
+            <a href="#security" className="text-primary hover:underline">Security Measures</a>
+            <a href="#cookies" className="text-primary hover:underline">Cookies & Consent</a>
+            <a href="#payment" className="text-primary hover:underline">Payment Details</a>
+            <a href="#children" className="text-primary hover:underline">Children's Privacy</a>
+            <a href="#gdpr-rights" className="text-primary hover:underline">GDPR/EEA & UK Rights</a>
+            <a href="#california" className="text-primary hover:underline">California Privacy</a>
+            <a href="#delete" className="text-primary hover:underline">Delete Account Policy</a>
+            <a href="#changes" className="text-primary hover:underline">Policy Changes</a>
+            <a href="#contact" className="text-primary hover:underline">Contact Us</a>
           </div>
         </div>
       </section>
 
-      <Footer />
-    </div>;
+      {/* Main Content */}
+      <section className="py-8 sm:py-12 px-4">
+        <div className="container max-w-5xl mx-auto space-y-8">
+
+          {/* Introduction */}
+          <Card>
+            <CardContent className="pt-6">
+              <p className="leading-relaxed text-muted-foreground">
+                By accessing or using the Service, you acknowledge that you have read and understood this Privacy Policy. 
+                Where required by applicable law, we will obtain your explicit consent before collecting or processing your personal data.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Definitions */}
+          <Card id="definitions">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Definitions and Key Terms
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="font-semibold">Cookie</p>
+                  <p className="text-sm text-muted-foreground">Small text file stored on your device by your browser. Used for essential operations, analytics, and preferences.</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Company / we / us / our</p>
+                  <p className="text-sm text-muted-foreground">Refers to the ChatLearn platform operated by TASOLAR (Cyprus).</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Country / Jurisdiction</p>
+                  <p className="text-sm text-muted-foreground">Republic of Cyprus (EU).</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Customer</p>
+                  <p className="text-sm text-muted-foreground">An individual or organization subscribing to or using the Service.</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Device</p>
+                  <p className="text-sm text-muted-foreground">Any internet-connected device (e.g., phone, tablet, computer).</p>
+                </div>
+                <div>
+                  <p className="font-semibold">IP Address</p>
+                  <p className="text-sm text-muted-foreground">Numeric label assigned to a device connected to the Internet (may approximate location).</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Personal Data</p>
+                  <p className="text-sm text-muted-foreground">Any information relating to an identified or identifiable natural person.</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Service</p>
+                  <p className="text-sm text-muted-foreground">The functionality and products provided by ChatLearn via https://chatl.ai.</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Third-Party Service Providers</p>
+                  <p className="text-sm text-muted-foreground">External parties assisting us (e.g., hosting, analytics, payments, model API providers).</p>
+                </div>
+                <div>
+                  <p className="font-semibold">You / User / Data Subject</p>
+                  <p className="text-sm text-muted-foreground">The individual accessing or using the Service.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Integrations */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" />
+                About Our AI Integrations (Transparency)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                ChatLearn provides a unified interface to multiple AI models. Current integrations may include (subject to change):
+              </p>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li>OpenAI (GPT-5, GPT-4o, GPT-4o mini, DALL·E 3)</li>
+                <li>Anthropic (Claude Sonnet 4)</li>
+                <li>Google DeepMind (Gemini 2.5 Flash)</li>
+                <li>xAI (Grok 4)</li>
+                <li>DeepSeek V2</li>
+              </ul>
+              <div className="p-4 bg-muted/50 rounded-lg border">
+                <p className="text-sm font-semibold mb-2">Disclaimer</p>
+                <p className="text-sm text-muted-foreground">
+                  ChatLearn is not affiliated with, sponsored, or endorsed by these providers. 
+                  We access their technologies only via official APIs under lawful agreements. 
+                  Prompts and inputs you submit may be sent to these providers only as needed to generate outputs, following this Policy.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Data Categories */}
+          <Card id="data-categories">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-primary" />
+                Categories of Personal Data and Processing
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-muted-foreground">
+                We process personal data under GDPR lawful bases (performance of contract, legal obligation, legitimate interests, consent).
+              </p>
+
+              {/* 1. Personal & Contact Information */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold mb-3">1. Personal & Contact Information</h3>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Data:</span> Name, email, login identity (Google/Apple SSO), account identifiers.</p>
+                  <p><span className="font-medium">Purpose:</span> Account management, authentication, support.</p>
+                  <p><span className="font-medium">Legal basis:</span> Performance of a contract.</p>
+                </div>
+              </div>
+
+              {/* 2. Technical & Security Data */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold mb-3">2. Technical & Security Data</h3>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Data:</span> IP address, device info, browser/OS, timestamps, referral URLs, diagnostic logs.</p>
+                  <p><span className="font-medium">Purpose:</span> Security, fraud prevention, analytics.</p>
+                  <p><span className="font-medium">Legal basis:</span> Legitimate interests.</p>
+                </div>
+              </div>
+
+              {/* 3. Usage & Log Data */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold mb-3">3. Usage & Log Data</h3>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Data:</span> Session metadata, feature usage, crash/error data, model usage metrics.</p>
+                  <p><span className="font-medium">Purpose:</span> Service improvement, abuse prevention.</p>
+                  <p><span className="font-medium">Legal basis:</span> Legitimate interests.</p>
+                </div>
+              </div>
+
+              {/* 4. Transaction & Subscription Data */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold mb-3">4. Transaction & Subscription Data</h3>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Data:</span> Plan tier, purchase history, invoice data, subscription status.</p>
+                  <p><span className="font-medium">Purpose:</span> Billing, receipts, VAT compliance, customer support.</p>
+                  <p><span className="font-medium">Legal basis:</span> Performance of a contract; legal obligation.</p>
+                </div>
+              </div>
+
+              {/* 5. Marketing & Analytics Data */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="font-semibold mb-3">5. Marketing & Analytics Data</h3>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Data:</span> Cookies, UTM parameters, engagement data, consent preferences.</p>
+                  <p><span className="font-medium">Purpose:</span> Measure performance, personalize communications.</p>
+                  <p><span className="font-medium">Legal basis:</span> Legitimate interests; consent (for non-essential cookies).</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* How We Use */}
+          <Card id="how-we-use">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                How We Use Your Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">We use your data to:</p>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground mt-3">
+                <li>Provide and maintain the Service</li>
+                <li>Process your AI requests and generate outputs</li>
+                <li>Manage your account and authentication</li>
+                <li>Process payments and subscriptions</li>
+                <li>Improve service quality and performance</li>
+                <li>Prevent fraud and ensure security</li>
+                <li>Comply with legal obligations</li>
+                <li>Communicate with you about updates and support</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* How We Disclose */}
+          <Card id="how-we-disclose">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" />
+                How We Disclose Your Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                We share data only as needed to operate the Service or comply with law:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                <li><strong>AI Model Providers:</strong> OpenAI, Anthropic, Google DeepMind, xAI, DeepSeek (for content generation).</li>
+                <li><strong>Infrastructure & Security:</strong> Cloud hosting, CDN, DDoS protection, logging.</li>
+                <li><strong>Payments:</strong> Stripe (billing, invoices, VAT). We do not store card data.</li>
+                <li><strong>Analytics (optional):</strong> Privacy-aware tools such as GA4 or other consented cookies.</li>
+                <li><strong>Professional Advisors:</strong> Legal, audit, compliance.</li>
+                <li><strong>Authorities:</strong> If required by law or to protect rights and safety.</li>
+                <li><strong>Business Transfers:</strong> In case of merger, acquisition, or reorganization, subject to this Policy.</li>
+              </ul>
+              <p className="text-sm text-muted-foreground pt-2">
+                All partners are bound by confidentiality and GDPR-compliant processing agreements.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* International Transfers */}
+          <Card id="international">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" />
+                International Transfers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                We are based in Cyprus (EU), but some providers may process data outside the EEA/UK. 
+                When we transfer data, we rely on adequacy decisions or Standard Contractual Clauses (SCCs) with additional safeguards.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Data Retention */}
+          <Card id="retention">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Data Retention
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                We retain personal data only as long as necessary for the stated purposes or legal obligations.
+              </p>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li><strong>Account data:</strong> retained while active.</li>
+                <li><strong>Logs:</strong> short-term retention, then anonymized.</li>
+                <li><strong>Billing:</strong> retained per tax laws.</li>
+              </ul>
+              <p className="text-sm text-muted-foreground">
+                When you delete your account, related data is deleted or anonymized within a reasonable timeframe, except where retention is required by law.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Security */}
+          <Card id="security">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                Security Measures
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                We use encryption (TLS), access controls, network monitoring, and backups to protect your data. 
+                While no system is 100% secure, we continuously improve our safeguards to mitigate risks.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Cookies */}
+          <Card id="cookies">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Cookies & Consent Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">We use:</p>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li><strong>Strictly Necessary Cookies</strong> (login, security, performance).</li>
+                <li><strong>Optional Cookies</strong> (analytics, marketing) only with your consent.</li>
+              </ul>
+              <p className="text-sm text-muted-foreground">
+                You can manage or withdraw cookie consent anytime via our on-site banner or your browser settings. 
+                Disabling certain cookies may affect functionality. For more details, see our{' '}
+                <a href="/cookie-policy" className="text-primary hover:underline">Cookie Policy</a>.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Payment */}
+          <Card id="payment">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                Payment Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                All payments are processed securely through Stripe. We do not collect or store full card data on our servers. 
+                To manage or remove payment info, use your billing page or contact Stripe.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Children's Privacy */}
+          <Card id="children">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                Children's Privacy
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                The Service is not directed to individuals under 16. We do not knowingly collect data from minors. 
+                If you believe a child provided information, contact{' '}
+                <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a> and we will delete it.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* GDPR Rights */}
+          <Card id="gdpr-rights">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-primary" />
+                Rights of Data Subjects (GDPR/EEA & UK)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">You may have the right to:</p>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li>Access your data</li>
+                <li>Rectify inaccuracies</li>
+                <li>Request deletion ("right to be forgotten")</li>
+                <li>Restrict or object to processing</li>
+                <li>Receive your data (portability)</li>
+                <li>Withdraw consent at any time</li>
+              </ul>
+              <p className="text-sm text-muted-foreground">
+                To exercise these rights, email{' '}
+                <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a>. 
+                You may also complain to the Office of the Commissioner for Personal Data Protection, Cyprus.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* California Privacy */}
+          <Card id="california">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-primary" />
+                California Privacy (CCPA/CPRA)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">California residents have rights to:</p>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li>Know what data we collect and how it's used</li>
+                <li>Request deletion or correction</li>
+                <li>Opt-out of sale/sharing (we do not sell data)</li>
+              </ul>
+              <p className="text-sm text-muted-foreground">
+                To exercise these rights, contact{' '}
+                <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a>. 
+                We will not discriminate against you for doing so.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Delete Account */}
+          <Card id="delete">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-primary" />
+                Delete Account Policy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="font-semibold">How to delete your account:</p>
+              <ol className="list-decimal pl-6 space-y-1 text-muted-foreground">
+                <li>Log in → Account Settings → Delete Account</li>
+                <li>Confirm the deletion request</li>
+                <li>Upon confirmation, your account and related personal data will be deleted or anonymized, except where required by law</li>
+              </ol>
+              <p className="text-sm text-muted-foreground">
+                Backups may retain minimal encrypted data for a limited period for disaster-recovery only. 
+                Deletion is permanent and ends all active subscriptions. Refunds follow our Refund Policy.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Changes to Policy */}
+          <Card id="changes">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Changes to This Privacy Policy
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                We may update this Policy to reflect service or legal changes. We will notify users of significant updates where required by law. 
+                Continued use after changes take effect means acceptance.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Contact Us */}
+          <Card id="contact" className="border-2 border-primary/20 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                Contact Us
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <p className="font-semibold">Email (Privacy):</p>
+                <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a>
+              </div>
+              <div>
+                <p className="font-semibold">Support:</p>
+                <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a>
+              </div>
+              <div>
+                <p className="font-semibold">Website:</p>
+                <a href="https://chatl.ai" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">https://chatl.ai</a>
+              </div>
+              <div>
+                <p className="font-semibold">Mailing Address:</p>
+                <address className="text-muted-foreground not-italic text-sm">
+                  TASOLAR<br />
+                  Dimostheni Severi & Katsoni 2<br />
+                  Avenue Court<br />
+                  1082 Nicosia, Cyprus
+                </address>
+              </div>
+            </CardContent>
+          </Card>
+
+        </div>
+      </section>
+    </div>
+  );
 }
