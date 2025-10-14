@@ -4145,182 +4145,246 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
             )}
 
             {!isRecording && (
-              <div className="flex items-center justify-between">
-                {/* Mobile controls */}
-                {isMobile ? (
-                <>
-                  {/* Left side - Upload button */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 w-8 rounded-full border border-border/30 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" 
-                        aria-label="Upload or create content"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-48 p-2 bg-background border shadow-lg z-50" align="start">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start gap-2"
-                        onClick={handleFileUpload}
-                      >
-                        <Paperclip className="h-4 w-4" />
-                        Add photos & files
-                      </Button>
-                        <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start gap-2"
-                        onClick={handleCreateImageClick}
-                      >
-                        <ImageIcon className="h-4 w-4" />
-                        Generate image
-                      </Button>
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Right side - Send/Voice controls */}
-                  <div className="flex items-center gap-2 bg-muted/30 rounded-full p-1">
-                    <Button 
-                      size="sm" 
-                      className={`h-7 w-7 rounded-full focus-visible:ring-2 focus-visible:ring-offset-1 flex-shrink-0 ${
-                        input.trim().length > 0 || selectedFiles.length > 0
-                          ? 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
-                          : isRecording 
-                            ? 'bg-red-500 hover:bg-red-600 focus-visible:ring-red-300 text-background' 
-                            : 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
-                      }`} 
-                      disabled={loading || isGeneratingResponse}
-                      onClick={input.trim().length > 0 || selectedFiles.length > 0 ? sendMessage : (isRecording ? stopRecording : startRecording)}
-                      aria-label={input.trim().length > 0 || selectedFiles.length > 0 ? "Send message" : (isRecording ? "Stop recording" : "Start voice recording")}
-                      aria-pressed={isRecording}
-                    >
-                      {input.trim().length > 0 || selectedFiles.length > 0 ? (
-                        <SendHorizontalIcon className="h-3 w-3" />
-                      ) : (
-                        isRecording ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />
-                      )}
-                    </Button>
-                    
-                  </div>
-                </>
-              ) : (
-                /* Desktop controls */
-                <>
+              <div className="flex flex-col gap-3">
+                {/* File upload and image generation controls row */}
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full border border-border/50 text-muted-foreground">
+                    {!isMobile && (
+                      <>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-9 w-9 rounded-full border border-border/50 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" 
+                          onClick={handleFileUpload} 
+                          aria-label="Upload file"
+                        >
                           <Paperclip className="h-4 w-4" />
                         </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-48 p-2 bg-background border shadow-lg" align="start">
-                        <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleFileUpload}>
-                          <Paperclip className="h-4 w-4" />
-                          Add photos & files
-                        </Button>
-                        <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleCreateImageClick}>
-                          <ImageIcon className="h-4 w-4" />
-                          Generate image
-                        </Button>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Select value={selectedModel} onValueChange={handleModelChange}>
-                       <SelectTrigger className="w-[180px] h-8 bg-background border border-border/50 rounded-full z-50">
-                        <SelectValue>
-                          <span className="text-sm font-medium">{selectedModelData?.shortLabel}</span>
-                        </SelectValue>
-                      </SelectTrigger>
-                       <SelectContent className="z-[100] bg-background border shadow-lg rounded-lg p-1 w-[calc(100vw-2rem)] max-w-[280px]">
-                           {availableModelsList.map(model => {
-                             const isPro = model.type === 'pro';
-                             const isImageModel = model.id === 'generate-image';
-                             const isDisabled = (isPro && !subscriptionStatus.subscribed) || 
-                                               (isImageModel && !limitsLoading && !usageLimits.canGenerate);
-                             
-                             return (
-                               <SelectItem 
-                                 key={model.id} 
-                                 value={model.id} 
-                                 disabled={isDisabled}
-                                 className={`px-2 py-1.5 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                               >
-                                <div className="flex items-center w-full gap-2">
-                                   <div className="relative flex-shrink-0">
-                                      {model.id.includes('gpt') || model.id === 'generate-image' || model.id === 'edit-image' ? (
-                                        <img src={chatgptLogoSrc} alt="OpenAI" className="w-5 h-5 object-contain" />
-                                      ) : model.id.includes('claude') ? (
-                                         <img src={claudeLogo} alt="Claude" className="w-5 h-5 object-contain" />
-                                       ) : model.id.includes('gemini') ? (
-                                         <img src={geminiLogo} alt="Gemini" className="w-5 h-5 object-contain" />
-                                       ) : model.id.includes('deepseek') ? (
-                                         <img 
-                                           src={deepseekLogo} 
-                                           alt="DeepSeek" 
-                                           className="w-5 h-5 object-contain"
-                                           style={actualTheme === 'light' ? { filter: 'brightness(0) saturate(100%) invert(38%) sepia(98%) saturate(2618%) hue-rotate(221deg) brightness(98%) contrast(101%)' } : {}}
-                                         />
-                                       ) : model.id.includes('grok') ? (
-                                         <img 
-                                           src={grokLogo} 
-                                           alt="Grok" 
-                                           className="w-5 h-5 object-contain"
-                                           style={actualTheme === 'light' ? { filter: 'brightness(0)' } : {}}
-                                         />
-                                       ) : (
-                                         <Bot className="h-5 w-5" />
-                                       )}
-                                       {isPro && !subscriptionStatus.subscribed && (
-                                         <span className="absolute -top-1 -right-1 text-[7px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-0.5 py-0.5 rounded-full shadow-sm font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                                           PRO
-                                         </span>
-                                       )}
-                                   </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="font-medium text-sm truncate">
-                                        {model.name}
-                                        {isDisabled && <span className="ml-1 text-xs text-muted-foreground">(Pro required)</span>}
+                        
+                        {isImageMode && !selectedStyle ? (
+                          <div className="flex items-center gap-2">
+                            {/* Image mode indicator */}
+                            <div className="group flex items-center gap-1 bg-muted px-3 py-2 rounded-full text-xs">
+                              <ImageIcon className="h-3 w-3" />
+                              <span>Image</span>
+                              <button 
+                                onClick={handleExitImageMode} 
+                                className="opacity-70 group-hover:opacity-100 transition-opacity ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary" 
+                                aria-label="Exit image mode"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                            
+                            {/* Styles dropdown */}
+                            <Popover open={isStylesOpen} onOpenChange={setIsStylesOpen}>
+                              <PopoverTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-9 px-3 text-xs gap-1 bg-muted hover:bg-muted/80 rounded-full border border-border/50 focus-visible:ring-2 focus-visible:ring-primary" 
+                                  aria-label="Select image style" 
+                                  aria-expanded={isStylesOpen} 
+                                  aria-haspopup="true"
+                                >
+                                  <Palette className="h-3 w-3" />
+                                  <span>Styles</span>
+                                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-72 sm:w-80 p-3 sm:p-4 bg-background border shadow-lg z-50" align="start">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                                  {imageStyles.map(style => (
+                                    <button 
+                                      key={style.name} 
+                                      onClick={() => handleStyleSelect(style)} 
+                                      className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors text-center focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-muted" 
+                                      aria-label={`Select ${style.name} style`}
+                                    >
+                                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getStyleBackground(style.name)}`}>
+                                        <span className={`text-xs font-medium ${style.name === 'Coloring Book' ? 'text-black' : 'text-foreground'}`}>
+                                          {style.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
+                                        </span>
                                       </div>
-                                      <div className="text-xs text-muted-foreground truncate">{model.description}</div>
-                                    </div>
+                                      <span className="text-xs font-medium leading-tight">{style.name}</span>
+                                    </button>
+                                  ))}
                                 </div>
-                             </SelectItem>
-                             );
-                           })}
-                       </SelectContent>
-                    </Select>
-                    
-                    <Button 
-                      size="sm" 
-                      className={`h-8 w-8 rounded-full border border-border/50 ${
-                        input.trim().length > 0 || selectedFiles.length > 0
-                          ? 'bg-foreground hover:bg-foreground/90 text-background'
-                          : isRecording 
-                            ? 'bg-red-500 hover:bg-red-600 text-background' 
-                            : 'bg-foreground hover:bg-foreground/90 text-background'
-                      }`} 
-                      disabled={loading || isGeneratingResponse}
-                      onClick={input.trim().length > 0 || selectedFiles.length > 0 ? sendMessage : (isRecording ? stopRecording : startRecording)}
-                      aria-label={input.trim().length > 0 || selectedFiles.length > 0 ? "Send message" : (isRecording ? "Stop recording" : "Start voice recording")}
-                    >
-                      {input.trim().length > 0 || selectedFiles.length > 0 ? (
-                        <SendHorizontalIcon className="h-4 w-4" />
-                      ) : (
-                        isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />
-                      )}
-                    </Button>
-                    
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        ) : (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-9 px-3 rounded-full border border-border/50 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary text-xs" 
+                            onClick={handleCreateImageClick} 
+                            aria-label="Create an image"
+                          >
+                            <ImageIcon className="h-4 w-4 mr-2" />
+                            <span>Generate an image</span>
+                          </Button>
+                        )}
+                      </>
+                    )}
                   </div>
-                </>
-              )}
-            </div>
+
+                  {/* Desktop model selector and voice controls */}
+                  {!isMobile && (
+                    <div className="flex items-center gap-2">
+                      <Select value={selectedModel} onValueChange={handleModelChange}>
+                        <SelectTrigger className="w-[180px] h-8 bg-background border border-border/50 rounded-full z-50">
+                          <SelectValue>
+                            <span className="text-sm font-medium">{selectedModelData?.shortLabel}</span>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="z-[100] bg-background border shadow-lg rounded-lg p-1 w-[calc(100vw-2rem)] max-w-[280px]">
+                          {availableModelsList.map(model => {
+                            const isPro = model.type === 'pro';
+                            const isImageModel = model.id === 'generate-image';
+                            const isDisabled = (isPro && !subscriptionStatus.subscribed) || 
+                                              (isImageModel && !limitsLoading && !usageLimits.canGenerate);
+                            
+                            return (
+                              <SelectItem 
+                                key={model.id} 
+                                value={model.id} 
+                                disabled={isDisabled}
+                                className={`px-2 py-1.5 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              >
+                                <div className="flex items-center w-full gap-2">
+                                  <div className="relative flex-shrink-0">
+                                    {model.id.includes('gpt') || model.id === 'generate-image' || model.id === 'edit-image' ? (
+                                      <img src={chatgptLogoSrc} alt="OpenAI" className="w-5 h-5 object-contain" />
+                                    ) : model.id.includes('claude') ? (
+                                      <img src={claudeLogo} alt="Claude" className="w-5 h-5 object-contain" />
+                                    ) : model.id.includes('gemini') ? (
+                                      <img src={geminiLogo} alt="Gemini" className="w-5 h-5 object-contain" />
+                                    ) : model.id.includes('deepseek') ? (
+                                      <img 
+                                        src={deepseekLogo} 
+                                        alt="DeepSeek" 
+                                        className="w-5 h-5 object-contain"
+                                        style={actualTheme === 'light' ? { filter: 'brightness(0) saturate(100%) invert(38%) sepia(98%) saturate(2618%) hue-rotate(221deg) brightness(98%) contrast(101%)' } : {}}
+                                      />
+                                    ) : model.id.includes('grok') ? (
+                                      <img 
+                                        src={grokLogo} 
+                                        alt="Grok" 
+                                        className="w-5 h-5 object-contain"
+                                        style={actualTheme === 'light' ? { filter: 'brightness(0)' } : {}}
+                                      />
+                                    ) : (
+                                      <Bot className="h-5 w-5" />
+                                    )}
+                                    {isPro && !subscriptionStatus.subscribed && (
+                                      <span className="absolute -top-1 -right-1 text-[7px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-0.5 py-0.5 rounded-full shadow-sm font-bold">
+                                        PRO
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-medium text-sm truncate">
+                                      {model.name}
+                                      {isDisabled && <span className="ml-1 text-xs text-muted-foreground">(Pro required)</span>}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground truncate">{model.description}</div>
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button 
+                        size="sm" 
+                        className={`h-8 w-8 rounded-full border border-border/50 ${
+                          input.trim().length > 0 || selectedFiles.length > 0
+                            ? 'bg-foreground hover:bg-foreground/90 text-background'
+                            : isRecording 
+                              ? 'bg-red-500 hover:bg-red-600 text-background' 
+                              : 'bg-foreground hover:bg-foreground/90 text-background'
+                        }`} 
+                        disabled={loading || isGeneratingResponse}
+                        onClick={input.trim().length > 0 || selectedFiles.length > 0 ? sendMessage : (isRecording ? stopRecording : startRecording)}
+                        aria-label={input.trim().length > 0 || selectedFiles.length > 0 ? "Send message" : (isRecording ? "Stop recording" : "Start voice recording")}
+                      >
+                        {input.trim().length > 0 || selectedFiles.length > 0 ? (
+                          <SendHorizontalIcon className="h-4 w-4" />
+                        ) : (
+                          isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile controls - upload, dictation and voice mode buttons */}
+                {isMobile && (
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 rounded-full border border-border/30 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" 
+                            aria-label="Upload or create content"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-48 p-2 bg-background border shadow-lg z-50" align="start">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full justify-start gap-2" 
+                            onClick={handleFileUpload}
+                          >
+                            <Paperclip className="h-4 w-4" />
+                            Add photos & files
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full justify-start gap-2" 
+                            onClick={handleCreateImageClick}
+                          >
+                            <ImageIcon className="h-4 w-4" />
+                            Generate image
+                          </Button>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-muted/30 rounded-full p-1">
+                      <Button 
+                        size="sm" 
+                        className={`h-7 w-7 rounded-full focus-visible:ring-2 focus-visible:ring-offset-1 flex-shrink-0 ${
+                          input.trim().length > 0 || selectedFiles.length > 0
+                            ? 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
+                            : isRecording 
+                              ? 'bg-red-500 hover:bg-red-600 focus-visible:ring-red-300 text-background' 
+                              : 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
+                        }`} 
+                        disabled={loading || isGeneratingResponse}
+                        onClick={input.trim().length > 0 || selectedFiles.length > 0 ? sendMessage : (isRecording ? stopRecording : startRecording)}
+                        aria-label={input.trim().length > 0 || selectedFiles.length > 0 ? "Send message" : (isRecording ? "Stop recording" : "Start voice recording")}
+                        aria-pressed={isRecording}
+                      >
+                        {input.trim().length > 0 || selectedFiles.length > 0 ? (
+                          <SendHorizontalIcon className="h-3 w-3" />
+                        ) : (
+                          isRecording ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
