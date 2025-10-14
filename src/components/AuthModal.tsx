@@ -314,11 +314,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               </div>
             </div>
 
-            {/* Trusted by Millions - Centered between icons and comments */}
-            <div className="absolute bottom-56 left-0 right-0 text-center z-10">
-              <h3 className="text-lg font-bold">Trusted by Millions</h3>
-            </div>
-
             {/* Scrolling Testimonials */}
             <div className="absolute bottom-4 left-0 right-0 h-44 overflow-hidden pointer-events-none">
               <div className="animate-seamless-scroll flex gap-2">
