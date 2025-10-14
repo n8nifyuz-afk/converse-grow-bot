@@ -252,7 +252,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-4xl lg:max-w-5xl w-full p-0 bg-background border border-border shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden mx-auto my-auto max-h-[95vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-[70vw] md:max-w-3xl lg:max-w-4xl w-full p-0 bg-background border border-border shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden mx-auto my-auto max-h-[95vh] overflow-y-auto">
         <DialogHeader className="sr-only">
           <DialogTitle>ChatLearn Authentication</DialogTitle>
           <DialogDescription>
