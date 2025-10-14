@@ -7,7 +7,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useSidebar, SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { supabase } from '@/integrations/supabase/client';
 import { MessageSquare, Plus, Paperclip, Copy, Check, X, FileText, ImageIcon, Mic, MicOff, Download, MoreHorizontal, Image as ImageIcon2, Palette, ChevronDown, ChevronUp, Bot } from 'lucide-react';
 import { SendHorizontalIcon } from '@/components/ui/send-horizontal-icon';
@@ -23,7 +22,6 @@ import { useUsageLimits } from '@/hooks/useUsageLimits';
 import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
 import { PricingModal } from '@/components/PricingModal';
-import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 import chatgptLogo from '@/assets/chatgpt-logo.png';
 import chatgptLogoLight from '@/assets/chatgpt-logo-light.png';
 import claudeLogo from '@/assets/claude-logo.png';
@@ -158,7 +156,6 @@ export default function Chat() {
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
-  const { canSendMessage, isAtLimit, incrementMessageCount, messageCount, limit } = useMessageLimit();
   // Remove toast hook since we're not using toasts
   const { state: sidebarState, isMobile } = useSidebar();
   
@@ -1697,11 +1694,6 @@ export default function Chat() {
         });
         return;
       }
-    }
-    
-    // Check message limit for non-subscribed users
-    if (!user || (!subscriptionStatus.subscribed && !canSendMessage)) {
-      return; // Warning will be shown below input
     }
     
     console.log('[SEND-START] ===== SEND MESSAGE CALLED =====');
@@ -4247,11 +4239,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
           </div>
         </div>
       </div>
-
-      {/* Message Limit Warning */}
-      {!user && isAtLimit && (
-        <MessageLimitWarning messageCount={messageCount} limit={limit} />
-      )}
 
       {/* Hidden file input */}
       <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />
