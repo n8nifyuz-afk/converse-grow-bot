@@ -16,15 +16,15 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
   return (
     <>
       <div className="w-full max-w-3xl mx-auto px-4 py-3">
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-3">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-2">
           <p className="text-destructive-foreground text-sm">
-            You've reached your free message limit. Upgrade to Pro for unlimited chats.
+            You've reached your free message limit. Upgrade to Pro or Ultra Pro for unlimited chats.
           </p>
           <Button 
             onClick={() => setIsPricingModalOpen(true)}
-            className="bg-foreground text-background hover:bg-foreground/90 rounded-lg px-4 py-2 font-semibold flex items-center gap-2"
+            className="bg-foreground text-background hover:bg-foreground/90 rounded-md px-3 py-1.5 text-sm font-semibold flex items-center gap-1.5"
           >
-            <Gem className="w-4 h-4" />
+            <Gem className="w-3.5 h-3.5" />
             Upgrade
           </Button>
         </div>

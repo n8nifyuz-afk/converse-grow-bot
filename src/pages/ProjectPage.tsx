@@ -14,6 +14,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { SendHorizontalIcon } from '@/components/ui/send-horizontal-icon';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import ProjectEditModal from '@/components/ProjectEditModal';
+import AuthModal from '@/components/AuthModal';
+import { PricingModal } from '@/components/PricingModal';
 
 import { toast } from 'sonner';
 
@@ -261,11 +263,11 @@ export default function ProjectPage() {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [hasSelectedModel, setHasSelectedModel] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
-  // Filter models based on subscription
-  const availableModelsList = subscriptionStatus.subscribed
-    ? models 
-    : models.filter(m => m.type === 'free');
+  // Show all models - access control happens on selection
+  const availableModelsList = models;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -354,6 +356,28 @@ export default function ProjectPage() {
       console.error('Error in createNewChat:', error);
     }
   };
+  
+  const handleModelSelect = (modelId: string) => {
+    const selectedModelInfo = models.find(m => m.id === modelId);
+    
+    // Check if user is trying to select a PRO model
+    if (selectedModelInfo?.type === 'pro') {
+      // If not authenticated, show auth modal
+      if (!user) {
+        setShowAuthModal(true);
+        return;
+      }
+      // If not subscribed, show pricing modal
+      if (!subscriptionStatus.subscribed) {
+        setShowPricingModal(true);
+        return;
+      }
+    }
+    
+    setSelectedModel(modelId);
+    setHasSelectedModel(true);
+  };
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
 
@@ -1002,8 +1026,7 @@ export default function ProjectPage() {
                         key={model.id}
                         className={`rounded-xl px-2 py-2 md:px-3 md:py-3 hover:bg-accent/60 focus:bg-accent/60 transition-all duration-200 cursor-pointer ${isSelected ? 'bg-accent/40' : ''}`}
                         onClick={() => {
-                          setSelectedModel(model.id);
-                          setHasSelectedModel(true);
+                          handleModelSelect(model.id);
                         }}
                       >
                         <div className="flex items-center w-full gap-3">
@@ -1325,7 +1348,7 @@ export default function ProjectPage() {
 
                       {/* Voice controls */}
                       {!isMobile && <div className="flex items-center gap-2">
-                        <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <Select value={selectedModel} onValueChange={handleModelSelect}>
                           <SelectTrigger className="w-[200px] h-10 bg-background/80 backdrop-blur-sm border border-border/50 rounded-xl focus-visible:ring-2 focus-visible:ring-primary text-sm shadow-sm hover:bg-accent/50 transition-all duration-200" aria-label="Select AI model">
                             <SelectValue>
                               <div className="flex items-center gap-2">
@@ -1449,6 +1472,16 @@ export default function ProjectPage() {
         description={confirmDialog.description} 
         variant="destructive" 
         confirmText="Delete" 
+      />
+      
+      <PricingModal 
+        open={showPricingModal}
+        onOpenChange={setShowPricingModal}
+      />
+      
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
       />
     </div>;
 }
