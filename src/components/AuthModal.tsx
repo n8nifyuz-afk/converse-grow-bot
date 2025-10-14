@@ -304,7 +304,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             <div className="text-center mb-4 sm:mb-6 md:mb-8 z-10">
               <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-3 sm:mb-4">Available on all platforms</div>
               <div className="flex justify-center px-4">
-                <div className="relative inline-flex gap-2.5 sm:gap-3 items-center flex-nowrap p-3 sm:p-3.5 rounded-2xl bg-background/60 backdrop-blur-md border border-border/50 shadow-lg overflow-hidden">
+                <div className="relative inline-flex gap-2.5 sm:gap-3 items-center flex-nowrap p-3 sm:p-3.5 rounded-2xl sm:bg-background/60 sm:backdrop-blur-md sm:border sm:border-border/50 sm:shadow-lg overflow-hidden">
                   {/* Subtle tech pattern overlay matching the abstract background */}
                   <div className="absolute inset-0 pointer-events-none opacity-30">
                     <div className="absolute top-1 left-2 text-[8px] text-primary/20 font-mono">#</div>
@@ -341,7 +341,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-6 sm:bottom-8 md:bottom-10 left-0 right-0 h-32 sm:h-40 md:h-44 overflow-hidden pointer-events-none">
+            <div className="hidden sm:block absolute bottom-6 sm:bottom-8 md:bottom-10 left-0 right-0 h-32 sm:h-40 md:h-44 overflow-hidden pointer-events-none">
               <div className="animate-seamless-scroll flex gap-2">
                 {(() => {
                   const testimonials = [
