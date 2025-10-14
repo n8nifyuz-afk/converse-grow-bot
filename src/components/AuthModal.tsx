@@ -262,7 +262,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           {/* Left Panel - Social Proof */}
           <div className="w-full md:w-1/2 bg-gradient-to-br from-background to-muted/30 p-5 md:p-7 flex flex-col items-center justify-start border-r border-border overflow-hidden relative">
             {/* Badge and Rating */}
-            <div className="text-center mb-3 z-10 mt-2">
+            <div className="text-center mb-3 z-10 mt-6">
               <div className="inline-flex items-center gap-2 mb-2">
                 <img src="/chatl-logo-black.png" alt="ChatLearn" className="w-6 h-6 dark:hidden" />
                 <img src="/chatl-logo-white.png" alt="ChatLearn" className="w-6 h-6 hidden dark:block" />
@@ -281,7 +281,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Available On */}
-            <div className="text-center mb-5 z-10">
+            <div className="text-center mb-6 z-10">
               <div className="text-xs text-muted-foreground mb-2">Available on</div>
               <div className="flex justify-center">
                 <div className="inline-flex gap-1.5 items-center flex-wrap p-3 bg-white dark:bg-gray-950 rounded-full shadow-lg">
