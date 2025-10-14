@@ -10,49 +10,6 @@ export default function Cookies() {
   const NavBar = () => <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       
     </nav>;
-  const Footer = () => <footer className="py-12 px-4 bg-muted/20 border-t">
-      <div className="container max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <span className="text-lg font-semibold text-foreground">ChatLearn</span>
-            </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Professional AI solutions for businesses and individuals.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Product</h3>
-            <div className="space-y-2">
-              <button onClick={() => navigate('/features')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Features</button>
-              <button onClick={() => navigate('/pricing')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
-              <button onClick={() => navigate('/models')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">AI Models</button>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Company</h3>
-            <div className="space-y-2">
-              <a href="/help" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">About</a>
-              <a href="/explore-tools" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Explore Tools</a>
-              <a href="/help" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Help Center</a>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Legal</h3>
-            <div className="space-y-2">
-              <a href="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-              <a href="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-              <a href="/cookie-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</a>
-            </div>
-          </div>
-        </div>
-        
-        
-      </div>
-    </footer>;
   return <div className="min-h-screen bg-background">
       <NavBar />
       
@@ -280,7 +237,5 @@ export default function Cookies() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>;
 }
