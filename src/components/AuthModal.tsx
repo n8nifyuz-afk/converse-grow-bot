@@ -24,6 +24,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const [signupCooldown, setSignupCooldown] = useState<number>(0);
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordField, setShowPasswordField] = useState(false);
   
   const { user, signIn, signUp, signInWithGoogle, signInWithApple, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -56,6 +57,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       setSignupCooldown(0);
       setError('');
       setShowPassword(false);
+      setShowPasswordField(false);
     }
   }, [isOpen]);
 
@@ -495,7 +497,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     </div>
                   </div>
 
-                   <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-2.5">
+                   <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-2.5 min-h-[180px]">
                      <Input
                        type="email"
                        placeholder="Enter your email"
@@ -503,86 +505,110 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                        onChange={(e) => {
                          setEmail(e.target.value);
                          setError('');
-                         // Show password field when email is entered
-                         if (e.target.value.trim()) {
-                           setShowPassword(true);
-                         }
                        }}
                        required
                        className="h-11 border-2 border-gray-400 dark:border-gray-600"
                      />
                      
-                     <div className={`transition-all duration-300 ease-in-out ${showPassword ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}>
-                       <Input
-                         type="password"
-                         placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'}
-                         value={password}
-                         onChange={(e) => {
-                           setPassword(e.target.value);
-                           setError('');
-                         }}
-                         required
-                         minLength={6}
-                         className="h-11 border-2 border-gray-400 dark:border-gray-600"
-                       />
-                     </div>
-                     
-                     {error && (
-                       <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md animate-fade-in">
-                         {error}
-                       </div>
+                     {showPasswordField ? (
+                       <>
+                         <Input
+                           type="password"
+                           placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'}
+                           value={password}
+                           onChange={(e) => {
+                             setPassword(e.target.value);
+                             setError('');
+                           }}
+                           required
+                           minLength={6}
+                           className="h-11 border-2 border-gray-400 dark:border-gray-600"
+                         />
+                         
+                         {error && (
+                           <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md animate-fade-in">
+                             {error}
+                           </div>
+                         )}
+                         
+                         <Button
+                           type="submit"
+                           disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)}
+                           className="w-full h-11"
+                         >
+                          {loading ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                              {mode === 'signin' ? 'Signing in...' : 'Sending verification...'}
+                            </>
+                          ) : mode === 'signup' && signupCooldown > 0 ? (
+                            `Wait ${signupCooldown}s`
+                          ) : mode === 'signin' ? (
+                            'Sign In'
+                          ) : (
+                            'Sign Up'
+                          )}
+                        </Button>
+                       </>
+                     ) : (
+                       <>
+                         {error && (
+                           <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md animate-fade-in">
+                             {error}
+                           </div>
+                         )}
+                         <Button
+                           type="button"
+                           onClick={() => {
+                             if (email.trim()) {
+                               setShowPasswordField(true);
+                             }
+                           }}
+                           disabled={!email.trim()}
+                           className="w-full h-11"
+                         >
+                           Continue with Email
+                         </Button>
+                       </>
                      )}
-                     
-                     <div className={`transition-all duration-300 ease-in-out ${showPassword ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}>
-                       <Button
-                         type="submit"
-                         disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)}
-                         className="w-full h-11"
-                       >
-                        {loading ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                            {mode === 'signin' ? 'Signing in...' : 'Sending verification...'}
-                          </>
-                        ) : mode === 'signup' && signupCooldown > 0 ? (
-                          `Wait ${signupCooldown}s`
-                        ) : (
-                          'Continue with Email'
-                        )}
-                      </Button>
-                     </div>
                   </form>
 
-                  <div className="mt-3 text-center space-x-2 text-xs">
-                    {mode === 'signin' ? (
-                      <>
-                        <span className="text-muted-foreground">Don't have an account?</span>
-                        <button
-                          onClick={() => setMode('signup')}
-                          className="text-primary hover:underline font-medium"
-                        >
-                          Sign up
-                        </button>
-                        <span className="text-muted-foreground">|</span>
-                        <button
-                          onClick={() => setMode('reset')}
-                          className="text-primary hover:underline"
-                        >
-                          Forgot password?
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-muted-foreground">Already have an account?</span>
-                        <button
-                          onClick={() => setMode('signin')}
-                          className="text-primary hover:underline font-medium"
-                        >
-                          Sign in
-                        </button>
-                      </>
-                    )}
-                  </div>
+                   <div className="mt-3 text-center space-x-2 text-xs">
+                     {mode === 'signin' ? (
+                       <>
+                         <span className="text-muted-foreground">Don't have an account?</span>
+                         <button
+                           onClick={() => {
+                             setMode('signup');
+                             setShowPasswordField(false);
+                           }}
+                           className="text-primary hover:underline font-medium"
+                         >
+                           Sign up
+                         </button>
+                         <span className="text-muted-foreground">|</span>
+                         <button
+                           onClick={() => setMode('reset')}
+                           className="text-primary hover:underline"
+                         >
+                           Forgot password?
+                         </button>
+                       </>
+                     ) : (
+                       <>
+                         <span className="text-muted-foreground">Already have an account?</span>
+                         <button
+                           onClick={() => {
+                             setMode('signin');
+                             setShowPasswordField(false);
+                           }}
+                           className="text-primary hover:underline font-medium"
+                         >
+                           Sign in
+                         </button>
+                       </>
+                     )}
+                   </div>
                 </>
               )}
             </div>
