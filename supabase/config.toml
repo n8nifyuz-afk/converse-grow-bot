@@ -1,1 +1,46 @@
 project_id = "lciaiunzacgvvbvcshdh"
+
+[api]
+enabled = true
+port = 50321
+schemas = []
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 50322
+
+[studio]
+enabled = true
+port = 50323
+
+[inbucket]
+enabled = true
+port = 50324
+
+# User-facing functions require authentication
+# By default, JWT verification is enabled. Only explicitly disable for webhooks.
+
+# Keep public for external webhooks with signature verification
+[functions.webhook-handler]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+# Keep public for internal service calls (called by other edge functions)
+[functions.save-token-usage]
+verify_jwt = false
+
+# User-facing TTS function requires authentication
+[functions.text-to-speech-voice-mode]
+verify_jwt = true
+
+# Usage limit checking requires authentication
+[functions.check-image-limit]
+verify_jwt = true
+
+# Admin function to delete specific users
+[functions.delete-specific-user]
+verify_jwt = true
+
