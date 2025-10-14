@@ -261,19 +261,19 @@ All colors MUST be HSL.
 }
 
 /* Scrolling testimonials animation */
-@keyframes scroll-up {
+@keyframes scroll-left {
   0% {
-    transform: translateY(0);
+    transform: translateX(0);
   }
   100% {
-    transform: translateY(-50%);
+    transform: translateX(-50%);
   }
 }
 
-.animate-scroll-up {
-  animation: scroll-up 30s linear infinite;
+.animate-scroll-left {
+  animation: scroll-left 60s linear infinite;
 }
 
-.animate-scroll-up:hover {
+.animate-scroll-left:hover {
   animation-play-state: paused;
 }

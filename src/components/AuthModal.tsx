@@ -294,9 +294,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     </svg>
                   </div>
                   <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                    </svg>
+                    <img src="/whatsapp-icon.svg" alt="WhatsApp" className="w-6 h-6 object-contain" />
                   </div>
                   <div className="w-10 h-10 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center justify-center">
                     <img src="/chrome-icon.svg" alt="Chrome" className="w-6 h-6 object-contain" />
@@ -320,8 +318,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-              <div className="animate-scroll-up space-y-2">
+            <div className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden">
+              <div className="animate-scroll-left flex gap-3">
                 {[
                   { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
                   { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
@@ -339,7 +337,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 mx-3">
+                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[280px] flex-shrink-0">
                     <div className="flex gap-1 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
                         <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
@@ -377,7 +375,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 mx-3">
+                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[280px] flex-shrink-0">
                     <div className="flex gap-1 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
                         <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
@@ -542,7 +540,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                          setError('');
                        }}
                        required
-                       className="h-10"
+                       className="h-10 border-2"
                      />
                      <Input
                        type="password"
@@ -554,7 +552,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                        }}
                        required
                        minLength={6}
-                       className="h-10"
+                       className="h-10 border-2"
                      />
                      {error && (
                        <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
