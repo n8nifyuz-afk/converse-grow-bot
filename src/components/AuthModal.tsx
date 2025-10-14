@@ -264,10 +264,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             {/* Badge and Rating */}
             <div className="text-center mb-5">
               <div className="inline-flex items-center gap-2 mb-2">
-                <div>
-                  <div className="text-xs font-semibold text-muted-foreground">#1</div>
-                  <div className="text-base font-bold">ChatLearn</div>
-                </div>
+                <img src="/chatl-logo-black.png" alt="ChatLearn" className="w-6 h-6 dark:hidden" />
+                <img src="/favicon.png" alt="ChatLearn" className="w-6 h-6 hidden dark:block" />
+                <div className="text-base font-bold">ChatLearn</div>
               </div>
               
               <div className="flex gap-1 justify-center mb-1">
@@ -352,7 +351,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             {/* Main Heading */}
             <div className="mb-5">
               <h2 className="text-2xl font-bold leading-tight">
-                Join Millions of Happy Users
+                Log In and Get Smart
               </h2>
             </div>
 
