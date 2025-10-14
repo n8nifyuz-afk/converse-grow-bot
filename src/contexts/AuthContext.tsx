@@ -255,6 +255,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user?.id]); // Only run when user ID changes
 
   const signUp = async (email: string, password: string, displayName?: string) => {
+    // First check if user exists with OAuth provider
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('signup_method')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (profile?.signup_method === 'google') {
+        return {
+          error: {
+            message: 'This email is already registered via Google. Please use "Continue with Google" to sign in.',
+            code: 'oauth_account_exists'
+          }
+        };
+      } else if (profile?.signup_method === 'apple') {
+        return {
+          error: {
+            message: 'This email is already registered via Apple. Please use "Continue with Apple" to sign in.',
+            code: 'oauth_account_exists'
+          }
+        };
+      }
+    } catch (checkError) {
+      // Continue with signup if check fails
+    }
+    
     // Use current origin for redirects (works in test and production)
     const redirectUrl = window.location.origin + '/';
     
@@ -312,6 +339,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password
     });
+    
+    // If login fails, check if user exists with OAuth provider
+    if (error && error.message?.toLowerCase().includes('invalid')) {
+      try {
+        // Check profiles table to see signup method
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('signup_method')
+          .eq('email', email)
+          .maybeSingle();
+        
+        if (profile?.signup_method === 'google') {
+          return { 
+            error: { 
+              message: 'This email is registered via Google. Please use "Continue with Google" to sign in.',
+              code: 'oauth_only_account'
+            } 
+          };
+        } else if (profile?.signup_method === 'apple') {
+          return { 
+            error: { 
+              message: 'This email is registered via Apple. Please use "Continue with Apple" to sign in.',
+              code: 'oauth_only_account'
+            } 
+          };
+        }
+      } catch (checkError) {
+        // If check fails, return original error
+      }
+    }
     
     return { error };
   };

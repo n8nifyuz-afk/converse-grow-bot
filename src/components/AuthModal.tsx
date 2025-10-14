@@ -67,7 +67,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       const { error: signInError } = await signIn(email, password);
       
       if (signInError) {
-        setError("Email or password is incorrect");
+        // Check if this is an OAuth-only account
+        if (signInError.code === 'oauth_only_account') {
+          setError(signInError.message);
+        } else {
+          setError("Email or password is incorrect");
+        }
       }
       // If sign in succeeds, the useEffect will handle closing the modal and redirecting
     } catch (error) {
@@ -109,8 +114,17 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           duration: 8000,
         });
       } else {
-        // Check if user already exists
-        if (error.message?.toLowerCase().includes('already registered') || 
+        // Check if this is an OAuth account
+        if (error.code === 'oauth_account_exists') {
+          toast({
+            title: "Account exists with different sign-in method",
+            description: error.message,
+            variant: "destructive",
+            duration: 10000,
+          });
+          // Switch to sign in mode so they can see OAuth buttons
+          setMode('signin');
+        } else if (error.message?.toLowerCase().includes('already registered') || 
             error.message?.toLowerCase().includes('user already registered')) {
           toast({
             title: "Account already exists",
