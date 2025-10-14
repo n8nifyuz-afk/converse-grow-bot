@@ -262,7 +262,25 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         <div className="flex flex-col md:flex-row min-h-[400px] sm:min-h-[500px] md:min-h-[550px]">
           {/* Left Panel - Social Proof */}
-          <div className="w-full md:w-1/2 bg-gradient-to-br from-background to-muted/30 p-4 sm:p-6 md:p-8 lg:p-10 flex flex-col items-center justify-start border-r border-border overflow-hidden relative">
+          <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 lg:p-10 flex flex-col items-center justify-start border-r border-border overflow-hidden relative bg-gradient-to-br from-primary/5 via-background to-accent/5">
+            {/* Abstract Background Elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {/* Animated gradient orbs */}
+              <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }} />
+              
+              {/* Geometric shapes */}
+              <div className="absolute top-10 right-10 w-32 h-32 border-2 border-primary/20 rounded-2xl rotate-12 animate-[spin_20s_linear_infinite]" />
+              <div className="absolute bottom-20 left-10 w-24 h-24 border-2 border-accent/20 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+              <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-gradient-to-br from-primary/10 to-transparent rounded-lg rotate-45 animate-pulse" />
+              
+              {/* Grid pattern */}
+              <div className="absolute inset-0 opacity-[0.03]" style={{ 
+                backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+                backgroundSize: '24px 24px'
+              }} />
+            </div>
             {/* Badge and Rating */}
             <div className="text-center mb-3 sm:mb-4 z-10 mt-4 sm:mt-6 md:mt-8">
               <div className="inline-flex items-center gap-2 sm:gap-2.5 mb-2 sm:mb-3">
