@@ -265,21 +265,33 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 lg:p-10 flex flex-col items-center justify-start border-r border-border overflow-hidden relative bg-gradient-to-br from-primary/5 via-background to-accent/5">
             {/* Abstract Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {/* Animated gradient orbs */}
-              <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-              <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }} />
+              {/* Floating hash symbols */}
+              <div className="absolute top-10 left-10 text-6xl font-bold text-primary/10 animate-float" style={{ animationDelay: '0s' }}>#</div>
+              <div className="absolute top-1/4 right-20 text-5xl font-bold text-accent/10 rotate-12 animate-float" style={{ animationDelay: '1s' }}>#</div>
+              <div className="absolute bottom-1/4 left-1/4 text-7xl font-bold text-primary/10 -rotate-12 animate-float" style={{ animationDelay: '2s' }}>#</div>
+              <div className="absolute top-1/2 right-10 text-4xl font-bold text-accent/10 rotate-45 animate-float" style={{ animationDelay: '1.5s' }}>#</div>
+              <div className="absolute bottom-20 right-1/3 text-5xl font-bold text-primary/10 animate-float" style={{ animationDelay: '2.5s' }}>#</div>
               
-              {/* Geometric shapes */}
-              <div className="absolute top-10 right-10 w-32 h-32 border-2 border-primary/20 rounded-2xl rotate-12 animate-[spin_20s_linear_infinite]" />
-              <div className="absolute bottom-20 left-10 w-24 h-24 border-2 border-accent/20 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
-              <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-gradient-to-br from-primary/10 to-transparent rounded-lg rotate-45 animate-pulse" />
+              {/* Diagonal lines */}
+              <div className="absolute top-0 left-1/4 w-0.5 h-full bg-gradient-to-b from-transparent via-primary/10 to-transparent rotate-12 origin-top" />
+              <div className="absolute top-0 right-1/3 w-0.5 h-full bg-gradient-to-b from-transparent via-accent/10 to-transparent -rotate-12 origin-top" />
               
-              {/* Grid pattern */}
-              <div className="absolute inset-0 opacity-[0.03]" style={{ 
-                backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-                backgroundSize: '24px 24px'
-              }} />
+              {/* Connecting dots and lines */}
+              <svg className="absolute inset-0 w-full h-full opacity-20">
+                <line x1="10%" y1="20%" x2="40%" y2="60%" stroke="currentColor" strokeWidth="1" className="text-primary/30" strokeDasharray="5,5">
+                  <animate attributeName="stroke-dashoffset" from="0" to="10" dur="2s" repeatCount="indefinite" />
+                </line>
+                <line x1="60%" y1="30%" x2="90%" y2="70%" stroke="currentColor" strokeWidth="1" className="text-accent/30" strokeDasharray="5,5">
+                  <animate attributeName="stroke-dashoffset" from="10" to="0" dur="2s" repeatCount="indefinite" />
+                </line>
+                <circle cx="40%" cy="60%" r="4" fill="currentColor" className="text-primary/40" />
+                <circle cx="60%" cy="30%" r="4" fill="currentColor" className="text-accent/40" />
+                <circle cx="90%" cy="70%" r="4" fill="currentColor" className="text-primary/40" />
+              </svg>
+              
+              {/* Gradient background blur */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-72 h-72 bg-accent/5 rounded-full blur-3xl" />
             </div>
             {/* Badge and Rating */}
             <div className="text-center mb-3 sm:mb-4 z-10 mt-4 sm:mt-6 md:mt-8">
