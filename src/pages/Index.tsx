@@ -16,6 +16,7 @@ import GoogleOneTab from '@/components/GoogleOneTab';
 import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
 import { PricingModal } from '@/components/PricingModal';
+import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 import { toast } from 'sonner';
 import chatgptLogo from '@/assets/chatgpt-logo.png';
 import chatgptLogoLight from '@/assets/chatgpt-logo-light.png';
@@ -221,7 +222,9 @@ export default function Index() {
     canSendMessage,
     isAtLimit,
     sessionId,
-    incrementMessageCount
+    incrementMessageCount,
+    messageCount,
+    limit
   } = useMessageLimit();
 
   // Helper function to get time-based greeting
@@ -578,8 +581,7 @@ export default function Index() {
       return;
     }
     if (!canSendMessage) {
-      navigate('/pricing-plans');
-      return;
+      return; // Warning will be shown below input
     }
     setLoading(true);
     try {
@@ -638,8 +640,7 @@ export default function Index() {
   };
   const createChatWithMessage = async (userId: string, messageToSend: string, modelToUse?: string) => {
     if (!canSendMessage) {
-      navigate('/pricing-plans');
-      return;
+      return; // Warning will be shown below input
     }
     setLoading(true);
     try {
@@ -1238,6 +1239,11 @@ export default function Index() {
           )}
         </div>
       </div>
+
+      {/* Message Limit Warning */}
+      {!user && isAtLimit && (
+        <MessageLimitWarning messageCount={messageCount} limit={limit} />
+      )}
 
       {/* Suggestion buttons - horizontal scroll on mobile */}
       {!showSuggestions && <div className="w-full max-w-3xl mb-4 sm:mb-6">

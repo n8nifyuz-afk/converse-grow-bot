@@ -7,12 +7,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Paperclip, Mic, MicOff, Edit2, Trash2, FolderOpen, Lightbulb, Target, Briefcase, Rocket, Palette, FileText, Code, Zap, Trophy, Heart, Star, Flame, Gem, Sparkles, MoreHorizontal, FileImage, FileVideo, FileAudio, File as FileIcon, X, Image as ImageIcon2, ImageIcon as ImageIcon, Check, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SendHorizontalIcon } from '@/components/ui/send-horizontal-icon';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import ProjectEditModal from '@/components/ProjectEditModal';
+import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 
 import { toast } from 'sonner';
 
@@ -255,6 +257,8 @@ export default function ProjectPage() {
   const [hasSelectedModel, setHasSelectedModel] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
+  const { canSendMessage, isAtLimit, incrementMessageCount, messageCount, limit } = useMessageLimit();
+  
   // Filter models based on subscription
   const availableModelsList = subscriptionStatus.subscribed
     ? models 
@@ -364,6 +368,12 @@ export default function ProjectPage() {
   const sendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() && selectedFiles.length === 0 || !user || !project || loading) return;
+    
+    // Check message limit for non-subscribed users
+    if (!subscriptionStatus.subscribed && !canSendMessage) {
+      return; // Warning will be shown below input
+    }
+    
     setLoading(true);
     const userMessage = input.trim();
     const files = [...selectedFiles];
@@ -1396,6 +1406,11 @@ export default function ProjectPage() {
             </div>
           </div>
         </div>
+
+        {/* Message Limit Warning */}
+        {!user && isAtLimit && (
+          <MessageLimitWarning messageCount={messageCount} limit={limit} />
+        )}
 
         {/* Hidden file input */}
         <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />

@@ -20,7 +20,7 @@ export const useMessageLimit = () => {
   const sessionId = !user ? generateSessionId() : null;
   
   // Free tier limits
-  const FREE_MESSAGE_LIMIT = 15;
+  const FREE_MESSAGE_LIMIT = 3;
   
   // Check if user has subscription
   const hasSubscription = user && userProfile && 
