@@ -318,8 +318,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-16 left-0 right-0 h-34 overflow-hidden">
-              <div className="animate-scroll-left-fastest flex gap-2">
+            <div className="absolute bottom-10 left-0 right-0 h-40 overflow-hidden pointer-events-none">
+              <div className="animate-scroll-left-fastest flex gap-2 [animation-play-state:running!important]">
                 {[
                   { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models like GPT-4, Claude, and Gemini in one place is absolutely game-changing for my workflow.", stars: 5 },
                   { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context and remembers our conversation. The quality of responses is consistently impressive and helps me debug faster.", stars: 5 },
@@ -337,7 +337,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day. It's like having an expert consultant on my team 24/7.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner who never runs out of creative ideas and always delivers on time.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[180px] max-w-[180px] flex-shrink-0">
+                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[144px] max-w-[144px] flex-shrink-0">
                     <div className="flex gap-0.5 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
                         <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
@@ -375,7 +375,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day. It's like having an expert consultant on my team 24/7.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner who never runs out of creative ideas and always delivers on time.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[180px] max-w-[180px] flex-shrink-0">
+                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[144px] max-w-[144px] flex-shrink-0">
                     <div className="flex gap-0.5 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
                         <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
