@@ -1,393 +1,218 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Sparkles, Shield, Users } from 'lucide-react';
+import SEO from '@/components/SEO';
+
 export default function Terms() {
-  const navigate = useNavigate();
-  const NavBar = () => <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  return (
+    <div className="min-h-screen bg-background">
+      <SEO 
+        title="Terms & Conditions"
+        description="Terms and conditions for using ChatLearn AI platform. Learn about our service agreements, user rights, and platform policies."
+      />
       
-    </nav>;
-  const Footer = () => <footer className="py-12 px-4 bg-muted/20 border-t">
-      <div className="container max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <span className="text-lg font-semibold text-foreground">ChatLearn</span>
-            </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Professional AI solutions for businesses and individuals.
+      <div className="container max-w-4xl mx-auto px-4 py-12">
+        <div className="prose prose-lg max-w-none dark:prose-invert">
+          <h1 className="text-4xl font-bold mb-2">Terms & Conditions</h1>
+          <p className="text-muted-foreground mb-8">Last Updated: October 3, 2025</p>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Who We Are</h2>
+            <p>
+              ChatLearn ("we," "us," or "our") is an advanced AI platform that unifies access to multiple world-class Large Language Models (LLMs) and text-to-image systems under one secure interface and membership.
             </p>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Product</h3>
-            <div className="space-y-2">
-              <button onClick={() => navigate('/features')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Features</button>
-              <button onClick={() => navigate('/pricing')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</button>
-              <button onClick={() => navigate('/models')} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">AI Models</button>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Company</h3>
-            <div className="space-y-2">
-              <a href="/help" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">About</a>
-              <a href="/explore-tools" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Explore Tools</a>
-              <a href="/help" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Help Center</a>
-            </div>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground">Legal</h3>
-            <div className="space-y-2">
-              <a href="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-              <a href="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-              <a href="/cookie-policy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</a>
-            </div>
-          </div>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Our current integrations include (subject to change):</h2>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-3">Language Models</h3>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>GPT-5, GPT-4o, GPT-4o mini by OpenAI</li>
+              <li>Claude Sonnet 4 by Anthropic</li>
+              <li>Gemini 2.5 Flash by Google DeepMind</li>
+              <li>Grok 4 by xAI</li>
+              <li>DeepSeek V2 by DeepSeek</li>
+            </ul>
+
+            <h3 className="text-xl font-semibold mt-6 mb-3">Image Model</h3>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>DALL-E 3 by OpenAI</li>
+            </ul>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Disclaimer</h2>
+            <p className="mb-4">
+              ChatLearn is an independent platform and is not affiliated with, sponsored by, or endorsed by any of the AI model providers integrated into the Service.
+            </p>
+            <p className="mb-4">
+              This includes, but is not limited to: OpenAI, Anthropic, Google DeepMind, xAI, DeepSeek, and Stability AI.
+            </p>
+            <p className="mb-4">
+              All trademarks, brand names, and model names such as GPT-5, Claude Sonnet 4, Gemini 2.5 Flash, Grok 4, DeepSeek V2, and DALL-E 3 are the property of their respective owners.
+            </p>
+            <p className="mb-4">
+              ChatLearn accesses these technologies exclusively through official APIs and legitimate service agreements, ensuring compliant and secure usage.
+            </p>
+            <p className="mb-4">
+              We do not claim ownership, partnership, or operational control over any third-party models or providers.
+            </p>
+            <p>
+              Our mission is to provide users with a unified, reliable interface to access multiple AI systems efficiently and securely.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">General Terms</h2>
+            <p className="mb-4">
+              By using ChatLearn ("the App," "the Platform," or "the Service"), you agree to these Terms of Use ("Terms") and our Privacy Policy.
+            </p>
+            <p className="mb-4">
+              If you do not agree, you must not use the Service.
+            </p>
+            <p className="mb-4">
+              Continued use of ChatLearn constitutes acceptance of these Terms and any updates made to them.
+            </p>
+            <p className="mb-4">
+              ChatLearn shall not be liable for any direct or indirect damages, including data loss, revenue loss, or service interruptions.
+            </p>
+            <p>
+              We reserve the right to modify pricing, plans, or usage policies at any time.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">License</h2>
+            <p className="mb-4">
+              ChatLearn grants you a revocable, non-exclusive, non-transferable, limited license to use the Service strictly in accordance with these Terms.
+            </p>
+            <p>
+              All rights not expressly granted are reserved by ChatLearn and its licensors.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Restrictions</h2>
+            <p className="mb-4">You agree not to, and will not permit others to:</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>License, sell, rent, or distribute the Service;</li>
+              <li>Copy, modify, or create derivative works of the platform;</li>
+              <li>Reverse-engineer or attempt to extract model data or API code;</li>
+              <li>Remove copyright or trademark notices;</li>
+              <li>Circumvent security or usage controls;</li>
+              <li>Use ChatLearn to create competing AI services;</li>
+              <li>Use outputs for unlawful, harmful, or deceptive purposes.</li>
+            </ul>
+            <p className="mt-4">
+              Violation of these restrictions may result in immediate account termination.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Your Suggestions</h2>
+            <p>
+              Any feedback, comments, or ideas ("Suggestions") you provide shall be the exclusive property of ChatLearn, which may use them freely without credit or compensation.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Third-Party Services and Model Availability</h2>
+            <p className="mb-4">
+              ChatLearn integrates external AI models and APIs, including OpenAI, Anthropic, Google DeepMind, xAI, DeepSeek, and Stability AI.
+            </p>
+            <p className="mb-4">
+              While we strive to maintain consistent access to all integrations, their continued availability depends on third-party providers.
+            </p>
+            
+            <h3 className="text-xl font-semibold mt-6 mb-3">Model Availability</h3>
+            <p className="mb-4">You acknowledge and agree that:</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>The list of supported models may change at any time.</li>
+              <li>ChatLearn may add, suspend, or remove any model, feature, or integration temporarily or permanently at its sole discretion.</li>
+              <li>These changes may result from API cost changes, provider limitations, compliance obligations, or technical considerations.</li>
+              <li>Such changes do not entitle users to refunds, compensation, or claims, as long as the core Service remains functional.</li>
+              <li>Replacement or updated models with equivalent or enhanced capabilities may be introduced without notice.</li>
+            </ul>
+            <p className="mt-4">
+              We will make reasonable efforts to inform users about significant model changes.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Cookies and Privacy</h2>
+            <p className="mb-4">
+              We use cookies and analytics tools to operate, secure, and improve our platform.
+            </p>
+            <p className="mb-4">
+              You can manage or disable cookies at any time through your browser or consent manager.
+            </p>
+            <p>
+              Please see our Privacy Policy for full details.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Subscription Terms</h2>
+            <p className="mb-4">
+              Certain features of ChatLearn are available through a paid subscription plan.
+            </p>
+            <p className="mb-4">
+              Subscriptions renew automatically unless canceled before the renewal date.
+            </p>
+            <p>
+              Payments are non-refundable except as required by law.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Free Trial</h2>
+            <p className="mb-4">
+              ChatLearn may offer a limited free trial (e.g., up to 3 messages) per user for evaluation purposes.
+            </p>
+            <p>
+              The free trial is subject to fair-use and anti-abuse measures (including device, IP, and account checks). We may modify, suspend, or end the free trial at any time. Once the free quota is exhausted, continued use requires an active paid plan.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Fair Use and Additional Charges</h2>
+            <p className="mb-4">
+              ChatLearn operates under a fair use policy to maintain platform stability and ensure equitable access for all users.
+            </p>
+            <p className="mb-4">Users acknowledge and agree that:</p>
+            <ol className="list-decimal pl-6 space-y-2">
+              <li>Each subscription plan includes specific resource limits (such as message volume, token count, or image generations).</li>
+              <li>ChatLearn continuously monitors system usage to detect excessive or disproportionate activity.</li>
+              <li>If your usage significantly exceeds your plan's fair-use limits, ChatLearn may:
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  <li>(a) temporarily restrict or throttle your access;</li>
+                  <li>(b) offer an upgrade to a higher-capacity plan; or</li>
+                  <li>(c) apply additional charges based on excess usage.</li>
+                </ul>
+              </li>
+              <li>Any additional charges will be communicated transparently via email, invoice, or within your account dashboard prior to billing.</li>
+              <li>Continued or repeated overuse without resolution may result in suspension or termination of your account.</li>
+              <li>Usage metrics and thresholds are determined internally by ChatLearn and may evolve over time as system capacity or model costs change.</li>
+              <li>These measures are in place to maintain a stable and cost-efficient experience for all users.</li>
+            </ol>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Company Information</h2>
+            <p className="mb-4">
+              The ChatLearn platform is operated by TASOLAR, a company registered in the Republic of Cyprus.
+            </p>
+            <p className="mb-2">
+              <strong>Registered Office:</strong> Dimostheni Severi & Katsoni 2, Avenue Court, 1082 Nicosia, Cyprus
+            </p>
+            <p className="mb-2">
+              <strong>Email:</strong> <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a>
+            </p>
+            <p>
+              <strong>Website:</strong> <a href="https://chatl.ai" className="text-primary hover:underline">https://chatl.ai</a>
+            </p>
+          </section>
         </div>
-        
-        
       </div>
-    </footer>;
-  return <div className="min-h-screen bg-background">
-      <NavBar />
-      
-      {/* Hero Section */}
-      <section className="py-16 px-4 border-b">
-        <div className="container max-w-4xl mx-auto text-center">
-          <Badge variant="outline" className="mb-6 border-muted-foreground/20 text-muted-foreground">
-            Legal Document
-          </Badge>
-          <h1 className="text-5xl font-bold mb-6 text-foreground">
-            Terms of Service
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })}
-          </p>
-        </div>
-      </section>
-
-      {/* Content Section */}
-      <section className="py-12 px-4">
-        <div className="container max-w-4xl mx-auto">
-          <div className="space-y-6">
-            <Card className="border-2 hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl text-foreground">Agreement to Terms</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="leading-relaxed text-muted-foreground">
-                  By accessing and using ChatLearn ("Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl text-foreground">Service Description</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="mb-4 text-muted-foreground">
-                  ChatLearn is an artificial intelligence-powered chat service that allows users to:
-                </p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-muted/20 border border-muted">
-                    <p className="font-semibold text-foreground">💬 AI Conversations</p>
-                    <p className="text-sm mt-2 text-muted-foreground">Engage with multiple AI assistants</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-muted/20 border border-muted">
-                    <p className="font-semibold text-foreground">📁 File Analysis</p>
-                    <p className="text-sm mt-2 text-muted-foreground">Upload and analyze various file types</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-muted/20 border border-muted">
-                    <p className="font-semibold text-foreground">🎨 Image Generation</p>
-                    <p className="text-sm mt-2 text-muted-foreground">Generate and edit images using AI</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-muted/20 border border-muted">
-                    <p className="font-semibold text-foreground">📊 Project Organization</p>
-                    <p className="text-sm mt-2 text-muted-foreground">Organize conversations into projects</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-muted-foreground">
-                  The Service is provided "as is" and we reserve the right to modify, suspend, or discontinue the Service at any time.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* ... keep existing cards with similar conservative styling ... */}
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">User Accounts and Obligations</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 text-primary">Account Requirements</h3>
-                  <ul className="list-disc pl-6 space-y-2 text-lg">
-                    <li>You must provide accurate and complete information when creating an account</li>
-                    <li>You are responsible for maintaining the security of your account credentials</li>
-                    <li>You must be at least 13 years old to use this Service</li>
-                    <li>One person or legal entity may not maintain more than one account</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 text-primary">User Responsibilities</h3>
-                  <ul className="list-disc pl-6 space-y-2 text-lg">
-                    <li>Use the Service in compliance with all applicable laws and regulations</li>
-                    <li>Respect the intellectual property rights of others</li>
-                    <li>Maintain the confidentiality of your account information</li>
-                    <li>Notify us immediately of any unauthorized use of your account</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Prohibited Content and Conduct</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-lg">You agree not to use the Service to create, upload, transmit, or distribute content that:</p>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                      <p className="font-semibold text-red-600 dark:text-red-400">🚫 Illegal Content</p>
-                      <ul className="text-sm mt-2 space-y-1">
-                        <li>Is illegal, harmful, or violates any laws</li>
-                        <li>Infringes on intellectual property rights</li>
-                        <li>Contains hate speech or discriminatory content</li>
-                      </ul>
-                    </div>
-                    <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                      <p className="font-semibold text-orange-600 dark:text-orange-400">⚠️ Harmful Content</p>
-                      <ul className="text-sm mt-2 space-y-1">
-                        <li>Promotes violence or illegal activities</li>
-                        <li>Contains malware or malicious code</li>
-                        <li>Is sexually explicit or inappropriate</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                      <p className="font-semibold text-yellow-600 dark:text-yellow-400">🔒 Privacy Violations</p>
-                      <ul className="text-sm mt-2 space-y-1">
-                        <li>Includes personal information of others without consent</li>
-                        <li>Violates privacy or publicity rights</li>
-                        <li>Attempts to harm or exploit minors</li>
-                      </ul>
-                    </div>
-                    <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                      <p className="font-semibold text-purple-600 dark:text-purple-400">🎭 Deceptive Content</p>
-                      <ul className="text-sm mt-2 space-y-1">
-                        <li>Is spam, fraudulent, or deceptive</li>
-                        <li>Impersonates others</li>
-                        <li>Contains false information</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-8">
-                  <h3 className="text-xl font-semibold mb-4 text-primary">Prohibited Activities</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>Attempting to gain unauthorized access to our systems</li>
-                      <li>Interfering with or disrupting the Service</li>
-                      <li>Using automated tools to access the Service without permission</li>
-                    </ul>
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>Reverse engineering or attempting to extract source code</li>
-                      <li>Reselling or redistributing the Service without authorization</li>
-                      <li>Violating any applicable laws or regulations</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Account Termination</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="p-6 rounded-xl bg-green-500/10 border border-green-500/20">
-                    <h3 className="text-lg font-semibold mb-3 text-green-600 dark:text-green-400">Termination by You</h3>
-                    <p>You may terminate your account at any time through your account settings. Upon termination, your access to the Service will cease immediately.</p>
-                  </div>
-
-                  <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/20">
-                    <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">Termination by Us</h3>
-                    <p>We reserve the right to suspend or terminate your account if you:</p>
-                    <ul className="list-disc pl-4 mt-2 space-y-1 text-sm">
-                      <li>Violate these Terms of Service</li>
-                      <li>Engage in prohibited content or conduct</li>
-                      <li>Fail to pay applicable fees (if any)</li>
-                      <li>Use the Service harmfully</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-xl bg-muted/50 border border-border">
-                  <h3 className="text-lg font-semibold mb-3">Effect of Termination</h3>
-                  <p>Upon termination, your right to use the Service will cease immediately. We may retain certain information as required by law or for legitimate business purposes.</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Intellectual Property</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="p-6 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                    <h3 className="text-lg font-semibold mb-3 text-blue-600 dark:text-blue-400">Our IP Rights</h3>
-                    <p className="text-sm">
-                      The Service and its original content, features, and functionality are owned by ChatLearn and are protected by international intellectual property laws.
-                    </p>
-                  </div>
-
-                  <div className="p-6 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                    <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Your Content</h3>
-                    <p className="text-sm">
-                      You retain ownership of any content you submit to the Service. By submitting content, you grant us a non-exclusive license to use it for providing the Service.
-                    </p>
-                  </div>
-
-                  <div className="p-6 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                    <h3 className="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">AI-Generated Content</h3>
-                    <p className="text-sm">
-                      Content generated by our AI systems in response to your prompts is provided to you under a non-exclusive license for your use.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Disclaimers and Limitations</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="p-6 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
-                    <h3 className="text-lg font-semibold mb-3 text-yellow-600 dark:text-yellow-400">Service Disclaimers</h3>
-                    <ul className="list-disc pl-4 space-y-2 text-sm">
-                      <li>The Service is provided "as is" without warranties</li>
-                      <li>AI-generated content may be inaccurate or inappropriate</li>
-                      <li>We do not guarantee continuous access</li>
-                      <li>We are not responsible for AI response accuracy</li>
-                    </ul>
-                  </div>
-
-                  <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/20">
-                    <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">Limitation of Liability</h3>
-                    <p className="text-sm">
-                      To the maximum extent permitted by law, ChatLearn shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the Service.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-xl bg-primary/10 border border-primary/20">
-                  <h3 className="text-lg font-semibold mb-3 text-primary">Indemnification</h3>
-                  <p>
-                    You agree to defend, indemnify, and hold harmless ChatLearn from any claims, damages, obligations, losses, liabilities, costs, or expenses arising from your use of the Service or violation of these Terms.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Privacy and Data</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">
-                  Your privacy is important to us. Please review our{' '}
-                  <a href="/privacy" className="text-primary hover:underline font-semibold">Privacy Policy</a>, which also governs your use of the Service, to understand our practices.
-                </p>
-                <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                  <p>
-                    By using the Service, you consent to the collection and use of information in accordance with our Privacy Policy.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Governing Law</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">
-                  These Terms shall be interpreted and governed by the laws of the State of Delaware, United States, without regard to its conflict of law provisions.
-                </p>
-                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <p className="text-sm">
-                    If you are a consumer residing in the European Union, you may also have the right to bring proceedings in the courts of your country of residence.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Changes to Terms</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">
-                  We reserve the right to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days notice prior to any new terms taking effect.
-                </p>
-                <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                  <p>
-                    Your continued use of the Service after any such changes constitutes your acceptance of the new Terms of Service.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5 hover:border-primary/40 transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-2xl">Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg">If you have any questions about these Terms of Service, please contact us:</p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-white text-sm">⚖</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Legal</p>
-                      <a href="mailto:legal@adamai.chat" className="text-primary hover:underline">legal@adamai.chat</a>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <span className="text-white text-sm">💬</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Support</p>
-                      <a href="mailto:support@adamai.chat" className="text-primary hover:underline">support@adamai.chat</a>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-    </div>;
+    </div>
+  );
 }
