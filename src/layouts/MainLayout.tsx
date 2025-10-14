@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import ChatSidebar from "@/components/ChatSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { PricingModal } from "@/components/PricingModal";
 
 function MainContent({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +21,18 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
+  const { user, subscriptionStatus, loadingSubscription } = useAuth();
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  
+  useEffect(() => {
+    // Check if we should show pricing modal on login
+    const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
+    
+    if (user && !loadingSubscription && !subscriptionStatus.subscribed && !hasShownModal) {
+      setShowPricingModal(true);
+      sessionStorage.setItem('pricing_modal_shown', 'true');
+    }
+  }, [user, subscriptionStatus, loadingSubscription]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
@@ -26,6 +40,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <ChatSidebar isOpen={true} onClose={() => {}} />
         <MainContent>{children}</MainContent>
       </div>
+      
+      <PricingModal 
+        open={showPricingModal} 
+        onOpenChange={setShowPricingModal} 
+      />
     </SidebarProvider>
   );
 }
