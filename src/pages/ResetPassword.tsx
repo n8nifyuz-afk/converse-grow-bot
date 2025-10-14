@@ -27,38 +27,53 @@ export default function ResetPassword() {
     // Check if there's a valid recovery session
     const checkRecoverySession = async () => {
       try {
+        console.log('🔍 Checking for password recovery session...');
+        console.log('Current URL:', window.location.href);
+        console.log('Hash params:', window.location.hash);
+        console.log('Search params:', window.location.search);
+        
         const { data: { session }, error } = await supabase.auth.getSession();
         
+        console.log('Session check result:', { 
+          hasSession: !!session, 
+          hasUser: !!session?.user,
+          error: error?.message 
+        });
+        
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('❌ Error getting session:', error);
           toast({
             title: "Invalid recovery link",
-            description: "This password reset link is invalid or has expired.",
+            description: "This password reset link is invalid or has expired. Please request a new one.",
             variant: "destructive",
+            duration: 5000,
           });
-          navigate('/');
+          setTimeout(() => navigate('/'), 2000);
           return;
         }
 
-        // Check if this is a recovery session
+        // Check if this is a recovery session (should have a valid session from the email link)
         if (session && session.user) {
+          console.log('✅ Valid recovery session found');
           setIsValidSession(true);
         } else {
+          console.log('⚠️ No valid session found - user may have clicked link without token');
           toast({
             title: "Invalid recovery link",
-            description: "This password reset link is invalid or has expired.",
+            description: "This password reset link is invalid or has expired. Please request a new one from the forgot password page.",
             variant: "destructive",
+            duration: 5000,
           });
-          navigate('/');
+          setTimeout(() => navigate('/'), 2000);
         }
       } catch (error) {
-        console.error('Error checking recovery session:', error);
+        console.error('❌ Error checking recovery session:', error);
         toast({
           title: "Error",
           description: "Something went wrong. Please try again.",
           variant: "destructive",
         });
-        navigate('/');
+        setTimeout(() => navigate('/'), 2000);
       }
     };
 
