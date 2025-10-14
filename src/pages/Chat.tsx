@@ -2979,13 +2979,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
     }
     // Check if user has a subscription
     if (!subscriptionStatus.subscribed) {
-      toast.error("File uploads are only available for Pro and Ultra Pro subscribers", {
-        description: "Upgrade your plan to upload files and images",
-        action: {
-          label: "Upgrade",
-          onClick: () => window.location.href = '/pricing'
-        }
-      });
+      setShowPricingModal(true);
       setIsPopoverOpen(false);
       return;
     }
@@ -2996,13 +2990,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Double-check subscription status (in case user bypassed the button)
     if (!subscriptionStatus.subscribed) {
-      toast.error("File uploads are only available for Pro and Ultra Pro subscribers", {
-        description: "Upgrade your plan to upload files and images",
-        action: {
-          label: "Upgrade",
-          onClick: () => window.location.href = '/pricing'
-        }
-      });
+      setShowPricingModal(true);
       event.target.value = '';
       return;
     }
