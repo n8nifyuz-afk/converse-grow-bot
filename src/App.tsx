@@ -16,8 +16,6 @@ import ProjectPage from '@/pages/ProjectPage';
 import Help from '@/pages/Help';
 import Home from '@/pages/Home';
 import Pricing from '@/pages/Pricing';
-import Features from '@/pages/Features';
-import Models from '@/pages/Models';
 import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
 import Cookies from '@/pages/Cookies';
@@ -69,16 +67,6 @@ function App() {
                   <Route path="/pricing" element={
                     <PublicLayout>
                       <Pricing />
-                    </PublicLayout>
-                  } />
-                  <Route path="/features" element={
-                    <PublicLayout>
-                      <Features />
-                    </PublicLayout>
-                  } />
-                  <Route path="/models" element={
-                    <PublicLayout>
-                      <Models />
                     </PublicLayout>
                   } />
                   <Route path="/about" element={

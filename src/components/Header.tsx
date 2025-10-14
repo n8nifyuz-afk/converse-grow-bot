@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Sun, Moon } from 'lucide-react';
@@ -10,12 +10,30 @@ import logoDark from '@/assets/chatl-logo-white.png';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme, actualTheme } = useTheme();
   const { user, userProfile } = useAuth();
 
   // Choose the correct logo based on theme
   const currentLogo = actualTheme === 'dark' ? logoDark : logoLight;
+
+  const handleScrollToSection = (sectionId: string) => {
+    // If not on home page, navigate to home first
+    if (location.pathname !== '/home') {
+      navigate('/home');
+      // Wait for navigation then scroll
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } else {
+      // Already on home page, just scroll
+      const element = document.getElementById(sectionId);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    setIsOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,18 +47,18 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/models" 
+            <button 
+              onClick={() => handleScrollToSection('ai-models-section')}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
               AI Tools
-            </Link>
-            <Link 
-              to="/features" 
+            </button>
+            <button 
+              onClick={() => handleScrollToSection('features-section')}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
               What You Can Do
-            </Link>
+            </button>
             <Link 
               to="/pricing" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
@@ -110,20 +128,18 @@ const Header = () => {
                   </Button>
                 </div>
                 <nav className="flex flex-col space-y-4">
-                  <Link 
-                    to="/models" 
-                    className="text-lg font-medium hover:text-primary transition-colors"
-                    onClick={() => setIsOpen(false)}
+                  <button 
+                    onClick={() => handleScrollToSection('ai-models-section')}
+                    className="text-lg font-medium hover:text-primary transition-colors text-left"
                   >
                     AI Tools
-                  </Link>
-                  <Link 
-                    to="/features" 
-                    className="text-lg font-medium hover:text-primary transition-colors"
-                    onClick={() => setIsOpen(false)}
+                  </button>
+                  <button 
+                    onClick={() => handleScrollToSection('features-section')}
+                    className="text-lg font-medium hover:text-primary transition-colors text-left"
                   >
                     What You Can Do
-                  </Link>
+                  </button>
                   <Link 
                     to="/pricing" 
                     className="text-lg font-medium hover:text-primary transition-colors"

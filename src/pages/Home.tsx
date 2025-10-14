@@ -58,7 +58,7 @@ const Home = () => {
       </section>
 
       {/* Models Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30" aria-labelledby="models-heading">
+      <section id="ai-models-section" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30" aria-labelledby="models-heading">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 id="models-heading" className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
@@ -209,7 +209,7 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
+      <section id="features-section" className="py-20 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
@@ -611,10 +611,16 @@ const Home = () => {
           }}>
               <h3 className="font-bold mb-6 text-lg">Product</h3>
               <div className="space-y-3">
-                <button onClick={() => navigate('/features')} className="block text-muted-foreground hover:text-primary transition-colors">Features</button>
-                <button onClick={() => navigate('/pricing')} className="block text-muted-foreground hover:text-primary transition-colors">Pricing</button>
-                <button onClick={() => navigate('/models')} className="block text-muted-foreground hover:text-primary transition-colors">AI Models</button>
-                <a href="/image-generation" className="block text-muted-foreground hover:text-primary transition-colors">Image Generation</a>
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById('ai-models-section');
+                    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }} 
+                  className="block text-left text-muted-foreground hover:text-primary transition-colors"
+                >
+                  AI Tools
+                </button>
+                <button onClick={() => navigate('/pricing')} className="block text-left text-muted-foreground hover:text-primary transition-colors">Pricing</button>
               </div>
             </div>
             
@@ -623,9 +629,15 @@ const Home = () => {
           }}>
               <h3 className="font-bold mb-6 text-lg">Company</h3>
               <div className="space-y-3">
-                <a href="/help" className="block text-muted-foreground hover:text-primary transition-colors">About</a>
-                <a href="/explore-tools" className="block text-muted-foreground hover:text-primary transition-colors">Explore Tools</a>
-                <a href="/help" className="block text-muted-foreground hover:text-primary transition-colors">Help Center</a>
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById('features-section');
+                    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }} 
+                  className="block text-left text-muted-foreground hover:text-primary transition-colors"
+                >
+                  What you can do
+                </button>
               </div>
             </div>
             
