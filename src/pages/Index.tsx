@@ -278,6 +278,7 @@ export default function Index() {
   const [showSuggestions, setShowSuggestions] = useState<string | null>(null);
   const [showMoreButtons, setShowMoreButtons] = useState(false);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [showLimitWarning, setShowLimitWarning] = useState(false);
   const [audioLevels, setAudioLevels] = useState<number[]>(Array(100).fill(0));
   const [tempTranscript, setTempTranscript] = useState('');
   const navigate = useNavigate();
@@ -581,7 +582,8 @@ export default function Index() {
       return;
     }
     if (!canSendMessage) {
-      navigate('/pricing-plans');
+      console.log('[INDEX] ❌ Free user at limit - showing warning');
+      setShowLimitWarning(true);
       return;
     }
     setLoading(true);
@@ -972,6 +974,11 @@ export default function Index() {
             <p className="text-muted-foreground text-base sm:text-lg">How can I help you today?</p>
           </>}
       </div>
+
+      {/* Message Limit Warning */}
+      {!subscriptionStatus.subscribed && showLimitWarning && (
+        <MessageLimitWarning messageCount={messageCount} limit={messageLimit} />
+      )}
 
       <div className="w-full max-w-3xl mb-4 sm:mb-6">
         {/* File attachments preview */}

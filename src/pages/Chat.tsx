@@ -646,6 +646,16 @@ export default function Chat() {
     };
   }, [isRecording]);
 
+  // Handle showLimitWarning flag from navigation state (from ProjectPage)
+  useEffect(() => {
+    if (location.state?.showLimitWarning && chatId) {
+      console.log('[CHAT] Showing limit warning from navigation state');
+      setShowLimitWarning(true);
+      // Clear the navigation state to prevent re-showing on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [chatId, location.state]);
+
   // Auto-trigger AI response for user messages that don't have responses
   useEffect(() => {
     // Also check the ref for immediate synchronous state

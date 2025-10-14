@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Paperclip, Mic, MicOff, Edit2, Trash2, FolderOpen, Lightbulb, Target, Briefcase, Rocket, Palette, FileText, Code, Zap, Trophy, Heart, Star, Flame, Gem, Sparkles, MoreHorizontal, FileImage, FileVideo, FileAudio, File as FileIcon, X, Image as ImageIcon2, ImageIcon as ImageIcon, Check, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -195,6 +196,12 @@ export default function ProjectPage() {
   const {
     actualTheme
   } = useTheme();
+  const {
+    canSendMessage,
+    isAtLimit,
+    sessionId,
+    incrementMessageCount
+  } = useMessageLimit();
   
   // Choose the appropriate ChatGPT logo based on theme
   const chatgptLogoSrc = actualTheme === 'dark' ? chatgptLogo : chatgptLogoLight;
@@ -364,6 +371,13 @@ export default function ProjectPage() {
   const sendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() && selectedFiles.length === 0 || !user || !project || loading) return;
+    
+    console.log('[PROJECT-MESSAGE-LIMIT] Checking message limit...', {
+      canSendMessage,
+      isAtLimit,
+      hasSubscription: subscriptionStatus.subscribed
+    });
+    
     setLoading(true);
     const userMessage = input.trim();
     const files = [...selectedFiles];
@@ -417,6 +431,45 @@ export default function ProjectPage() {
         role: 'user',
         file_attachments: uploadedFiles
       });
+      
+      // Track message for free users
+      console.log('[PROJECT-MESSAGE-LIMIT] Message saved, tracking for free user...');
+      
+      // If anonymous user, save to anonymous_messages table
+      if (!user && sessionId) {
+        console.log('[PROJECT-MESSAGE-LIMIT] Saving anonymous message to tracking table');
+        try {
+          await supabase
+            .from('anonymous_messages')
+            .insert({
+              session_id: sessionId,
+              content: userMessage,
+              role: 'user',
+              file_attachments: uploadedFiles
+            });
+          console.log('[PROJECT-MESSAGE-LIMIT] Anonymous message tracked successfully');
+        } catch (anonError) {
+          console.error('[PROJECT-MESSAGE-LIMIT] Error tracking anonymous message:', anonError);
+        }
+      }
+      
+      // Check message limit AFTER saving the message
+      if (!subscriptionStatus.subscribed && !canSendMessage) {
+        console.log('[PROJECT-MESSAGE-LIMIT] ❌ Free user at limit - NOT sending to webhook');
+        // Navigate to chat page with a flag to show limit warning
+        navigate(`/chat/${newChat.id}`, {
+          state: {
+            showLimitWarning: true
+          }
+        });
+        return;
+      }
+      
+      // Increment message count for free users
+      if (!subscriptionStatus.subscribed) {
+        incrementMessageCount();
+        console.log('[PROJECT-MESSAGE-LIMIT] Message count incremented');
+      }
 
       // Handle files vs text-only messages differently
       if (files.length > 0) {
