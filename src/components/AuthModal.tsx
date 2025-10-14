@@ -318,79 +318,81 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-10 left-0 right-0 h-40 overflow-hidden pointer-events-none">
-              <div className="animate-scroll-left-fastest flex gap-2 [animation-play-state:running!important]">
+            <div className="absolute bottom-10 left-0 right-0 h-48 overflow-hidden pointer-events-none">
+              <div className="animate-scroll-left-ultra-fast flex gap-2 [animation-play-state:running!important]">
                 {[
-                  { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models like GPT-4, Claude, and Gemini in one place is absolutely game-changing for my workflow.", stars: 5 },
-                  { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context and remembers our conversation. The quality of responses is consistently impressive and helps me debug faster.", stars: 5 },
-                  { name: "Emma Thompson", role: "Marketing Manager", text: "I've tried many AI tools, but this one stands out. The interface is intuitive, the results are phenomenal, and it helps me create compelling content effortlessly.", stars: 5 },
-                  { name: "Michael Chen", role: "Student", text: "As a student, this has become my go-to study companion. It explains complex topics in ways I can understand and helps me prepare for exams efficiently.", stars: 5 },
-                  { name: "Lisa Anderson", role: "Business Owner", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7 to help with planning, strategy, and problem-solving.", stars: 5 },
-                  { name: "David Kumar", role: "Writer", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on and it helps me overcome writer's block instantly!", stars: 5 },
-                  { name: "Sophie Martin", role: "Designer", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow and helps me brainstorm innovative design concepts quickly.", stars: 5 },
-                  { name: "Alex Johnson", role: "Data Analyst", text: "The AI's ability to process and explain complex data patterns is remarkable. It has become an invaluable tool for my daily analysis work. Highly recommend!", stars: 5 },
-                  { name: "Maria Garcia", role: "Teacher", text: "I use this daily for lesson planning and creating engaging content for my students. The quality and creativity it brings to education is absolutely brilliant!", stars: 5 },
-                  { name: "Ryan Peterson", role: "Entrepreneur", text: "Best AI investment I've made for my business. From market research to content creation, the ROI is undeniable and it keeps getting better!", stars: 5 },
-                  { name: "Nina Patel", role: "Researcher", text: "The depth and accuracy of information this AI provides has significantly enhanced my research projects. It saves me countless hours of literature review.", stars: 5 },
-                  { name: "Tom Wilson", role: "Consultant", text: "Client presentations have never been easier to prepare. This AI gets the job done right and helps me deliver exceptional insights to my clients every time.", stars: 5 },
-                  { name: "Jessica Lee", role: "Freelancer", text: "Game-changer for my freelance work! I can handle more projects with better quality now. The versatility across different tasks is what makes it indispensable.", stars: 5 },
-                  { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day. It's like having an expert consultant on my team 24/7.", stars: 5 },
-                  { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner who never runs out of creative ideas and always delivers on time.", stars: 5 },
+                  { name: "Sarah Mitchell", role: "Content Creator", title: "Perfect AI Tool", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch between platforms!", stars: 5 },
+                  { name: "James Rodriguez", role: "Software Developer", title: "Very Cool", text: "It is amazing app for fun and useful generating content, creating great ideas! This AI chatbot saves me in sad evenings.", stars: 5 },
+                  { name: "Emma Thompson", role: "Marketing Manager", title: "Game Changer", text: "So personalized and so fast! I'm loving how this AI app responds to anything immediately. The interface is incredibly intuitive.", stars: 5 },
+                  { name: "Michael Chen", role: "Student", title: "Best Study Companion", text: "As a student, this has become my go-to tool. It explains complex topics in ways I can understand and helps me prepare efficiently.", stars: 5 },
+                  { name: "Lisa Anderson", role: "Business Owner", title: "Incredible Time Saver", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7 to help with everything.", stars: 5 },
+                  { name: "David Kumar", role: "Writer", title: "Productivity Boost", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on and help me overcome writer's block!", stars: 5 },
+                  { name: "Sophie Martin", role: "Designer", title: "Creative Partner", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow and helps me brainstorm innovative concepts.", stars: 5 },
+                  { name: "Alex Johnson", role: "Data Analyst", title: "Remarkable Analysis", text: "The AI's ability to process and explain complex data patterns is remarkable. It has become invaluable for my daily work.", stars: 5 },
+                  { name: "Maria Garcia", role: "Teacher", title: "Education Revolution", text: "I use this daily for lesson planning and creating engaging content. The quality and creativity it brings is absolutely brilliant!", stars: 5 },
+                  { name: "Ryan Peterson", role: "Entrepreneur", title: "Best Investment", text: "Best AI investment I've made for my business. From market research to content creation, the ROI is undeniable!", stars: 5 },
+                  { name: "Nina Patel", role: "Researcher", title: "Research Essential", text: "The depth and accuracy of information has significantly enhanced my research projects. It saves me countless hours of work.", stars: 5 },
+                  { name: "Tom Wilson", role: "Consultant", title: "Client Favorite", text: "Client presentations have never been easier to prepare. This AI gets the job done right and helps me deliver exceptional insights.", stars: 5 },
+                  { name: "Jessica Lee", role: "Freelancer", title: "Freelance Hero", text: "Game-changer for my freelance work! I can handle more projects with better quality now. The versatility is what makes it indispensable.", stars: 5 },
+                  { name: "Chris Brown", role: "Product Manager", title: "Smart Decisions", text: "The insights I get from ChatLearn help me make better product decisions every single day. Like having an expert consultant on my team.", stars: 5 },
+                  { name: "Amanda White", role: "Copywriter", title: "Writing Partner", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant partner who never runs out of creative ideas.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[144px] max-w-[144px] flex-shrink-0">
-                    <div className="flex gap-0.5 mb-1">
+                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-4 min-w-[200px] max-w-[200px] flex-shrink-0">
+                    <h4 className="text-sm font-bold mb-2">{testimonial.title}</h4>
+                    <div className="flex gap-0.5 mb-2">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-[11px] text-foreground mb-1.5 line-clamp-3">{testimonial.text}</p>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                    <p className="text-xs text-foreground mb-3 line-clamp-4">{testimonial.text}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-[10px] font-semibold">{testimonial.name}</div>
-                        <div className="text-[9px] text-muted-foreground">{testimonial.role}</div>
+                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-[10px] text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
                   </div>
                 ))}
                 {/* Duplicate for seamless loop */}
                 {[
-                  { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models like GPT-4, Claude, and Gemini in one place is absolutely game-changing for my workflow.", stars: 5 },
-                  { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context and remembers our conversation. The quality of responses is consistently impressive and helps me debug faster.", stars: 5 },
-                  { name: "Emma Thompson", role: "Marketing Manager", text: "I've tried many AI tools, but this one stands out. The interface is intuitive, the results are phenomenal, and it helps me create compelling content effortlessly.", stars: 5 },
-                  { name: "Michael Chen", role: "Student", text: "As a student, this has become my go-to study companion. It explains complex topics in ways I can understand and helps me prepare for exams efficiently.", stars: 5 },
-                  { name: "Lisa Anderson", role: "Business Owner", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7 to help with planning, strategy, and problem-solving.", stars: 5 },
-                  { name: "David Kumar", role: "Writer", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on and it helps me overcome writer's block instantly!", stars: 5 },
-                  { name: "Sophie Martin", role: "Designer", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow and helps me brainstorm innovative design concepts quickly.", stars: 5 },
-                  { name: "Alex Johnson", role: "Data Analyst", text: "The AI's ability to process and explain complex data patterns is remarkable. It has become an invaluable tool for my daily analysis work. Highly recommend!", stars: 5 },
-                  { name: "Maria Garcia", role: "Teacher", text: "I use this daily for lesson planning and creating engaging content for my students. The quality and creativity it brings to education is absolutely brilliant!", stars: 5 },
-                  { name: "Ryan Peterson", role: "Entrepreneur", text: "Best AI investment I've made for my business. From market research to content creation, the ROI is undeniable and it keeps getting better!", stars: 5 },
-                  { name: "Nina Patel", role: "Researcher", text: "The depth and accuracy of information this AI provides has significantly enhanced my research projects. It saves me countless hours of literature review.", stars: 5 },
-                  { name: "Tom Wilson", role: "Consultant", text: "Client presentations have never been easier to prepare. This AI gets the job done right and helps me deliver exceptional insights to my clients every time.", stars: 5 },
-                  { name: "Jessica Lee", role: "Freelancer", text: "Game-changer for my freelance work! I can handle more projects with better quality now. The versatility across different tasks is what makes it indispensable.", stars: 5 },
-                  { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day. It's like having an expert consultant on my team 24/7.", stars: 5 },
-                  { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner who never runs out of creative ideas and always delivers on time.", stars: 5 },
+                  { name: "Sarah Mitchell", role: "Content Creator", title: "Perfect AI Tool", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch between platforms!", stars: 5 },
+                  { name: "James Rodriguez", role: "Software Developer", title: "Very Cool", text: "It is amazing app for fun and useful generating content, creating great ideas! This AI chatbot saves me in sad evenings.", stars: 5 },
+                  { name: "Emma Thompson", role: "Marketing Manager", title: "Game Changer", text: "So personalized and so fast! I'm loving how this AI app responds to anything immediately. The interface is incredibly intuitive.", stars: 5 },
+                  { name: "Michael Chen", role: "Student", title: "Best Study Companion", text: "As a student, this has become my go-to tool. It explains complex topics in ways I can understand and helps me prepare efficiently.", stars: 5 },
+                  { name: "Lisa Anderson", role: "Business Owner", title: "Incredible Time Saver", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7 to help with everything.", stars: 5 },
+                  { name: "David Kumar", role: "Writer", title: "Productivity Boost", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on and help me overcome writer's block!", stars: 5 },
+                  { name: "Sophie Martin", role: "Designer", title: "Creative Partner", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow and helps me brainstorm innovative concepts.", stars: 5 },
+                  { name: "Alex Johnson", role: "Data Analyst", title: "Remarkable Analysis", text: "The AI's ability to process and explain complex data patterns is remarkable. It has become invaluable for my daily work.", stars: 5 },
+                  { name: "Maria Garcia", role: "Teacher", title: "Education Revolution", text: "I use this daily for lesson planning and creating engaging content. The quality and creativity it brings is absolutely brilliant!", stars: 5 },
+                  { name: "Ryan Peterson", role: "Entrepreneur", title: "Best Investment", text: "Best AI investment I've made for my business. From market research to content creation, the ROI is undeniable!", stars: 5 },
+                  { name: "Nina Patel", role: "Researcher", title: "Research Essential", text: "The depth and accuracy of information has significantly enhanced my research projects. It saves me countless hours of work.", stars: 5 },
+                  { name: "Tom Wilson", role: "Consultant", title: "Client Favorite", text: "Client presentations have never been easier to prepare. This AI gets the job done right and helps me deliver exceptional insights.", stars: 5 },
+                  { name: "Jessica Lee", role: "Freelancer", title: "Freelance Hero", text: "Game-changer for my freelance work! I can handle more projects with better quality now. The versatility is what makes it indispensable.", stars: 5 },
+                  { name: "Chris Brown", role: "Product Manager", title: "Smart Decisions", text: "The insights I get from ChatLearn help me make better product decisions every single day. Like having an expert consultant on my team.", stars: 5 },
+                  { name: "Amanda White", role: "Copywriter", title: "Writing Partner", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant partner who never runs out of creative ideas.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3 min-w-[144px] max-w-[144px] flex-shrink-0">
-                    <div className="flex gap-0.5 mb-1">
+                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-4 min-w-[200px] max-w-[200px] flex-shrink-0">
+                    <h4 className="text-sm font-bold mb-2">{testimonial.title}</h4>
+                    <div className="flex gap-0.5 mb-2">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-[11px] text-foreground mb-1.5 line-clamp-3">{testimonial.text}</p>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                    <p className="text-xs text-foreground mb-3 line-clamp-4">{testimonial.text}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-[10px] font-semibold">{testimonial.name}</div>
-                        <div className="text-[9px] text-muted-foreground">{testimonial.role}</div>
+                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-[10px] text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
                   </div>
