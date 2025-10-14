@@ -76,6 +76,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
+  // Sync Google profile data on sign-in
+  const syncGoogleProfile = async (session: Session) => {
+    try {
+      const user = session.user;
+      const metadata = user.user_metadata;
+      const appMetadata = user.app_metadata;
+      
+      // Check if this is a Google sign-in
+      const isGoogleSignIn = 
+        metadata?.iss === 'https://accounts.google.com' ||
+        appMetadata?.provider === 'google';
+      
+      if (!isGoogleSignIn) return;
+      
+      // Get current profile
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      // Extract latest Google data
+      const latestName = metadata?.full_name || metadata?.name || currentProfile?.display_name;
+      const latestAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo;
+      
+      // Check if update is needed
+      const needsUpdate = 
+        currentProfile?.display_name !== latestName ||
+        currentProfile?.avatar_url !== latestAvatar;
+      
+      if (needsUpdate && currentProfile) {
+        await supabase
+          .from('profiles')
+          .update({
+            display_name: latestName,
+            avatar_url: latestAvatar,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+        
+        console.log('✅ Updated Google profile data');
+      }
+    } catch (error) {
+      console.error('Error syncing Google profile:', error);
+    }
+  };
+
   // Fetch user profile - only read, no updates to prevent 429 errors
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -112,8 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(session);
           setUser(session.user);
           
-          // Defer subscription check to avoid auth loop
+          // Defer profile sync and subscription check to avoid auth loop
           setTimeout(() => {
+            syncGoogleProfile(session);
             checkSubscription();
           }, 500);
         } else if (event === 'SIGNED_OUT') {

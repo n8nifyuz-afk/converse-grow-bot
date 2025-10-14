@@ -22,7 +22,7 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
           </p>
           <Button 
             onClick={() => setIsPricingModalOpen(true)}
-            className="bg-destructive hover:bg-destructive/90 dark:bg-foreground dark:hover:bg-foreground/90 text-destructive-foreground dark:text-background rounded-md px-3 py-1.5 text-sm font-semibold flex items-center gap-1.5"
+            className="bg-foreground hover:bg-foreground/90 text-background rounded-md px-3 py-1.5 text-sm font-semibold flex items-center gap-1.5"
           >
             <Gem className="w-3.5 h-3.5" />
             Upgrade
