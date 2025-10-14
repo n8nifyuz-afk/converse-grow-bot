@@ -71,6 +71,7 @@ const Footer = () => {
               <a href="/privacy" className="block text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a>
               <a href="/terms" className="block text-muted-foreground hover:text-primary transition-colors">Terms of Service</a>
               <a href="/cookie-policy" className="block text-muted-foreground hover:text-primary transition-colors">Cookie Policy</a>
+              <a href="/refund-policy" className="block text-muted-foreground hover:text-primary transition-colors">Refund Policy</a>
             </div>
           </div>
         </div>
