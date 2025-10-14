@@ -263,22 +263,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('email', email)
         .maybeSingle();
       
-      if (profile?.signup_method === 'google') {
+      if (profile?.signup_method === 'google' || profile?.signup_method === 'apple') {
+        console.log(`🔐 OAuth account detected (${profile.signup_method}), sending password setup email...`);
+        
+        // Send password reset email so they can add a password to their OAuth account
+        const redirectUrl = `${window.location.origin}/reset-password`;
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl
+        });
+        
+        if (resetError) {
+          console.error('❌ Failed to send password setup email:', resetError);
+          return {
+            error: {
+              message: `This email is already registered via ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. Please use "Continue with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}" to sign in.`,
+              code: 'oauth_account_exists'
+            }
+          };
+        }
+        
+        console.log('✅ Password setup email sent');
         return {
           error: {
-            message: 'This email is already registered via Google. Please use "Continue with Google" to sign in.',
-            code: 'oauth_account_exists'
-          }
-        };
-      } else if (profile?.signup_method === 'apple') {
-        return {
-          error: {
-            message: 'This email is already registered via Apple. Please use "Continue with Apple" to sign in.',
-            code: 'oauth_account_exists'
+            message: `This account exists with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. We've sent you an email to add a password so you can sign in with email too.`,
+            code: 'password_setup_sent'
           }
         };
       }
     } catch (checkError) {
+      console.error('❌ Error checking signup method:', checkError);
       // Continue with signup if check fails
     }
     

@@ -123,8 +123,17 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           duration: 8000,
         });
       } else {
-        // Check if this is an OAuth account
-        if (error.code === 'oauth_account_exists') {
+        // Check if password setup email was sent for OAuth account
+        if (error.code === 'password_setup_sent') {
+          toast({
+            title: "Check your email",
+            description: error.message,
+            duration: 10000,
+          });
+          setEmail('');
+          setPassword('');
+          setMode('signin');
+        } else if (error.code === 'oauth_account_exists') {
           toast({
             title: "Account exists with different sign-in method",
             description: error.message,
