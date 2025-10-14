@@ -260,9 +260,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         <div className="flex flex-col md:flex-row min-h-[420px]">
           {/* Left Panel - Social Proof */}
-          <div className="w-full md:w-1/2 bg-gradient-to-br from-background to-muted/30 p-5 md:p-7 flex flex-col items-center justify-center border-r border-border overflow-hidden relative">
+          <div className="w-full md:w-1/2 bg-gradient-to-br from-background to-muted/30 p-5 md:p-7 flex flex-col items-center justify-start border-r border-border overflow-hidden relative">
             {/* Badge and Rating */}
-            <div className="text-center mb-5 z-10">
+            <div className="text-center mb-3 z-10 mt-2">
               <div className="inline-flex items-center gap-2 mb-2">
                 <img src="/chatl-logo-black.png" alt="ChatLearn" className="w-6 h-6 dark:hidden" />
                 <img src="/chatl-logo-white.png" alt="ChatLearn" className="w-6 h-6 hidden dark:block" />
@@ -281,7 +281,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Available On */}
-            <div className="text-center mb-5 z-10">
+            <div className="text-center mb-3 z-10">
               <div className="text-xs text-muted-foreground mb-2">Available on</div>
               <div className="flex justify-center">
                 <div className="inline-flex gap-1.5 items-center flex-wrap p-3 bg-white dark:bg-gray-950 rounded-full shadow-lg">
@@ -313,13 +313,13 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Trusted by Millions */}
-            <div className="text-center mb-5 z-10">
+            <div className="text-center mb-3 z-10">
               <h3 className="text-xl font-bold">Trusted by Millions</h3>
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-8 left-0 right-0 h-20 overflow-hidden">
-              <div className="animate-scroll-left-fast flex gap-2">
+            <div className="absolute bottom-16 left-0 right-0 h-20 overflow-hidden">
+              <div className="animate-scroll-left-faster flex gap-2">
                 {[
                   { name: "Sarah Mitchell", role: "Content Creator", text: "This AI chatbot saves me hours every day! Access to multiple models in one place is game-changing.", stars: 5 },
                   { name: "James Rodriguez", role: "Software Developer", text: "Finally, an AI tool that actually understands context. The quality of responses is consistently impressive.", stars: 5 },
@@ -337,7 +337,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 min-w-[200px] max-w-[200px] flex-shrink-0">
+                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 min-w-[160px] max-w-[160px] flex-shrink-0">
                     <div className="flex gap-0.5 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
                         <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
@@ -375,7 +375,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", text: "The insights I get from ChatLearn help me make better product decisions every single day.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant writing partner.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 min-w-[200px] max-w-[200px] flex-shrink-0">
+                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 min-w-[160px] max-w-[160px] flex-shrink-0">
                     <div className="flex gap-0.5 mb-1">
                       {[...Array(testimonial.stars)].map((_, i) => (
                         <svg key={i} className="w-2.5 h-2.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
