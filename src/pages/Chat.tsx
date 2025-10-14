@@ -158,7 +158,7 @@ export default function Chat() {
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
-  const { canSendMessage, isAtLimit, incrementMessageCount, messageCount, limit } = useMessageLimit();
+  const { canSendMessage, isAtLimit, incrementMessageCount, messageCount, limit, sessionId } = useMessageLimit();
   // Remove toast hook since we're not using toasts
   const { state: sidebarState, isMobile } = useSidebar();
   
@@ -1699,8 +1699,9 @@ export default function Chat() {
       }
     }
     
-    // Check message limit for non-subscribed users
-    if (!user || (!subscriptionStatus.subscribed && !canSendMessage)) {
+    // Check message limit for non-subscribed users (both authenticated and anonymous)
+    if (!subscriptionStatus.subscribed && !canSendMessage) {
+      console.log('[SEND-BLOCKED] Message limit reached:', { messageCount, limit });
       return; // Warning will be shown below input
     }
     
@@ -2203,6 +2204,18 @@ export default function Chat() {
           throw userError;
         }
         
+        // Track anonymous messages for message limit
+        if (!user && sessionId) {
+          console.log('[ANONYMOUS-TRACKING] Saving to anonymous_messages for tracking');
+          await supabase.from('anonymous_messages').insert({
+            session_id: sessionId,
+            content: userMessage,
+            role: 'user',
+            file_attachments: tempFileAttachments as any
+          });
+          incrementMessageCount();
+        }
+        
         console.log('[FILE-MESSAGE] User message saved, ID:', insertedMessage?.id);
 
         // Update with embedding when ready (background)
@@ -2398,7 +2411,7 @@ export default function Chat() {
         // CRITICAL: Save text-only message to database immediately
         console.log('[TEXT-MESSAGE] Saving user message to database (no files)');
         console.log('[TEXT-MESSAGE] Chat ID:', chatId);
-        console.log('[TEXT-MESSAGE] User ID:', user.id);
+        console.log('[TEXT-MESSAGE] User ID:', user?.id || 'anonymous');
         console.log('[TEXT-MESSAGE] Message content:', userMessage?.substring(0, 50));
         console.log('[TEXT-MESSAGE] Timestamp:', Date.now());
         
@@ -2433,6 +2446,18 @@ export default function Chat() {
             return;
           }
           throw userError;
+        }
+        
+        // Track anonymous messages for message limit
+        if (!user && sessionId) {
+          console.log('[ANONYMOUS-TRACKING] Saving to anonymous_messages for tracking');
+          await supabase.from('anonymous_messages').insert({
+            session_id: sessionId,
+            content: userMessage,
+            role: 'user',
+            file_attachments: []
+          });
+          incrementMessageCount();
         }
         
         console.log('[TEXT-MESSAGE] User message saved, ID:', insertedMessage?.id);
@@ -4249,7 +4274,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       </div>
 
       {/* Message Limit Warning */}
-      {!user && isAtLimit && (
+      {!subscriptionStatus.subscribed && isAtLimit && (
         <MessageLimitWarning messageCount={messageCount} limit={limit} />
       )}
 
