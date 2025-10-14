@@ -115,8 +115,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 </div>
                 
-                {/* Feature Rows - Scrollable */}
-                <div className="flex-1 space-y-0.5 sm:space-y-1 overflow-y-auto custom-scrollbar">
+                {/* Feature Rows */}
+                <div className="flex-1 space-y-0">
                   {allFeatures
                     .filter((feature) => {
                       const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
@@ -126,7 +126,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
                       
                       return (
-                        <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1.5 sm:py-2 md:py-3 px-1.5 sm:px-2 md:px-3 rounded-lg hover:bg-white/5 transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-zinc-700/50">
+                        <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1 sm:py-1.5 md:py-2 px-1.5 sm:px-2 md:px-3 rounded-lg hover:bg-white/5 transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-zinc-700/50">
                           <div className="text-xs sm:text-sm md:text-base font-medium text-white flex items-center leading-tight">
                             {feature.name}
                           </div>
