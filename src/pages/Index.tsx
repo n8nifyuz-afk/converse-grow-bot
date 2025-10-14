@@ -973,11 +973,6 @@ export default function Index() {
           </>}
       </div>
 
-      {/* Message limit warning for free users */}
-      {!subscriptionStatus.subscribed && isAtLimit && (
-        <MessageLimitWarning messageCount={messageCount} limit={messageLimit} />
-      )}
-
       <div className="w-full max-w-3xl mb-4 sm:mb-6">
         {/* File attachments preview */}
         {selectedFiles.length > 0 && <div className="mb-3 flex flex-wrap gap-2">

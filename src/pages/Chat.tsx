@@ -268,6 +268,7 @@ export default function Chat() {
     // Use model from navigation state if available, otherwise default to gpt-4o-mini
     return location.state?.selectedModel || 'gpt-4o-mini';
   });
+  const [showLimitWarning, setShowLimitWarning] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -298,6 +299,9 @@ export default function Chat() {
 
       // CRITICAL: Clear messages state immediately when switching chats to prevent cross-chat bleeding
       setMessages([]);
+      
+      // Clear limit warning when switching chats
+      setShowLimitWarning(false);
       
       // CRITICAL: Clear user model selection when switching chats
       // This allows each chat to load its own model from DB
@@ -1703,13 +1707,7 @@ export default function Chat() {
     // Check message limit for free users (both authenticated and anonymous)
     if (!subscriptionStatus.subscribed && !canSendMessage) {
       console.log('[MESSAGE-LIMIT-CHECK] ❌ Free user at limit - blocking send');
-      toast.error(`You've reached the free limit of ${messageLimit} messages`, {
-        description: 'Upgrade to Pro for unlimited messages',
-        action: {
-          label: "Upgrade",
-          onClick: () => window.location.href = '/pricing-plans'
-        }
-      });
+      setShowLimitWarning(true);
       return;
     }
     
@@ -3946,8 +3944,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                 </div>}
             </div>}
             
-          {/* Message limit warning for free users */}
-          {!subscriptionStatus.subscribed && isAtLimit && (
+          {/* Message limit warning - only show in this chat if user tried to send and was blocked */}
+          {showLimitWarning && (
             <MessageLimitWarning messageCount={messageCount} limit={messageLimit} />
           )}
             
