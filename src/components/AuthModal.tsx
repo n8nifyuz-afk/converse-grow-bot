@@ -3,9 +3,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -28,6 +30,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const { user, signIn, signUp, signInWithGoogle, signInWithApple, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Close modal and call onSuccess when user is authenticated
   useEffect(() => {
@@ -250,19 +253,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-[70vw] md:max-w-3xl lg:max-w-4xl w-full p-0 bg-background border border-border shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden mx-auto my-auto max-h-[95vh] overflow-y-auto">
-        <DialogHeader className="sr-only">
-          <DialogTitle>ChatLearn Authentication</DialogTitle>
-          <DialogDescription>
-            {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex flex-col md:flex-row min-h-[400px] sm:min-h-[500px] md:min-h-[550px]">
-          {/* Left Panel - Social Proof */}
-          <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 lg:p-10 flex flex-col items-center justify-start border-r border-border overflow-hidden relative bg-gradient-to-br from-primary/5 via-background to-accent/5">
+  const authContent = (
+    <div className="flex flex-col md:flex-row min-h-[400px] md:min-h-[550px]">
+          {/* Left Panel - Social Proof (Hidden on Mobile) */}
+          <div className="hidden md:flex md:w-1/2 p-8 lg:p-10 flex-col items-center justify-start border-r border-border overflow-hidden relative bg-gradient-to-br from-primary/5 via-background to-accent/5">
             {/* Abstract Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               {/* Animated gradient orbs */}
@@ -391,37 +385,37 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           </div>
 
           {/* Right Panel - Auth Form */}
-          <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 lg:p-10 flex flex-col">
+          <div className="w-full md:w-1/2 p-6 md:p-8 lg:p-10 flex flex-col">
             {/* Powered By */}
-            <div className="mb-4 sm:mb-5 md:mb-6">
-              <div className="text-xs sm:text-sm text-muted-foreground text-center mb-2 sm:mb-3">Powered By</div>
+            <div className="mb-5 md:mb-6">
+              <div className="text-sm text-muted-foreground text-center mb-3">Powered By</div>
               <div className="flex justify-center">
-                <div className="inline-flex gap-2 sm:gap-3 md:gap-4 items-center p-2 sm:p-2.5 md:p-3 border-2 border-border rounded-xl sm:rounded-2xl flex-wrap justify-center">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <img src="/chatgpt-logo-light.png" alt="ChatGPT" className="w-4 h-4 sm:w-5 sm:h-5 hidden dark:block" />
-                    <img src="/chatgpt-logo.png" alt="ChatGPT" className="w-4 h-4 sm:w-5 sm:h-5 dark:hidden brightness-0" />
-                    <span className="text-xs sm:text-sm font-medium">OpenAI</span>
+                <div className="inline-flex gap-3 md:gap-4 items-center p-2.5 md:p-3 border-2 border-border rounded-xl md:rounded-2xl flex-wrap justify-center">
+                  <div className="flex items-center gap-2">
+                    <img src="/chatgpt-logo-light.png" alt="ChatGPT" className="w-5 h-5 hidden dark:block" />
+                    <img src="/chatgpt-logo.png" alt="ChatGPT" className="w-5 h-5 dark:hidden brightness-0" />
+                    <span className="text-sm font-medium">OpenAI</span>
                   </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <img src="/anthropic-icon.svg" alt="Anthropic" className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="text-xs sm:text-sm font-medium">Anthropic</span>
+                  <div className="flex items-center gap-2">
+                    <img src="/anthropic-icon.svg" alt="Anthropic" className="w-5 h-5" />
+                    <span className="text-sm font-medium">Anthropic</span>
                   </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex items-center gap-2">
                     <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    <span className="text-xs sm:text-sm font-medium">Google</span>
+                    <span className="text-sm font-medium">Google</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Main Heading */}
-            <div className="mb-5 sm:mb-6 md:mb-7 text-center">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight">
+            <div className="mb-6 md:mb-7 text-center">
+              <h2 className="text-2xl md:text-3xl font-bold leading-tight">
                 Log In and Get Smart
               </h2>
             </div>
@@ -439,12 +433,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10 sm:h-11 md:h-12 text-sm sm:text-base"
+                    className="h-11 md:h-12 text-base"
                   />
                   <Button
                     type="submit"
                     disabled={loading || !email}
-                    className="w-full h-10 sm:h-11 md:h-12 text-sm sm:text-base"
+                    className="w-full h-11 md:h-12 text-base"
                   >
                     {loading ? (
                       <>
@@ -473,16 +467,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                       <Button
                         onClick={handleGoogleSignIn}
                         disabled={googleLoading || appleLoading || loading}
-                        className="w-full h-10 sm:h-11 md:h-12 mb-2 sm:mb-3 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 text-sm sm:text-base"
+                        className="w-full h-11 md:h-12 mb-3 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 text-base"
                       >
                         {googleLoading ? (
                           <>
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2 sm:mr-3" />
+                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
                             Continue with Google
                           </>
                         ) : (
                           <>
-                            <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24">
                               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -497,16 +491,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                         onClick={handleAppleSignIn}
                         disabled={googleLoading || appleLoading || loading}
                         variant="outline"
-                        className="w-full h-10 sm:h-11 md:h-12 mb-3 sm:mb-4 border-2 border-gray-400 dark:border-gray-600 text-sm sm:text-base"
+                        className="w-full h-11 md:h-12 mb-4 border-2 border-gray-400 dark:border-gray-600 text-base"
                       >
                         {appleLoading ? (
                           <>
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2 sm:mr-3" />
+                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
                             Continue with Apple
                           </>
                         ) : (
                           <>
-                            <svg className="w-6 h-6 sm:w-7 sm:h-7 mr-2 sm:mr-3" viewBox="0 0 24 24" fill="currentColor">
+                            <svg className="w-7 h-7 mr-3" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                             </svg>
                             Continue with Apple
@@ -514,18 +508,18 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                         )}
                       </Button>
 
-                      <div className="relative my-3 sm:my-4">
+                      <div className="relative my-4">
                         <div className="absolute inset-0 flex items-center">
                           <div className="w-full border-t border-border" />
                         </div>
                         <div className="relative flex justify-center">
-                          <span className="px-2 sm:px-3 bg-background text-xs sm:text-sm text-muted-foreground">or</span>
+                          <span className="px-3 bg-background text-sm text-muted-foreground">or</span>
                         </div>
                       </div>
                     </>
                   )}
 
-                   <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-2.5 sm:space-y-3">
+                   <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
                      <Input
                        type="email"
                        placeholder="Enter your email"
@@ -541,7 +535,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                          }
                        }}
                        required
-                       className="h-10 sm:h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-sm sm:text-base"
+                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base"
                      />
                      {showPassword && (
                        <Input
@@ -554,19 +548,19 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                          }}
                          required
                          minLength={6}
-                         className="h-10 sm:h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-sm sm:text-base"
+                         className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base"
                        />
                      )}
-                     {error && (
-                       <div className="text-sm sm:text-base text-destructive bg-destructive/10 px-3 sm:px-4 py-2 sm:py-3 rounded-md">
+                      {error && (
+                        <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                          {error}
                        </div>
                      )}
                      {showPassword && (
                        <Button
                          type="submit"
-                         disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)}
-                         className="w-full h-10 sm:h-11 md:h-12 text-sm sm:text-base"
+                          disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)}
+                          className="w-full h-11 md:h-12 text-base"
                        >
                         {loading ? (
                           <>
@@ -580,9 +574,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                         )}
                       </Button>
                      )}
-                  </form>
+                   </form>
 
-                  <div className="mt-3 sm:mt-4 text-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                  <div className="mt-4 text-center space-x-2 text-sm">
                     {mode === 'signin' ? (
                       <>
                         <span className="text-muted-foreground">Don't have an account?</span>
@@ -617,8 +611,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Footer */}
-            <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 border-t border-border">
-              <div className="text-xs sm:text-sm text-muted-foreground text-center">
+            <div className="mt-5 md:mt-6 pt-5 border-t border-border">
+              <div className="text-sm text-muted-foreground text-center">
                 By proceeding, you agree to our{' '}
                 <button 
                   onClick={() => {
@@ -644,6 +638,34 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
           </div>
         </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={isOpen} onOpenChange={onClose}>
+        <DrawerContent className="max-h-[90vh] p-0">
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>ChatLearn Authentication</DrawerTitle>
+            <DrawerDescription>
+              {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
+            </DrawerDescription>
+          </DrawerHeader>
+          {authContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[95vw] sm:max-w-[70vw] md:max-w-3xl lg:max-w-4xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[95vh] overflow-y-auto">
+        <DialogHeader className="sr-only">
+          <DialogTitle>ChatLearn Authentication</DialogTitle>
+          <DialogDescription>
+            {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
+          </DialogDescription>
+        </DialogHeader>
+        {authContent}
       </DialogContent>
     </Dialog>
   );
