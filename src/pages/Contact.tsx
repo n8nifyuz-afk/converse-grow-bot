@@ -21,10 +21,10 @@ const Contact = () => {
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-muted/20 to-background">
         <div className="container mx-auto max-w-4xl text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 leading-tight">
-            Get in <span className="text-primary">Touch</span>
+            Let's <span className="text-primary">connect</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            We're here to help! Reach out to our team with any questions about ChatLearn.
+            Our team is always happy to help just reach out and we'll get back to you shortly.
           </p>
         </div>
       </section>
@@ -104,20 +104,9 @@ const Contact = () => {
                       <Mail className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground mb-1">Email Support</h3>
-                      <p className="text-muted-foreground mb-2">Get help via email</p>
-                      <p className="text-sm font-medium text-primary">support@adamchat.app</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                      <MessageSquare className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-1">Live Chat</h3>
-                      <p className="text-muted-foreground mb-2">Real-time assistance</p>
-                      <p className="text-sm font-medium text-primary">Available 24/7 through our platform</p>
+                      <h3 className="font-semibold text-foreground mb-1">General Support</h3>
+                      <p className="text-muted-foreground mb-2">For product or technical assistance</p>
+                      <a href="mailto:support@chatl.ai" className="text-sm font-medium text-primary hover:underline">support@chatl.ai</a>
                     </div>
                   </div>
                   
@@ -126,9 +115,9 @@ const Contact = () => {
                       <Phone className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground mb-1">Customer Support</h3>
-                      <p className="text-muted-foreground mb-2">Comprehensive assistance</p>
-                      <p className="text-sm font-medium text-primary">24/7/365 Customer Support</p>
+                      <h3 className="font-semibold text-foreground mb-1">Billing Support</h3>
+                      <p className="text-muted-foreground mb-2">For payment or subscription inquiries</p>
+                      <a href="mailto:billing@chatl.ai" className="text-sm font-medium text-primary hover:underline">billing@chatl.ai</a>
                     </div>
                   </div>
                 </div>
