@@ -313,12 +313,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             </div>
 
             {/* Trusted by Millions */}
-            <div className="text-center mb-6 z-10 absolute bottom-[180px] left-0 right-0">
+            <div className="text-center mb-6 z-10 absolute bottom-[200px] left-0 right-0">
               <h3 className="text-xl font-bold">Trusted by Millions</h3>
             </div>
 
             {/* Scrolling Testimonials */}
-            <div className="absolute bottom-10 left-0 right-0 h-48 overflow-hidden pointer-events-none">
+            <div className="absolute bottom-10 left-0 right-0 h-44 overflow-hidden pointer-events-none">
               <div className="animate-scroll-left-ultra-fast flex gap-2 [animation-play-state:running!important]">
                 {[
                   { name: "Sarah Mitchell", role: "Content Creator", title: "Perfect AI Tool", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch between platforms!", stars: 5 },
@@ -337,22 +337,22 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", title: "Smart Decisions", text: "The insights I get from ChatLearn help me make better product decisions every single day. Like having an expert consultant on my team.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", title: "Writing Partner", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant partner who never runs out of creative ideas.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-4 min-w-[200px] max-w-[200px] flex-shrink-0">
-                    <h4 className="text-sm font-bold mb-2">{testimonial.title}</h4>
-                    <div className="flex gap-0.5 mb-2">
+                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3.5 min-w-[170px] max-w-[170px] flex-shrink-0">
+                    <h4 className="text-xs font-bold mb-1.5">{testimonial.title}</h4>
+                    <div className="flex gap-0.5 mb-1.5">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-xs text-foreground mb-3 line-clamp-4">{testimonial.text}</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                    <p className="text-[11px] text-foreground mb-2.5 line-clamp-3">{testimonial.text}</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[11px] font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-[11px] font-semibold">{testimonial.name}</div>
                         <div className="text-[10px] text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
@@ -376,22 +376,22 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   { name: "Chris Brown", role: "Product Manager", title: "Smart Decisions", text: "The insights I get from ChatLearn help me make better product decisions every single day. Like having an expert consultant on my team.", stars: 5 },
                   { name: "Amanda White", role: "Copywriter", title: "Writing Partner", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant partner who never runs out of creative ideas.", stars: 5 },
                 ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-4 min-w-[200px] max-w-[200px] flex-shrink-0">
-                    <h4 className="text-sm font-bold mb-2">{testimonial.title}</h4>
-                    <div className="flex gap-0.5 mb-2">
+                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3.5 min-w-[170px] max-w-[170px] flex-shrink-0">
+                    <h4 className="text-xs font-bold mb-1.5">{testimonial.title}</h4>
+                    <div className="flex gap-0.5 mb-1.5">
                       {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       ))}
                     </div>
-                    <p className="text-xs text-foreground mb-3 line-clamp-4">{testimonial.text}</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                    <p className="text-[11px] text-foreground mb-2.5 line-clamp-3">{testimonial.text}</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[11px] font-bold text-primary">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-xs font-semibold">{testimonial.name}</div>
+                        <div className="text-[11px] font-semibold">{testimonial.name}</div>
                         <div className="text-[10px] text-muted-foreground">{testimonial.role}</div>
                       </div>
                     </div>
