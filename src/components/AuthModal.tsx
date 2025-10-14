@@ -508,9 +508,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                        onChange={(e) => {
                          setEmail(e.target.value);
                          setError('');
-                         // Show password field when email is entered
+                         // Show password field when email is entered, hide when cleared
                          if (e.target.value.trim()) {
                            setShowPassword(true);
+                         } else {
+                           setShowPassword(false);
                          }
                        }}
                        required
