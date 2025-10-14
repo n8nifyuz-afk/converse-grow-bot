@@ -265,7 +265,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             <div className="text-center mb-5">
               <div className="inline-flex items-center gap-2 mb-2">
                 <img src="/chatl-logo-black.png" alt="ChatLearn" className="w-6 h-6 dark:hidden" />
-                <img src="/favicon.png" alt="ChatLearn" className="w-6 h-6 hidden dark:block" />
+                <img src="/chatl-logo-white.png" alt="ChatLearn" className="w-6 h-6 hidden dark:block" />
                 <div className="text-base font-bold">ChatLearn</div>
               </div>
               
