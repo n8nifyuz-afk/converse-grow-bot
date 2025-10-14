@@ -338,7 +338,7 @@ export default function Index() {
       return;
     }
     if (!subscriptionStatus.subscribed) {
-      toast.error("This model requires a Pro or Ultra Pro subscription");
+      setShowPricingModal(true);
       return;
     }
     fileInputRef.current?.click();
@@ -362,7 +362,7 @@ export default function Index() {
       return;
     }
     if (!subscriptionStatus.subscribed) {
-      toast.error("This model requires a Pro or Ultra Pro subscription");
+      setShowPricingModal(true);
       return;
     }
     const files = Array.from(e.dataTransfer.files);
@@ -411,7 +411,7 @@ export default function Index() {
       return;
     }
     if (!subscriptionStatus.subscribed) {
-      toast.error("This model requires a Pro or Ultra Pro subscription");
+      setShowPricingModal(true);
       return;
     }
     
@@ -927,7 +927,7 @@ export default function Index() {
         return;
       }
       if (!subscriptionStatus.subscribed) {
-        toast.error("This model requires a Pro or Ultra Pro subscription");
+        setShowPricingModal(true);
         return;
       }
       const files = Array.from(e.dataTransfer.files);

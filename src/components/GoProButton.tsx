@@ -16,6 +16,7 @@ export const GoProButton = () => {
     <>
       <button
         onClick={() => setShowPricingModal(true)}
+        data-pricing-trigger="true"
         aria-label="Upgrade Now"
         className="flex items-center gap-2 px-4 py-2 rounded-[20px] bg-transparent border-2 hover:-translate-y-0.5 transition-transform duration-150"
         style={{ borderColor: '#b0851e' }}

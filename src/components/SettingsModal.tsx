@@ -762,7 +762,13 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       <Button 
                         onClick={() => {
                           onOpenChange(false);
-                          window.location.href = '/pricing';
+                          // Trigger pricing modal to open
+                          setTimeout(() => {
+                            const pricingButton = document.querySelector('[data-pricing-trigger]') as HTMLElement;
+                            if (pricingButton) {
+                              pricingButton.click();
+                            }
+                          }, 100);
                         }}
                         size="sm"
                         className="w-full sm:w-auto"

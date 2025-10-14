@@ -657,7 +657,7 @@ export default function ProjectPage() {
       return;
     }
     if (!subscriptionStatus.subscribed) {
-      toast.error("This model requires a Pro or Ultra Pro subscription");
+      setShowPricingModal(true);
       setIsPopoverOpen(false);
       return;
     }
@@ -673,7 +673,7 @@ export default function ProjectPage() {
       return;
     }
     if (!subscriptionStatus.subscribed) {
-      toast.error("This model requires a Pro or Ultra Pro subscription");
+      setShowPricingModal(true);
       event.target.value = '';
       return;
     }
@@ -814,7 +814,7 @@ export default function ProjectPage() {
       return;
     }
     if (!subscriptionStatus.subscribed) {
-      toast.error("This model requires a Pro or Ultra Pro subscription");
+      setShowPricingModal(true);
       return;
     }
     
@@ -1100,7 +1100,7 @@ export default function ProjectPage() {
             }
             
             if (!subscriptionStatus.subscribed) {
-              toast.error("This model requires a Pro or Ultra Pro subscription");
+              setShowPricingModal(true);
               return;
             }
             

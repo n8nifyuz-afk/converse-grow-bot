@@ -3066,7 +3066,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       return;
     }
     if (!subscriptionStatus.subscribed) {
-      toast.error("This model requires a Pro or Ultra Pro subscription");
+      setShowPricingModal(true);
       return;
     }
     
@@ -3638,7 +3638,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
           }
           
           if (!subscriptionStatus.subscribed) {
-            toast.error("This model requires a Pro or Ultra Pro subscription");
+            setShowPricingModal(true);
             return;
           }
           
@@ -4010,7 +4010,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
               setIsDragOver(false);
               
               if (!subscriptionStatus.subscribed) {
-                toast.error("This model requires a Pro or Ultra Pro subscription");
+                setShowPricingModal(true);
                 return;
               }
               
