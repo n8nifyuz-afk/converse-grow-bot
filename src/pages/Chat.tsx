@@ -18,6 +18,8 @@ import { ImagePopupModal } from '@/components/ImagePopupModal';
 import { FileAnalyzer } from '@/components/FileAnalyzer';
 import { ImageProcessingIndicator } from '@/components/ImageProcessingIndicator';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
+import { useMessageLimit } from '@/hooks/useMessageLimit';
+import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 
 import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
@@ -156,6 +158,14 @@ export default function Chat() {
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
+  const { 
+    canSendMessage, 
+    isAtLimit, 
+    sessionId: messageLimitSessionId, 
+    incrementMessageCount,
+    messageCount,
+    limit: messageLimit
+  } = useMessageLimit();
   // Remove toast hook since we're not using toasts
   const { state: sidebarState, isMobile } = useSidebar();
   
@@ -1682,6 +1692,27 @@ export default function Chat() {
   const sendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
+    console.log('[MESSAGE-LIMIT-CHECK] Checking message limit...', {
+      canSendMessage,
+      isAtLimit,
+      hasSubscription: subscriptionStatus.subscribed,
+      messageCount,
+      limit: messageLimit
+    });
+
+    // Check message limit for free users (both authenticated and anonymous)
+    if (!subscriptionStatus.subscribed && !canSendMessage) {
+      console.log('[MESSAGE-LIMIT-CHECK] ❌ Free user at limit - blocking send');
+      toast.error(`You've reached the free limit of ${messageLimit} messages`, {
+        description: 'Upgrade to Pro for unlimited messages',
+        action: {
+          label: "Upgrade",
+          onClick: () => window.location.href = '/pricing-plans'
+        }
+      });
+      return;
+    }
+    
     // Check if user is trying to use a pro model without subscription
     if (!subscriptionStatus.subscribed && selectedModel !== 'gpt-4o-mini') {
       const selectedModelData = models.find(m => m.id === selectedModel);
@@ -2197,6 +2228,33 @@ export default function Chat() {
         
         console.log('[FILE-MESSAGE] User message saved, ID:', insertedMessage?.id);
 
+        // Track message for free users
+        if (!subscriptionStatus.subscribed) {
+          console.log('[MESSAGE-LIMIT] Free user sent message with files - incrementing count');
+          
+          // If anonymous user, save to anonymous_messages table
+          if (!user && messageLimitSessionId) {
+            console.log('[MESSAGE-LIMIT] Saving anonymous message (with files) to tracking table');
+            try {
+              await supabase
+                .from('anonymous_messages')
+                .insert({
+                  session_id: messageLimitSessionId,
+                  content: userMessage,
+                  role: 'user',
+                  file_attachments: tempFileAttachments as any
+                });
+              console.log('[MESSAGE-LIMIT] Anonymous message with files tracked successfully');
+            } catch (anonError) {
+              console.error('[MESSAGE-LIMIT] Error tracking anonymous message:', anonError);
+            }
+          }
+          
+          // Increment message count in state
+          incrementMessageCount();
+          console.log('[MESSAGE-LIMIT] Message count incremented');
+        }
+
         // Update with embedding when ready (background)
         if (insertedMessage) {
           userEmbeddingPromise.then(embedding => {
@@ -2428,6 +2486,33 @@ export default function Chat() {
         }
         
         console.log('[TEXT-MESSAGE] User message saved, ID:', insertedMessage?.id);
+        
+        // Track message for free users
+        if (!subscriptionStatus.subscribed) {
+          console.log('[MESSAGE-LIMIT] Free user sent message - incrementing count');
+          
+          // If anonymous user, save to anonymous_messages table
+          if (!user && messageLimitSessionId) {
+            console.log('[MESSAGE-LIMIT] Saving anonymous message to tracking table');
+            try {
+              await supabase
+                .from('anonymous_messages')
+                .insert({
+                  session_id: messageLimitSessionId,
+                  content: userMessage,
+                  role: 'user',
+                  file_attachments: []
+                });
+              console.log('[MESSAGE-LIMIT] Anonymous message tracked successfully');
+            } catch (anonError) {
+              console.error('[MESSAGE-LIMIT] Error tracking anonymous message:', anonError);
+            }
+          }
+          
+          // Increment message count in state
+          incrementMessageCount();
+          console.log('[MESSAGE-LIMIT] Message count incremented');
+        }
         
         // Replace temp message with real message in state immediately
         if (insertedMessage) {
@@ -3860,6 +3945,11 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   </div>
                 </div>}
             </div>}
+            
+          {/* Message limit warning for free users */}
+          {!subscriptionStatus.subscribed && isAtLimit && (
+            <MessageLimitWarning messageCount={messageCount} limit={messageLimit} />
+          )}
             
           <div ref={messagesEndRef} />
         </div>

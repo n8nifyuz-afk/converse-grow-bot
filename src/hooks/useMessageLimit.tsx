@@ -19,8 +19,8 @@ export const useMessageLimit = () => {
   
   const sessionId = !user ? generateSessionId() : null;
   
-  // Free tier limits
-  const FREE_MESSAGE_LIMIT = 15;
+  // Free tier limits - 3 messages for free users
+  const FREE_MESSAGE_LIMIT = 3;
   
   // Check if user has subscription
   const hasSubscription = user && userProfile && 
@@ -29,16 +29,46 @@ export const useMessageLimit = () => {
   useEffect(() => {
     const fetchMessageCount = async () => {
       try {
+        console.log('[MESSAGE-LIMIT] Fetching message count...', { 
+          user: user?.id, 
+          sessionId,
+          hasSubscription 
+        });
+
         if (user) {
-          // Authenticated user - get from messages table
+          // Authenticated user - count ALL user messages across ALL chats
+          // First get all chat IDs for this user
+          const { data: userChats, error: chatsError } = await supabase
+            .from('chats')
+            .select('id')
+            .eq('user_id', user.id);
+
+          if (chatsError) {
+            console.error('[MESSAGE-LIMIT] Error fetching user chats:', chatsError);
+            setLoading(false);
+            return;
+          }
+
+          const chatIds = userChats?.map(chat => chat.id) || [];
+          
+          if (chatIds.length === 0) {
+            console.log('[MESSAGE-LIMIT] No chats found for user');
+            setMessageCount(0);
+            setLoading(false);
+            return;
+          }
+
+          // Count all user messages in those chats
           const { count, error } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
-            .eq('chat_id', user.id); // This might need adjustment based on how you count messages
+            .eq('role', 'user')
+            .in('chat_id', chatIds);
 
           if (error) {
-            console.error('Error fetching message count:', error);
+            console.error('[MESSAGE-LIMIT] Error fetching user message count:', error);
           } else {
+            console.log('[MESSAGE-LIMIT] User message count:', count);
             setMessageCount(count || 0);
           }
         } else if (sessionId) {
@@ -50,33 +80,45 @@ export const useMessageLimit = () => {
             .eq('role', 'user');
 
           if (error) {
-            console.error('Error fetching anonymous message count:', error);
+            console.error('[MESSAGE-LIMIT] Error fetching anonymous message count:', error);
           } else {
+            console.log('[MESSAGE-LIMIT] Anonymous message count:', count);
             setMessageCount(count || 0);
           }
         }
       } catch (error) {
-        console.error('Error in fetchMessageCount:', error);
+        console.error('[MESSAGE-LIMIT] Error in fetchMessageCount:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchMessageCount();
-  }, [user, sessionId]);
+  }, [user, sessionId, hasSubscription]);
 
   const canSendMessage = () => {
-    if (hasSubscription) return true;
-    return messageCount < FREE_MESSAGE_LIMIT;
+    if (hasSubscription) {
+      console.log('[MESSAGE-LIMIT] Has subscription - can send');
+      return true;
+    }
+    const can = messageCount < FREE_MESSAGE_LIMIT;
+    console.log('[MESSAGE-LIMIT] Can send message:', can, `(${messageCount}/${FREE_MESSAGE_LIMIT})`);
+    return can;
   };
 
   const incrementMessageCount = () => {
+    console.log('[MESSAGE-LIMIT] Incrementing message count:', messageCount, '->', messageCount + 1);
     setMessageCount(prev => prev + 1);
   };
 
   const isAtLimit = () => {
-    if (hasSubscription) return false;
-    return messageCount >= FREE_MESSAGE_LIMIT;
+    if (hasSubscription) {
+      console.log('[MESSAGE-LIMIT] Has subscription - not at limit');
+      return false;
+    }
+    const atLimit = messageCount >= FREE_MESSAGE_LIMIT;
+    console.log('[MESSAGE-LIMIT] At limit check:', atLimit, `(${messageCount}/${FREE_MESSAGE_LIMIT})`);
+    return atLimit;
   };
 
   return {

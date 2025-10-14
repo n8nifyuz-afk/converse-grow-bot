@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useMessageLimit } from '@/hooks/useMessageLimit';
+import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -221,7 +222,9 @@ export default function Index() {
     canSendMessage,
     isAtLimit,
     sessionId,
-    incrementMessageCount
+    incrementMessageCount,
+    messageCount,
+    limit: messageLimit
   } = useMessageLimit();
 
   // Helper function to get time-based greeting
@@ -638,6 +641,7 @@ export default function Index() {
   };
   const createChatWithMessage = async (userId: string, messageToSend: string, modelToUse?: string) => {
     if (!canSendMessage) {
+      console.log('[INDEX] Cannot send - at message limit');
       navigate('/pricing-plans');
       return;
     }
@@ -652,20 +656,50 @@ export default function Index() {
         model_id: modelToUse || selectedModel
       }]).select().single();
       if (chatError) throw chatError;
+      
       const {
+        data: insertedMessage,
         error: messageError
       } = await supabase.from('messages').insert({
         chat_id: chatData.id,
         content: messageToSend,
         role: 'user'
-      });
+      }).select().single();
+      
       if (messageError) throw messageError;
+      
+      // Track message for free users
+      console.log('[INDEX] Message saved, tracking for free user...');
+      
+      // If anonymous user, save to anonymous_messages table
+      if (!user && sessionId) {
+        console.log('[INDEX] Saving anonymous message to tracking table');
+        try {
+          await supabase
+            .from('anonymous_messages')
+            .insert({
+              session_id: sessionId,
+              content: messageToSend,
+              role: 'user',
+              file_attachments: []
+            });
+          console.log('[INDEX] Anonymous message tracked successfully');
+        } catch (anonError) {
+          console.error('[INDEX] Error tracking anonymous message:', anonError);
+        }
+      }
+      
+      // Increment message count
+      incrementMessageCount();
+      console.log('[INDEX] Message count incremented');
+      
       navigate(`/chat/${chatData.id}`, {
         state: {
           selectedModel: modelToUse || selectedModel
         }
       });
     } catch (error) {
+      console.error('[INDEX] Error creating chat:', error);
       toast.error('Failed to start chat. Please try again.');
     } finally {
       setLoading(false);
@@ -938,6 +972,11 @@ export default function Index() {
             <p className="text-muted-foreground text-base sm:text-lg">How can I help you today?</p>
           </>}
       </div>
+
+      {/* Message limit warning for free users */}
+      {!subscriptionStatus.subscribed && isAtLimit && (
+        <MessageLimitWarning messageCount={messageCount} limit={messageLimit} />
+      )}
 
       <div className="w-full max-w-3xl mb-4 sm:mb-6">
         {/* File attachments preview */}
