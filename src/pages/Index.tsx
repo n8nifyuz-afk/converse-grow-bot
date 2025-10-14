@@ -581,7 +581,6 @@ export default function Index() {
       return;
     }
     if (!canSendMessage) {
-      console.log('[INDEX] Message limit reached:', { messageCount, limit });
       return; // Warning will be shown below input
     }
     setLoading(true);
@@ -1242,7 +1241,7 @@ export default function Index() {
       </div>
 
       {/* Message Limit Warning */}
-      {!subscriptionStatus.subscribed && isAtLimit && (
+      {!user && isAtLimit && (
         <MessageLimitWarning messageCount={messageCount} limit={limit} />
       )}
 

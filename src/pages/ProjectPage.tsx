@@ -1408,7 +1408,7 @@ export default function ProjectPage() {
         </div>
 
         {/* Message Limit Warning */}
-        {!subscriptionStatus.subscribed && isAtLimit && (
+        {!user && isAtLimit && (
           <MessageLimitWarning messageCount={messageCount} limit={limit} />
         )}
 
