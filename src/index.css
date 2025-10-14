@@ -282,9 +282,22 @@ All colors MUST be HSL.
   animation: scroll-left 16s linear infinite;
 }
 
-.animate-scroll-left-ultra-fast {
-  animation: scroll-left 10s linear infinite;
-}
+  .animate-scroll-left-ultra-fast {
+    animation: scroll-left 10s linear infinite;
+  }
+
+  .animate-seamless-scroll {
+    animation: seamless-scroll 30s linear infinite;
+  }
+
+  @keyframes seamless-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
 
 .animate-scroll-left:hover,
 .animate-scroll-left-fast:hover,

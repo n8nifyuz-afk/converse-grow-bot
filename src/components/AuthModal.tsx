@@ -23,6 +23,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const [lastSignupAttempt, setLastSignupAttempt] = useState<number>(0);
   const [signupCooldown, setSignupCooldown] = useState<number>(0);
   const [error, setError] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
   
   const { user, signIn, signUp, signInWithGoogle, signInWithApple, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -54,6 +55,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       setMode('signin');
       setSignupCooldown(0);
       setError('');
+      setShowPassword(false);
     }
   }, [isOpen]);
 
@@ -319,84 +321,50 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
             {/* Scrolling Testimonials */}
             <div className="absolute bottom-10 left-0 right-0 h-44 overflow-hidden pointer-events-none">
-              <div className="animate-scroll-left-ultra-fast flex gap-2 [animation-play-state:running!important]">
-                {[
-                  { name: "Sarah Mitchell", role: "Content Creator", title: "Perfect AI Tool", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch between platforms!", stars: 5 },
-                  { name: "James Rodriguez", role: "Software Developer", title: "Very Cool", text: "It is amazing app for fun and useful generating content, creating great ideas! This AI chatbot saves me in sad evenings.", stars: 5 },
-                  { name: "Emma Thompson", role: "Marketing Manager", title: "Game Changer", text: "So personalized and so fast! I'm loving how this AI app responds to anything immediately. The interface is incredibly intuitive.", stars: 5 },
-                  { name: "Michael Chen", role: "Student", title: "Best Study Companion", text: "As a student, this has become my go-to tool. It explains complex topics in ways I can understand and helps me prepare efficiently.", stars: 5 },
-                  { name: "Lisa Anderson", role: "Business Owner", title: "Incredible Time Saver", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7 to help with everything.", stars: 5 },
-                  { name: "David Kumar", role: "Writer", title: "Productivity Boost", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on and help me overcome writer's block!", stars: 5 },
-                  { name: "Sophie Martin", role: "Designer", title: "Creative Partner", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow and helps me brainstorm innovative concepts.", stars: 5 },
-                  { name: "Alex Johnson", role: "Data Analyst", title: "Remarkable Analysis", text: "The AI's ability to process and explain complex data patterns is remarkable. It has become invaluable for my daily work.", stars: 5 },
-                  { name: "Maria Garcia", role: "Teacher", title: "Education Revolution", text: "I use this daily for lesson planning and creating engaging content. The quality and creativity it brings is absolutely brilliant!", stars: 5 },
-                  { name: "Ryan Peterson", role: "Entrepreneur", title: "Best Investment", text: "Best AI investment I've made for my business. From market research to content creation, the ROI is undeniable!", stars: 5 },
-                  { name: "Nina Patel", role: "Researcher", title: "Research Essential", text: "The depth and accuracy of information has significantly enhanced my research projects. It saves me countless hours of work.", stars: 5 },
-                  { name: "Tom Wilson", role: "Consultant", title: "Client Favorite", text: "Client presentations have never been easier to prepare. This AI gets the job done right and helps me deliver exceptional insights.", stars: 5 },
-                  { name: "Jessica Lee", role: "Freelancer", title: "Freelance Hero", text: "Game-changer for my freelance work! I can handle more projects with better quality now. The versatility is what makes it indispensable.", stars: 5 },
-                  { name: "Chris Brown", role: "Product Manager", title: "Smart Decisions", text: "The insights I get from ChatLearn help me make better product decisions every single day. Like having an expert consultant on my team.", stars: 5 },
-                  { name: "Amanda White", role: "Copywriter", title: "Writing Partner", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant partner who never runs out of creative ideas.", stars: 5 },
-                ].map((testimonial, index) => (
-                  <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3.5 min-w-[170px] max-w-[170px] flex-shrink-0">
-                    <h4 className="text-xs font-bold mb-1.5">{testimonial.title}</h4>
-                    <div className="flex gap-0.5 mb-1.5">
-                      {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="text-[11px] text-foreground mb-2.5 line-clamp-3">{testimonial.text}</p>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[11px] font-bold text-primary">
-                        {testimonial.name.charAt(0)}
+              <div className="animate-seamless-scroll flex gap-2">
+                {(() => {
+                  const testimonials = [
+                    { name: "Sarah Mitchell", role: "Content Creator", title: "Perfect AI Tool", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch between platforms!", stars: 5 },
+                    { name: "James Rodriguez", role: "Software Developer", title: "Very Cool", text: "It is amazing app for fun and useful generating content, creating great ideas! This AI chatbot saves me in sad evenings.", stars: 5 },
+                    { name: "Emma Thompson", role: "Marketing Manager", title: "Game Changer", text: "So personalized and so fast! I'm loving how this AI app responds to anything immediately. The interface is incredibly intuitive.", stars: 5 },
+                    { name: "Michael Chen", role: "Student", title: "Best Study Companion", text: "As a student, this has become my go-to tool. It explains complex topics in ways I can understand and helps me prepare efficiently.", stars: 5 },
+                    { name: "Lisa Anderson", role: "Business Owner", title: "Incredible Time Saver", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7 to help with everything.", stars: 5 },
+                    { name: "David Kumar", role: "Writer", title: "Productivity Boost", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on and help me overcome writer's block!", stars: 5 },
+                    { name: "Sophie Martin", role: "Designer", title: "Creative Partner", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow and helps me brainstorm innovative concepts.", stars: 5 },
+                    { name: "Alex Johnson", role: "Data Analyst", title: "Remarkable Analysis", text: "The AI's ability to process and explain complex data patterns is remarkable. It has become invaluable for my daily work.", stars: 5 },
+                    { name: "Maria Garcia", role: "Teacher", title: "Education Revolution", text: "I use this daily for lesson planning and creating engaging content. The quality and creativity it brings is absolutely brilliant!", stars: 5 },
+                    { name: "Ryan Peterson", role: "Entrepreneur", title: "Best Investment", text: "Best AI investment I've made for my business. From market research to content creation, the ROI is undeniable!", stars: 5 },
+                    { name: "Nina Patel", role: "Researcher", title: "Research Essential", text: "The depth and accuracy of information has significantly enhanced my research projects. It saves me countless hours of work.", stars: 5 },
+                    { name: "Tom Wilson", role: "Consultant", title: "Client Favorite", text: "Client presentations have never been easier to prepare. This AI gets the job done right and helps me deliver exceptional insights.", stars: 5 },
+                    { name: "Jessica Lee", role: "Freelancer", title: "Freelance Hero", text: "Game-changer for my freelance work! I can handle more projects with better quality now. The versatility is what makes it indispensable.", stars: 5 },
+                    { name: "Chris Brown", role: "Product Manager", title: "Smart Decisions", text: "The insights I get from ChatLearn help me make better product decisions every single day. Like having an expert consultant on my team.", stars: 5 },
+                    { name: "Amanda White", role: "Copywriter", title: "Writing Partner", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant partner who never runs out of creative ideas.", stars: 5 },
+                  ];
+                  
+                  // Create three copies for seamless infinite loop
+                  return [...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
+                    <div key={index} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3.5 min-w-[170px] max-w-[170px] flex-shrink-0">
+                      <h4 className="text-xs font-bold mb-1.5">{testimonial.title}</h4>
+                      <div className="flex gap-0.5 mb-1.5">
+                        {[...Array(testimonial.stars)].map((_, i) => (
+                          <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                        ))}
                       </div>
-                      <div>
-                        <div className="text-[11px] font-semibold">{testimonial.name}</div>
-                        <div className="text-[10px] text-muted-foreground">{testimonial.role}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {/* Duplicate for seamless loop */}
-                {[
-                  { name: "Sarah Mitchell", role: "Content Creator", title: "Perfect AI Tool", text: "It's a great time-saver to access all the latest AI models through a single, simple interface. There's no need to switch between platforms!", stars: 5 },
-                  { name: "James Rodriguez", role: "Software Developer", title: "Very Cool", text: "It is amazing app for fun and useful generating content, creating great ideas! This AI chatbot saves me in sad evenings.", stars: 5 },
-                  { name: "Emma Thompson", role: "Marketing Manager", title: "Game Changer", text: "So personalized and so fast! I'm loving how this AI app responds to anything immediately. The interface is incredibly intuitive.", stars: 5 },
-                  { name: "Michael Chen", role: "Student", title: "Best Study Companion", text: "As a student, this has become my go-to tool. It explains complex topics in ways I can understand and helps me prepare efficiently.", stars: 5 },
-                  { name: "Lisa Anderson", role: "Business Owner", title: "Incredible Time Saver", text: "The time I save using this AI assistant is incredible. It's like having a smart colleague available 24/7 to help with everything.", stars: 5 },
-                  { name: "David Kumar", role: "Writer", title: "Productivity Boost", text: "My productivity has doubled since I started using ChatLearn. The writing suggestions are spot-on and help me overcome writer's block!", stars: 5 },
-                  { name: "Sophie Martin", role: "Designer", title: "Creative Partner", text: "This tool understands creative briefs better than most humans. It's revolutionized my workflow and helps me brainstorm innovative concepts.", stars: 5 },
-                  { name: "Alex Johnson", role: "Data Analyst", title: "Remarkable Analysis", text: "The AI's ability to process and explain complex data patterns is remarkable. It has become invaluable for my daily work.", stars: 5 },
-                  { name: "Maria Garcia", role: "Teacher", title: "Education Revolution", text: "I use this daily for lesson planning and creating engaging content. The quality and creativity it brings is absolutely brilliant!", stars: 5 },
-                  { name: "Ryan Peterson", role: "Entrepreneur", title: "Best Investment", text: "Best AI investment I've made for my business. From market research to content creation, the ROI is undeniable!", stars: 5 },
-                  { name: "Nina Patel", role: "Researcher", title: "Research Essential", text: "The depth and accuracy of information has significantly enhanced my research projects. It saves me countless hours of work.", stars: 5 },
-                  { name: "Tom Wilson", role: "Consultant", title: "Client Favorite", text: "Client presentations have never been easier to prepare. This AI gets the job done right and helps me deliver exceptional insights.", stars: 5 },
-                  { name: "Jessica Lee", role: "Freelancer", title: "Freelance Hero", text: "Game-changer for my freelance work! I can handle more projects with better quality now. The versatility is what makes it indispensable.", stars: 5 },
-                  { name: "Chris Brown", role: "Product Manager", title: "Smart Decisions", text: "The insights I get from ChatLearn help me make better product decisions every single day. Like having an expert consultant on my team.", stars: 5 },
-                  { name: "Amanda White", role: "Copywriter", title: "Writing Partner", text: "This AI understands tone and brand voice perfectly. It's like having a brilliant partner who never runs out of creative ideas.", stars: 5 },
-                ].map((testimonial, index) => (
-                  <div key={`duplicate-${index}`} className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-3.5 min-w-[170px] max-w-[170px] flex-shrink-0">
-                    <h4 className="text-xs font-bold mb-1.5">{testimonial.title}</h4>
-                    <div className="flex gap-0.5 mb-1.5">
-                      {[...Array(testimonial.stars)].map((_, i) => (
-                        <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="text-[11px] text-foreground mb-2.5 line-clamp-3">{testimonial.text}</p>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[11px] font-bold text-primary">
-                        {testimonial.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-[11px] font-semibold">{testimonial.name}</div>
-                        <div className="text-[10px] text-muted-foreground">{testimonial.role}</div>
+                      <p className="text-[11px] text-foreground mb-2.5 line-clamp-3">{testimonial.text}</p>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[11px] font-bold text-primary">
+                          {testimonial.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-semibold">{testimonial.name}</div>
+                          <div className="text-[10px] text-muted-foreground">{testimonial.role}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ));
+                })()}
               </div>
             </div>
           </div>
@@ -540,43 +508,51 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                        onChange={(e) => {
                          setEmail(e.target.value);
                          setError('');
+                         // Show password field when email is entered
+                         if (e.target.value.trim()) {
+                           setShowPassword(true);
+                         }
                        }}
                        required
                        className="h-10 border-2 border-gray-400 dark:border-gray-600"
                      />
-                     <Input
-                       type="password"
-                       placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'}
-                       value={password}
-                       onChange={(e) => {
-                         setPassword(e.target.value);
-                         setError('');
-                       }}
-                       required
-                       minLength={6}
-                       className="h-10 border-2 border-gray-400 dark:border-gray-600"
-                     />
+                     {showPassword && (
+                       <Input
+                         type="password"
+                         placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'}
+                         value={password}
+                         onChange={(e) => {
+                           setPassword(e.target.value);
+                           setError('');
+                         }}
+                         required
+                         minLength={6}
+                         className="h-10 border-2 border-gray-400 dark:border-gray-600"
+                       />
+                     )}
                      {error && (
                        <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
                          {error}
                        </div>
                      )}
-                     <Button
-                       type="submit"
-                       disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)}
-                       className="w-full h-10"
-                     >
-                      {loading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                          {mode === 'signin' ? 'Signing in...' : 'Sending verification...'}
-                        </>
-                      ) : mode === 'signup' && signupCooldown > 0 ? (
-                        `Wait ${signupCooldown}s`
-                      ) : (
-                        'Continue with Email'
-                      )}
-                    </Button>
+                     {showPassword && (
+                       <Button
+                         type="submit"
+                         disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)}
+                         className="w-full h-10"
+                       >
+                        {loading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                            {mode === 'signin' ? 'Signing in...' : 'Sending verification...'}
+                          </>
+                        ) : mode === 'signup' && signupCooldown > 0 ? (
+                          `Wait ${signupCooldown}s`
+                        ) : (
+                          'Continue with Email'
+                        )}
+                      </Button>
+                     )}
                   </form>
 
                   <div className="mt-3 text-center space-x-2 text-xs">
