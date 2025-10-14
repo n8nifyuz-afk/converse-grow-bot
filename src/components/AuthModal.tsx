@@ -286,7 +286,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             <div className="text-center mb-4 sm:mb-6 md:mb-8 z-10">
               <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-3 sm:mb-4">Available on all platforms</div>
               <div className="flex justify-center px-4">
-                <div className="relative inline-flex gap-3 sm:gap-4 md:gap-5 items-center flex-nowrap p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 border border-primary/10 shadow-lg backdrop-blur-sm overflow-hidden">
+                <div className="relative inline-flex gap-3 sm:gap-4 md:gap-5 items-center flex-nowrap p-3 sm:p-3.5 rounded-full bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 border border-primary/10 shadow-lg backdrop-blur-sm overflow-hidden">
                   {/* Animated gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-[slide-in-right_3s_ease-in-out_infinite]"></div>
                   
