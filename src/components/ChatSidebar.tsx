@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { MessageSquare, Plus, Edit2, Trash2, Settings, LogOut, User, HelpCircle, Bot, Menu, FolderPlus, ChevronDown, ChevronRight, Briefcase, BookOpen, Code, Palette, Lightbulb, Target, Heart, Star, Rocket, MoreHorizontal, FolderOpen, FileText, Zap, Trophy, Flame, Gem, Sparkles, Search, DollarSign, CreditCard } from 'lucide-react';
@@ -519,9 +519,10 @@ export default function ChatSidebar({
                   <DropdownMenuTrigger asChild>
                     <div className={`flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors cursor-pointer w-full ${collapsed ? 'justify-center' : ''}`}>
                       <Avatar className="h-6 w-6">
-                        {userProfile?.avatar_url ? <img src={userProfile.avatar_url} alt="Profile" className="h-6 w-6 rounded-full object-cover" /> : <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                            {userProfile?.display_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-                          </AvatarFallback>}
+                        <AvatarImage src={userProfile?.avatar_url || undefined} alt="Profile" className="object-cover" />
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                          {userProfile?.display_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
                       </Avatar>
                        {!collapsed && <div className="flex-1 min-w-0">
                           <p className="text-sm text-sidebar-foreground font-medium truncate">
