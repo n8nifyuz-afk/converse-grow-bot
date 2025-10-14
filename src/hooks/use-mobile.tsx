@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const MOBILE_BREAKPOINT = 1024;
+const MOBILE_BREAKPOINT = 1280;
 
 export function useIsMobile() {
   try {
