@@ -25,12 +25,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   
-  // Clear pricing modal flag when user changes
+  // Clear pricing modal flag when user changes (only for free users)
   useEffect(() => {
     if (user) {
-      sessionStorage.removeItem('pricing_modal_shown');
+      // Wait a bit for subscription to load before clearing flag
+      const timer = setTimeout(() => {
+        if (!loadingSubscription && !subscriptionStatus.subscribed) {
+          sessionStorage.removeItem('pricing_modal_shown');
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [user?.id]);
+  }, [user?.id, loadingSubscription, subscriptionStatus.subscribed]);
   
   useEffect(() => {
     // Mark subscription as checked when loading completes
@@ -42,14 +48,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, [user, loadingSubscription]);
   
   useEffect(() => {
-    // Only show pricing modal after subscription has been verified
+    // Close modal immediately if user has subscription
+    if (subscriptionStatus.subscribed) {
+      setShowPricingModal(false);
+      return;
+    }
+    
+    // Only show pricing modal for free users after subscription has been verified
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     
     if (user && subscriptionChecked && !subscriptionStatus.subscribed && !hasShownModal) {
+      console.log('📊 Showing pricing modal for free user');
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
     }
-  }, [user, subscriptionStatus, subscriptionChecked]);
+  }, [user, subscriptionStatus.subscribed, subscriptionChecked]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
