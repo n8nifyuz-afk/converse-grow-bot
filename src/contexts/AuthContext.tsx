@@ -169,12 +169,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
           setUserProfile(null);
           
-          // Clear subscription status and localStorage
+          // Clear subscription status and cache
           setSubscriptionStatus({
             subscribed: false,
             product_id: null,
             subscription_end: null
           });
+          clearCachedSubscription();
         }
         setLoading(false);
       }
