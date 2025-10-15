@@ -372,10 +372,20 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       }
     } catch (error: any) {
       console.error('Customer portal error:', error);
+      
+      // Extract the error message from the response
+      let errorMessage = "Failed to open customer portal. Please try again.";
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error.error) {
+        errorMessage = error.error;
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to open customer portal. Please try again.",
+        title: "Stripe Configuration Required",
+        description: errorMessage,
         variant: "destructive",
+        duration: 10000, // Show longer for important configuration message
       });
     } finally {
       setIsLoadingPortal(false);

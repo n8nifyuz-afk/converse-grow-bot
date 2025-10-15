@@ -62,7 +62,17 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR in customer-portal", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    
+    // Provide helpful error message if portal is not configured
+    let userFriendlyMessage = errorMessage;
+    if (errorMessage.includes("No configuration provided") || errorMessage.includes("default configuration has not been created")) {
+      userFriendlyMessage = "Stripe Customer Portal is not configured. Please go to https://dashboard.stripe.com/settings/billing/portal and save your customer portal settings in LIVE mode.";
+    }
+    
+    return new Response(JSON.stringify({ 
+      error: userFriendlyMessage,
+      details: errorMessage 
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
