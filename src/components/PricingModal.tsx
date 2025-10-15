@@ -237,10 +237,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="flex items-baseline gap-1 sm:gap-2 justify-end">
-                        <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.price}</div>
-                        <div className="text-sm sm:text-base md:text-lg text-zinc-400 dark:text-zinc-600 line-through">€{pricingOptions[selectedPlan].monthly.price}</div>
-                      </div>
+                      <div className="text-sm sm:text-base md:text-lg text-zinc-400 dark:text-zinc-600 line-through mb-0.5">€{pricingOptions[selectedPlan].monthly.price}</div>
+                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.price}</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per month</div>
                     </div>
                   </div>
