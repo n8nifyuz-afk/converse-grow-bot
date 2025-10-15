@@ -13,6 +13,8 @@ interface AuthContextType {
     product_id: string | null;
     subscription_end: string | null;
   };
+  showPricingModal: boolean;
+  setShowPricingModal: (show: boolean) => void;
   checkSubscription: () => Promise<void>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -66,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   
   // Try to load cached subscription status on mount
   const cachedStatus = loadCachedSubscription();
@@ -494,6 +497,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  // Helper function to check and show pricing modal for free users
+  const checkAndShowPricingModal = (status: { subscribed: boolean; product_id: string | null; subscription_end: string | null }) => {
+    // Check if modal was already shown this session
+    const modalShownKey = 'pricing_modal_shown_session';
+    const wasShown = sessionStorage.getItem(modalShownKey);
+    
+    // Only show if:
+    // 1. Not already shown this session
+    // 2. User is not subscribed (free user or no subscription)
+    if (!wasShown && !status.subscribed) {
+      console.log('[AUTH-CONTEXT] Showing pricing modal for free user');
+      setShowPricingModal(true);
+      sessionStorage.setItem(modalShownKey, 'true');
+    }
+  };
+
   const checkSubscription = async () => {
     if (!user || isCheckingSubscription) {
       if (!user) {
@@ -530,6 +549,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
           setSubscriptionStatus(newStatus);
           saveCachedSubscription(newStatus);
+          checkAndShowPricingModal(newStatus);
         } else {
           console.log('ℹ️ No active subscription found in database');
           const resetStatus = {
@@ -539,6 +559,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
           setSubscriptionStatus(resetStatus);
           clearCachedSubscription();
+          checkAndShowPricingModal(resetStatus);
         }
         setIsCheckingSubscription(false);
         setLoadingSubscription(false);
@@ -569,6 +590,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
           setSubscriptionStatus(newStatus);
           saveCachedSubscription(newStatus);
+          checkAndShowPricingModal(newStatus);
         } else {
           // On error and no DB record, keep cached status if available
           const cached = loadCachedSubscription();
@@ -594,6 +616,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Save to sessionStorage for instant load on next page load
         saveCachedSubscription(newStatus);
+        
+        // Check if we should show pricing modal
+        checkAndShowPricingModal(newStatus);
       }
     } catch (error) {
       console.error('❌ Error checking subscription:', error);
@@ -615,6 +640,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
           setSubscriptionStatus(newStatus);
           saveCachedSubscription(newStatus);
+          checkAndShowPricingModal(newStatus);
         } else {
           // On error, keep cached status if available
           const cached = loadCachedSubscription();
@@ -660,6 +686,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadingSubscription,
     userProfile,
     subscriptionStatus,
+    showPricingModal,
+    setShowPricingModal,
     checkSubscription,
     signUp,
     signIn,
