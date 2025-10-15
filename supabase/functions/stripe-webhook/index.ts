@@ -164,7 +164,19 @@ serve(async (req) => {
         // Use the highest tier subscription for database update
         const finalSubscription = highestTierSub;
         const productId = finalSubscription.items.data[0].price.product as string;
-        const planName = productToPlanMap[productId] || 'Unknown';
+        const planName = productToPlanMap[productId];
+        
+        // CRITICAL: If no valid plan name, reject this webhook event
+        if (!planName) {
+          logStep("ERROR: Unknown product ID - cannot process subscription", { productId });
+          return new Response(JSON.stringify({ 
+            received: true, 
+            error: "Unknown product ID" 
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          });
+        }
         
         // Determine plan tier based on product and subscription status
         let planTier = 'free';
@@ -177,11 +189,8 @@ serve(async (req) => {
           // Ultra Pro products (monthly or yearly) - LIVE ONLY
           } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
             planTier = 'ultra_pro';
-          } else if (productId) {
-            // Unknown product - reject it
-            logStep("ERROR: Unknown product ID, rejecting", { productId });
-            break; // Don't save this subscription
           }
+          // Note: Unknown products already rejected above
         }
         
         const subscriptionEnd = finalSubscription.current_period_end 

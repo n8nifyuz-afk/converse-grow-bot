@@ -111,17 +111,23 @@ serve(async (req) => {
       for (const sub of subscriptions.data) {
         const subProductId = sub.items.data[0].price.product as string;
         
+        // CRITICAL: Only process known product IDs
+        if (!productToPlanMap[subProductId]) {
+          logStep("WARNING: Unknown product ID found - skipping", { 
+            subscriptionId: sub.id, 
+            productId: subProductId 
+          });
+          continue; // Skip unknown products entirely
+        }
+        
         // Determine tier - match with your live product IDs above
         let subTier = 'free';
-        const proProdId = Object.keys(productToPlanMap).find(k => productToPlanMap[k] === 'Pro');
-        const ultraProdId = Object.keys(productToPlanMap).find(k => productToPlanMap[k] === 'Ultra Pro');
+        const planName = productToPlanMap[subProductId];
         
-        if (subProductId === proProdId) {
+        if (planName === 'Pro') {
           subTier = 'pro';
-        } else if (subProductId === ultraProdId) {
+        } else if (planName === 'Ultra Pro') {
           subTier = 'ultra_pro';
-        } else if (subProductId) {
-          subTier = 'pro'; // Default to pro for unmapped products
         }
         
         logStep("Evaluating subscription", { 
@@ -164,7 +170,13 @@ serve(async (req) => {
       }
       
       productId = subscription.items.data[0].price.product as string;
-      const planName = productToPlanMap[productId] || 'Unknown';
+      const planName = productToPlanMap[productId];
+      
+      // CRITICAL: Reject if no valid plan found (should never happen after filtering above)
+      if (!planName) {
+        logStep("ERROR: No valid subscription found with known product ID");
+        throw new Error("No valid subscription plan found. Please contact support.");
+      }
       
       logStep("Final subscription details", { productId, planName, planTier: highestTier });
       
