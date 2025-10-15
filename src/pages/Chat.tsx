@@ -3409,8 +3409,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       }, 100);
-
-      toast.success('Image downloaded successfully');
     } catch (error) {
       console.error('Download failed:', error);
       toast.error('Failed to download image');
