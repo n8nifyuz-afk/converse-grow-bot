@@ -506,15 +506,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsCheckingSubscription(true);
     setLoadingSubscription(true);
     try {
-      // Check with Stripe API - source of truth
-      console.log('🔍 Checking subscription via Stripe API...');
-      const { data, error } = await supabase.functions.invoke('check-subscription');
+      // First, refresh the session to ensure we have a valid token
+      console.log('🔄 Refreshing session before subscription check...');
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
-      if (error) {
-        console.error('❌ Error checking subscription with Stripe:', error);
-        // On error, keep cached status if available, otherwise assume no subscription
-        const cached = loadCachedSubscription();
-        if (!cached) {
+      if (sessionError || !sessionData.session) {
+        console.warn('⚠️ Session refresh failed, falling back to database check');
+        // Fallback: Check database directly
+        const { data: dbSub, error: dbError } = await supabase
+          .from('user_subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        if (!dbError && dbSub) {
+          console.log('✅ Found active subscription in database:', dbSub);
+          const newStatus = {
+            subscribed: true,
+            product_id: dbSub.product_id,
+            subscription_end: dbSub.current_period_end
+          };
+          setSubscriptionStatus(newStatus);
+          saveCachedSubscription(newStatus);
+        } else {
+          console.log('ℹ️ No active subscription found in database');
           const resetStatus = {
             subscribed: false,
             product_id: null,
@@ -522,6 +538,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
           setSubscriptionStatus(resetStatus);
           clearCachedSubscription();
+        }
+        setIsCheckingSubscription(false);
+        setLoadingSubscription(false);
+        return;
+      }
+      
+      // Check with Stripe API - source of truth
+      console.log('🔍 Checking subscription via Stripe API...');
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      
+      if (error) {
+        console.error('❌ Error checking subscription with Stripe:', error);
+        // Fallback to database check if Stripe API fails
+        console.log('🔄 Falling back to database check...');
+        const { data: dbSub, error: dbError } = await supabase
+          .from('user_subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        if (!dbError && dbSub) {
+          console.log('✅ Found active subscription in database (fallback):', dbSub);
+          const newStatus = {
+            subscribed: true,
+            product_id: dbSub.product_id,
+            subscription_end: dbSub.current_period_end
+          };
+          setSubscriptionStatus(newStatus);
+          saveCachedSubscription(newStatus);
+        } else {
+          // On error and no DB record, keep cached status if available
+          const cached = loadCachedSubscription();
+          if (!cached) {
+            const resetStatus = {
+              subscribed: false,
+              product_id: null,
+              subscription_end: null
+            };
+            setSubscriptionStatus(resetStatus);
+            clearCachedSubscription();
+          }
         }
       } else if (data) {
         const newStatus = {
@@ -538,16 +596,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('❌ Error checking subscription:', error);
-      // On error, keep cached status if available
-      const cached = loadCachedSubscription();
-      if (!cached) {
-        const resetStatus = {
-          subscribed: false,
-          product_id: null,
-          subscription_end: null
-        };
-        setSubscriptionStatus(resetStatus);
-        clearCachedSubscription();
+      // Fallback to database check on any error
+      try {
+        const { data: dbSub, error: dbError } = await supabase
+          .from('user_subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        if (!dbError && dbSub) {
+          console.log('✅ Found active subscription in database (error fallback):', dbSub);
+          const newStatus = {
+            subscribed: true,
+            product_id: dbSub.product_id,
+            subscription_end: dbSub.current_period_end
+          };
+          setSubscriptionStatus(newStatus);
+          saveCachedSubscription(newStatus);
+        } else {
+          // On error, keep cached status if available
+          const cached = loadCachedSubscription();
+          if (!cached) {
+            const resetStatus = {
+              subscribed: false,
+              product_id: null,
+              subscription_end: null
+            };
+            setSubscriptionStatus(resetStatus);
+            clearCachedSubscription();
+          }
+        }
+      } catch (fallbackError) {
+        console.error('❌ Database fallback also failed:', fallbackError);
       }
     } finally {
       setIsCheckingSubscription(false);
