@@ -23,56 +23,59 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
-  const [hasCheckedSubscription, setHasCheckedSubscription] = useState(false);
+  const [hasCompletedInitialCheck, setHasCompletedInitialCheck] = useState(false);
   
-  // Track subscription check completion
+  // Track when initial subscription check completes (not just loading state)
   useEffect(() => {
-    // Only mark as checked when we have a user AND subscription loading is complete
-    if (user && !loadingSubscription) {
-      // Add a small delay to ensure state has fully settled
-      const timer = setTimeout(() => {
-        setHasCheckedSubscription(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    } else if (!user) {
-      // Reset when user signs out
-      setHasCheckedSubscription(false);
+    if (!user) {
+      setHasCompletedInitialCheck(false);
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
-    }
-  }, [user, loadingSubscription]);
-
-  // Show modal logic - ONLY after subscription check is complete
-  useEffect(() => {
-    // Don't run until subscription check is complete
-    if (!hasCheckedSubscription) {
       return;
     }
 
-    // Don't show modal if no user (shouldn't happen but safety check)
+    // Only mark as complete when:
+    // 1. We have a user
+    // 2. Loading is complete
+    // 3. We wait a bit to ensure Stripe API call has finished
+    if (!loadingSubscription) {
+      const timer = setTimeout(() => {
+        setHasCompletedInitialCheck(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [user, loadingSubscription]);
+
+  // Show modal logic - ONLY run after initial check completes
+  useEffect(() => {
+    // Critical: Don't run until we've completed the initial subscription check
+    if (!hasCompletedInitialCheck) {
+      return;
+    }
+
     if (!user) {
       setShowPricingModal(false);
       return;
     }
 
-    // NEVER show for subscribed users - this is the critical check
+    // NEVER show for subscribed users (this is the critical check)
     if (subscriptionStatus.subscribed) {
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
     }
 
-    // For free users: show once per session
+    // For free users only: show once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     if (!hasShownModal) {
-      // Add small delay to ensure no flash
+      // Small delay to ensure no flash
       const timer = setTimeout(() => {
         setShowPricingModal(true);
         sessionStorage.setItem('pricing_modal_shown', 'true');
-      }, 200);
+      }, 100);
       return () => clearTimeout(timer);
     }
-  }, [hasCheckedSubscription, user, subscriptionStatus.subscribed]);
+  }, [hasCompletedInitialCheck, user, subscriptionStatus.subscribed]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
