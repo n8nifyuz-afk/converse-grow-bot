@@ -193,11 +193,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let realtimeChannel: any = null;
     
     if (user) {
-      // CRITICAL: Don't use cached subscription status until verified
-      // Keep loadingSubscription=true until fresh Stripe check completes
-      setLoadingSubscription(true);
+      // Load cached status immediately if available
+      const cached = loadCachedSubscription();
+      if (cached) {
+        setSubscriptionStatus(cached);
+        // Don't set loadingSubscription to false here - wait for actual Stripe check
+      }
       
-      // Check subscription via Stripe API FIRST (source of truth)
+      // Then check subscription via Stripe API (verify cache)
+      // This will set loadingSubscription to false when complete
       checkSubscription();
       
       // Set up realtime listener for webhook updates - this is the primary update mechanism
