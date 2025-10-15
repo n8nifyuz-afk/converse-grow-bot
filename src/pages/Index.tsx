@@ -877,9 +877,9 @@ export default function Index() {
             </Select>
           </div>
           
-          {/* Go Pro button for mobile authenticated users */}
+          {/* Go Pro button for small mobile authenticated users only */}
           {user && (
-            <div className="ml-auto">
+            <div className="ml-auto sm:hidden">
               <GoProButton />
             </div>
           )}
