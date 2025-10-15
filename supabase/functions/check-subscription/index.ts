@@ -12,13 +12,12 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// IMPORTANT: Add your LIVE Stripe product IDs here
-// Step 1: Go to https://dashboard.stripe.com/products (LIVE mode)
-// Step 2: Click on "Pro" product, copy the Product ID (starts with prod_), paste below
-// Step 3: Click on "Ultra Pro" product, copy the Product ID, paste below
+// Product IDs for both monthly and yearly plans
 const productToPlanMap: { [key: string]: string } = {
-  '': 'Pro',        // ADD YOUR LIVE Pro Product ID here (prod_XXXXX)
-  '': 'Ultra Pro',  // ADD YOUR LIVE Ultra Pro Product ID here (prod_XXXXX)
+  'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
+  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
+  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
+  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
 };
 
 serve(async (req) => {

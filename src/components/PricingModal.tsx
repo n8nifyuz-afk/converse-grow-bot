@@ -58,12 +58,12 @@ const pricingOptions = {
 
 const priceIds = {
   pro: {
-    monthly: '',  // ADD YOUR LIVE Pro Monthly price ID here (€19.99/month)
-    yearly: ''    // ADD YOUR LIVE Pro Yearly price ID here (€15.99/month)
+    monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
+    yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
   },
   ultra: {
-    monthly: '', // ADD YOUR LIVE Ultra Pro Monthly price ID here (€39.99/month)
-    yearly: ''   // ADD YOUR LIVE Ultra Pro Yearly price ID here (€31.99/month)
+    monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
+    yearly: 'price_1SH1MjL8Zm4LqDn40swOy4Ar'
   }
 };
 
