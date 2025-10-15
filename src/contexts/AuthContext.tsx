@@ -502,6 +502,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Helper function to check and show pricing modal for free users
   const checkAndShowPricingModal = (status: { subscribed: boolean; product_id: string | null; subscription_end: string | null }) => {
+    // Don't show on page refresh for non-authenticated users
+    const isPageRefresh = performance.navigation?.type === 1 || 
+                          (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type === 'reload';
+    
+    if (isPageRefresh && !user) {
+      console.log('[AUTH-CONTEXT] Page refresh detected for non-authenticated user - skipping pricing modal');
+      return;
+    }
+    
     // Check if modal was already shown this session
     const modalShownKey = 'pricing_modal_shown_session';
     const wasShown = sessionStorage.getItem(modalShownKey);
@@ -509,6 +518,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('[AUTH-CONTEXT] Pricing modal check:', {
       subscribed: status.subscribed,
       wasShown: !!wasShown,
+      isPageRefresh,
+      hasUser: !!user,
       willShow: !wasShown && !status.subscribed
     });
     
