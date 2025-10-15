@@ -3349,45 +3349,53 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
   };
   const downloadImageFromChat = async (imageUrl: string, fileName: string) => {
     try {
-      let response;
-      console.log('Downloading image:', {
-        imageUrl,
-        fileName
-      });
+      let blob: Blob;
+      console.log('Downloading image:', { imageUrl, fileName });
 
       // Check if it's a Supabase storage URL
       if (imageUrl.includes('lciaiunzacgvvbvcshdh.supabase.co/storage')) {
-        // Extract the file path from the public URL
-        const urlParts = imageUrl.split('/storage/v1/object/public/chat-files/');
-        if (urlParts.length > 1) {
-          const filePath = urlParts[1];
-          console.log('Downloading from Supabase storage:', filePath);
+        // Try to extract bucket name and file path
+        let bucketName = 'chat-images';
+        let filePath = '';
+        
+        // Check for chat-images bucket
+        if (imageUrl.includes('/storage/v1/object/public/chat-images/')) {
+          const urlParts = imageUrl.split('/storage/v1/object/public/chat-images/');
+          filePath = urlParts[1];
+          bucketName = 'chat-images';
+        } 
+        // Check for chat-files bucket
+        else if (imageUrl.includes('/storage/v1/object/public/chat-files/')) {
+          const urlParts = imageUrl.split('/storage/v1/object/public/chat-files/');
+          filePath = urlParts[1];
+          bucketName = 'chat-files';
+        }
+
+        if (filePath) {
+          console.log('Downloading from Supabase storage:', { bucketName, filePath });
 
           // Download using Supabase storage API
-          const {
-            data,
-            error
-          } = await supabase.storage.from('chat-files').download(filePath);
+          const { data, error } = await supabase.storage.from(bucketName).download(filePath);
           if (error) {
             console.error('Supabase storage download error:', error);
             throw error;
           }
-          response = {
-            blob: () => Promise.resolve(data)
-          };
+          blob = data;
         } else {
-          throw new Error('Invalid Supabase storage URL');
+          throw new Error('Could not parse Supabase storage URL');
         }
       } else {
-        // For external URLs or other cases, try direct fetch
-        response = await fetch(imageUrl, {
+        // For external URLs, fetch directly
+        const response = await fetch(imageUrl, {
           method: 'GET',
           mode: 'cors',
           cache: 'no-cache'
         });
         if (!response.ok) throw new Error('Failed to fetch image');
+        blob = await response.blob();
       }
-      const blob = await response.blob();
+
+      // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -3401,17 +3409,11 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       }, 100);
+
+      toast.success('Image downloaded successfully');
     } catch (error) {
       console.error('Download failed:', error);
-      // Fallback to opening in new tab
-      try {
-        const newWindow = window.open(imageUrl, '_blank');
-        if (!newWindow) {
-          console.error('Could not open image in new tab');
-        }
-      } catch (fallbackError) {
-        console.error('Failed to download or open image:', fallbackError);
-      }
+      toast.error('Failed to download image');
     }
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
