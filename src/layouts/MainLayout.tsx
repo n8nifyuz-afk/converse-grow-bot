@@ -23,42 +23,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
-  const [hasCompletedInitialCheck, setHasCompletedInitialCheck] = useState(false);
   
-  // Track when initial subscription check completes (not just loading state)
+  // Show modal logic - run after subscription check completes
   useEffect(() => {
+    // Don't show anything while checking subscription
+    if (loadingSubscription) {
+      setShowPricingModal(false);
+      return;
+    }
+
+    // Don't show if no user
     if (!user) {
-      setHasCompletedInitialCheck(false);
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
     }
 
-    // Only mark as complete when:
-    // 1. We have a user
-    // 2. Loading is complete
-    // 3. We wait a bit to ensure Stripe API call has finished
-    if (!loadingSubscription) {
-      const timer = setTimeout(() => {
-        setHasCompletedInitialCheck(true);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [user, loadingSubscription]);
-
-  // Show modal logic - ONLY run after initial check completes
-  useEffect(() => {
-    // Critical: Don't run until we've completed the initial subscription check
-    if (!hasCompletedInitialCheck) {
-      return;
-    }
-
-    if (!user) {
-      setShowPricingModal(false);
-      return;
-    }
-
-    // NEVER show for subscribed users (this is the critical check)
+    // NEVER show for subscribed users
     if (subscriptionStatus.subscribed) {
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
@@ -68,14 +49,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // For free users only: show once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     if (!hasShownModal) {
-      // Small delay to ensure no flash
-      const timer = setTimeout(() => {
-        setShowPricingModal(true);
-        sessionStorage.setItem('pricing_modal_shown', 'true');
-      }, 100);
-      return () => clearTimeout(timer);
+      setShowPricingModal(true);
+      sessionStorage.setItem('pricing_modal_shown', 'true');
     }
-  }, [hasCompletedInitialCheck, user, subscriptionStatus.subscribed]);
+  }, [loadingSubscription, user, subscriptionStatus.subscribed]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
