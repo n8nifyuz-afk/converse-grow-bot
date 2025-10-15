@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
@@ -66,15 +66,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Debug: Log when modal open state changes
-  useEffect(() => {
-    console.log('[PRICING-MODAL] Open state changed:', { 
-      open, 
-      hasUser: !!user,
-      isMobile 
-    });
-  }, [open, user, isMobile]);
 
   const handleSubscribe = async () => {
     if (!user) {

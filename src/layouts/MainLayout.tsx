@@ -24,51 +24,35 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
   
-  // Show/hide modal based on subscription status
+  // Show modal logic - run after subscription check completes
   useEffect(() => {
-    console.log('[MAIN-LAYOUT] Modal logic:', {
-      loadingSubscription,
-      hasUser: !!user,
-      subscribed: subscriptionStatus.subscribed,
-      product_id: subscriptionStatus.product_id,
-      currentModalState: showPricingModal,
-      sessionFlag: sessionStorage.getItem('pricing_modal_shown')
-    });
-
-    // While loading, don't make any changes
+    // Don't show anything while checking subscription
     if (loadingSubscription) {
-      console.log('[MAIN-LAYOUT] Still loading subscription...');
+      setShowPricingModal(false);
       return;
     }
 
-    // No user - clear everything
+    // Don't show if no user
     if (!user) {
-      console.log('[MAIN-LAYOUT] No user, clearing modal');
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
     }
 
-    // User is subscribed - NEVER show modal, always hide it
+    // NEVER show for subscribed users
     if (subscriptionStatus.subscribed) {
-      console.log('[MAIN-LAYOUT] Subscribed user - hiding modal');
-      if (showPricingModal) {
-        setShowPricingModal(false);
-      }
+      setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
     }
 
-    // Free user - show once per session
+    // For free users only: show once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     if (!hasShownModal) {
-      console.log('[MAIN-LAYOUT] Free user - showing modal once');
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
-    } else {
-      console.log('[MAIN-LAYOUT] Modal already shown to free user this session');
     }
-  }, [loadingSubscription, user, subscriptionStatus.subscribed, subscriptionStatus.product_id, showPricingModal]);
+  }, [loadingSubscription, user, subscriptionStatus.subscribed]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
