@@ -23,20 +23,47 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [hasCompletedFirstCheck, setHasCompletedFirstCheck] = useState(false);
   
-  // Only show modal after subscription check is complete
+  // Track when the first subscription check completes
+  useEffect(() => {
+    console.log('[MAIN-LAYOUT] Subscription state:', {
+      loadingSubscription,
+      subscribed: subscriptionStatus.subscribed,
+      hasUser: !!user,
+      hasCompletedFirstCheck
+    });
+    
+    // Reset check flag when loading starts
+    if (loadingSubscription) {
+      console.log('[MAIN-LAYOUT] Subscription check started, resetting flag');
+      setHasCompletedFirstCheck(false);
+      return;
+    }
+    
+    // Set check complete flag when loading finishes
+    if (!loadingSubscription && user) {
+      console.log('[MAIN-LAYOUT] First check completed');
+      setHasCompletedFirstCheck(true);
+    }
+    if (!user) {
+      console.log('[MAIN-LAYOUT] No user, resetting check');
+      setHasCompletedFirstCheck(false);
+    }
+  }, [loadingSubscription, user, subscriptionStatus.subscribed, hasCompletedFirstCheck]);
+  
+  // Only show modal after first check is complete
   useEffect(() => {
     console.log('[MAIN-LAYOUT] Modal decision:', {
-      loadingSubscription,
+      hasCompletedFirstCheck,
       subscribed: subscriptionStatus.subscribed,
       hasUser: !!user,
       currentModalState: showPricingModal
     });
     
-    // CRITICAL: Never show modal while loading
-    if (loadingSubscription) {
-      console.log('[MAIN-LAYOUT] Still loading subscription, hiding modal');
-      setShowPricingModal(false);
+    // Don't do anything until first check is complete
+    if (!hasCompletedFirstCheck) {
+      console.log('[MAIN-LAYOUT] Waiting for first check to complete');
       return;
     }
     
@@ -62,7 +89,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         hasShownModal
       });
     }
-  }, [user, subscriptionStatus.subscribed, loadingSubscription, showPricingModal]);
+  }, [user, subscriptionStatus.subscribed, hasCompletedFirstCheck, showPricingModal]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
