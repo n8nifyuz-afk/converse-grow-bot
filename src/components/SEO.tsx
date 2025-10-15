@@ -10,7 +10,7 @@ interface SEOProps {
 
 const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex = false, ogImage }) => {
   const fullTitle = `${title} | ChatLearn`;
-  const defaultOgImage = 'https://chatl.ai/favicon.png';
+  const defaultOgImage = 'https://chatl.ai/og-image.png';
   const ogImageUrl = ogImage || defaultOgImage;
 
   useEffect(() => {
