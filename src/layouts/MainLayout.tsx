@@ -25,6 +25,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   
+  // Clear pricing modal flag when user changes
+  useEffect(() => {
+    if (user) {
+      sessionStorage.removeItem('pricing_modal_shown');
+    }
+  }, [user?.id]);
+  
   useEffect(() => {
     // Mark subscription as checked when loading completes
     if (user && !loadingSubscription) {
