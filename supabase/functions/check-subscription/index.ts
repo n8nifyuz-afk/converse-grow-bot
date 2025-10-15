@@ -12,8 +12,9 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// LIVE Product IDs ONLY - DO NOT add test products
+// LIVE Product IDs
 const productToPlanMap: { [key: string]: string } = {
+  'prod_TExAqVXMsTfeDA': 'Pro',        // Pro Daily Test (LIVE $0.01)
   'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly (LIVE)
   'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
   'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)

@@ -12,8 +12,9 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-// LIVE Product IDs ONLY - DO NOT add test products
+// LIVE Product IDs
 const productToPlanMap: { [key: string]: string } = {
+  'prod_TExAqVXMsTfeDA': 'Pro',        // Pro Daily Test (LIVE $0.01)
   'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly (LIVE)
   'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
   'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
@@ -120,10 +121,12 @@ serve(async (req) => {
           const subProductId = sub.items.data[0].price.product as string;
           
           let subTier = 'free';
-          // Pro products (monthly or yearly) - LIVE ONLY
-          if (subProductId === 'prod_TDSbUWLqR3bz7k' || subProductId === 'prod_TEx5Xda5BPBuHv') {
+          // Pro products (all variants) - LIVE
+          if (subProductId === 'prod_TExAqVXMsTfeDA' || 
+              subProductId === 'prod_TDSbUWLqR3bz7k' || 
+              subProductId === 'prod_TEx5Xda5BPBuHv') {
             subTier = 'pro';
-          // Ultra Pro products (monthly or yearly) - LIVE ONLY
+          // Ultra Pro products (monthly or yearly) - LIVE
           } else if (subProductId === 'prod_TDSbGJB9U4Xt7b' || subProductId === 'prod_TDSHzExQNjyvJD') {
             subTier = 'ultra_pro';
           } else if (subProductId) {
@@ -183,10 +186,12 @@ serve(async (req) => {
         
         // If subscription is not active, user should be on free plan
         if (finalSubscription.status === 'active') {
-          // Pro products (monthly or yearly) - LIVE ONLY
-          if (productId === 'prod_TDSbUWLqR3bz7k' || productId === 'prod_TEx5Xda5BPBuHv') {
+          // Pro products (all variants) - LIVE
+          if (productId === 'prod_TExAqVXMsTfeDA' || 
+              productId === 'prod_TDSbUWLqR3bz7k' || 
+              productId === 'prod_TEx5Xda5BPBuHv') {
             planTier = 'pro';
-          // Ultra Pro products (monthly or yearly) - LIVE ONLY
+          // Ultra Pro products (monthly or yearly) - LIVE
           } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
             planTier = 'ultra_pro';
           }
