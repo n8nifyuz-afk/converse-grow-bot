@@ -936,9 +936,9 @@ export default function Index() {
       }
     }}>
 
-        {/* Auth buttons for unauthenticated users (desktop only) */}
-        {!user && !isMobile && (
-          <div className="fixed top-4 right-6 flex items-center gap-3 z-50">
+        {/* Auth buttons for unauthenticated users (tablet and desktop) */}
+        {!user && (
+          <div className="hidden sm:flex fixed top-4 right-6 items-center gap-3 z-50">
             <Button 
               variant="ghost" 
               onClick={() => setShowAuthModal(true)}
@@ -955,9 +955,9 @@ export default function Index() {
           </div>
         )}
 
-        {/* Go Pro button for authenticated users (desktop only) */}
-        {user && !isMobile && (
-          <div className="fixed top-4 right-6 z-50">
+        {/* Go Pro button for authenticated users (tablet and desktop) */}
+        {user && (
+          <div className="hidden sm:flex fixed top-4 right-6 z-50">
             <GoProButton />
           </div>
         )}
