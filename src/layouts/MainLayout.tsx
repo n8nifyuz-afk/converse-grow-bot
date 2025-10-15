@@ -34,6 +34,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
       hasCompletedFirstCheck
     });
     
+    // Reset check flag when loading starts
+    if (loadingSubscription) {
+      console.log('[MAIN-LAYOUT] Subscription check started, resetting flag');
+      setHasCompletedFirstCheck(false);
+      return;
+    }
+    
+    // Set check complete flag when loading finishes
     if (!loadingSubscription && user) {
       console.log('[MAIN-LAYOUT] First check completed');
       setHasCompletedFirstCheck(true);
