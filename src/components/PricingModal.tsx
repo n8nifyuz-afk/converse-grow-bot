@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -8,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import AuthModal from '@/components/AuthModal';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PricingModalProps {
   open: boolean;
@@ -59,6 +61,7 @@ const priceIds = {
 
 export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -94,11 +97,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const currentPrice = pricingOptions[selectedPlan][selectedPeriod];
   const savings = selectedPeriod === 'yearly' ? pricingOptions[selectedPlan].yearly.savings : 0;
 
-  return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[80vh] md:h-[75vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl">
-          <div className="flex flex-col md:flex-row h-full">
+  const modalContent = (
+    <div className="flex flex-col md:flex-row h-full">
             {/* Left Panel - Features Comparison */}
             <div className="w-full md:w-7/12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-700 dark:border-zinc-800 flex flex-col relative">
               {/* Decorative gradient overlay */}
@@ -126,7 +126,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
                       
                       return (
-                        <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1 sm:py-1.5 md:py-2 px-1.5 sm:px-2 md:px-3 rounded-lg hover:bg-white/5 transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-zinc-700/50">
+                        <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1 sm:py-1.5 md:py-2 px-1.5 sm:px-2 md:px-3 rounded-lg md:hover:bg-white/5 md:transition-all md:duration-200 backdrop-blur-sm border border-transparent md:hover:border-zinc-700/50">
                           <div className="text-xs sm:text-sm md:text-base font-medium text-white flex items-center leading-tight">
                             {feature.name}
                           </div>
@@ -302,8 +302,25 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+  );
+
+  return (
+    <>
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="max-h-[95vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700">
+            <div className="overflow-y-auto max-h-[95vh]">
+              {modalContent}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[80vh] md:h-[75vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
+            {modalContent}
+          </DialogContent>
+        </Dialog>
+      )}
 
       <AuthModal 
         isOpen={showAuthModal} 
