@@ -49,7 +49,7 @@ serve(async (req) => {
         event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
         logStep("Webhook signature verified");
       } catch (err) {
-        logStep("Webhook signature verification failed", { error: err.message });
+        logStep("Webhook signature verification failed", { error: err instanceof Error ? err.message : String(err) });
         return new Response(JSON.stringify({ error: "Invalid signature" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 400,
@@ -143,7 +143,7 @@ serve(async (req) => {
               } catch (cancelError) {
                 logStep("ERROR cancelling subscription", { 
                   subscriptionId: sub.id, 
-                  error: cancelError.message 
+                  error: cancelError instanceof Error ? cancelError.message : String(cancelError)
                 });
               }
             }

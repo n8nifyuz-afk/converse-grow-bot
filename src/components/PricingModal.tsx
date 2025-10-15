@@ -47,16 +47,23 @@ const pricingOptions = {
   }
 };
 
-// Stripe LIVE price IDs - Replace with your actual live price IDs from Stripe Dashboard
-// To get these: Stripe Dashboard > Products > Select your product > Copy the price ID
+// IMPORTANT: You must add your LIVE Stripe price IDs here
+// Step 1: Go to https://dashboard.stripe.com/products (make sure you're in LIVE mode, not test mode)
+// Step 2: Find or create these 4 products with these exact prices:
+//         - Pro Monthly: €19.99/month
+//         - Pro Yearly: €191.88/year (€15.99/month)
+//         - Ultra Pro Monthly: €39.99/month  
+//         - Ultra Pro Yearly: €383.88/year (€31.99/month)
+// Step 3: Click on each product, copy the Price ID (starts with price_), and paste below
+
 const priceIds = {
   pro: {
-    monthly: 'price_YOUR_LIVE_PRO_MONTHLY_ID',  // Replace: Pro Plan Monthly (€19.99)
-    yearly: 'price_YOUR_LIVE_PRO_YEARLY_ID'     // Replace: Pro Plan Yearly (€15.99)
+    monthly: '',  // ADD YOUR LIVE Pro Monthly price ID here (€19.99/month)
+    yearly: ''    // ADD YOUR LIVE Pro Yearly price ID here (€15.99/month)
   },
   ultra: {
-    monthly: 'price_YOUR_LIVE_ULTRA_MONTHLY_ID', // Replace: Ultra Pro Monthly (€39.99)
-    yearly: 'price_YOUR_LIVE_ULTRA_YEARLY_ID'    // Replace: Ultra Pro Yearly (€31.99)
+    monthly: '', // ADD YOUR LIVE Ultra Pro Monthly price ID here (€39.99/month)
+    yearly: ''   // ADD YOUR LIVE Ultra Pro Yearly price ID here (€31.99/month)
   }
 };
 

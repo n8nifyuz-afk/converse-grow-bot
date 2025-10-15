@@ -12,11 +12,13 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// LIVE Product ID to plan name mapping - Replace with your actual live product IDs
-// To get these: Stripe Dashboard > Products > Select your product > Copy the product ID (starts with prod_)
+// IMPORTANT: Add your LIVE Stripe product IDs here
+// Step 1: Go to https://dashboard.stripe.com/products (LIVE mode)
+// Step 2: Click on "Pro" product, copy the Product ID (starts with prod_), paste below
+// Step 3: Click on "Ultra Pro" product, copy the Product ID, paste below
 const productToPlanMap: { [key: string]: string } = {
-  'prod_YOUR_LIVE_PRO_PRODUCT_ID': 'Pro',        // Replace: Pro Plan Product ID
-  'prod_YOUR_LIVE_ULTRA_PRODUCT_ID': 'Ultra Pro', // Replace: Ultra Pro Plan Product ID
+  '': 'Pro',        // ADD YOUR LIVE Pro Product ID here (prod_XXXXX)
+  '': 'Ultra Pro',  // ADD YOUR LIVE Ultra Pro Product ID here (prod_XXXXX)
 };
 
 serve(async (req) => {
@@ -104,11 +106,14 @@ serve(async (req) => {
       for (const sub of subscriptions.data) {
         const subProductId = sub.items.data[0].price.product as string;
         
-        // Determine tier for this subscription - Update with your live product IDs
+        // Determine tier - match with your live product IDs above
         let subTier = 'free';
-        if (subProductId === 'prod_YOUR_LIVE_PRO_PRODUCT_ID') {  // Replace with Pro product ID
+        const proProdId = Object.keys(productToPlanMap).find(k => productToPlanMap[k] === 'Pro');
+        const ultraProdId = Object.keys(productToPlanMap).find(k => productToPlanMap[k] === 'Ultra Pro');
+        
+        if (subProductId === proProdId) {
           subTier = 'pro';
-        } else if (subProductId === 'prod_YOUR_LIVE_ULTRA_PRODUCT_ID') {  // Replace with Ultra product ID
+        } else if (subProductId === ultraProdId) {
           subTier = 'ultra_pro';
         } else if (subProductId) {
           subTier = 'pro'; // Default to pro for unmapped products
@@ -147,7 +152,7 @@ serve(async (req) => {
         }
       } catch (dateError) {
         logStep("ERROR converting date", { 
-          error: dateError.message,
+          error: dateError instanceof Error ? dateError.message : String(dateError),
           currentPeriodEnd: subscription.current_period_end 
         });
         // Continue without the date if conversion fails
@@ -181,7 +186,7 @@ serve(async (req) => {
           logStep("Successfully saved subscription to DB");
         }
       } catch (dbError) {
-        logStep("ERROR saving to DB", { error: dbError.message });
+        logStep("ERROR saving to DB", { error: dbError instanceof Error ? dbError.message : String(dbError) });
       }
     } else {
       logStep("No active subscription found");
