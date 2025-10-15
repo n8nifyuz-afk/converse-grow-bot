@@ -179,6 +179,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             subscription_end: null
           });
           clearCachedSubscription();
+          
+          // Clear pricing modal session flag on sign-out
+          sessionStorage.removeItem('pricing_modal_shown_session');
         }
         setLoading(false);
       }
@@ -502,6 +505,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if modal was already shown this session
     const modalShownKey = 'pricing_modal_shown_session';
     const wasShown = sessionStorage.getItem(modalShownKey);
+    
+    console.log('[AUTH-CONTEXT] Pricing modal check:', {
+      subscribed: status.subscribed,
+      wasShown: !!wasShown,
+      willShow: !wasShown && !status.subscribed
+    });
     
     // Only show if:
     // 1. Not already shown this session
