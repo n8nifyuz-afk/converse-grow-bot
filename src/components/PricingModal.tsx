@@ -38,7 +38,7 @@ const allFeatures: Feature[] = [
 
 const pricingOptions = {
   pro: {
-    daily: { price: 1.99, perDay: 1.99 },
+    daily: { price: 0.01, perDay: 0.01 },
     monthly: { price: 19.99, perDay: 0.67 },
     yearly: { price: 15.99, perDay: 0.53, savings: 20 }
   },
