@@ -290,6 +290,22 @@ export default function ProjectPage() {
       if (interval) clearInterval(interval);
     };
   }, [isRecording]);
+
+  // Prevent default browser drag and drop behavior globally
+  useEffect(() => {
+    const preventDefaults = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
+    document.addEventListener('dragover', preventDefaults);
+    document.addEventListener('drop', preventDefaults);
+    
+    return () => {
+      document.removeEventListener('dragover', preventDefaults);
+      document.removeEventListener('drop', preventDefaults);
+    };
+  }, []);
   useEffect(() => {
     if (projectId && user) {
       fetchProject();

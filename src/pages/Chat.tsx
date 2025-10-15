@@ -646,6 +646,22 @@ export default function Chat() {
     };
   }, [isRecording]);
 
+  // Prevent default browser drag and drop behavior globally
+  useEffect(() => {
+    const preventDefaults = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
+    document.addEventListener('dragover', preventDefaults);
+    document.addEventListener('drop', preventDefaults);
+    
+    return () => {
+      document.removeEventListener('dragover', preventDefaults);
+      document.removeEventListener('drop', preventDefaults);
+    };
+  }, []);
+
   // Handle showLimitWarning flag from navigation state (from ProjectPage)
   useEffect(() => {
     if (location.state?.showLimitWarning && chatId) {
