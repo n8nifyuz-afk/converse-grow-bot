@@ -25,6 +25,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [hasCompletedFirstCheck, setHasCompletedFirstCheck] = useState(false);
   
+  console.log('[MAIN-LAYOUT] Component render:', {
+    isMobile,
+    hasUser: !!user,
+    showPricingModal,
+    hasCompletedFirstCheck
+  });
+  
   // Track when the first subscription check completes
   useEffect(() => {
     console.log('[MAIN-LAYOUT] Subscription state:', {
@@ -75,15 +82,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
       return;
     }
     
-    // Only for free users: show modal once per session
+  // Only for free users: show modal once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     
+    console.log('[MAIN-LAYOUT] Modal decision check:', {
+      hasUser: !!user,
+      subscribed: subscriptionStatus.subscribed,
+      hasShownModal,
+      isMobile,
+      willShow: user && !subscriptionStatus.subscribed && !hasShownModal
+    });
+    
     if (user && !subscriptionStatus.subscribed && !hasShownModal) {
-      console.log('[MAIN-LAYOUT] Showing pricing modal for free user');
+      console.log('[MAIN-LAYOUT] ✅ SHOWING pricing modal for free user');
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
     } else {
-      console.log('[MAIN-LAYOUT] Not showing modal:', {
+      console.log('[MAIN-LAYOUT] ❌ NOT showing modal:', {
         hasUser: !!user,
         subscribed: subscriptionStatus.subscribed,
         hasShownModal

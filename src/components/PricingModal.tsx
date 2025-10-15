@@ -71,7 +71,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     open,
     hasUser: !!user,
     selectedPlan,
-    selectedPeriod
+    selectedPeriod,
+    isMobile,
+    componentType: isMobile ? 'Drawer' : 'Dialog'
   });
 
   const handleSubscribe = async () => {
