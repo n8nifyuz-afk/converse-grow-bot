@@ -527,11 +527,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoadingSubscription(true);
     try {
       // First, refresh the session to ensure we have a valid token
-      console.log('🔄 Refreshing session before subscription check...');
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      console.log('🔄 Refreshing session and token before subscription check...');
+      const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
       
-      if (sessionError || !sessionData.session) {
-        console.warn('⚠️ Session refresh failed, falling back to database check');
+      if (refreshError || !refreshedSession) {
+        console.warn('⚠️ Session refresh failed, getting current session');
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+        if (sessionError || !sessionData.session) {
+          console.warn('⚠️ Session not available, falling back to database check');
         // Fallback: Check database directly
         const { data: dbSub, error: dbError } = await supabase
           .from('user_subscriptions')
@@ -561,13 +565,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           clearCachedSubscription();
           checkAndShowPricingModal(resetStatus);
         }
-        setIsCheckingSubscription(false);
-        setLoadingSubscription(false);
-        return;
+          setIsCheckingSubscription(false);
+          setLoadingSubscription(false);
+          return;
+        }
       }
       
       // Check with Stripe API - source of truth
-      console.log('🔍 Checking subscription via Stripe API...');
+      console.log('🔍 Checking subscription via Stripe API with refreshed token...');
       const { data, error } = await supabase.functions.invoke('check-subscription');
       
       if (error) {
