@@ -12,13 +12,12 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// Product IDs for all plans (must match live Stripe products)
+// LIVE Product IDs ONLY - DO NOT add test products
 const productToPlanMap: { [key: string]: string } = {
-  'prod_TExAqVXMsTfeDA': 'Pro',        // Pro Daily (Test)
-  'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
-  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
-  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
-  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
+  'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly (LIVE)
+  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
+  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
+  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly (LIVE)
 };
 
 serve(async (req) => {
@@ -37,7 +36,13 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    
+    // CRITICAL: Reject test mode keys to prevent test subscriptions
+    if (stripeKey.startsWith("sk_test_")) {
+      throw new Error("TEST MODE DETECTED: Use live Stripe keys only. Change STRIPE_SECRET_KEY to sk_live_...");
+    }
+    
+    logStep("Stripe key verified (LIVE mode)");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");

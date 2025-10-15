@@ -12,13 +12,12 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-// Product IDs for all plans (must match live Stripe products)
+// LIVE Product IDs ONLY - DO NOT add test products
 const productToPlanMap: { [key: string]: string } = {
-  'prod_TExAqVXMsTfeDA': 'Pro',        // Pro Daily (Test)
-  'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
-  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
-  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
-  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
+  'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly (LIVE)
+  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
+  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
+  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly (LIVE)
 };
 
 serve(async (req) => {
@@ -37,6 +36,11 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    
+    // CRITICAL: Reject test mode keys to prevent test subscriptions
+    if (stripeKey.startsWith("sk_test_")) {
+      throw new Error("TEST MODE DETECTED: Use live Stripe keys only. Change STRIPE_SECRET_KEY to sk_live_...");
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
@@ -116,14 +120,16 @@ serve(async (req) => {
           const subProductId = sub.items.data[0].price.product as string;
           
           let subTier = 'free';
-          // Pro products (daily, monthly or yearly)
-          if (subProductId === 'prod_TExAqVXMsTfeDA' || subProductId === 'prod_TDSbUWLqR3bz7k' || subProductId === 'prod_TEx5Xda5BPBuHv') {
+          // Pro products (monthly or yearly) - LIVE ONLY
+          if (subProductId === 'prod_TDSbUWLqR3bz7k' || subProductId === 'prod_TEx5Xda5BPBuHv') {
             subTier = 'pro';
-          // Ultra Pro products (monthly or yearly)
+          // Ultra Pro products (monthly or yearly) - LIVE ONLY
           } else if (subProductId === 'prod_TDSbGJB9U4Xt7b' || subProductId === 'prod_TDSHzExQNjyvJD') {
             subTier = 'ultra_pro';
           } else if (subProductId) {
-            subTier = 'pro'; // Default to pro for unmapped products
+            // Unknown product - log warning and skip
+            logStep("WARNING: Unknown product ID detected", { productId: subProductId });
+            continue; // Skip this subscription
           }
           
           if (tierPriority[subTier] > tierPriority[highestTier]) {
@@ -165,14 +171,16 @@ serve(async (req) => {
         
         // If subscription is not active, user should be on free plan
         if (finalSubscription.status === 'active') {
-          // Pro products (daily, monthly or yearly)
-          if (productId === 'prod_TExAqVXMsTfeDA' || productId === 'prod_TDSbUWLqR3bz7k' || productId === 'prod_TEx5Xda5BPBuHv') {
+          // Pro products (monthly or yearly) - LIVE ONLY
+          if (productId === 'prod_TDSbUWLqR3bz7k' || productId === 'prod_TEx5Xda5BPBuHv') {
             planTier = 'pro';
-          // Ultra Pro products (monthly or yearly)
+          // Ultra Pro products (monthly or yearly) - LIVE ONLY
           } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
             planTier = 'ultra_pro';
           } else if (productId) {
-            planTier = 'pro'; // Default to pro for unmapped products
+            // Unknown product - reject it
+            logStep("ERROR: Unknown product ID, rejecting", { productId });
+            break; // Don't save this subscription
           }
         }
         
