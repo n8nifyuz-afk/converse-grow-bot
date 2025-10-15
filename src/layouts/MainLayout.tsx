@@ -23,57 +23,88 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [hasCompletedFirstCheck, setHasCompletedFirstCheck] = useState(false);
   
-  // Track when user first signs in to prevent modal from showing immediately
+  console.log('[MAIN-LAYOUT] Component render:', {
+    isMobile,
+    hasUser: !!user,
+    showPricingModal,
+    hasCompletedFirstCheck
+  });
+  
+  // Track when the first subscription check completes
   useEffect(() => {
-    if (user) {
-      // Mark that user just signed in - prevent modal for this session
-      const justSignedIn = sessionStorage.getItem('just_signed_in');
-      if (!justSignedIn) {
-        sessionStorage.setItem('just_signed_in', 'true');
-      }
-    } else {
-      // Clear all modal-related flags on sign out
-      sessionStorage.removeItem('just_signed_in');
-      sessionStorage.removeItem('pricing_modal_shown');
-      setShowPricingModal(false);
-    }
-  }, [user?.id]); // Only run when user ID changes (sign in/out)
-
-  // Show modal logic - only after subscription check completes
-  useEffect(() => {
-    // Don't show modal if still checking subscription
+    console.log('[MAIN-LAYOUT] Subscription state:', {
+      loadingSubscription,
+      subscribed: subscriptionStatus.subscribed,
+      hasUser: !!user,
+      hasCompletedFirstCheck
+    });
+    
+    // Reset check flag when loading starts
     if (loadingSubscription) {
+      console.log('[MAIN-LAYOUT] Subscription check started, resetting flag');
+      setHasCompletedFirstCheck(false);
       return;
     }
-
-    // Don't show modal if no user
+    
+    // Set check complete flag when loading finishes
+    if (!loadingSubscription && user) {
+      console.log('[MAIN-LAYOUT] First check completed');
+      setHasCompletedFirstCheck(true);
+    }
     if (!user) {
-      setShowPricingModal(false);
+      console.log('[MAIN-LAYOUT] No user, resetting check');
+      setHasCompletedFirstCheck(false);
+    }
+  }, [loadingSubscription, user, subscriptionStatus.subscribed, hasCompletedFirstCheck]);
+  
+  // Only show modal after first check is complete
+  useEffect(() => {
+    console.log('[MAIN-LAYOUT] Modal decision:', {
+      hasCompletedFirstCheck,
+      subscribed: subscriptionStatus.subscribed,
+      hasUser: !!user,
+      currentModalState: showPricingModal
+    });
+    
+    // Don't do anything until first check is complete
+    if (!hasCompletedFirstCheck) {
+      console.log('[MAIN-LAYOUT] Waiting for first check to complete');
       return;
     }
-
-    // Never show for subscribed users
+    
+    // If user has subscription, never show modal
     if (subscriptionStatus.subscribed) {
+      console.log('[MAIN-LAYOUT] User is subscribed, hiding modal');
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
     }
-
-    // Don't show modal immediately after sign-in (wait for next visit)
-    const justSignedIn = sessionStorage.getItem('just_signed_in');
-    if (justSignedIn) {
-      sessionStorage.removeItem('just_signed_in');
-      return;
-    }
-
-    // Show once per session for free users (on subsequent visits)
+    
+  // Only for free users: show modal once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
-    if (!hasShownModal) {
+    
+    console.log('[MAIN-LAYOUT] Modal decision check:', {
+      hasUser: !!user,
+      subscribed: subscriptionStatus.subscribed,
+      hasShownModal,
+      isMobile,
+      willShow: user && !subscriptionStatus.subscribed && !hasShownModal
+    });
+    
+    if (user && !subscriptionStatus.subscribed && !hasShownModal) {
+      console.log('[MAIN-LAYOUT] ✅ SHOWING pricing modal for free user');
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
+    } else {
+      console.log('[MAIN-LAYOUT] ❌ NOT showing modal:', {
+        hasUser: !!user,
+        subscribed: subscriptionStatus.subscribed,
+        hasShownModal
+      });
     }
-  }, [user, loadingSubscription, subscriptionStatus.subscribed]);
+  }, [user, subscriptionStatus.subscribed, hasCompletedFirstCheck, showPricingModal]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
