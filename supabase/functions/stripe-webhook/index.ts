@@ -12,10 +12,12 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-// Product ID to plan name mapping - must match frontend
+// Product IDs for both monthly and yearly plans (must match live Stripe products)
 const productToPlanMap: { [key: string]: string } = {
-  'prod_TDSeCiQ2JEFnWB': 'Pro',
-  'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
+  'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
+  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
+  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
+  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
 };
 
 serve(async (req) => {
@@ -113,12 +115,14 @@ serve(async (req) => {
           const subProductId = sub.items.data[0].price.product as string;
           
           let subTier = 'free';
-          if (subProductId === 'prod_TDSeCiQ2JEFnWB') {
+          // Pro products (monthly or yearly)
+          if (subProductId === 'prod_TDSbUWLqR3bz7k' || subProductId === 'prod_TEx5Xda5BPBuHv') {
             subTier = 'pro';
-          } else if (subProductId === 'prod_TDSfAtaWP5KbhM') {
+          // Ultra Pro products (monthly or yearly)
+          } else if (subProductId === 'prod_TDSbGJB9U4Xt7b' || subProductId === 'prod_TDSHzExQNjyvJD') {
             subTier = 'ultra_pro';
           } else if (subProductId) {
-            subTier = 'pro';
+            subTier = 'pro'; // Default to pro for unmapped products
           }
           
           if (tierPriority[subTier] > tierPriority[highestTier]) {
@@ -160,12 +164,14 @@ serve(async (req) => {
         
         // If subscription is not active, user should be on free plan
         if (finalSubscription.status === 'active') {
-          if (productId === 'prod_TDSeCiQ2JEFnWB') {
+          // Pro products (monthly or yearly)
+          if (productId === 'prod_TDSbUWLqR3bz7k' || productId === 'prod_TEx5Xda5BPBuHv') {
             planTier = 'pro';
-          } else if (productId === 'prod_TDSfAtaWP5KbhM') {
+          // Ultra Pro products (monthly or yearly)
+          } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
             planTier = 'ultra_pro';
           } else if (productId) {
-            planTier = 'pro';
+            planTier = 'pro'; // Default to pro for unmapped products
           }
         }
         
