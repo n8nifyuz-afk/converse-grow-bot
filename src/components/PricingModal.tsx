@@ -60,20 +60,12 @@ const priceIds = {
 };
 
 export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }) => {
-  const { user, subscriptionStatus, loadingSubscription } = useAuth();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Don't show modal if user already has a subscription
-  if (!loadingSubscription && subscriptionStatus.subscribed) {
-    if (open) {
-      onOpenChange(false);
-    }
-    return null;
-  }
 
   const handleSubscribe = async () => {
     if (!user) {
