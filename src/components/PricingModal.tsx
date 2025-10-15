@@ -67,6 +67,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log('[PRICING-MODAL] Render state:', {
+    open,
+    hasUser: !!user,
+    selectedPlan,
+    selectedPeriod
+  });
+
   const handleSubscribe = async () => {
     if (!user) {
       setShowAuthModal(true);

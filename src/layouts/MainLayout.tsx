@@ -27,23 +27,41 @@ export default function MainLayout({ children }: MainLayoutProps) {
   
   // Track when the first subscription check completes
   useEffect(() => {
+    console.log('[MAIN-LAYOUT] Subscription state:', {
+      loadingSubscription,
+      subscribed: subscriptionStatus.subscribed,
+      hasUser: !!user,
+      hasCompletedFirstCheck
+    });
+    
     if (!loadingSubscription && user) {
+      console.log('[MAIN-LAYOUT] First check completed');
       setHasCompletedFirstCheck(true);
     }
     if (!user) {
+      console.log('[MAIN-LAYOUT] No user, resetting check');
       setHasCompletedFirstCheck(false);
     }
-  }, [loadingSubscription, user]);
+  }, [loadingSubscription, user, subscriptionStatus.subscribed, hasCompletedFirstCheck]);
   
   // Only show modal after first check is complete
   useEffect(() => {
+    console.log('[MAIN-LAYOUT] Modal decision:', {
+      hasCompletedFirstCheck,
+      subscribed: subscriptionStatus.subscribed,
+      hasUser: !!user,
+      currentModalState: showPricingModal
+    });
+    
     // Don't do anything until first check is complete
     if (!hasCompletedFirstCheck) {
+      console.log('[MAIN-LAYOUT] Waiting for first check to complete');
       return;
     }
     
     // If user has subscription, never show modal
     if (subscriptionStatus.subscribed) {
+      console.log('[MAIN-LAYOUT] User is subscribed, hiding modal');
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
@@ -53,10 +71,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     
     if (user && !subscriptionStatus.subscribed && !hasShownModal) {
+      console.log('[MAIN-LAYOUT] Showing pricing modal for free user');
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
+    } else {
+      console.log('[MAIN-LAYOUT] Not showing modal:', {
+        hasUser: !!user,
+        subscribed: subscriptionStatus.subscribed,
+        hasShownModal
+      });
     }
-  }, [user, subscriptionStatus.subscribed, hasCompletedFirstCheck]);
+  }, [user, subscriptionStatus.subscribed, hasCompletedFirstCheck, showPricingModal]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
