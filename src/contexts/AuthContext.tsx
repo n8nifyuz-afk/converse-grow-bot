@@ -586,38 +586,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('❌ Error checking subscription with Stripe:', error);
-        // Fallback to database check if Stripe API fails
-        console.log('🔄 Falling back to database check...');
-        const { data: dbSub, error: dbError } = await supabase
-          .from('user_subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .maybeSingle();
-        
-        if (!dbError && dbSub) {
-          console.log('✅ Found active subscription in database (fallback):', dbSub);
-          const newStatus = {
-            subscribed: true,
-            product_id: dbSub.product_id,
-            subscription_end: dbSub.current_period_end
-          };
-          setSubscriptionStatus(newStatus);
-          saveCachedSubscription(newStatus);
-          checkAndShowPricingModal(newStatus);
-        } else {
-          // On error and no DB record, keep cached status if available
-          const cached = loadCachedSubscription();
-          if (!cached) {
-            const resetStatus = {
-              subscribed: false,
-              product_id: null,
-              subscription_end: null
-            };
-            setSubscriptionStatus(resetStatus);
-            clearCachedSubscription();
-          }
-        }
+        // NEVER trust database as source of truth - only Stripe API
+        // If Stripe check fails, mark as unsubscribed for security
+        console.warn('⚠️ Stripe check failed - marking as unsubscribed for security');
+        const resetStatus = {
+          subscribed: false,
+          product_id: null,
+          subscription_end: null
+        };
+        setSubscriptionStatus(resetStatus);
+        clearCachedSubscription();
+        checkAndShowPricingModal(resetStatus);
       } else if (data) {
         const newStatus = {
           subscribed: data.subscribed || false,
@@ -636,41 +615,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('❌ Error checking subscription:', error);
-      // Fallback to database check on any error
-      try {
-        const { data: dbSub, error: dbError } = await supabase
-          .from('user_subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .maybeSingle();
-        
-        if (!dbError && dbSub) {
-          console.log('✅ Found active subscription in database (error fallback):', dbSub);
-          const newStatus = {
-            subscribed: true,
-            product_id: dbSub.product_id,
-            subscription_end: dbSub.current_period_end
-          };
-          setSubscriptionStatus(newStatus);
-          saveCachedSubscription(newStatus);
-          checkAndShowPricingModal(newStatus);
-        } else {
-          // On error, keep cached status if available
-          const cached = loadCachedSubscription();
-          if (!cached) {
-            const resetStatus = {
-              subscribed: false,
-              product_id: null,
-              subscription_end: null
-            };
-            setSubscriptionStatus(resetStatus);
-            clearCachedSubscription();
-          }
-        }
-      } catch (fallbackError) {
-        console.error('❌ Database fallback also failed:', fallbackError);
-      }
+      // SECURITY: Never trust database - if Stripe check fails, mark as unsubscribed
+      console.warn('⚠️ Exception during subscription check - marking as unsubscribed for security');
+      const resetStatus = {
+        subscribed: false,
+        product_id: null,
+        subscription_end: null
+      };
+      setSubscriptionStatus(resetStatus);
+      clearCachedSubscription();
     } finally {
       setIsCheckingSubscription(false);
       setLoadingSubscription(false);
