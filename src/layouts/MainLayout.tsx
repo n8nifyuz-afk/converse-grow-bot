@@ -23,66 +23,52 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
-  const [hasCheckedForModal, setHasCheckedForModal] = useState(false);
   
-  // Show modal logic - run after subscription check completes
+  // Show/hide modal based on subscription status
   useEffect(() => {
-    console.log('[MAIN-LAYOUT] Modal decision:', {
+    console.log('[MAIN-LAYOUT] Modal logic:', {
       loadingSubscription,
       hasUser: !!user,
       subscribed: subscriptionStatus.subscribed,
+      product_id: subscriptionStatus.product_id,
       currentModalState: showPricingModal,
-      hasCheckedForModal,
       sessionFlag: sessionStorage.getItem('pricing_modal_shown')
     });
 
-    // Don't run until loading is complete
+    // While loading, don't make any changes
     if (loadingSubscription) {
-      console.log('[MAIN-LAYOUT] Still loading subscription');
+      console.log('[MAIN-LAYOUT] Still loading subscription...');
       return;
     }
 
-    // Only run this logic once after loading completes
-    if (hasCheckedForModal) {
-      console.log('[MAIN-LAYOUT] Already checked, skipping');
-      return;
-    }
-
-    // Mark that we've checked
-    setHasCheckedForModal(true);
-
-    // Don't show if no user
+    // No user - clear everything
     if (!user) {
-      console.log('[MAIN-LAYOUT] No user');
-      return;
-    }
-
-    // NEVER show for subscribed users
-    if (subscriptionStatus.subscribed) {
-      console.log('[MAIN-LAYOUT] User is subscribed, not showing modal');
+      console.log('[MAIN-LAYOUT] No user, clearing modal');
+      setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
     }
 
-    // For free users only: show once per session
+    // User is subscribed - NEVER show modal, always hide it
+    if (subscriptionStatus.subscribed) {
+      console.log('[MAIN-LAYOUT] Subscribed user - hiding modal');
+      if (showPricingModal) {
+        setShowPricingModal(false);
+      }
+      sessionStorage.removeItem('pricing_modal_shown');
+      return;
+    }
+
+    // Free user - show once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     if (!hasShownModal) {
-      console.log('[MAIN-LAYOUT] Free user, showing modal');
+      console.log('[MAIN-LAYOUT] Free user - showing modal once');
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
     } else {
-      console.log('[MAIN-LAYOUT] Modal already shown this session');
+      console.log('[MAIN-LAYOUT] Modal already shown to free user this session');
     }
-  }, [loadingSubscription, hasCheckedForModal]);
-
-  // Reset check flag when user changes
-  useEffect(() => {
-    setHasCheckedForModal(false);
-    if (!user) {
-      setShowPricingModal(false);
-      sessionStorage.removeItem('pricing_modal_shown');
-    }
-  }, [user?.id]);
+  }, [loadingSubscription, user, subscriptionStatus.subscribed, subscriptionStatus.product_id, showPricingModal]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
