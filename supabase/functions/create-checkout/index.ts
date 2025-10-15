@@ -60,6 +60,7 @@ serve(async (req) => {
     // Get origin from request for dynamic redirect URLs (works in test and production)
     const origin = req.headers.get("origin") || "https://www.chatl.ai";
     
+    // Configure subscription for exact daily billing without batching
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -70,6 +71,12 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
+      subscription_data: {
+        // Anchor billing to the exact time of subscription creation
+        // This prevents Stripe from batching multiple days together
+        billing_cycle_anchor: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // Next day
+        proration_behavior: 'none', // Don't prorate, charge full amount each cycle
+      },
       success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
     });
