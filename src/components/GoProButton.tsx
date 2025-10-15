@@ -18,14 +18,14 @@ export const GoProButton = () => {
         onClick={() => setShowPricingModal(true)}
         data-pricing-trigger="true"
         aria-label="Upgrade Now"
-        className="flex items-center gap-2 px-4 py-2 rounded-[20px] bg-transparent border-2 hover:-translate-y-0.5 transition-transform duration-150"
+        className="flex items-center gap-1.5 px-2 py-1.5 sm:gap-2 sm:px-4 sm:py-2 rounded-[20px] bg-transparent border-2 hover:-translate-y-0.5 transition-transform duration-150"
         style={{ borderColor: '#b0851e' }}
       >
         {/* Rocket Icon */}
         <img 
           src={rocketIcon} 
           alt="Rocket" 
-          className="w-5 h-5"
+          className="w-4 h-4 sm:w-5 sm:h-5"
           style={{
             filter: "brightness(0) saturate(100%) invert(49%) sepia(56%) saturate(475%) hue-rotate(7deg) brightness(95%) contrast(89%)"
           }}
@@ -33,9 +33,8 @@ export const GoProButton = () => {
 
         {/* Text with gold gradient */}
         <span
-          className="font-semibold leading-tight"
+          className="font-semibold leading-tight text-sm sm:text-base"
           style={{
-            fontSize: 18,
             background: "linear-gradient(90deg,#b0851e,#d4aa3a)",
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
