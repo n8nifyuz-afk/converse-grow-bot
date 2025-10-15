@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Gem } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PricingModal } from './PricingModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MessageLimitWarningProps {
   messageCount: number;
@@ -11,7 +12,15 @@ interface MessageLimitWarningProps {
 
 export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messageCount, limit }) => {
   const navigate = useNavigate();
+  const { subscriptionStatus, loadingSubscription } = useAuth();
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
+  const handleUpgradeClick = () => {
+    // Only show pricing modal for free users
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
+      setIsPricingModalOpen(true);
+    }
+  };
 
   return (
     <>
@@ -21,7 +30,7 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
             You've reached your free message limit. Upgrade to Pro or Ultra Pro for unlimited chats.
           </p>
           <Button 
-            onClick={() => setIsPricingModalOpen(true)}
+            onClick={handleUpgradeClick}
             className="bg-foreground hover:bg-foreground/90 text-background rounded-md px-3 py-1.5 text-sm font-semibold flex items-center gap-1.5"
           >
             <Gem className="w-3.5 h-3.5" />

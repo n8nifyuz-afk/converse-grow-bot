@@ -193,7 +193,8 @@ export default function ProjectPage() {
   const navigate = useNavigate();
   const {
     user,
-    subscriptionStatus
+    subscriptionStatus,
+    loadingSubscription
   } = useAuth();
   const {
     actualTheme
@@ -367,8 +368,8 @@ export default function ProjectPage() {
         setShowAuthModal(true);
         return;
       }
-      // If not subscribed, show pricing modal
-      if (!subscriptionStatus.subscribed) {
+      // If not subscribed, show pricing modal (only for free users)
+      if (!loadingSubscription && !subscriptionStatus.subscribed) {
         setShowPricingModal(true);
         return;
       }
@@ -656,7 +657,7 @@ export default function ProjectPage() {
       setIsPopoverOpen(false);
       return;
     }
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       setIsPopoverOpen(false);
       return;
@@ -672,7 +673,7 @@ export default function ProjectPage() {
       event.target.value = '';
       return;
     }
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       event.target.value = '';
       return;
@@ -813,7 +814,7 @@ export default function ProjectPage() {
       });
       return;
     }
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       return;
     }
@@ -1099,7 +1100,7 @@ export default function ProjectPage() {
               return;
             }
             
-            if (!subscriptionStatus.subscribed) {
+            if (!loadingSubscription && !subscriptionStatus.subscribed) {
               setShowPricingModal(true);
               return;
             }

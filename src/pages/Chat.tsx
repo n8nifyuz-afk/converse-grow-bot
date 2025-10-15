@@ -1678,8 +1678,8 @@ export default function Chat() {
     const selectedModelInfo = models.find(m => m.id === modelId);
     const isProModel = selectedModelInfo?.type === 'pro';
     
-    // If it's a pro model and user doesn't have a subscription, show pricing modal
-    if (isProModel && !subscriptionStatus.subscribed) {
+    // If it's a pro model and user doesn't have a subscription, show pricing modal (only for free users)
+    if (isProModel && !loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       return;
     }
@@ -2977,8 +2977,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       setIsPopoverOpen(false);
       return;
     }
-    // Check if user has a subscription
-    if (!subscriptionStatus.subscribed) {
+    // Check if user has a subscription (only show modal for free users)
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       setIsPopoverOpen(false);
       return;
@@ -2989,7 +2989,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
   };
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Double-check subscription status (in case user bypassed the button)
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       event.target.value = '';
       return;
@@ -3053,7 +3053,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       });
       return;
     }
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       return;
     }
@@ -3625,7 +3625,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
             return;
           }
           
-          if (!subscriptionStatus.subscribed) {
+          if (!loadingSubscription && !subscriptionStatus.subscribed) {
             setShowPricingModal(true);
             return;
           }

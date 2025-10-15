@@ -178,7 +178,8 @@ export default function Index() {
     user,
     loading: authLoading,
     userProfile,
-    subscriptionStatus
+    subscriptionStatus,
+    loadingSubscription
   } = useAuth();
   const {
     actualTheme
@@ -337,7 +338,7 @@ export default function Index() {
       });
       return;
     }
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       return;
     }
@@ -361,7 +362,7 @@ export default function Index() {
       setShowAuthModal(true);
       return;
     }
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       return;
     }
@@ -410,7 +411,7 @@ export default function Index() {
       });
       return;
     }
-    if (!subscriptionStatus.subscribed) {
+    if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
       return;
     }
@@ -733,8 +734,8 @@ export default function Index() {
         setShowAuthModal(true);
         return;
       }
-      // If not subscribed, show pricing modal
-      if (!subscriptionStatus.subscribed) {
+      // If not subscribed, show pricing modal (only for free users)
+      if (!loadingSubscription && !subscriptionStatus.subscribed) {
         setShowPricingModal(true);
         return;
       }
@@ -926,7 +927,7 @@ export default function Index() {
         });
         return;
       }
-      if (!subscriptionStatus.subscribed) {
+      if (!loadingSubscription && !subscriptionStatus.subscribed) {
         setShowPricingModal(true);
         return;
       }
