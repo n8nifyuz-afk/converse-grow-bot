@@ -23,57 +23,56 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [hasCheckedSubscription, setHasCheckedSubscription] = useState(false);
   
-  // Track when user first signs in to prevent modal from showing immediately
+  // Track subscription check completion
   useEffect(() => {
-    if (user) {
-      // Mark that user just signed in - prevent modal for this session
-      const justSignedIn = sessionStorage.getItem('just_signed_in');
-      if (!justSignedIn) {
-        sessionStorage.setItem('just_signed_in', 'true');
-      }
-    } else {
-      // Clear all modal-related flags on sign out
-      sessionStorage.removeItem('just_signed_in');
-      sessionStorage.removeItem('pricing_modal_shown');
+    // Only mark as checked when we have a user AND subscription loading is complete
+    if (user && !loadingSubscription) {
+      // Add a small delay to ensure state has fully settled
+      const timer = setTimeout(() => {
+        setHasCheckedSubscription(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else if (!user) {
+      // Reset when user signs out
+      setHasCheckedSubscription(false);
       setShowPricingModal(false);
+      sessionStorage.removeItem('pricing_modal_shown');
     }
-  }, [user?.id]); // Only run when user ID changes (sign in/out)
+  }, [user, loadingSubscription]);
 
-  // Show modal logic - only after subscription check completes
+  // Show modal logic - ONLY after subscription check is complete
   useEffect(() => {
-    // Don't show modal if still checking subscription
-    if (loadingSubscription) {
+    // Don't run until subscription check is complete
+    if (!hasCheckedSubscription) {
       return;
     }
 
-    // Don't show modal if no user
+    // Don't show modal if no user (shouldn't happen but safety check)
     if (!user) {
       setShowPricingModal(false);
       return;
     }
 
-    // Never show for subscribed users
+    // NEVER show for subscribed users - this is the critical check
     if (subscriptionStatus.subscribed) {
       setShowPricingModal(false);
       sessionStorage.removeItem('pricing_modal_shown');
       return;
     }
 
-    // Don't show modal immediately after sign-in (wait for next visit)
-    const justSignedIn = sessionStorage.getItem('just_signed_in');
-    if (justSignedIn) {
-      sessionStorage.removeItem('just_signed_in');
-      return;
-    }
-
-    // Show once per session for free users (on subsequent visits)
+    // For free users: show once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     if (!hasShownModal) {
-      setShowPricingModal(true);
-      sessionStorage.setItem('pricing_modal_shown', 'true');
+      // Add small delay to ensure no flash
+      const timer = setTimeout(() => {
+        setShowPricingModal(true);
+        sessionStorage.setItem('pricing_modal_shown', 'true');
+      }, 200);
+      return () => clearTimeout(timer);
     }
-  }, [user, loadingSubscription, subscriptionStatus.subscribed]);
+  }, [hasCheckedSubscription, user, subscriptionStatus.subscribed]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
