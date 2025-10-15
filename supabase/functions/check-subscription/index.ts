@@ -12,8 +12,9 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// Product IDs for both monthly and yearly plans
+// Product IDs for all plans (must match live Stripe products)
 const productToPlanMap: { [key: string]: string } = {
+  'prod_TExAqVXMsTfeDA': 'Pro',        // Pro Daily (Test)
   'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
   'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
   'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly

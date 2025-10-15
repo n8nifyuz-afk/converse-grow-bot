@@ -38,6 +38,7 @@ const allFeatures: Feature[] = [
 
 const pricingOptions = {
   pro: {
+    daily: { price: 1.99, perDay: 1.99 },
     monthly: { price: 19.99, perDay: 0.67 },
     yearly: { price: 15.99, perDay: 0.53, savings: 20 }
   },
@@ -58,6 +59,7 @@ const pricingOptions = {
 
 const priceIds = {
   pro: {
+    daily: 'price_1SITFgL8Zm4LqDn49eCVYCGN',
     monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
     yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
   },
@@ -71,7 +73,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -207,6 +209,36 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Billing Period Options */}
               <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-3 flex-1 min-h-0">
+                {selectedPlan === 'pro' && (
+                  <button
+                    onClick={() => setSelectedPeriod('daily')}
+                    className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
+                      selectedPeriod === 'daily'
+                        ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
+                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
+                    }`}
+                  >
+                    <Badge className="absolute -top-1.5 sm:-top-2 right-2 sm:right-4 bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold border-0">
+                      TEST ONLY
+                    </Badge>
+                    {selectedPeriod === 'daily' && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
+                    )}
+                    <div className="flex justify-between items-center relative z-10">
+                      <div>
+                        <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Daily</div>
+                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+                          Billed daily • For testing
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].daily.price}</div>
+                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
+                      </div>
+                    </div>
+                  </button>
+                )}
+                
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
