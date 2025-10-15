@@ -12,10 +12,11 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// Product ID to plan name mapping - must match frontend
+// LIVE Product ID to plan name mapping - Replace with your actual live product IDs
+// To get these: Stripe Dashboard > Products > Select your product > Copy the product ID (starts with prod_)
 const productToPlanMap: { [key: string]: string } = {
-  'prod_TDSeCiQ2JEFnWB': 'Pro',
-  'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
+  'prod_YOUR_LIVE_PRO_PRODUCT_ID': 'Pro',        // Replace: Pro Plan Product ID
+  'prod_YOUR_LIVE_ULTRA_PRODUCT_ID': 'Ultra Pro', // Replace: Ultra Pro Plan Product ID
 };
 
 serve(async (req) => {
@@ -103,11 +104,11 @@ serve(async (req) => {
       for (const sub of subscriptions.data) {
         const subProductId = sub.items.data[0].price.product as string;
         
-        // Determine tier for this subscription
+        // Determine tier for this subscription - Update with your live product IDs
         let subTier = 'free';
-        if (subProductId === 'prod_TDSeCiQ2JEFnWB') {
+        if (subProductId === 'prod_YOUR_LIVE_PRO_PRODUCT_ID') {  // Replace with Pro product ID
           subTier = 'pro';
-        } else if (subProductId === 'prod_TDSfAtaWP5KbhM') {
+        } else if (subProductId === 'prod_YOUR_LIVE_ULTRA_PRODUCT_ID') {  // Replace with Ultra product ID
           subTier = 'ultra_pro';
         } else if (subProductId) {
           subTier = 'pro'; // Default to pro for unmapped products

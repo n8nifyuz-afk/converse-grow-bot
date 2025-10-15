@@ -47,15 +47,16 @@ const pricingOptions = {
   }
 };
 
-// Stripe price IDs
+// Stripe LIVE price IDs - Replace with your actual live price IDs from Stripe Dashboard
+// To get these: Stripe Dashboard > Products > Select your product > Copy the price ID
 const priceIds = {
   pro: {
-    monthly: 'price_1SH1jRL8Zm4LqDn4M49yf60W',
-    yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
+    monthly: 'price_YOUR_LIVE_PRO_MONTHLY_ID',  // Replace: Pro Plan Monthly (€19.99)
+    yearly: 'price_YOUR_LIVE_PRO_YEARLY_ID'     // Replace: Pro Plan Yearly (€15.99)
   },
   ultra: {
-    monthly: 'price_1SH1jpL8Zm4LqDn4zN9CGBpC',
-    yearly: 'price_1SHioTL8Zm4LqDn41Pd00GWM'
+    monthly: 'price_YOUR_LIVE_ULTRA_MONTHLY_ID', // Replace: Ultra Pro Monthly (€39.99)
+    yearly: 'price_YOUR_LIVE_ULTRA_YEARLY_ID'    // Replace: Ultra Pro Yearly (€31.99)
   }
 };
 
