@@ -23,10 +23,22 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [hasCompletedFirstCheck, setHasCompletedFirstCheck] = useState(false);
   
+  // Track when the first subscription check completes
   useEffect(() => {
-    // Don't do anything while subscription is loading
-    if (loadingSubscription) {
+    if (!loadingSubscription && user) {
+      setHasCompletedFirstCheck(true);
+    }
+    if (!user) {
+      setHasCompletedFirstCheck(false);
+    }
+  }, [loadingSubscription, user]);
+  
+  // Only show modal after first check is complete
+  useEffect(() => {
+    // Don't do anything until first check is complete
+    if (!hasCompletedFirstCheck) {
       return;
     }
     
@@ -44,7 +56,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
     }
-  }, [user, subscriptionStatus.subscribed, loadingSubscription]);
+  }, [user, subscriptionStatus.subscribed, hasCompletedFirstCheck]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
