@@ -23,46 +23,28 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
-  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
-  
-  // Clear pricing modal flag when user changes (only for free users)
-  useEffect(() => {
-    if (user) {
-      // Wait a bit for subscription to load before clearing flag
-      const timer = setTimeout(() => {
-        if (!loadingSubscription && !subscriptionStatus.subscribed) {
-          sessionStorage.removeItem('pricing_modal_shown');
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [user?.id, loadingSubscription, subscriptionStatus.subscribed]);
   
   useEffect(() => {
-    // Mark subscription as checked when loading completes
-    if (user && !loadingSubscription) {
-      setSubscriptionChecked(true);
-    } else if (!user) {
-      setSubscriptionChecked(false);
-    }
-  }, [user, loadingSubscription]);
-  
-  useEffect(() => {
-    // Close modal immediately if user has subscription
-    if (subscriptionStatus.subscribed) {
-      setShowPricingModal(false);
+    // Don't do anything while subscription is loading
+    if (loadingSubscription) {
       return;
     }
     
-    // Only show pricing modal for free users after subscription has been verified
+    // If user has subscription, never show modal
+    if (subscriptionStatus.subscribed) {
+      setShowPricingModal(false);
+      sessionStorage.removeItem('pricing_modal_shown');
+      return;
+    }
+    
+    // Only for free users: show modal once per session
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     
-    if (user && subscriptionChecked && !subscriptionStatus.subscribed && !hasShownModal) {
-      console.log('📊 Showing pricing modal for free user');
+    if (user && !subscriptionStatus.subscribed && !hasShownModal) {
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
     }
-  }, [user, subscriptionStatus.subscribed, subscriptionChecked]);
+  }, [user, subscriptionStatus.subscribed, loadingSubscription]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
