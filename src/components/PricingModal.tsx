@@ -97,10 +97,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-3xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[80vh] md:h-[75vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl">
           <div className="flex flex-col md:flex-row h-full">
             {/* Left Panel - Features Comparison */}
-            <div className="w-full md:w-7/12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 sm:p-4 md:p-6 lg:p-8 border-r border-zinc-700 dark:border-zinc-800 flex flex-col relative">
+            <div className="w-full md:w-7/12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-700 dark:border-zinc-800 flex flex-col relative">
               {/* Decorative gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/10 pointer-events-none"></div>
               
@@ -160,16 +160,16 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30">
-              <div className="mb-3 sm:mb-4 md:mb-6 flex-shrink-0">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1.5 sm:mb-2 md:mb-3 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-4 lg:p-8 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30">
+              <div className="mb-3 sm:mb-4 md:mb-4 flex-shrink-0">
+                <h2 className="text-xl sm:text-2xl md:text-2xl lg:text-4xl font-bold mb-1.5 sm:mb-2 md:mb-2 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
                   Choose Your Plan
                 </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm md:text-base">Unlock unlimited access to all AI models</p>
+                <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm md:text-sm">Unlock unlimited access to all AI models</p>
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-3 sm:mb-4 md:mb-5 flex-shrink-0">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-3 sm:mb-4 md:mb-3 flex-shrink-0">
                 <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10 md:h-12 bg-zinc-100 dark:bg-zinc-900 p-1 sm:p-1.5 border border-zinc-200 dark:border-zinc-800 rounded-lg sm:rounded-xl">
                   <TabsTrigger 
                     value="pro" 
@@ -189,7 +189,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-5 flex-1 min-h-0">
+              <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-3 flex-1 min-h-0">
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
@@ -268,7 +268,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Button>
 
               {/* Footer */}
-              <div className="mt-3 sm:mt-4 md:mt-5 space-y-2 sm:space-y-3 flex-shrink-0">
+              <div className="mt-3 sm:mt-4 md:mt-3 space-y-2 sm:space-y-3 flex-shrink-0">
                 {/* Payment Cards */}
                 <div className="flex items-center justify-center gap-2 sm:gap-3 py-1 sm:py-2">
                   {/* Visa */}
