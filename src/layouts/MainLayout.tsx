@@ -23,16 +23,26 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { user, subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   
   useEffect(() => {
-    // Check if we should show pricing modal on login
+    // Mark subscription as checked when loading completes
+    if (user && !loadingSubscription) {
+      setSubscriptionChecked(true);
+    } else if (!user) {
+      setSubscriptionChecked(false);
+    }
+  }, [user, loadingSubscription]);
+  
+  useEffect(() => {
+    // Only show pricing modal after subscription has been verified
     const hasShownModal = sessionStorage.getItem('pricing_modal_shown');
     
-    if (user && !loadingSubscription && !subscriptionStatus.subscribed && !hasShownModal) {
+    if (user && subscriptionChecked && !subscriptionStatus.subscribed && !hasShownModal) {
       setShowPricingModal(true);
       sessionStorage.setItem('pricing_modal_shown', 'true');
     }
-  }, [user, subscriptionStatus, loadingSubscription]);
+  }, [user, subscriptionStatus, subscriptionChecked]);
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
