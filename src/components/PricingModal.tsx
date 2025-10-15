@@ -192,7 +192,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-3 flex-1 min-h-0">
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
-                  className={`w-full p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
+                  className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
                     selectedPeriod === 'monthly'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
@@ -217,7 +217,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
                 <button
                   onClick={() => setSelectedPeriod('yearly')}
-                  className={`w-full p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border transition-all duration-300 text-left relative group overflow-hidden ${
+                  className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left relative group overflow-hidden ${
                     selectedPeriod === 'yearly'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
