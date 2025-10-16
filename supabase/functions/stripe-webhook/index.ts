@@ -12,12 +12,21 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-// LIVE Product IDs
+// LIVE Product IDs - Updated based on active payment links
 const productToPlanMap: { [key: string]: string } = {
-  'prod_TFM1M1I5vYy7fk': 'Pro',        // Pro Monthly Cheap (LIVE)
+  'prod_TFM1M1I5vYy7fk': 'Pro',        // Pro Monthly Cheap (Test/LIVE)
   'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
   'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
   'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly (LIVE)
+};
+
+// Price ID to Product ID mapping for reference
+const priceToProductMap: { [key: string]: string } = {
+  'price_1SIrJEL8Zm4LqDn4JqqrksNA': 'prod_TFM1M1I5vYy7fk',  // Pro Monthly Cheap
+  'price_1SH1g3L8Zm4LqDn4WSyw1BzA': 'prod_TEx5Xda5BPBuHv',  // Pro Monthly
+  'price_1SITBGL8Zm4LqDn4fd4JLVDA': 'prod_TEx5Xda5BPBuHv',  // Pro Yearly
+  'price_1SH1gHL8Zm4LqDn4wDQIGntf': 'prod_TDSbGJB9U4Xt7b',  // Ultra Monthly
+  'price_1SH1MjL8Zm4LqDn40swOy4Ar': 'prod_TDSHzExQNjyvJD',  // Ultra Yearly
 };
 
 serve(async (req) => {
@@ -121,7 +130,7 @@ serve(async (req) => {
           
           let subTier = 'free';
           // Pro products (all variants) - LIVE
-          if (subProductId === 'prod_TFLbRE1wL9Miha' || 
+          if (subProductId === 'prod_TFM1M1I5vYy7fk' || 
               subProductId === 'prod_TEx5Xda5BPBuHv') {
             subTier = 'pro';
           // Ultra Pro products (monthly or yearly) - LIVE
@@ -294,7 +303,7 @@ serve(async (req) => {
 
         // Determine plan tier based on product
         let planTier = 'free';
-        if (productId === 'prod_TFLbRE1wL9Miha' || 
+        if (productId === 'prod_TFM1M1I5vYy7fk' || 
             productId === 'prod_TEx5Xda5BPBuHv') {
           planTier = 'pro';
         } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
