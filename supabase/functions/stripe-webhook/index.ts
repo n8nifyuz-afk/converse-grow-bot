@@ -14,7 +14,7 @@ const logStep = (step: string, details?: any) => {
 
 // LIVE Product IDs
 const productToPlanMap: { [key: string]: string } = {
-  'prod_TExAqVXMsTfeDA': 'Pro',        // Pro Daily Test (LIVE $0.01)
+  'prod_TFICJyIefTctMv': 'Pro',        // Pro Daily Test (LIVE $0.50)
   'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly (LIVE)
   'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
   'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
@@ -122,7 +122,7 @@ serve(async (req) => {
           
           let subTier = 'free';
           // Pro products (all variants) - LIVE
-          if (subProductId === 'prod_TExAqVXMsTfeDA' || 
+          if (subProductId === 'prod_TFICJyIefTctMv' || 
               subProductId === 'prod_TDSbUWLqR3bz7k' || 
               subProductId === 'prod_TEx5Xda5BPBuHv') {
             subTier = 'pro';
@@ -187,7 +187,7 @@ serve(async (req) => {
         // If subscription is not active, user should be on free plan
         if (finalSubscription.status === 'active') {
           // Pro products (all variants) - LIVE
-          if (productId === 'prod_TExAqVXMsTfeDA' || 
+          if (productId === 'prod_TFICJyIefTctMv' || 
               productId === 'prod_TDSbUWLqR3bz7k' || 
               productId === 'prod_TEx5Xda5BPBuHv') {
             planTier = 'pro';
