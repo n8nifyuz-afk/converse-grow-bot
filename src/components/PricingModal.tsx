@@ -227,14 +227,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     )}
                     <div className="flex justify-between items-center relative z-10">
                       <div>
-                        <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Daily</div>
+                        <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Monthly Cheap</div>
                         <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                          Billed daily • For testing
+                          Billed monthly • For testing
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].daily.price}</div>
-                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
+                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per month</div>
                       </div>
                     </div>
                   </button>
