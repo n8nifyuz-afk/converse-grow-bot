@@ -106,6 +106,22 @@ serve(async (req) => {
           break;
         }
 
+        // If subscription is canceled, past_due, unpaid, or incomplete_expired, revert to free
+        if (['canceled', 'past_due', 'unpaid', 'incomplete_expired'].includes(subscription.status)) {
+          logStep("Subscription cancelled/expired, reverting to free plan", { 
+            subscriptionId: subscription.id,
+            status: subscription.status 
+          });
+          
+          await supabaseClient
+            .from('user_subscriptions')
+            .delete()
+            .eq('user_id', user.id);
+          
+          logStep("User reverted to free plan", { userId: user.id });
+          break;
+        }
+
         // Check if user has multiple active subscriptions (upgrade scenario)
         const allSubscriptions = await stripe.subscriptions.list({
           customer: subscription.customer as string,
@@ -368,6 +384,57 @@ serve(async (req) => {
           .eq('user_id', user.id);
 
         logStep("Subscription marked as past_due", { userId: user.id });
+        break;
+      }
+
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        logStep("Charge refunded", { chargeId: charge.id, amountRefunded: charge.amount_refunded });
+        
+        // Get customer email
+        if (!charge.customer) {
+          logStep("No customer associated with charge");
+          break;
+        }
+
+        const customer = await stripe.customers.retrieve(charge.customer as string) as Stripe.Customer;
+        if (!customer.email) {
+          logStep("No customer email found");
+          break;
+        }
+
+        // Find user by email
+        const { data: users, error: userError } = await supabaseClient.auth.admin.listUsers();
+        if (userError) throw userError;
+
+        const user = users.users.find(u => u.email === customer.email);
+        if (!user) {
+          logStep("User not found", { email: customer.email });
+          break;
+        }
+
+        // Check if this is a full refund
+        if (charge.amount_refunded === charge.amount) {
+          logStep("Full refund detected, reverting user to free plan", { userId: user.id });
+          
+          // Delete subscription record (user reverts to free plan)
+          const { error: deleteError } = await supabaseClient
+            .from('user_subscriptions')
+            .delete()
+            .eq('user_id', user.id);
+
+          if (deleteError) {
+            logStep("Error deleting subscription after refund", { error: deleteError.message });
+          } else {
+            logStep("User reverted to free plan after full refund", { userId: user.id });
+          }
+        } else {
+          logStep("Partial refund detected, keeping subscription active", { 
+            userId: user.id,
+            amountRefunded: charge.amount_refunded,
+            totalAmount: charge.amount
+          });
+        }
         break;
       }
 
