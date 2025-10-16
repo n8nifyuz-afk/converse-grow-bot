@@ -77,7 +77,6 @@ serve(async (req) => {
         billing_cycle_anchor: 'now', // Start billing immediately
         proration_behavior: 'none',
       },
-      payment_behavior: 'default_incomplete', // Require payment before subscription activates
     });
     logStep("Checkout session created", { sessionId: session.id });
 
