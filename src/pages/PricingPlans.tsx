@@ -150,7 +150,7 @@ export default function PricingPlans() {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TDSeCiQ2JEFnWB': 'Pro',
+    'prod_TFLbRE1wL9Miha': 'Pro',
     'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
   };
 
@@ -164,7 +164,7 @@ export default function PricingPlans() {
       // Price IDs based on billing period (only monthly and yearly available)
       const priceIds = {
         'pro': {
-          monthly: 'price_1QiS3eJUJwxjDZUkFUrmfHke',
+          monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
           yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
         },
         'ultra_pro': {
