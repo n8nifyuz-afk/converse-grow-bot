@@ -53,6 +53,20 @@ serve(async (req) => {
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       logStep("Existing customer found", { customerId });
+      
+      // Check if customer has any active subscriptions
+      const activeSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 10,
+      });
+      
+      if (activeSubscriptions.data.length > 0) {
+        logStep("Active subscription found - blocking checkout", { 
+          subscriptionCount: activeSubscriptions.data.length 
+        });
+        throw new Error("You already have an active subscription. Please cancel your current plan before upgrading. Refunds are calculated on a prorated daily basis.");
+      }
     } else {
       logStep("No existing customer, will create during checkout");
     }

@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import AuthModal from '@/components/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
+import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ const Pricing = () => {
   const { user, subscriptionStatus, checkSubscription } = useAuth();
   const [isYearly, setIsYearly] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
+  const [blockedPlanName, setBlockedPlanName] = useState('');
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
@@ -158,6 +161,14 @@ const Pricing = () => {
       return;
     }
     
+    // Check if user already has an active subscription
+    if (subscriptionStatus.subscribed && subscriptionStatus.product_id) {
+      const currentPlanName = productToPlanMap[subscriptionStatus.product_id] || 'Unknown';
+      setBlockedPlanName(currentPlanName);
+      setShowUpgradeBlockedDialog(true);
+      return;
+    }
+    
     try {
       // Map plan to price ID based on billing period
       const priceIds = {
@@ -186,6 +197,15 @@ const Pricing = () => {
       });
       
       if (error) {
+        // Check if error is about active subscription
+        const errorMessage = error.message || '';
+        if (errorMessage.includes('active subscription')) {
+          toast.dismiss();
+          const currentPlanName = productToPlanMap[subscriptionStatus.product_id || ''] || 'Unknown';
+          setBlockedPlanName(currentPlanName);
+          setShowUpgradeBlockedDialog(true);
+          return;
+        }
         toast.error('Failed to create checkout session');
         console.error('Checkout error:', error);
         return;
@@ -468,6 +488,11 @@ const Pricing = () => {
           setShowAuthModal(false);
           toast.success('Welcome! Please select your plan.');
         }}
+      />
+      <UpgradeBlockedDialog 
+        isOpen={showUpgradeBlockedDialog}
+        onClose={() => setShowUpgradeBlockedDialog(false)}
+        currentPlan={blockedPlanName}
       />
     </div>;
 };

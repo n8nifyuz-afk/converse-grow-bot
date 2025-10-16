@@ -164,10 +164,9 @@ serve(async (req) => {
           }
         }
         
-        // If there are multiple active subscriptions, just log for now
-        // DO NOT cancel lower tiers yet - wait until payment is confirmed
+        // Log multiple subscriptions - user needs to cancel manually per policy
         if (allSubscriptions.data.length > 1) {
-          logStep("Multiple active subscriptions detected - will cancel lower tiers after payment confirmation", {
+          logStep("Multiple active subscriptions detected - user must cancel lower tier manually", {
             highestTierSubId: highestTierSub.id,
             totalSubs: allSubscriptions.data.length
           });
@@ -343,60 +342,6 @@ serve(async (req) => {
           logStep("Error granting Pro access", { error: updateError.message });
         } else {
           logStep("Pro access granted successfully", { userId: user.id, planTier });
-        }
-
-        // NOW cancel lower tier subscriptions after payment is confirmed
-        const allSubscriptions = await stripe.subscriptions.list({
-          customer: subscription.customer as string,
-          status: "active",
-          limit: 10,
-        });
-
-        if (allSubscriptions.data.length > 1) {
-          logStep("Payment confirmed - now cancelling lower tier subscriptions", {
-            currentSubId: subscription.id,
-            totalSubs: allSubscriptions.data.length
-          });
-
-          const tierPriority: { [key: string]: number } = {
-            'free': 0,
-            'pro': 1,
-            'ultra_pro': 2
-          };
-
-          let currentTierPriority = tierPriority[planTier] || 0;
-
-          for (const sub of allSubscriptions.data) {
-            if (sub.id === subscription.id) continue; // Skip current subscription
-
-            const subProductId = sub.items.data[0].price.product as string;
-            let subTier = 'free';
-
-            if (subProductId === 'prod_TFM1M1I5vYy7fk' || subProductId === 'prod_TEx5Xda5BPBuHv') {
-              subTier = 'pro';
-            } else if (subProductId === 'prod_TDSbGJB9U4Xt7b' || subProductId === 'prod_TDSHzExQNjyvJD') {
-              subTier = 'ultra_pro';
-            }
-
-            const subTierPriority = tierPriority[subTier] || 0;
-
-            // Cancel if this subscription is lower tier than the current one
-            if (subTierPriority < currentTierPriority) {
-              try {
-                await stripe.subscriptions.cancel(sub.id);
-                logStep("Cancelled lower-tier subscription after payment confirmation", { 
-                  subscriptionId: sub.id,
-                  cancelledTier: subTier,
-                  activeTier: planTier
-                });
-              } catch (cancelError) {
-                logStep("ERROR cancelling lower-tier subscription", { 
-                  subscriptionId: sub.id, 
-                  error: cancelError instanceof Error ? cancelError.message : String(cancelError)
-                });
-              }
-            }
-          }
         }
         break;
       }

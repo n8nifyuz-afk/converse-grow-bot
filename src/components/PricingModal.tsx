@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import AuthModal from '@/components/AuthModal';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 
 interface PricingModalProps {
   open: boolean;
@@ -70,12 +71,22 @@ const priceIds = {
 };
 
 export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }) => {
-  const { user } = useAuth();
+  const { user, subscriptionStatus } = useAuth();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
   const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
+  const [blockedPlanName, setBlockedPlanName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Product ID to plan name mapping
+  const productToPlanMap: { [key: string]: string } = {
+    'prod_TFLbRE1wL9Miha': 'Pro',
+    'prod_TEx5Xda5BPBuHv': 'Pro',
+    'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',
+    'prod_TDSHzExQNjyvJD': 'Ultra Pro',
+  };
 
   console.log('[PRICING-MODAL] Render state:', {
     open,
@@ -92,6 +103,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
       return;
     }
 
+    // Check if user already has an active subscription
+    if (subscriptionStatus.subscribed && subscriptionStatus.product_id) {
+      const currentPlanName = productToPlanMap[subscriptionStatus.product_id] || 'Unknown';
+      setBlockedPlanName(currentPlanName);
+      setShowUpgradeBlockedDialog(true);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const priceId = priceIds[selectedPlan][selectedPeriod];
@@ -100,7 +119,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
         body: { priceId }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if error is about active subscription
+        const errorMessage = error.message || '';
+        if (errorMessage.includes('active subscription')) {
+          toast.dismiss();
+          const currentPlanName = productToPlanMap[subscriptionStatus.product_id || ''] || 'Unknown';
+          setBlockedPlanName(currentPlanName);
+          setShowUpgradeBlockedDialog(true);
+          return;
+        }
+        throw error;
+      }
 
       if (data?.url) {
         // Redirect to Stripe checkout in the same window
@@ -375,6 +405,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
+      />
+      <UpgradeBlockedDialog 
+        isOpen={showUpgradeBlockedDialog}
+        onClose={() => setShowUpgradeBlockedDialog(false)}
+        currentPlan={blockedPlanName}
       />
     </>
   );
