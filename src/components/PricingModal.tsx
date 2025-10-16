@@ -59,7 +59,7 @@ const pricingOptions = {
 
 const priceIds = {
   pro: {
-    daily: 'price_1SIq5pL8Zm4LqDn4Updb530U',
+    daily: 'price_1SIquEL8Zm4LqDn444wZtoij',
     monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
     yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
   },
