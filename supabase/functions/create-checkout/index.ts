@@ -72,6 +72,10 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
+      subscription_data: {
+        billing_cycle_anchor: 'now',
+        proration_behavior: 'none',
+      },
     });
     logStep("Checkout session created", { sessionId: session.id });
 
