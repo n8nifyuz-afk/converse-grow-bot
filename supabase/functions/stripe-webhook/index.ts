@@ -181,36 +181,23 @@ serve(async (req) => {
           });
         }
         
-        // Determine plan tier based on product and subscription status
-        let planTier = 'free';
-        
-        // If subscription is not active, user should be on free plan
-        if (finalSubscription.status === 'active') {
-          // Pro products (all variants) - LIVE
-          if (productId === 'prod_TFKlp5cbBYy1gp' || 
-              productId === 'prod_TDSbUWLqR3bz7k' || 
-              productId === 'prod_TEx5Xda5BPBuHv') {
-            planTier = 'pro';
-          // Ultra Pro products (monthly or yearly) - LIVE
-          } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
-            planTier = 'ultra_pro';
-          }
-          // Note: Unknown products already rejected above
-        }
+        // Save subscription as 'pending_payment' initially
+        // Pro access will only be granted after invoice.payment_succeeded
+        const planTier = 'free'; // Keep user on free plan until payment confirmed
+        const subscriptionStatus = finalSubscription.status === 'active' ? 'pending_payment' : finalSubscription.status;
         
         const subscriptionEnd = finalSubscription.current_period_end 
           ? new Date(finalSubscription.current_period_end * 1000).toISOString()
           : null;
 
-        logStep("Determined final subscription tier", { 
+        logStep("Subscription saved as pending payment", { 
           productId, 
           planName, 
-          planTier, 
-          status: finalSubscription.status,
+          status: subscriptionStatus,
           subscriptionId: finalSubscription.id
         });
 
-        // Upsert subscription data
+        // Upsert subscription data (user stays on free plan until payment succeeds)
         const { error: upsertError } = await supabaseClient
           .from('user_subscriptions')
           .upsert({
@@ -220,7 +207,7 @@ serve(async (req) => {
             product_id: productId,
             plan_name: planName,
             plan: planTier,
-            status: finalSubscription.status,
+            status: subscriptionStatus,
             current_period_end: subscriptionEnd,
             updated_at: new Date().toISOString()
           }, {
@@ -230,7 +217,7 @@ serve(async (req) => {
         if (upsertError) {
           logStep("Error upserting subscription", { error: upsertError.message });
         } else {
-          logStep("Subscription updated successfully", { userId: user.id });
+          logStep("Subscription saved pending payment", { userId: user.id });
         }
         break;
       }
@@ -272,8 +259,83 @@ serve(async (req) => {
 
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
-        logStep("Payment succeeded", { invoiceId: invoice.id });
-        // Payment succeeded - subscription is already handled by subscription.updated event
+        logStep("Payment succeeded", { invoiceId: invoice.id, amountPaid: invoice.amount_paid });
+        
+        // Only process if this is a subscription invoice with actual payment
+        if (!invoice.subscription || invoice.amount_paid === 0) {
+          logStep("Skipping - no subscription or zero payment");
+          break;
+        }
+
+        // Get customer email
+        const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
+        if (!customer.email) {
+          logStep("No customer email found");
+          break;
+        }
+
+        // Find user by email
+        const { data: users, error: userError } = await supabaseClient.auth.admin.listUsers();
+        if (userError) throw userError;
+
+        const user = users.users.find(u => u.email === customer.email);
+        if (!user) {
+          logStep("User not found", { email: customer.email });
+          break;
+        }
+
+        // Get the subscription to determine product tier
+        const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+        const productId = subscription.items.data[0].price.product as string;
+        const planName = productToPlanMap[productId];
+        
+        if (!planName) {
+          logStep("Unknown product ID", { productId });
+          break;
+        }
+
+        // Determine plan tier based on product
+        let planTier = 'free';
+        if (productId === 'prod_TFKlp5cbBYy1gp' || 
+            productId === 'prod_TDSbUWLqR3bz7k' || 
+            productId === 'prod_TEx5Xda5BPBuHv') {
+          planTier = 'pro';
+        } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
+          planTier = 'ultra_pro';
+        }
+
+        const subscriptionEnd = subscription.current_period_end 
+          ? new Date(subscription.current_period_end * 1000).toISOString()
+          : null;
+
+        logStep("Granting Pro access after payment", { 
+          userId: user.id,
+          planTier,
+          amountPaid: invoice.amount_paid
+        });
+
+        // NOW grant Pro access after confirmed payment
+        const { error: updateError } = await supabaseClient
+          .from('user_subscriptions')
+          .upsert({
+            user_id: user.id,
+            stripe_customer_id: subscription.customer as string,
+            stripe_subscription_id: subscription.id,
+            product_id: productId,
+            plan_name: planName,
+            plan: planTier,
+            status: 'active',
+            current_period_end: subscriptionEnd,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
+          });
+
+        if (updateError) {
+          logStep("Error granting Pro access", { error: updateError.message });
+        } else {
+          logStep("Pro access granted successfully", { userId: user.id, planTier });
+        }
         break;
       }
 
