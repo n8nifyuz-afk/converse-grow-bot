@@ -23,11 +23,11 @@ const Pricing = () => {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TFLbRE1wL9Miha': 'Pro', // Pro Monthly Cheap plan product ID
-    'prod_TEx5Xda5BPBuHv': 'Pro', // Pro Yearly plan product ID
-    'prod_TFjbArlYa9GMQr': 'Pro', // Pro Daily plan product ID
-    'prod_TDSbGJB9U4Xt7b': 'Ultra Pro', // Ultra Pro Monthly plan product ID
-    'prod_TDSHzExQNjyvJD': 'Ultra Pro', // Ultra Pro Yearly plan product ID
+    'prod_TFjbArlYa9GMQr': 'Pro',        // Pro Daily
+    'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
+    'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
+    'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
+    'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
   };
 
   // Scroll to top on page load
@@ -173,12 +173,12 @@ const Pricing = () => {
       const priceIds = {
         'Pro': {
           daily: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
-          monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
-          yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
+          monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
+          yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
         },
         'Ultra Pro': {
-          monthly: 'price_1QiS6JJUJwxjDZUkmQWZQEKl',
-          yearly: 'price_1SHioTL8Zm4LqDn41Pd00GWM'
+          monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
+          yearly: 'price_1SH1MjL8Zm4LqDn40swOy4Ar'
         }
       };
       

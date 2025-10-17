@@ -52,12 +52,12 @@ const pricingOptions = {
 const priceIds = {
   pro: {
     daily: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
-    monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
-    yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
+    monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
+    yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
   },
   ultra: {
-    monthly: 'price_1QiS6JJUJwxjDZUkmQWZQEKl',
-    yearly: 'price_1SHioTL8Zm4LqDn41Pd00GWM'
+    monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
+    yearly: 'price_1SH1MjL8Zm4LqDn40swOy4Ar'
   }
 };
 
@@ -73,11 +73,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TFLbRE1wL9Miha': 'Pro',
-    'prod_TEx5Xda5BPBuHv': 'Pro',
-    'prod_TFjbArlYa9GMQr': 'Pro',
-    'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',
-    'prod_TDSHzExQNjyvJD': 'Ultra Pro',
+    'prod_TFjbArlYa9GMQr': 'Pro',        // Pro Daily
+    'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
+    'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
+    'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
+    'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
   };
 
   console.log('[PRICING-MODAL] Render state:', {
