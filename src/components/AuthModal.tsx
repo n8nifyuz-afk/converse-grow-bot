@@ -181,27 +181,31 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     
     setLoading(true);
     try {
+      console.log('🔄 Requesting password reset for:', email);
       const { error } = await resetPassword(email);
       if (error) {
+        console.error('❌ Password reset failed:', error);
         toast({
           title: "Password reset failed",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log('✅ Password reset email sent successfully');
         toast({
           title: "Check your email",
-          description: "We've sent you a password reset link.",
-          duration: 8000,
+          description: "If an account exists with this email, you'll receive a password reset link. Please check your inbox and spam folder.",
+          duration: 10000,
         });
         setMode('signin');
         setEmail('');
         setPassword('');
       }
     } catch (error) {
+      console.error('❌ Unexpected error during password reset:', error);
       toast({
         title: "An error occurred",
-        description: "Please try again later.",
+        description: "Please try again later or contact support if the issue persists.",
         variant: "destructive",
       });
     } finally {
