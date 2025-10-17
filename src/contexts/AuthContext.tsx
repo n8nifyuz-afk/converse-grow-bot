@@ -250,6 +250,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           comingFromStripe
         });
         
+        // Clean URL immediately to avoid confusion
+        const cleanUrl = () => {
+          if (sessionId || urlParams.has('success')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            console.log('🧹 Cleaned URL parameters');
+          }
+        };
+        
         // Function to check subscription with retries after Stripe checkout
         const checkWithRetries = async (attempt = 1, maxAttempts = 4) => {
           console.log(`🔍 Stripe verification attempt ${attempt}/${maxAttempts}`);
@@ -257,28 +265,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const delay = attempt === 1 ? 3000 : 2000;
           await new Promise(resolve => setTimeout(resolve, delay));
           
-          // Check Stripe directly - this will update subscription status
-          await checkSubscription();
-          
-          if (subscriptionStatus.subscribed) {
-            console.log('✅ Subscription confirmed!');
-            // Clear URL params only if they exist
-            if (sessionId || urlParams.has('success')) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-          } else if (attempt < maxAttempts) {
-            console.log(`⏳ Retrying in ${delay}ms...`);
-            checkWithRetries(attempt + 1, maxAttempts);
-          } else {
-            console.log('⚠️ Max attempts reached - payment may have failed or subscription not activated yet');
-            // Clear URL params
-            if (sessionId || urlParams.has('success')) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            // Force one final refresh to ensure UI is up to date
+          try {
+            // Check Stripe directly - this will update subscription status
             await checkSubscription();
+            
+            if (subscriptionStatus.subscribed) {
+              console.log('✅ Subscription confirmed!');
+              cleanUrl();
+            } else if (attempt < maxAttempts) {
+              console.log(`⏳ Retrying in ${delay}ms...`);
+              checkWithRetries(attempt + 1, maxAttempts);
+            } else {
+              console.log('⚠️ Max attempts reached - cleaning URL anyway');
+              cleanUrl();
+              // Force one final refresh to ensure UI is up to date
+              await checkSubscription();
+            }
+          } catch (error) {
+            console.error('❌ Subscription check failed:', error);
+            if (attempt < maxAttempts) {
+              console.log(`⏳ Retrying in ${delay}ms after error...`);
+              checkWithRetries(attempt + 1, maxAttempts);
+            } else {
+              console.log('⚠️ Max attempts reached after errors - cleaning URL');
+              cleanUrl();
+            }
           }
         };
+        
+        // Clean URL after a short delay regardless of subscription check result
+        setTimeout(cleanUrl, 5000);
         
         checkWithRetries();
       }
@@ -584,7 +600,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
       
       if (refreshError || !refreshedSession) {
-        console.warn('⚠️ Session refresh failed, getting current session');
+        console.warn('⚠️ Session refresh failed - using fallback', refreshError);
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
         if (sessionError || !sessionData.session) {
@@ -626,7 +642,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Check with Stripe API - source of truth
       console.log('🔍 Checking subscription via Stripe API with refreshed token...');
-      const { data, error } = await supabase.functions.invoke('check-subscription');
+      
+      // Get the current session to ensure we have a valid token
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) {
+        console.error('❌ No valid session token available');
+        throw new Error('No valid authentication token');
+      }
+      
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${currentSession.access_token}`,
+        },
+      });
       
       if (error) {
         console.error('❌ Error checking subscription with Stripe:', error);
