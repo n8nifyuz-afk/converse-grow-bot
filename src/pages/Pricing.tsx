@@ -25,6 +25,7 @@ const Pricing = () => {
   const productToPlanMap: { [key: string]: string } = {
     'prod_TFLbRE1wL9Miha': 'Pro', // Pro Monthly Cheap plan product ID
     'prod_TEx5Xda5BPBuHv': 'Pro', // Pro Yearly plan product ID
+    'prod_TFjbArlYa9GMQr': 'Pro', // Pro Daily plan product ID
     'prod_TDSbGJB9U4Xt7b': 'Ultra Pro', // Ultra Pro Monthly plan product ID
     'prod_TDSHzExQNjyvJD': 'Ultra Pro', // Ultra Pro Yearly plan product ID
   };
@@ -171,6 +172,7 @@ const Pricing = () => {
       // Map plan to price ID based on billing period
       const priceIds = {
         'Pro': {
+          daily: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
           monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
           yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
         },

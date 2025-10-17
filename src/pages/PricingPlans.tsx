@@ -145,12 +145,13 @@ const faqData = [
 export default function PricingPlans() {
   const { user, subscriptionStatus } = useAuth();
   const navigate = useNavigate();
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [billingPeriod, setBillingPeriod] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
     'prod_TFLbRE1wL9Miha': 'Pro',
+    'prod_TFjbArlYa9GMQr': 'Pro',
     'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
   };
 
@@ -161,9 +162,10 @@ export default function PricingPlans() {
     }
     
     try {
-      // Price IDs based on billing period (only monthly and yearly available)
+      // Price IDs based on billing period
       const priceIds = {
         'pro': {
+          daily: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
           monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
           yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
         },
@@ -173,9 +175,7 @@ export default function PricingPlans() {
         }
       };
       
-      // Use monthly for quarterly billing period since we only have monthly and yearly
-      const period = billingPeriod === 'yearly' ? 'yearly' : 'monthly';
-      const priceId = priceIds[plan][period];
+      const priceId = priceIds[plan][billingPeriod];
       
       toast.loading('Redirecting to checkout...');
       
@@ -211,6 +211,7 @@ export default function PricingPlans() {
   const getPricing = (plan: 'pro' | 'ultra_pro') => {
     const prices = {
       pro: {
+        daily: { price: 0.60, period: 'day', note: 'billed daily' },
         monthly: { price: 19.99, period: 'month' },
         yearly: { price: 15.99, period: 'month', note: 'billed annually', savings: 20 }
       },
@@ -238,7 +239,15 @@ export default function PricingPlans() {
         </p>
 
         {/* Billing Period Selector */}
-        <div className="inline-flex bg-muted rounded-lg p-1 mb-6 sm:mb-8 w-full max-w-sm sm:w-auto">
+        <div className="inline-flex bg-muted rounded-lg p-1 mb-6 sm:mb-8 w-full max-w-md sm:w-auto">
+          <Button
+            variant={billingPeriod === 'daily' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setBillingPeriod('daily')}
+            className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
+          >
+            Daily
+          </Button>
           <Button
             variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
             size="sm"
