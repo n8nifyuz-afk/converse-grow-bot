@@ -144,17 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Handle auth callback from email verification
-    const handleAuthCallback = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (!error && data.session) {
-        setSession(data.session);
-        setUser(data.session.user);
-      }
-      setLoading(false);
-    };
+    let initialCheckComplete = false;
     
-    // Set up auth state listener - ONLY ONCE on mount
+    // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         // CRITICAL: Only synchronous state updates here to prevent auth loops
@@ -183,12 +175,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Clear pricing modal session flag on sign-out
           sessionStorage.removeItem('pricing_modal_shown_session');
         }
-        setLoading(false);
+        
+        // Only set loading to false after initial check is complete
+        if (initialCheckComplete) {
+          setLoading(false);
+        }
       }
     );
 
-    // Initial session check and auth callback handling
-    handleAuthCallback();
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!error && data.session) {
+        setSession(data.session);
+        setUser(data.session.user);
+      }
+      
+      // Mark initial check as complete and set loading to false
+      initialCheckComplete = true;
+      setLoading(false);
+    });
 
     return () => {
       subscription.unsubscribe();
