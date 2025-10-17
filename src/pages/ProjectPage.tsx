@@ -422,13 +422,7 @@ export default function ProjectPage() {
     // Check limit BEFORE creating chat or saving message
     if (!subscriptionStatus.subscribed && isAtLimit) {
       console.log('[PROJECT-MESSAGE-LIMIT] ❌ User at limit - showing upgrade message');
-      toast.error('Message limit reached', {
-        description: 'You have reached your free message limit. Please upgrade to Pro to continue chatting.',
-        action: {
-          label: 'Upgrade',
-          onClick: () => navigate('/pricing-plans')
-        }
-      });
+      // Message limit warning is now displayed inline above the input
       return;
     }
     
@@ -1217,6 +1211,32 @@ export default function ProjectPage() {
                       </button>
                     </div>)}
                 </div>}
+              
+              {/* Message limit warning */}
+              {!subscriptionStatus.subscribed && isAtLimit && (
+                <div className="mb-3 p-3 sm:p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-amber-500/20 rounded-full flex items-center justify-center">
+                      <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-semibold text-foreground mb-1">
+                        Message Limit Reached
+                      </h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        You've used your 3 free messages. Upgrade to Pro for unlimited access to all AI models.
+                      </p>
+                      <Button 
+                        size="sm" 
+                        className="h-8 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                        onClick={() => navigate('/pricing-plans')}
+                      >
+                        Upgrade to Pro
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <div className="relative bg-background border border-border rounded-xl sm:rounded-2xl p-3 sm:p-4">
                 <Textarea 
