@@ -235,13 +235,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         )
         .subscribe();
       
-      // Check for returning from Stripe
+      // Check for returning from Stripe (both success and failure cases)
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       const isReturningFromStripe = sessionId || urlParams.has('success');
       
-      if (isReturningFromStripe) {
-        console.log('🔄 Detected return from Stripe, verifying with retries...');
+      // Also detect if user was just on Stripe by checking document.referrer
+      const comingFromStripe = document.referrer.includes('stripe.com') || document.referrer.includes('checkout.stripe.com');
+      
+      if (isReturningFromStripe || comingFromStripe) {
+        console.log('🔄 Detected return from Stripe (success or failure), verifying with retries...', {
+          hasSessionId: !!sessionId,
+          hasSuccessParam: urlParams.has('success'),
+          comingFromStripe
+        });
         
         // Function to check subscription with retries after Stripe checkout
         const checkWithRetries = async (attempt = 1, maxAttempts = 4) => {
@@ -250,18 +257,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const delay = attempt === 1 ? 3000 : 2000;
           await new Promise(resolve => setTimeout(resolve, delay));
           
-          // Check Stripe directly
+          // Check Stripe directly - this will update subscription status
           await checkSubscription();
           
           if (subscriptionStatus.subscribed) {
             console.log('✅ Subscription confirmed!');
-            window.history.replaceState({}, document.title, window.location.pathname);
+            // Clear URL params only if they exist
+            if (sessionId || urlParams.has('success')) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
           } else if (attempt < maxAttempts) {
             console.log(`⏳ Retrying in ${delay}ms...`);
             checkWithRetries(attempt + 1, maxAttempts);
           } else {
-            console.log('⚠️ Max attempts reached');
-            window.history.replaceState({}, document.title, window.location.pathname);
+            console.log('⚠️ Max attempts reached - payment may have failed or subscription not activated yet');
+            // Clear URL params
+            if (sessionId || urlParams.has('success')) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            // Force one final refresh to ensure UI is up to date
+            await checkSubscription();
           }
         };
         

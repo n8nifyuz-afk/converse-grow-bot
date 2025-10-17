@@ -310,6 +310,89 @@ serve(async (req) => {
         break;
       }
 
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        logStep("Checkout session completed", { 
+          sessionId: session.id,
+          paymentStatus: session.payment_status,
+          status: session.status
+        });
+
+        // If payment failed or session expired, user should remain on free plan
+        if (session.payment_status === 'unpaid' || session.status === 'expired') {
+          logStep("Checkout session failed or expired", { 
+            sessionId: session.id,
+            paymentStatus: session.payment_status
+          });
+          
+          if (session.customer_email) {
+            const { data: users } = await supabaseClient.auth.admin.listUsers();
+            const user = users.users.find(u => u.email === session.customer_email);
+            
+            if (user) {
+              // Ensure user stays on free plan
+              await supabaseClient
+                .from('user_subscriptions')
+                .delete()
+                .eq('user_id', user.id);
+              
+              logStep("User kept on free plan after failed checkout", { userId: user.id });
+            }
+          }
+        }
+        // Success case is already handled by subscription.created webhook
+        break;
+      }
+
+      case "payment_intent.payment_failed": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        logStep("Payment intent failed", { 
+          paymentIntentId: paymentIntent.id,
+          lastPaymentError: paymentIntent.last_payment_error?.message
+        });
+
+        // Get customer email from payment intent
+        if (paymentIntent.customer) {
+          const customer = await stripe.customers.retrieve(paymentIntent.customer as string) as Stripe.Customer;
+          if (customer.email) {
+            const { data: users } = await supabaseClient.auth.admin.listUsers();
+            const user = users.users.find(u => u.email === customer.email);
+            
+            if (user) {
+              // Ensure user stays on free plan
+              await supabaseClient
+                .from('user_subscriptions')
+                .delete()
+                .eq('user_id', user.id);
+              
+              logStep("User kept on free plan after payment failure", { userId: user.id });
+            }
+          }
+        }
+        break;
+      }
+
+      case "checkout.session.async_payment_failed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        logStep("Async payment failed", { sessionId: session.id });
+
+        if (session.customer_email) {
+          const { data: users } = await supabaseClient.auth.admin.listUsers();
+          const user = users.users.find(u => u.email === session.customer_email);
+          
+          if (user) {
+            // Revert to free plan
+            await supabaseClient
+              .from('user_subscriptions')
+              .delete()
+              .eq('user_id', user.id);
+            
+            logStep("User reverted to free after async payment failure", { userId: user.id });
+          }
+        }
+        break;
+      }
+
       default:
         logStep("Unhandled event type", { type: event.type });
     }
