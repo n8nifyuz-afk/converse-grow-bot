@@ -152,6 +152,36 @@ serve(async (req) => {
       try {
         if (subscription.current_period_end) {
           subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+          
+          // CRITICAL FIX: Check if subscription has expired
+          const now = new Date();
+          const periodEnd = new Date(subscriptionEnd);
+          
+          if (periodEnd < now) {
+            logStep("EXPIRED: Subscription period ended", { 
+              subscriptionId: subscription.id,
+              endDate: subscriptionEnd,
+              now: now.toISOString()
+            });
+            
+            // Delete expired subscription from database
+            await supabaseClient
+              .from('user_subscriptions')
+              .delete()
+              .eq('user_id', user.id);
+            
+            logStep("Expired subscription removed - user downgraded to free", { userId: user.id });
+            
+            return new Response(JSON.stringify({
+              subscribed: false,
+              product_id: null,
+              subscription_end: null
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          }
+          
           logStep("Selected highest-tier subscription", { 
             subscriptionId: subscription.id, 
             tier: highestTier,

@@ -359,16 +359,16 @@ serve(async (req) => {
         const user = users?.users.find(u => u.email === customer.email);
         if (!user) break;
 
-        // Update subscription status to reflect payment failure
+        // CRITICAL FIX: Downgrade to free plan immediately on payment failure
+        // Stripe will retry payment, but user should not have Pro access until payment succeeds
+        logStep("Payment failed - downgrading user to free plan", { userId: user.id });
+        
         await supabaseClient
           .from('user_subscriptions')
-          .update({
-            status: 'past_due',
-            updated_at: new Date().toISOString()
-          })
+          .delete()
           .eq('user_id', user.id);
 
-        logStep("Subscription marked as past_due", { userId: user.id });
+        logStep("User downgraded to free plan due to payment failure", { userId: user.id });
         break;
       }
 
