@@ -88,35 +88,91 @@ serve(async (req) => {
       // Continue with account deletion even if storage cleanup fails
     }
 
-    // Delete token_usage records first (to avoid foreign key constraint violation)
+    // Clean up ALL user data systematically
+    console.log('Starting comprehensive user data cleanup', { userId: user.id });
+
+    // 1. Delete usage limits
+    const { error: usageLimitsError } = await supabaseAdmin
+      .from('usage_limits')
+      .delete()
+      .eq('user_id', user.id);
+    if (usageLimitsError) {
+      console.error('Usage limits deletion error:', usageLimitsError);
+    }
+
+    // 2. Delete user subscriptions (fully remove, not just mark cancelled)
+    const { error: subscriptionError } = await supabaseAdmin
+      .from('user_subscriptions')
+      .delete()
+      .eq('user_id', user.id);
+    if (subscriptionError) {
+      console.error('Subscription deletion error:', subscriptionError);
+    }
+
+    // 3. Delete user roles
+    const { error: rolesError } = await supabaseAdmin
+      .from('user_roles')
+      .delete()
+      .eq('user_id', user.id);
+    if (rolesError) {
+      console.error('User roles deletion error:', rolesError);
+    }
+
+    // 4. Delete image analyses
+    const { error: imageAnalysesError } = await supabaseAdmin
+      .from('image_analyses')
+      .delete()
+      .eq('user_id', user.id);
+    if (imageAnalysesError) {
+      console.error('Image analyses deletion error:', imageAnalysesError);
+    }
+
+    // 5. Delete message ratings
+    const { error: ratingsError } = await supabaseAdmin
+      .from('message_ratings')
+      .delete()
+      .eq('user_id', user.id);
+    if (ratingsError) {
+      console.error('Message ratings deletion error:', ratingsError);
+    }
+
+    // 6. Delete projects
+    const { error: projectsError } = await supabaseAdmin
+      .from('projects')
+      .delete()
+      .eq('user_id', user.id);
+    if (projectsError) {
+      console.error('Projects deletion error:', projectsError);
+    }
+
+    // 7. Delete token usage
     const { error: tokenError } = await supabaseAdmin
       .from('token_usage')
       .delete()
-      .eq('user_id', user.id)
-
+      .eq('user_id', user.id);
     if (tokenError) {
-      console.error('Token usage deletion error occurred');
+      console.error('Token usage deletion error:', tokenError);
     }
 
-    // Delete user data (profiles, chats, messages will be handled by cascading)
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .delete()
-      .eq('user_id', user.id)
-
-    if (profileError) {
-      console.error('Profile deletion error occurred');
-    }
-
-    // Delete user's chats (messages will be cascade deleted)
+    // 8. Delete chats (messages will be cascade deleted)
     const { error: chatsError } = await supabaseAdmin
       .from('chats')
       .delete()
-      .eq('user_id', user.id)
-
+      .eq('user_id', user.id);
     if (chatsError) {
-      console.error('Chat deletion error occurred');
+      console.error('Chats deletion error:', chatsError);
     }
+
+    // 9. Delete profile (should be last before auth deletion)
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .delete()
+      .eq('user_id', user.id);
+    if (profileError) {
+      console.error('Profile deletion error:', profileError);
+    }
+
+    console.log('User data cleanup completed', { userId: user.id });
 
     // Finally, delete the user from auth
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)

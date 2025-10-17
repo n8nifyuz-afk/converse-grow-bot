@@ -63,22 +63,25 @@ serve(async (req) => {
       logStep("Cancelled subscription", { subscriptionId: subscription.id });
     }
 
-    // Update user subscription status in database
+    // Delete user subscription record and usage limits (account is being deleted)
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Delete subscription record completely (not just mark as cancelled)
     await supabaseAdmin
       .from("user_subscriptions")
-      .update({
-        status: "cancelled",
-        plan: "free",
-        updated_at: new Date().toISOString(),
-      })
+      .delete()
       .eq("user_id", userId);
 
-    logStep("Updated user subscription status in database");
+    // Also delete usage limits
+    await supabaseAdmin
+      .from("usage_limits")
+      .delete()
+      .eq("user_id", userId);
+
+    logStep("Deleted user subscription and usage limits from database");
 
     return new Response(
       JSON.stringify({ 
