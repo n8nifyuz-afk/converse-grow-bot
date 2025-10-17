@@ -38,6 +38,10 @@ const allFeatures: Feature[] = [
 ];
 
 const pricingOptions = {
+  daily: {
+    monthly: { price: 0.60, perDay: 0.60 },
+    yearly: { price: 0.60, perDay: 0.60, savings: 0 }
+  },
   pro: {
     monthly: { price: 19.99, perDay: 0.67 },
     yearly: { price: 15.99, perDay: 0.53, savings: 20 }
@@ -49,6 +53,10 @@ const pricingOptions = {
 };
 
 const priceIds = {
+  daily: {
+    monthly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
+    yearly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6'
+  },
   pro: {
     monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
     yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
@@ -62,8 +70,8 @@ const priceIds = {
 export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }) => {
   const { user, subscriptionStatus } = useAuth();
   const isMobile = useIsMobile();
-  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'daily' | 'pro' | 'ultra'>('pro');
+  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -71,6 +79,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
+    'prod_TFjbArlYa9GMQr': 'Daily',
     'prod_TFLbRE1wL9Miha': 'Pro',
     'prod_TEx5Xda5BPBuHv': 'Pro',
     'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',
@@ -218,8 +227,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-3 sm:mb-4 md:mb-3 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10 md:h-12 bg-zinc-100 dark:bg-zinc-900 p-1 sm:p-1.5 border border-zinc-200 dark:border-zinc-800 rounded-lg sm:rounded-xl">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'daily' | 'pro' | 'ultra')} className="mb-3 sm:mb-4 md:mb-3 flex-shrink-0">
+                <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10 md:h-12 bg-zinc-100 dark:bg-zinc-900 p-1 sm:p-1.5 border border-zinc-200 dark:border-zinc-800 rounded-lg sm:rounded-xl">
+                  <TabsTrigger 
+                    value="daily" 
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                  >
+                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    Daily
+                  </TabsTrigger>
                   <TabsTrigger 
                     value="pro" 
                     className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
@@ -307,7 +323,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </>
                 ) : (
                   <>
-                    <span className="hidden sm:inline">Subscribe to {selectedPlan === 'pro' ? 'Pro' : 'Ultra Pro'} Plan</span>
+                    <span className="hidden sm:inline">Subscribe to {selectedPlan === 'daily' ? 'Daily' : selectedPlan === 'pro' ? 'Pro' : 'Ultra Pro'} Plan</span>
                     <span className="sm:hidden">Subscribe</span>
                     <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
                   </>

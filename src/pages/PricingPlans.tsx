@@ -150,11 +150,12 @@ export default function PricingPlans() {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
+    'prod_TFjbArlYa9GMQr': 'Daily',
     'prod_TFLbRE1wL9Miha': 'Pro',
     'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
   };
 
-  const handleSubscribe = async (plan: 'pro' | 'ultra_pro') => {
+  const handleSubscribe = async (plan: 'daily' | 'pro' | 'ultra_pro') => {
     if (!user) {
       setShowAuthModal(true);
       return;
@@ -163,6 +164,10 @@ export default function PricingPlans() {
     try {
       // Price IDs based on billing period (only monthly and yearly available)
       const priceIds = {
+        'daily': {
+          monthly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
+          yearly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6'
+        },
         'pro': {
           monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
           yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
@@ -208,8 +213,12 @@ export default function PricingPlans() {
   };
 
 
-  const getPricing = (plan: 'pro' | 'ultra_pro') => {
+  const getPricing = (plan: 'daily' | 'pro' | 'ultra_pro') => {
     const prices = {
+      daily: {
+        monthly: { price: 0.60, period: 'day' },
+        yearly: { price: 0.60, period: 'day', note: 'per day', savings: 0 }
+      },
       pro: {
         monthly: { price: 19.99, period: 'month' },
         yearly: { price: 15.99, period: 'month', note: 'billed annually', savings: 20 }
