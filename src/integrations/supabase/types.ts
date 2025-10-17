@@ -309,15 +309,7 @@ export type Database = {
           output_tokens?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "token_usage_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       usage_limits: {
         Row: {
