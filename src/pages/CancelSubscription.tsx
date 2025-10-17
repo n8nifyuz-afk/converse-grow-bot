@@ -22,7 +22,7 @@ const CancelSubscription = () => {
       }
       
       if (data?.url) {
-        window.location.href = data.url;
+        window.open(data.url, '_blank');
       }
     } catch (error: any) {
       toast.error('Failed to open subscription management');
