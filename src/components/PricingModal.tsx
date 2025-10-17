@@ -79,7 +79,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TFjbArlYa9GMQr': 'Daily',
+    'prod_TFjbArlYa9GMQr': 'Daily Pro',
     'prod_TFLbRE1wL9Miha': 'Pro',
     'prod_TEx5Xda5BPBuHv': 'Pro',
     'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',
@@ -234,7 +234,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Daily
+                    Daily Pro
                   </TabsTrigger>
                   <TabsTrigger 
                     value="pro" 
@@ -323,7 +323,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </>
                 ) : (
                   <>
-                    <span className="hidden sm:inline">Subscribe to {selectedPlan === 'daily' ? 'Daily' : selectedPlan === 'pro' ? 'Pro' : 'Ultra Pro'} Plan</span>
+                    <span className="hidden sm:inline">Subscribe to {selectedPlan === 'daily' ? 'Daily Pro' : selectedPlan === 'pro' ? 'Pro' : 'Ultra Pro'} Plan</span>
                     <span className="sm:hidden">Subscribe</span>
                     <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
                   </>
