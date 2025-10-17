@@ -39,7 +39,7 @@ const allFeatures: Feature[] = [
 
 const pricingOptions = {
   pro: {
-    daily: { price: 0.50, perDay: 0.50 },
+    daily: { price: 1, perDay: 1 },
     monthly: { price: 19.99, perDay: 0.67 },
     yearly: { price: 15.99, perDay: 0.53, savings: 20 }
   },
@@ -263,7 +263,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].daily.price}</div>
+                        <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].daily.price}</div>
                         <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per month</div>
                       </div>
                     </div>
