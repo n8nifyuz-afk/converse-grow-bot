@@ -3518,8 +3518,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   const modelData = availableModels.find(m => m.id === model.id);
                   const isPro = model.type === 'pro';
                   const isImageModel = model.id === 'generate-image';
-                  const isDisabled = (isPro && !subscriptionStatus.subscribed) || 
-                                    (isImageModel && !limitsLoading && !usageLimits.canGenerate);
+                  // Only disable image generation when limit is reached, let pro models be clickable
+                  const isDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
                   
                   return (
                     <SelectItem
@@ -3527,27 +3527,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                       value={model.id} 
                       disabled={isDisabled}
                       className={`rounded-xl px-3 py-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/60 focus-visible:bg-accent/60 cursor-pointer'} transition-all duration-200`}
-                      onClick={(e) => {
-                        if (isPro && !subscriptionStatus.subscribed) {
-                          e.preventDefault();
-                          toast.error('This model requires a Pro plan', {
-                            description: 'Upgrade to access premium AI models',
-                            action: {
-                              label: 'Upgrade',
-                              onClick: () => window.location.href = '/pricing'
-                            }
-                          });
-                        } else if (isImageModel && !usageLimits.canGenerate) {
-                          e.preventDefault();
-                          toast.error('Image generation limit reached', {
-                            description: `You've used all ${usageLimits.limit} image generations this month. Upgrade your plan for more!`,
-                            action: {
-                              label: 'Upgrade',
-                              onClick: () => window.location.href = '/pricing'
-                            }
-                          });
-                        }
-                      }}
                     >
                       <div className="flex items-center w-full gap-3">
                         <div className="relative flex-shrink-0">
@@ -3568,7 +3547,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm text-foreground truncate">
                             {model.name}
-                            {isDisabled && <span className="ml-2 text-xs text-muted-foreground">(Pro required)</span>}
+                            {isDisabled && <span className="ml-2 text-xs text-muted-foreground">(Limit reached)</span>}
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5 truncate">{model.description}</div>
                         </div>
@@ -4223,8 +4202,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                           {availableModelsList.map(model => {
                             const isPro = model.type === 'pro';
                             const isImageModel = model.id === 'generate-image';
-                            const isDisabled = (isPro && !subscriptionStatus.subscribed) || 
-                                              (isImageModel && !limitsLoading && !usageLimits.canGenerate);
+                            // Only disable image generation when limit is reached, let pro models be clickable
+                            const isDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
                             
                             return (
                               <SelectItem 
@@ -4267,7 +4246,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                                   <div className="min-w-0 flex-1">
                                     <div className="font-medium text-sm truncate">
                                       {model.name}
-                                      {isDisabled && <span className="ml-1 text-xs text-muted-foreground">(Pro required)</span>}
+                                      {isDisabled && <span className="ml-1 text-xs text-muted-foreground">(Limit reached)</span>}
                                     </div>
                                     <div className="text-xs text-muted-foreground truncate">{model.description}</div>
                                   </div>
