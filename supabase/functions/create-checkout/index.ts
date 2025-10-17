@@ -86,7 +86,12 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}`,
-      payment_method_types: ['card', 'link'],
+      payment_method_types: ['card'],
+      payment_method_options: {
+        card: {
+          request_three_d_secure: 'any',
+        },
+      },
     });
     logStep("Checkout session created", { sessionId: session.id });
 
