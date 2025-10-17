@@ -221,6 +221,15 @@ serve(async (req) => {
         }
 
         logStep("Subscription updated successfully", { userId: user.id, plan });
+
+        // CRITICAL: Reset image generation limits when subscription is activated/renewed
+        // This ensures users get fresh limits when they pay (including after payment failures)
+        await supabaseClient
+          .from('usage_limits')
+          .delete()
+          .eq('user_id', user.id);
+        
+        logStep("Reset image generation limits for fresh subscription period", { userId: user.id });
         break;
       }
 
@@ -235,12 +244,18 @@ serve(async (req) => {
         const user = users.users.find(u => u.email === customer.email);
         if (!user) break;
 
+        // Delete subscription and clean up usage limits
         await supabaseClient
           .from('user_subscriptions')
           .delete()
           .eq('user_id', user.id);
 
-        logStep("User subscription deleted, reverted to free", { userId: user.id });
+        await supabaseClient
+          .from('usage_limits')
+          .delete()
+          .eq('user_id', user.id);
+
+        logStep("User subscription deleted, reverted to free, limits cleaned up", { userId: user.id });
         break;
       }
 
@@ -264,7 +279,14 @@ serve(async (req) => {
           .eq('user_id', user.id);
 
         if (error) throw error;
-        logStep("Subscription activated", { userId: user.id });
+        
+        // Reset image generation limits when payment succeeds (fresh 30-day period)
+        await supabaseClient
+          .from('usage_limits')
+          .delete()
+          .eq('user_id', user.id);
+        
+        logStep("Subscription activated and limits reset", { userId: user.id });
         break;
       }
 
@@ -278,13 +300,18 @@ serve(async (req) => {
         const user = users.users.find(u => u.email === invoice.customer_email);
         if (!user) break;
 
-        // Revert to free plan
+        // Revert to free plan and clean up limits
         await supabaseClient
           .from('user_subscriptions')
           .delete()
           .eq('user_id', user.id);
 
-        logStep("User reverted to free due to payment failure", { userId: user.id });
+        await supabaseClient
+          .from('usage_limits')
+          .delete()
+          .eq('user_id', user.id);
+
+        logStep("User reverted to free due to payment failure, limits cleaned up", { userId: user.id });
         break;
       }
 
@@ -305,7 +332,12 @@ serve(async (req) => {
             .delete()
             .eq('user_id', user.id);
 
-          logStep("User reverted to free after full refund", { userId: user.id });
+          await supabaseClient
+            .from('usage_limits')
+            .delete()
+            .eq('user_id', user.id);
+
+          logStep("User reverted to free after full refund, limits cleaned up", { userId: user.id });
         }
         break;
       }
@@ -330,13 +362,18 @@ serve(async (req) => {
             const user = users.users.find(u => u.email === session.customer_email);
             
             if (user) {
-              // Ensure user stays on free plan
+              // Ensure user stays on free plan and clean up limits
               await supabaseClient
                 .from('user_subscriptions')
                 .delete()
                 .eq('user_id', user.id);
+
+              await supabaseClient
+                .from('usage_limits')
+                .delete()
+                .eq('user_id', user.id);
               
-              logStep("User kept on free plan after failed checkout", { userId: user.id });
+              logStep("User kept on free plan after failed checkout, limits cleaned", { userId: user.id });
             }
           }
         }
@@ -359,13 +396,18 @@ serve(async (req) => {
             const user = users.users.find(u => u.email === customer.email);
             
             if (user) {
-              // Ensure user stays on free plan
+              // Ensure user stays on free plan and clean up limits
               await supabaseClient
                 .from('user_subscriptions')
                 .delete()
                 .eq('user_id', user.id);
+
+              await supabaseClient
+                .from('usage_limits')
+                .delete()
+                .eq('user_id', user.id);
               
-              logStep("User kept on free plan after payment failure", { userId: user.id });
+              logStep("User kept on free plan after payment failure, limits cleaned", { userId: user.id });
             }
           }
         }
@@ -381,13 +423,18 @@ serve(async (req) => {
           const user = users.users.find(u => u.email === session.customer_email);
           
           if (user) {
-            // Revert to free plan
+            // Revert to free plan and clean up limits
             await supabaseClient
               .from('user_subscriptions')
               .delete()
               .eq('user_id', user.id);
+
+            await supabaseClient
+              .from('usage_limits')
+              .delete()
+              .eq('user_id', user.id);
             
-            logStep("User reverted to free after async payment failure", { userId: user.id });
+            logStep("User reverted to free after async payment failure, limits cleaned", { userId: user.id });
           }
         }
         break;
