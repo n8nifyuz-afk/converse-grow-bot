@@ -23,7 +23,6 @@ const Pricing = () => {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TFjbArlYa9GMQr': 'Daily', // Daily plan product ID
     'prod_TFLbRE1wL9Miha': 'Pro', // Pro Monthly Cheap plan product ID
     'prod_TEx5Xda5BPBuHv': 'Pro', // Pro Yearly plan product ID
     'prod_TDSbGJB9U4Xt7b': 'Ultra Pro', // Ultra Pro Monthly plan product ID
@@ -78,35 +77,6 @@ const Pricing = () => {
     }],
     buttonText: "Get Started",
     buttonVariant: "outline" as const
-  }, {
-    name: "Daily",
-    emoji: "⚡",
-    price: 0.60,
-    yearlyPrice: 0.60,
-    icon: Sparkles,
-    description: "Pay as you go - $0.60 per day",
-    popular: false,
-    features: [{
-      text: "Full access for 24 hours",
-      included: true
-    }, {
-      text: "Access to all AI models",
-      included: true
-    }, {
-      text: "Unlimited chats",
-      included: true
-    }, {
-      text: "Voice mode",
-      included: true
-    }, {
-      text: "File uploads",
-      included: true
-    }, {
-      text: "Image generation",
-      included: true
-    }],
-    buttonText: "Get Daily Pass",
-    buttonVariant: "default" as const
   }, {
     name: "Pro",
     emoji: "⭐",
@@ -200,10 +170,6 @@ const Pricing = () => {
     try {
       // Map plan to price ID based on billing period
       const priceIds = {
-        'Daily': {
-          monthly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
-          yearly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6'
-        },
         'Pro': {
           monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
           yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
