@@ -19,6 +19,7 @@ const Pricing = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
+  const [pendingPlan, setPendingPlan] = useState<typeof plans[0] | null>(null);
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
@@ -157,6 +158,7 @@ const Pricing = () => {
     }
     
     if (!user) {
+      setPendingPlan(plan);
       setShowAuthModal(true);
       return;
     }
@@ -217,6 +219,16 @@ const Pricing = () => {
     } catch (error) {
       console.error('Error:', error);
       toast.error('An error occurred. Please try again.');
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    if (pendingPlan) {
+      // Retry the subscription after successful authentication
+      setTimeout(() => {
+        handleSubscribe(pendingPlan);
+        setPendingPlan(null);
+      }, 500);
     }
   };
 
@@ -484,10 +496,7 @@ const Pricing = () => {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          toast.success('Welcome! Please select your plan.');
-        }}
+        onSuccess={handleAuthSuccess}
       />
       <UpgradeBlockedDialog 
         isOpen={showUpgradeBlockedDialog}
