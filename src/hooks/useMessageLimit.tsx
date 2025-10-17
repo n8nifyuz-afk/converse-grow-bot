@@ -13,7 +13,7 @@ const generateSessionId = () => {
 };
 
 export const useMessageLimit = () => {
-  const { user, userProfile } = useAuth();
+  const { user, subscriptionStatus } = useAuth();
   const [messageCount, setMessageCount] = useState(0);
   const [loading, setLoading] = useState(true);
   
@@ -22,9 +22,8 @@ export const useMessageLimit = () => {
   // Free tier limits - 3 messages for free users
   const FREE_MESSAGE_LIMIT = 3;
   
-  // Check if user has subscription
-  const hasSubscription = user && userProfile && 
-    (userProfile.plan === 'pro' || userProfile.plan === 'ultra_pro');
+  // Check if user has subscription - use subscriptionStatus from AuthContext
+  const hasSubscription = user && subscriptionStatus.subscribed;
 
   useEffect(() => {
     const fetchMessageCount = async () => {
