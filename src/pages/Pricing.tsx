@@ -160,7 +160,7 @@ const Pricing = () => {
       return;
     }
     
-    // Check if user already has an active subscription
+    // Check if user already has an active subscription BEFORE showing any loading messages
     if (subscriptionStatus.subscribed && subscriptionStatus.product_id) {
       const currentPlanName = productToPlanMap[subscriptionStatus.product_id] || 'Unknown';
       setBlockedPlanName(currentPlanName);
@@ -190,11 +190,14 @@ const Pricing = () => {
         return;
       }
       
+      // Show loading toast ONLY after subscription check passes
       toast.loading('Redirecting to checkout...');
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId }
       });
+      
+      toast.dismiss(); // Dismiss loading toast
       
       if (error) {
         const errorMessage = error.message || '';
@@ -225,6 +228,7 @@ const Pricing = () => {
         window.location.href = data.url;
       }
     } catch (error) {
+      toast.dismiss(); // Dismiss loading toast on error
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An error occurred';
       toast.error('Unable to process request', {
