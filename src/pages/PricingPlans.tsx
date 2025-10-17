@@ -145,7 +145,7 @@ const faqData = [
 export default function PricingPlans() {
   const { user, subscriptionStatus } = useAuth();
   const navigate = useNavigate();
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Product ID to plan name mapping
@@ -184,18 +184,26 @@ export default function PricingPlans() {
       });
       
       if (error) {
-        toast.error('Failed to create checkout session');
+        const errorMessage = error.message || 'Failed to create checkout session';
+        
+        // Provide user-friendly error messages
+        if (errorMessage.includes('active subscription')) {
+          toast.error('You already have an active subscription', {
+            description: 'Please cancel your current plan first to switch plans'
+          });
+        } else {
+          toast.error(errorMessage);
+        }
         console.error('Checkout error:', error);
         return;
       }
       
       if (data?.url) {
-        window.open(data.url, '_blank');
-        toast.success('Opening checkout in new tab...');
+        window.location.href = data.url;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
-      toast.error('An error occurred. Please try again.');
+      toast.error(error?.message || 'An error occurred. Please try again.');
     }
   };
 
@@ -204,20 +212,19 @@ export default function PricingPlans() {
     const prices = {
       pro: {
         monthly: { price: 19.99, period: 'month' },
-        quarterly: { price: 16.99, period: 'month', note: 'billed quarterly' },
-        yearly: { price: 14.99, period: 'month', note: 'billed annually' }
+        yearly: { price: 15.99, period: 'month', note: 'billed annually', savings: 20 }
       },
       ultra_pro: {
         monthly: { price: 39.99, period: 'month' },
-        quarterly: { price: 34.99, period: 'month', note: 'billed quarterly' },
-        yearly: { price: 29.99, period: 'month', note: 'billed annually' }
+        yearly: { price: 31.99, period: 'month', note: 'billed annually', savings: 20 }
       }
     };
     
     const pricing = prices[plan][billingPeriod];
     return {
       ...pricing,
-      note: 'note' in pricing ? pricing.note : undefined
+      note: 'note' in pricing ? pricing.note : undefined,
+      savings: 'savings' in pricing ? pricing.savings : 0
     };
   };
 
@@ -241,20 +248,12 @@ export default function PricingPlans() {
             Monthly
           </Button>
           <Button
-            variant={billingPeriod === 'quarterly' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setBillingPeriod('quarterly')}
-            className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
-          >
-            Quarterly
-          </Button>
-          <Button
             variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setBillingPeriod('yearly')}
             className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
           >
-            Yearly
+            Yearly <Badge variant="secondary" className="ml-1 text-[10px]">Save 20%</Badge>
           </Button>
         </div>
       </div>
@@ -334,12 +333,19 @@ export default function PricingPlans() {
             <CardTitle className="text-xl sm:text-2xl">Pro</CardTitle>
             <div className="mt-2">
               <span className="text-xs sm:text-sm text-muted-foreground">
-                ${(getPricing('pro').price / 30 * 1).toFixed(2)} Per Day
+                €{(getPricing('pro').price / 30 * 1).toFixed(2)} Per Day
               </span>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold">${getPricing('pro').price}</div>
+            <div className="text-2xl sm:text-3xl font-bold">
+              €{getPricing('pro').price}
+              {billingPeriod === 'yearly' && getPricing('pro').savings > 0 && (
+                <Badge variant="secondary" className="ml-2 text-xs bg-green-500/10 text-green-600 border-green-500/30">
+                  Save {getPricing('pro').savings}%
+                </Badge>
+              )}
+            </div>
             <CardDescription className="mt-2 text-xs sm:text-sm">
-              {getPricing('pro').note ? `${getPricing('pro').period}/${getPricing('pro').note}` : `${getPricing('pro').period}/billed ${billingPeriod}`}
+              per {getPricing('pro').period}{getPricing('pro').note ? `, ${getPricing('pro').note}` : ''}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -398,12 +404,19 @@ export default function PricingPlans() {
             <CardTitle className="text-xl sm:text-2xl">Ultra Pro</CardTitle>
             <div className="mt-2">
               <span className="text-xs sm:text-sm text-muted-foreground">
-                ${(getPricing('ultra_pro').price / 30 * 1).toFixed(2)} Per Day
+                €{(getPricing('ultra_pro').price / 30 * 1).toFixed(2)} Per Day
               </span>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold">${getPricing('ultra_pro').price}</div>
+            <div className="text-2xl sm:text-3xl font-bold">
+              €{getPricing('ultra_pro').price}
+              {billingPeriod === 'yearly' && getPricing('ultra_pro').savings > 0 && (
+                <Badge variant="secondary" className="ml-2 text-xs bg-green-500/10 text-green-600 border-green-500/30">
+                  Save {getPricing('ultra_pro').savings}%
+                </Badge>
+              )}
+            </div>
             <CardDescription className="mt-2 text-xs sm:text-sm">
-              {getPricing('ultra_pro').note ? `${getPricing('ultra_pro').period}/${getPricing('ultra_pro').note}` : `${getPricing('ultra_pro').period}/billed ${billingPeriod}`}
+              per {getPricing('ultra_pro').period}{getPricing('ultra_pro').note ? `, ${getPricing('ultra_pro').note}` : ''}
             </CardDescription>
           </CardHeader>
           <CardContent>

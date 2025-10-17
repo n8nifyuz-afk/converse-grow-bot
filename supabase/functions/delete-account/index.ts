@@ -55,7 +55,24 @@ serve(async (req) => {
       throw new Error('User not found or not authenticated')
     }
 
-    // First, delete all user images from storage
+    // First, cancel Stripe subscription if exists
+    try {
+      const { error: stripeError } = await supabaseAdmin.functions.invoke('delete-stripe-subscription', {
+        body: {
+          userId: user.id,
+          userEmail: user.email
+        }
+      });
+      
+      if (stripeError) {
+        console.error('Stripe cancellation error occurred');
+      }
+    } catch (stripeError) {
+      console.error('Stripe cancellation failed');
+      // Continue with account deletion even if Stripe cancellation fails
+    }
+
+    // Then, delete all user images from storage
     try {
       const { error: storageError } = await supabaseAdmin.functions.invoke('delete-all-user-images', {
         body: {

@@ -32,6 +32,10 @@ verify_jwt = false
 [functions.save-token-usage]
 verify_jwt = false
 
+# Service function to delete Stripe subscriptions (called by delete-account)
+[functions.delete-stripe-subscription]
+verify_jwt = false
+
 # User-facing TTS function requires authentication
 [functions.text-to-speech-voice-mode]
 verify_jwt = true

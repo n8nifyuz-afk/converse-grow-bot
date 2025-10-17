@@ -1,10 +1,41 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, MessageSquare, RefreshCw } from 'lucide-react';
+import { AlertTriangle, MessageSquare } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const CancelSubscription = () => {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
+
+  const handleManageSubscription = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) {
+        toast.error(error.message || 'Failed to open customer portal');
+        return;
+      }
+      
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      toast.error('Failed to open subscription management');
+      console.error('Portal error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleContactSupport = () => {
+    navigate('/contact');
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <SEO 
@@ -14,9 +45,9 @@ const CancelSubscription = () => {
       
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Cancel Subscription</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-4">Manage Subscription</h1>
           <p className="text-xl text-muted-foreground">
-            We're sorry to see you go. Let us know how we can improve.
+            Update your subscription, payment method, or cancel anytime
           </p>
         </div>
         
@@ -33,16 +64,6 @@ const CancelSubscription = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start gap-3">
-              <RefreshCw className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <h3 className="font-medium text-foreground">Pause your subscription</h3>
-                <p className="text-sm text-muted-foreground">
-                  Temporarily pause billing for up to 3 months while keeping your account active
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
               <MessageSquare className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <h3 className="font-medium text-foreground">Talk to support</h3>
@@ -54,18 +75,32 @@ const CancelSubscription = () => {
           </CardContent>
         </Card>
         
-        {/* Cancellation options */}
+        {/* Management options */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Pause Subscription</CardTitle>
+              <CardTitle>Manage Subscription</CardTitle>
               <CardDescription>
-                Take a break without losing your account data and settings
+                Cancel subscription, update payment method, or view invoice history
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Pause for 1-3 months
+            <CardContent className="space-y-4">
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <h4 className="font-medium text-foreground mb-2">What you can do:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Cancel your subscription (remains active until period ends)</li>
+                  <li>• Update your payment method</li>
+                  <li>• View and download invoice history</li>
+                  <li>• Update billing information</li>
+                </ul>
+              </div>
+              
+              <Button 
+                onClick={handleManageSubscription} 
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? 'Opening...' : 'Open Subscription Management'}
               </Button>
             </CardContent>
           </Card>
@@ -74,36 +109,12 @@ const CancelSubscription = () => {
             <CardHeader>
               <CardTitle>Contact Support</CardTitle>
               <CardDescription>
-                Let us help you find a solution before canceling
+                Let us help you find a solution
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={handleContactSupport}>
                 Chat with support
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Cancel Subscription</CardTitle>
-              <CardDescription>
-                Cancel your subscription and stop future billing
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium text-foreground mb-2">What happens when you cancel:</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Your subscription will remain active until the end of your current billing period</li>
-                  <li>• You'll continue to have full access to all features until then</li>
-                  <li>• No future charges will be made to your payment method</li>
-                  <li>• Your account data will be preserved for 30 days after cancellation</li>
-                </ul>
-              </div>
-              
-              <Button variant="destructive" className="w-full">
-                Cancel My Subscription
               </Button>
             </CardContent>
           </Card>

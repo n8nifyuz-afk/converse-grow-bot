@@ -39,7 +39,6 @@ const allFeatures: Feature[] = [
 
 const pricingOptions = {
   pro: {
-    daily: { price: 1, perDay: 1 },
     monthly: { price: 19.99, perDay: 0.67 },
     yearly: { price: 15.99, perDay: 0.53, savings: 20 }
   },
@@ -49,24 +48,14 @@ const pricingOptions = {
   }
 };
 
-// IMPORTANT: You must add your LIVE Stripe price IDs here
-// Step 1: Go to https://dashboard.stripe.com/products (make sure you're in LIVE mode, not test mode)
-// Step 2: Find or create these 4 products with these exact prices:
-//         - Pro Monthly: €19.99/month
-//         - Pro Yearly: €191.88/year (€15.99/month)
-//         - Ultra Pro Monthly: €39.99/month  
-//         - Ultra Pro Yearly: €383.88/year (€31.99/month)
-// Step 3: Click on each product, copy the Price ID (starts with price_), and paste below
-
 const priceIds = {
   pro: {
-    daily: 'price_1SIrJEL8Zm4LqDn4JqqrksNA',
-    monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
-    yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
+    monthly: 'price_1SIquEL8Zm4LqDn444wZtoij',
+    yearly: 'price_1SHinzL8Zm4LqDn4jE1jGyKi'
   },
   ultra: {
-    monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
-    yearly: 'price_1SH1MjL8Zm4LqDn40swOy4Ar'
+    monthly: 'price_1QiS6JJUJwxjDZUkmQWZQEKl',
+    yearly: 'price_1SHioTL8Zm4LqDn41Pd00GWM'
   }
 };
 
@@ -74,7 +63,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const { user, subscriptionStatus } = useAuth();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
+  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -138,7 +127,17 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
       }
     } catch (error: any) {
       console.error('Subscription error:', error);
-      toast.error(error.message || 'Failed to start subscription process');
+      const errorMessage = error?.message || 'Failed to start subscription process';
+      
+      if (errorMessage.includes('active subscription')) {
+        toast.error('You already have an active subscription', {
+          description: 'Please cancel your current plan first'
+        });
+      } else if (errorMessage.includes('authentication')) {
+        toast.error('Please sign in to continue');
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -240,36 +239,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Billing Period Options */}
               <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-3 flex-1 min-h-0">
-                {selectedPlan === 'pro' && (
-                  <button
-                    onClick={() => setSelectedPeriod('daily')}
-                    className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
-                      selectedPeriod === 'daily'
-                        ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
-                    }`}
-                  >
-                    <Badge className="absolute -top-1.5 sm:-top-2 right-2 sm:right-4 bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold border-0">
-                      TEST ONLY
-                    </Badge>
-                    {selectedPeriod === 'daily' && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
-                    )}
-                    <div className="flex justify-between items-center relative z-10">
-                      <div>
-                        <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Monthly Cheap</div>
-                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                          Billed monthly • For testing
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].daily.price}</div>
-                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per month</div>
-                      </div>
-                    </div>
-                  </button>
-                )}
-                
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${

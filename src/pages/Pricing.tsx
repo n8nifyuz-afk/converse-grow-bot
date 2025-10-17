@@ -39,12 +39,8 @@ const Pricing = () => {
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get('success') === 'true' && user) {
       console.log('[PRICING] Success param detected, checking subscription...');
-      // Wait a bit for Stripe webhook to process
-      setTimeout(() => {
-        console.log('[PRICING] Calling checkSubscription...');
-        checkSubscription();
-        toast.success('Subscription activated successfully!');
-      }, 2000);
+      checkSubscription();
+      toast.success('Subscription activated successfully!');
     }
   }, [location.search, user, checkSubscription]);
 
@@ -199,16 +195,26 @@ const Pricing = () => {
       });
       
       if (error) {
-        // Check if error is about active subscription
         const errorMessage = error.message || '';
+        
+        // Provide user-friendly error messages
         if (errorMessage.includes('active subscription')) {
-          toast.dismiss();
-          const currentPlanName = productToPlanMap[subscriptionStatus.product_id || ''] || 'Unknown';
-          setBlockedPlanName(currentPlanName);
-          setShowUpgradeBlockedDialog(true);
-          return;
+          toast.error('You already have an active subscription', {
+            description: 'Please cancel your current plan first to switch plans',
+            action: {
+              label: 'Manage',
+              onClick: () => navigate('/cancel-subscription')
+            }
+          });
+        } else if (errorMessage.includes('authentication')) {
+          toast.error('Authentication failed', {
+            description: 'Please sign in and try again'
+          });
+        } else {
+          toast.error('Failed to start checkout', {
+            description: errorMessage
+          });
         }
-        toast.error('Failed to create checkout session');
         console.error('Checkout error:', error);
         return;
       }
@@ -218,7 +224,10 @@ const Pricing = () => {
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('An error occurred. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      toast.error('Unable to process request', {
+        description: errorMessage
+      });
     }
   };
 

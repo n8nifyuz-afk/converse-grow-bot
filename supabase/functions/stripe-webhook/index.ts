@@ -12,22 +12,8 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-// LIVE Product IDs - Updated based on active payment links
-const productToPlanMap: { [key: string]: string } = {
-  'prod_TFM1M1I5vYy7fk': 'Pro',        // Pro Monthly Cheap (Test/LIVE)
-  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
-  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
-  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly (LIVE)
-};
-
-// Price ID to Product ID mapping for reference
-const priceToProductMap: { [key: string]: string } = {
-  'price_1SIrJEL8Zm4LqDn4JqqrksNA': 'prod_TFM1M1I5vYy7fk',  // Pro Monthly Cheap
-  'price_1SH1g3L8Zm4LqDn4WSyw1BzA': 'prod_TEx5Xda5BPBuHv',  // Pro Monthly
-  'price_1SITBGL8Zm4LqDn4fd4JLVDA': 'prod_TEx5Xda5BPBuHv',  // Pro Yearly
-  'price_1SH1gHL8Zm4LqDn4wDQIGntf': 'prod_TDSbGJB9U4Xt7b',  // Ultra Monthly
-  'price_1SH1MjL8Zm4LqDn40swOy4Ar': 'prod_TDSHzExQNjyvJD',  // Ultra Yearly
-};
+// Webhook signature verification timeout (5 minutes)
+const WEBHOOK_TIMEOUT_MS = 5 * 60 * 1000;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -45,11 +31,6 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    
-    // CRITICAL: Reject test mode keys to prevent test subscriptions
-    if (stripeKey.startsWith("sk_test_")) {
-      throw new Error("TEST MODE DETECTED: Use live Stripe keys only. Change STRIPE_SECRET_KEY to sk_live_...");
-    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
@@ -58,12 +39,25 @@ serve(async (req) => {
     
     let event: Stripe.Event;
 
-    // Verify webhook signature (if webhook secret is configured)
+    // Verify webhook signature
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     if (webhookSecret && signature) {
       try {
         event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
         logStep("Webhook signature verified");
+        
+        // Check webhook timestamp to prevent replay attacks
+        const eventTimestamp = event.created * 1000; // Convert to milliseconds
+        const now = Date.now();
+        if (now - eventTimestamp > WEBHOOK_TIMEOUT_MS) {
+          logStep("Webhook timestamp expired", { 
+            eventAge: Math.floor((now - eventTimestamp) / 1000) + " seconds" 
+          });
+          return new Response(JSON.stringify({ error: "Webhook timestamp too old" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          });
+        }
       } catch (err) {
         logStep("Webhook signature verification failed", { error: err instanceof Error ? err.message : String(err) });
         return new Response(JSON.stringify({ error: "Invalid signature" }), {
@@ -72,12 +66,54 @@ serve(async (req) => {
         });
       }
     } else {
-      // Parse without verification (for testing)
       event = JSON.parse(body);
-      logStep("Processing unverified webhook (development mode)");
+      logStep("WARNING: Processing unverified webhook");
     }
 
-    logStep("Event type", { type: event.type });
+    // Check for duplicate webhook events (idempotency)
+    const { data: existingEvent } = await supabaseClient
+      .from('stripe_webhook_events')
+      .select('id')
+      .eq('stripe_event_id', event.id)
+      .single();
+
+    if (existingEvent) {
+      logStep("Duplicate webhook event detected, skipping", { eventId: event.id });
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // Record webhook event for idempotency
+    await supabaseClient
+      .from('stripe_webhook_events')
+      .insert({
+        stripe_event_id: event.id,
+        event_type: event.type
+      });
+
+    logStep("Event type", { type: event.type, eventId: event.id });
+
+    // Load product mapping from database
+    const { data: productMappings, error: mappingError } = await supabaseClient
+      .from('stripe_products')
+      .select('stripe_product_id, plan_name, plan_tier');
+
+    if (mappingError) {
+      logStep("Error loading product mappings", { error: mappingError.message });
+      throw mappingError;
+    }
+
+    const productToPlanMap: { [key: string]: { name: string, tier: string } } = {};
+    productMappings?.forEach((mapping: any) => {
+      productToPlanMap[mapping.stripe_product_id] = {
+        name: mapping.plan_name,
+        tier: mapping.plan_tier
+      };
+    });
+
+    logStep("Loaded product mappings", { count: Object.keys(productToPlanMap).length });
 
     // Handle different event types
     switch (event.type) {
@@ -122,16 +158,16 @@ serve(async (req) => {
           break;
         }
 
-        // Check if user has multiple active subscriptions (upgrade scenario)
+        // Check if user has multiple active subscriptions
         const allSubscriptions = await stripe.subscriptions.list({
           customer: subscription.customer as string,
           status: "active",
           limit: 10,
         });
         
-        logStep("Found active subscriptions for customer", { count: allSubscriptions.data.length });
+        logStep("Found active subscriptions", { count: allSubscriptions.data.length });
         
-        // If user has multiple active subscriptions, find the highest tier
+        // Find the highest tier subscription
         let highestTierSub = subscription;
         let highestTier = 'free';
         
@@ -143,80 +179,37 @@ serve(async (req) => {
         
         for (const sub of allSubscriptions.data) {
           const subProductId = sub.items.data[0].price.product as string;
+          const planMapping = productToPlanMap[subProductId];
           
-          let subTier = 'free';
-          // Pro products (all variants) - LIVE
-          if (subProductId === 'prod_TFM1M1I5vYy7fk' || 
-              subProductId === 'prod_TEx5Xda5BPBuHv') {
-            subTier = 'pro';
-          // Ultra Pro products (monthly or yearly) - LIVE
-          } else if (subProductId === 'prod_TDSbGJB9U4Xt7b' || subProductId === 'prod_TDSHzExQNjyvJD') {
-            subTier = 'ultra_pro';
-          } else if (subProductId) {
-            // Unknown product - log warning and skip
-            logStep("WARNING: Unknown product ID detected", { productId: subProductId });
-            continue; // Skip this subscription
-          }
-          
-          if (tierPriority[subTier] > tierPriority[highestTier]) {
-            highestTier = subTier;
+          if (planMapping && tierPriority[planMapping.tier] > tierPriority[highestTier]) {
+            highestTier = planMapping.tier;
             highestTierSub = sub;
           }
         }
-        
-        // Log multiple subscriptions - user needs to cancel manually per policy
-        if (allSubscriptions.data.length > 1) {
-          logStep("Multiple active subscriptions detected - user must cancel lower tier manually", {
-            highestTierSubId: highestTierSub.id,
-            totalSubs: allSubscriptions.data.length
-          });
-        }
-        
-        // Use the highest tier subscription for database update
-        const finalSubscription = highestTierSub;
-        const productId = finalSubscription.items.data[0].price.product as string;
-        const planName = productToPlanMap[productId];
-        
-        // CRITICAL: If no valid plan name, reject this webhook event
-        if (!planName) {
-          logStep("ERROR: Unknown product ID - cannot process subscription", { productId });
-          return new Response(JSON.stringify({ 
-            received: true, 
-            error: "Unknown product ID" 
-          }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 400,
-          });
-        }
-        
-        // Save subscription as 'pending_payment' initially
-        // Pro access will only be granted after invoice.payment_succeeded
-        const planTier = 'free'; // Keep user on free plan until payment confirmed
-        const subscriptionStatus = finalSubscription.status === 'active' ? 'pending_payment' : finalSubscription.status;
-        
-        const subscriptionEnd = finalSubscription.current_period_end 
-          ? new Date(finalSubscription.current_period_end * 1000).toISOString()
-          : null;
 
-        logStep("Subscription saved as pending payment", { 
-          productId, 
-          planName, 
-          status: subscriptionStatus,
-          subscriptionId: finalSubscription.id
-        });
+        const productId = highestTierSub.items.data[0].price.product as string;
+        const planMapping = productToPlanMap[productId];
+        
+        if (!planMapping) {
+          logStep("Unknown product ID", { productId });
+          break;
+        }
 
-        // Upsert subscription data (user stays on free plan until payment succeeds)
+        const plan = planMapping.tier;
+        logStep("Determined plan", { plan, productId });
+
+        // Upsert subscription
         const { error: upsertError } = await supabaseClient
           .from('user_subscriptions')
           .upsert({
             user_id: user.id,
-            stripe_customer_id: finalSubscription.customer as string,
-            stripe_subscription_id: finalSubscription.id,
+            stripe_customer_id: customer.id,
+            stripe_subscription_id: highestTierSub.id,
             product_id: productId,
-            plan_name: planName,
-            plan: planTier,
-            status: subscriptionStatus,
-            current_period_end: subscriptionEnd,
+            plan: plan,
+            plan_name: planMapping.name,
+            status: 'active',
+            current_period_end: new Date(highestTierSub.current_period_end * 1000).toISOString(),
             updated_at: new Date().toISOString()
           }, {
             onConflict: 'user_id'
@@ -224,201 +217,95 @@ serve(async (req) => {
 
         if (upsertError) {
           logStep("Error upserting subscription", { error: upsertError.message });
-        } else {
-          logStep("Subscription saved pending payment", { userId: user.id });
+          throw upsertError;
         }
+
+        logStep("Subscription updated successfully", { userId: user.id, plan });
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        logStep("Processing subscription deletion", { subscriptionId: subscription.id });
+        logStep("Subscription deleted", { subscriptionId: subscription.id });
 
-        // Get customer email
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-        if (!customer.email) {
-          logStep("No customer email found");
-          break;
-        }
+        if (!customer.email) break;
 
-        // Find user by email
-        const { data: users, error: userError } = await supabaseClient.auth.admin.listUsers();
-        if (userError) throw userError;
-
+        const { data: users } = await supabaseClient.auth.admin.listUsers();
         const user = users.users.find(u => u.email === customer.email);
-        if (!user) {
-          logStep("User not found", { email: customer.email });
-          break;
-        }
+        if (!user) break;
 
-        // Delete subscription record (user reverts to free plan)
-        const { error: deleteError } = await supabaseClient
+        await supabaseClient
           .from('user_subscriptions')
           .delete()
           .eq('user_id', user.id);
 
-        if (deleteError) {
-          logStep("Error deleting subscription", { error: deleteError.message });
-        } else {
-          logStep("Subscription deleted successfully", { userId: user.id });
-        }
+        logStep("User subscription deleted, reverted to free", { userId: user.id });
         break;
       }
 
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
-        logStep("Payment succeeded", { invoiceId: invoice.id, amountPaid: invoice.amount_paid });
-        
-        // Only process if this is a subscription invoice with actual payment
-        if (!invoice.subscription || invoice.amount_paid === 0) {
-          logStep("Skipping - no subscription or zero payment");
-          break;
-        }
+        logStep("Payment succeeded", { invoiceId: invoice.id });
 
-        // Get customer email
-        const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
-        if (!customer.email) {
-          logStep("No customer email found");
-          break;
-        }
+        if (!invoice.customer_email) break;
 
-        // Find user by email
-        const { data: users, error: userError } = await supabaseClient.auth.admin.listUsers();
-        if (userError) throw userError;
+        const { data: users } = await supabaseClient.auth.admin.listUsers();
+        const user = users.users.find(u => u.email === invoice.customer_email);
+        if (!user) break;
 
-        const user = users.users.find(u => u.email === customer.email);
-        if (!user) {
-          logStep("User not found", { email: customer.email });
-          break;
-        }
-
-        // Get the subscription to determine product tier
-        const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
-        const productId = subscription.items.data[0].price.product as string;
-        const planName = productToPlanMap[productId];
-        
-        if (!planName) {
-          logStep("Unknown product ID", { productId });
-          break;
-        }
-
-        // Determine plan tier based on product
-        let planTier = 'free';
-        if (productId === 'prod_TFM1M1I5vYy7fk' || 
-            productId === 'prod_TEx5Xda5BPBuHv') {
-          planTier = 'pro';
-        } else if (productId === 'prod_TDSbGJB9U4Xt7b' || productId === 'prod_TDSHzExQNjyvJD') {
-          planTier = 'ultra_pro';
-        }
-
-        const subscriptionEnd = subscription.current_period_end 
-          ? new Date(subscription.current_period_end * 1000).toISOString()
-          : null;
-
-        logStep("Granting Pro access after payment", { 
-          userId: user.id,
-          planTier,
-          amountPaid: invoice.amount_paid
-        });
-
-        // NOW grant Pro access after confirmed payment
-        const { error: updateError } = await supabaseClient
+        // Activate subscription
+        const { error } = await supabaseClient
           .from('user_subscriptions')
-          .upsert({
-            user_id: user.id,
-            stripe_customer_id: subscription.customer as string,
-            stripe_subscription_id: subscription.id,
-            product_id: productId,
-            plan_name: planName,
-            plan: planTier,
+          .update({
             status: 'active',
-            current_period_end: subscriptionEnd,
             updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'user_id'
-          });
+          })
+          .eq('user_id', user.id);
 
-        if (updateError) {
-          logStep("Error granting Pro access", { error: updateError.message });
-        } else {
-          logStep("Pro access granted successfully", { userId: user.id, planTier });
-        }
+        if (error) throw error;
+        logStep("Subscription activated", { userId: user.id });
         break;
       }
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         logStep("Payment failed", { invoiceId: invoice.id });
-        
-        // Get customer email
-        const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
-        if (!customer.email) break;
 
-        // Find user
+        if (!invoice.customer_email) break;
+
         const { data: users } = await supabaseClient.auth.admin.listUsers();
-        const user = users?.users.find(u => u.email === customer.email);
+        const user = users.users.find(u => u.email === invoice.customer_email);
         if (!user) break;
 
-        // CRITICAL FIX: Downgrade to free plan immediately on payment failure
-        // Stripe will retry payment, but user should not have Pro access until payment succeeds
-        logStep("Payment failed - downgrading user to free plan", { userId: user.id });
-        
+        // Revert to free plan
         await supabaseClient
           .from('user_subscriptions')
           .delete()
           .eq('user_id', user.id);
 
-        logStep("User downgraded to free plan due to payment failure", { userId: user.id });
+        logStep("User reverted to free due to payment failure", { userId: user.id });
         break;
       }
 
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
-        logStep("Charge refunded", { chargeId: charge.id, amountRefunded: charge.amount_refunded });
-        
-        // Get customer email
-        if (!charge.customer) {
-          logStep("No customer associated with charge");
-          break;
-        }
+        logStep("Charge refunded", { chargeId: charge.id });
 
-        const customer = await stripe.customers.retrieve(charge.customer as string) as Stripe.Customer;
-        if (!customer.email) {
-          logStep("No customer email found");
-          break;
-        }
+        if (!charge.billing_details.email) break;
 
-        // Find user by email
-        const { data: users, error: userError } = await supabaseClient.auth.admin.listUsers();
-        if (userError) throw userError;
+        const { data: users } = await supabaseClient.auth.admin.listUsers();
+        const user = users.users.find(u => u.email === charge.billing_details.email);
+        if (!user) break;
 
-        const user = users.users.find(u => u.email === customer.email);
-        if (!user) {
-          logStep("User not found", { email: customer.email });
-          break;
-        }
-
-        // Check if this is a full refund
+        // Only revert if fully refunded
         if (charge.amount_refunded === charge.amount) {
-          logStep("Full refund detected, reverting user to free plan", { userId: user.id });
-          
-          // Delete subscription record (user reverts to free plan)
-          const { error: deleteError } = await supabaseClient
+          await supabaseClient
             .from('user_subscriptions')
             .delete()
             .eq('user_id', user.id);
 
-          if (deleteError) {
-            logStep("Error deleting subscription after refund", { error: deleteError.message });
-          } else {
-            logStep("User reverted to free plan after full refund", { userId: user.id });
-          }
-        } else {
-          logStep("Partial refund detected, keeping subscription active", { 
-            userId: user.id,
-            amountRefunded: charge.amount_refunded,
-            totalAmount: charge.amount
-          });
+          logStep("User reverted to free after full refund", { userId: user.id });
         }
         break;
       }
@@ -431,10 +318,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR processing webhook", { message: errorMessage });
+    logStep("ERROR", { message: errorMessage, stack: error instanceof Error ? error.stack : undefined });
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
