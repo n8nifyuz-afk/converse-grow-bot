@@ -79,33 +79,33 @@ const Pricing = () => {
     buttonText: "Get Started",
     buttonVariant: "outline" as const
   }, {
-    name: "Daily Pro",
+    name: "Daily",
     emoji: "⚡",
     price: 0.60,
     yearlyPrice: 0.60,
     icon: Sparkles,
-    description: "Full Pro access - pay daily",
+    description: "Pay as you go - $0.60 per day",
     popular: false,
     features: [{
-      text: "Full Pro access for 24 hours",
+      text: "Full access for 24 hours",
       included: true
     }, {
-      text: "All AI models (GPT-5, Claude, Gemini)",
+      text: "Access to all AI models",
       included: true
     }, {
       text: "Unlimited chats",
       included: true
     }, {
-      text: "Voice mode & file uploads",
+      text: "Voice mode",
+      included: true
+    }, {
+      text: "File uploads",
       included: true
     }, {
       text: "Image generation",
       included: true
-    }, {
-      text: "No long-term commitment",
-      included: true
     }],
-    buttonText: "Get Daily Pro",
+    buttonText: "Get Daily Pass",
     buttonVariant: "default" as const
   }, {
     name: "Pro",
@@ -200,7 +200,7 @@ const Pricing = () => {
     try {
       // Map plan to price ID based on billing period
       const priceIds = {
-        'Daily Pro': {
+        'Daily': {
           monthly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
           yearly: 'price_1SJE8mL8Zm4LqDn4Qseyrms6'
         },

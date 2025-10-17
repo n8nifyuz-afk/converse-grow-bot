@@ -150,7 +150,7 @@ export default function PricingPlans() {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TFjbArlYa9GMQr': 'Daily Pro',
+    'prod_TFjbArlYa9GMQr': 'Daily',
     'prod_TFLbRE1wL9Miha': 'Pro',
     'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
   };
@@ -217,7 +217,7 @@ export default function PricingPlans() {
     const prices = {
       daily: {
         monthly: { price: 0.60, period: 'day' },
-        yearly: { price: 0.60, period: 'day', note: 'daily Pro access', savings: 0 }
+        yearly: { price: 0.60, period: 'day', note: 'per day', savings: 0 }
       },
       pro: {
         monthly: { price: 19.99, period: 'month' },
