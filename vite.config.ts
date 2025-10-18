@@ -18,13 +18,13 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Optimize bundle size
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
+    minify: 'esbuild', // Fast and efficient minification
+    // Remove console logs and debuggers in production
+    ...(mode === 'production' && {
+      esbuild: {
+        drop: ['console', 'debugger'],
       },
-    },
+    }),
     // Code splitting configuration
     rollupOptions: {
       output: {
