@@ -627,6 +627,10 @@ export default function ProjectPage() {
             // Determine correct type based on file type
             const webhookType = file.type.startsWith('image/') ? 'analyse-image' : 'analyse-files';
             
+            // Get session metadata
+            const { getSessionMetadata } = await import('@/utils/sessionTracking');
+            const sessionMetadata = await getSessionMetadata();
+            
             await fetch(webhookUrl, {
               method: 'POST',
               headers: {
@@ -641,7 +645,8 @@ export default function ProjectPage() {
                 fileSize: file.size,
                 fileType: file.type.startsWith('image/') ? 'image/png' : file.type,
                 fileData: base64Data,
-                model: selectedModel
+                model: selectedModel,
+                ...sessionMetadata
               })
             });
             console.log('[PROJECT-WEBHOOK] File sent to webhook, AI response will arrive via realtime');

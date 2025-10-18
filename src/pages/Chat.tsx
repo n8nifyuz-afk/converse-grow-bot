@@ -33,6 +33,7 @@ import grokLogo from '@/assets/grok-logo.png';
 
 // Speech recognition will be accessed with type casting to avoid global conflicts
 import { ImageAnalysisResult, analyzeImageComprehensively } from '@/utils/imageAnalysis';
+import { getSessionMetadata } from '@/utils/sessionTracking';
 const models = [{
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
@@ -1120,6 +1121,9 @@ export default function Chat() {
       
       console.log('[REGENERATE] Sending webhook payload:', JSON.stringify(payload).substring(0, 500) + '...');
 
+      // Get session metadata
+      const sessionMetadata = await getSessionMetadata();
+
       // Call N8n webhook (N8n will call webhook-handler in background to create new message)
       console.log('[REGENERATE] Calling N8n webhook (N8n will call webhook-handler)');
       
@@ -1128,7 +1132,10 @@ export default function Chat() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          ...payload,
+          ...sessionMetadata
+        })
       });
       
       if (!webhookResponse.ok) {
@@ -1314,6 +1321,9 @@ export default function Chat() {
       // Image generation models are handled separately
       console.log('[AI-RESPONSE] Calling webhook with type: text, model:', selectedModel);
       
+      // Get session metadata
+      const sessionMetadata = await getSessionMetadata();
+      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
@@ -1324,6 +1334,7 @@ export default function Chat() {
           message: userMessage,
           userId: user.id,
           chatId: originalChatId,
+          ...sessionMetadata,
           model: selectedModel
         })
       });
@@ -2040,6 +2051,10 @@ export default function Chat() {
         
         // Send to N8n webhook for image generation
         console.log('[IMAGE-GEN] Calling N8n webhook with prompt:', userMessage);
+        
+        // Get session metadata
+        const sessionMetadata = await getSessionMetadata();
+        
         const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
           method: 'POST',
           headers: {
@@ -2050,6 +2065,7 @@ export default function Chat() {
             message: userMessage,
             userId: user.id,
             chatId: chatId,
+            ...sessionMetadata,
             model: 'generate-image'
           })
         });
@@ -2414,6 +2430,9 @@ export default function Chat() {
           try {
             console.log('[WEBHOOK] Sending file to webhook:', attachment.name);
             
+            // Get session metadata
+            const sessionMetadata = await getSessionMetadata();
+            
             // Build webhook body conditionally based on model
             const webhookBody: any = {
               fileName: attachment.name,
@@ -2423,7 +2442,8 @@ export default function Chat() {
               userId: user.id,
               chatId: chatId,
               message: userMessage,
-              model: selectedModel
+              model: selectedModel,
+              ...sessionMetadata
             };
             
             // Only add type field if not edit-image model
