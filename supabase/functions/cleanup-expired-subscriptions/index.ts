@@ -25,12 +25,25 @@ serve(async (req) => {
   try {
     logStep("Starting cleanup of expired subscriptions");
 
-    // Get all subscriptions where current_period_end has passed
-    const now = new Date().toISOString();
+    const now = new Date();
+    
+    // CRITICAL FIX: Add 5-minute grace period to avoid conflicts with webhooks
+    // Only clean up subscriptions that expired more than 5 minutes ago
+    const gracePeriod = new Date(now.getTime() - 5 * 60 * 1000);
+    const gracePeriodISO = gracePeriod.toISOString();
+    
+    logStep("Using grace period", { 
+      now: now.toISOString(), 
+      gracePeriod: gracePeriodISO 
+    });
+
+    // Get all subscriptions where current_period_end passed > 5 minutes ago
+    // AND haven't been updated in last 5 minutes (webhook might be processing)
     const { data: expiredSubs, error: fetchError } = await supabaseClient
       .from('user_subscriptions')
       .select('*')
-      .lt('current_period_end', now)
+      .lt('current_period_end', gracePeriodISO)
+      .lt('updated_at', gracePeriodISO)
       .eq('status', 'active');
 
     if (fetchError) {
@@ -39,7 +52,7 @@ serve(async (req) => {
     }
 
     if (!expiredSubs || expiredSubs.length === 0) {
-      logStep("No expired subscriptions found");
+      logStep("No expired subscriptions found (after grace period)");
       return new Response(JSON.stringify({ 
         cleaned: 0, 
         message: "No expired subscriptions found" 
@@ -49,13 +62,14 @@ serve(async (req) => {
       });
     }
 
-    logStep("Found expired subscriptions", { count: expiredSubs.length });
+    logStep("Found expired subscriptions (after grace period)", { count: expiredSubs.length });
 
-    // Delete all expired subscriptions (users revert to free plan)
+    // Delete all expired subscriptions with grace period (users revert to free plan)
     const { error: deleteError } = await supabaseClient
       .from('user_subscriptions')
       .delete()
-      .lt('current_period_end', now)
+      .lt('current_period_end', gracePeriodISO)
+      .lt('updated_at', gracePeriodISO)
       .eq('status', 'active');
 
     if (deleteError) {

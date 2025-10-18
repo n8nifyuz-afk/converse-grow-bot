@@ -153,6 +153,27 @@ serve(async (req) => {
           // Continue processing - user stays active until subscription.deleted fires
         }
 
+        // CRITICAL: Handle paused subscriptions - treat as inactive
+        if (subscription.status === 'paused') {
+          logStep("Subscription paused, reverting to free plan", { 
+            subscriptionId: subscription.id 
+          });
+          
+          await supabaseClient
+            .from('user_subscriptions')
+            .delete()
+            .eq('user_id', user.id);
+          
+          // ONLY delete usage_limits on downgrade/cancellation
+          await supabaseClient
+            .from('usage_limits')
+            .delete()
+            .eq('user_id', user.id);
+          
+          logStep("User reverted to free plan (paused)", { userId: user.id });
+          break;
+        }
+
         // If subscription is canceled, past_due, unpaid, or incomplete_expired, revert to free
         if (['canceled', 'past_due', 'unpaid', 'incomplete_expired'].includes(subscription.status)) {
           logStep("Subscription cancelled/expired, reverting to free plan", { 
@@ -165,6 +186,7 @@ serve(async (req) => {
             .delete()
             .eq('user_id', user.id);
           
+          // ONLY delete usage_limits on downgrade/cancellation
           await supabaseClient
             .from('usage_limits')
             .delete()
@@ -238,17 +260,14 @@ serve(async (req) => {
 
         logStep("Subscription updated successfully", { userId: user.id, plan });
 
-        // CRITICAL: Reset image generation limits when subscription is activated/renewed
-        // Add timestamp to prevent double reset if invoice.payment_succeeded arrives later
-        const resetTimestamp = new Date().toISOString();
-        await supabaseClient
-          .from('usage_limits')
-          .delete()
-          .eq('user_id', user.id);
+        // CRITICAL FIX: Don't delete usage_limits on renewal/activation
+        // Let check_and_reset_usage_limits handle natural expiry and reset
+        // This prevents race conditions with other functions and cron jobs
+        // The DB function will create new period when old one expires
         
-        logStep("Reset image generation limits for fresh subscription period", { 
+        logStep("Subscription activated, usage limits will reset naturally at period end", { 
           userId: user.id,
-          resetAt: resetTimestamp
+          periodEnd: new Date(highestTierSub.current_period_end * 1000).toISOString()
         });
         break;
       }
@@ -264,12 +283,13 @@ serve(async (req) => {
         const user = users.users.find(u => u.email === customer.email);
         if (!user) break;
 
-        // Delete subscription and clean up usage limits
+        // Delete subscription and clean up usage limits (user downgrade)
         await supabaseClient
           .from('user_subscriptions')
           .delete()
           .eq('user_id', user.id);
 
+        // ONLY delete usage_limits on subscription deletion (downgrade)
         await supabaseClient
           .from('usage_limits')
           .delete()
@@ -300,26 +320,26 @@ serve(async (req) => {
 
         if (error) throw error;
         
-        // Check if limits were already reset by subscription.updated (within last 60 seconds)
-        // This prevents double reset when events arrive out of order
+        // CRITICAL FIX: Check updated_at to prevent double reset
+        // Use .maybeSingle() instead of .single() to avoid errors when no records exist
         const { data: existingLimits } = await supabaseClient
           .from('usage_limits')
-          .select('created_at')
+          .select('updated_at')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
         
-        const shouldReset = !existingLimits || 
-          (Date.now() - new Date(existingLimits.created_at).getTime() > 60000);
-        
-        if (shouldReset) {
-          await supabaseClient
-            .from('usage_limits')
-            .delete()
-            .eq('user_id', user.id);
-          
-          logStep("Subscription activated and limits reset", { userId: user.id });
+        // Don't delete usage_limits - let natural expiry handle it
+        // This prevents race conditions with subscription.updated and cron jobs
+        if (existingLimits) {
+          const timeSinceUpdate = Date.now() - new Date(existingLimits.updated_at).getTime();
+          logStep("Subscription activated, usage limits exist", { 
+            userId: user.id,
+            timeSinceUpdate: Math.floor(timeSinceUpdate / 1000) + " seconds"
+          });
         } else {
-          logStep("Subscription activated, limits already reset recently", { userId: user.id });
+          logStep("Subscription activated, no usage limits yet (will be created on first use)", { 
+            userId: user.id 
+          });
         }
         break;
       }
@@ -334,12 +354,13 @@ serve(async (req) => {
         const user = users.users.find(u => u.email === invoice.customer_email);
         if (!user) break;
 
-        // Revert to free plan and clean up limits
+        // Revert to free plan and clean up limits (downgrade)
         await supabaseClient
           .from('user_subscriptions')
           .delete()
           .eq('user_id', user.id);
 
+        // Delete usage_limits on downgrade
         await supabaseClient
           .from('usage_limits')
           .delete()

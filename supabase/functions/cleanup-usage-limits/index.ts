@@ -25,13 +25,25 @@ serve(async (req) => {
   try {
     logStep("Starting cleanup of expired usage limits");
 
-    const now = new Date().toISOString();
+    const now = new Date();
+    
+    // CRITICAL FIX: Add 5-minute grace period to avoid conflicts with webhooks
+    // Only clean up usage limits that expired more than 5 minutes ago
+    const gracePeriod = new Date(now.getTime() - 5 * 60 * 1000);
+    const gracePeriodISO = gracePeriod.toISOString();
+    
+    logStep("Using grace period", { 
+      now: now.toISOString(), 
+      gracePeriod: gracePeriodISO 
+    });
 
-    // Delete expired usage periods
+    // Delete expired usage periods with grace period
+    // Also check updated_at to avoid deleting records being actively updated
     const { data: deletedRecords, error: deleteError } = await supabaseClient
       .from('usage_limits')
       .delete()
-      .lt('period_end', now)
+      .lt('period_end', gracePeriodISO)
+      .lt('updated_at', gracePeriodISO)
       .select('id');
 
     if (deleteError) {
@@ -40,7 +52,7 @@ serve(async (req) => {
     }
 
     const deletedCount = deletedRecords?.length || 0;
-    logStep("Cleanup completed", { deletedCount, timestamp: now });
+    logStep("Cleanup completed", { deletedCount, timestamp: now.toISOString() });
 
     return new Response(
       JSON.stringify({ 

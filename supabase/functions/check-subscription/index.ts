@@ -62,13 +62,11 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      logStep("No customer found, updating unsubscribed state");
+      logStep("No customer found, user not subscribed");
       
-      // Delete any existing subscription record
-      await supabaseClient
-        .from('user_subscriptions')
-        .delete()
-        .eq('user_id', user.id);
+      // CRITICAL FIX: Make this function READ-ONLY
+      // stripe-webhook is the single source of truth for subscription updates
+      // This prevents race conditions between webhook and verification
       
       return new Response(JSON.stringify({ 
         subscribed: false,
@@ -165,13 +163,10 @@ serve(async (req) => {
               now: now.toISOString()
             });
             
-            // Delete expired subscription from database
-            await supabaseClient
-              .from('user_subscriptions')
-              .delete()
-              .eq('user_id', user.id);
+            // CRITICAL FIX: Don't delete - let webhook or cron handle it
+            // This function is READ-ONLY verification only
             
-            logStep("Expired subscription removed - user downgraded to free", { userId: user.id });
+            logStep("Expired subscription detected - cron will clean up", { userId: user.id });
             
             return new Response(JSON.stringify({
               subscribed: false,
@@ -211,39 +206,20 @@ serve(async (req) => {
       
       logStep("Final subscription details", { productId, planName, planTier: highestTier });
       
-      // Save/update subscription in database
-      try {
-        const { error: upsertError } = await supabaseClient
-          .from('user_subscriptions')
-          .upsert({
-            user_id: user.id,
-            stripe_customer_id: customerId,
-            stripe_subscription_id: subscriptionId,
-            product_id: productId,
-            plan_name: planName,
-            plan: highestTier, // Use the highest tier determined from evaluation
-            status: 'active',
-            current_period_end: subscriptionEnd
-          }, {
-            onConflict: 'user_id'
-          });
-        
-        if (upsertError) {
-          logStep("ERROR upserting subscription to DB", { error: upsertError.message });
-        } else {
-          logStep("Successfully saved subscription to DB");
-        }
-      } catch (dbError) {
-        logStep("ERROR saving to DB", { error: dbError instanceof Error ? dbError.message : String(dbError) });
-      }
-    } else {
-      logStep("No active subscription found");
+      // CRITICAL FIX: Make this function READ-ONLY
+      // stripe-webhook is the authoritative source for subscription data
+      // This function only verifies against Stripe API, doesn't write to DB
+      // This prevents race conditions when webhook and verification run simultaneously
       
-      // Delete any existing subscription record
-      await supabaseClient
-        .from('user_subscriptions')
-        .delete()
-        .eq('user_id', user.id);
+      logStep("Subscription verified via Stripe API (webhook manages DB)", { 
+        highestTier,
+        subscriptionId 
+      });
+    } else {
+      logStep("No active subscription found in Stripe");
+      
+      // CRITICAL FIX: Don't delete - let webhook handle it
+      // This is READ-ONLY verification
     }
 
     return new Response(JSON.stringify({
