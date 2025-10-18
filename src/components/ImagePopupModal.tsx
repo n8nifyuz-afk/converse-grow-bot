@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Download, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -28,13 +28,6 @@ export function ImagePopupModal({ isOpen, onClose, imageUrl, prompt = '' }: Imag
   const handleZoomOut = () => {
     setIsTransitioning(true);
     setZoom(prev => Math.max(prev - 0.25, 0.25));
-    setTimeout(() => setIsTransitioning(false), 300);
-  };
-
-  const handleReset = () => {
-    setIsTransitioning(true);
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
     setTimeout(() => setIsTransitioning(false), 300);
   };
 
@@ -176,15 +169,6 @@ export function ImagePopupModal({ isOpen, onClose, imageUrl, prompt = '' }: Imag
                 className="h-8 w-8 p-0"
               >
                 <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                className="h-8 px-2 text-xs"
-              >
-                <RotateCcw className="h-3 w-3 mr-1" />
-                Reset
               </Button>
             </div>
             
