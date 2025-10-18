@@ -23,65 +23,76 @@ serve(async (req) => {
   );
 
   try {
-    logStep("Starting cleanup of expired subscriptions");
+    logStep("Starting cleanup of dead/orphaned subscriptions");
 
     const now = new Date();
     
-    // CRITICAL FIX: Add 5-minute grace period to avoid conflicts with webhooks
-    // Only clean up subscriptions that expired more than 5 minutes ago
-    const gracePeriod = new Date(now.getTime() - 5 * 60 * 1000);
+    // CRITICAL FIX: Only clean up subscriptions in failed states
+    // NEVER delete 'active' subscriptions - let webhooks handle period renewals
+    // This cron is a safety net for orphaned records, not primary handler
+    
+    // Add 24-hour grace period - only clean up truly stale records
+    const gracePeriod = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const gracePeriodISO = gracePeriod.toISOString();
     
-    logStep("Using grace period", { 
+    logStep("Using 24-hour grace period for safety", { 
       now: now.toISOString(), 
       gracePeriod: gracePeriodISO 
     });
 
-    // Get all subscriptions where current_period_end passed > 5 minutes ago
-    // AND haven't been updated in last 5 minutes (webhook might be processing)
-    const { data: expiredSubs, error: fetchError } = await supabaseClient
+    // ONLY delete subscriptions that are:
+    // 1. In a failed/terminal state (NOT active)
+    // 2. Haven't been updated in 24 hours (webhook must have failed)
+    // 3. Period ended long ago (7+ days to be extra safe)
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgoISO = sevenDaysAgo.toISOString();
+    
+    const { data: deadSubs, error: fetchError } = await supabaseClient
       .from('user_subscriptions')
       .select('*')
-      .lt('current_period_end', gracePeriodISO)
+      .in('status', ['canceled', 'unpaid', 'past_due', 'incomplete_expired', 'paused'])
       .lt('updated_at', gracePeriodISO)
-      .eq('status', 'active');
+      .lt('current_period_end', sevenDaysAgoISO);
 
     if (fetchError) {
-      logStep("Error fetching expired subscriptions", { error: fetchError.message });
+      logStep("Error fetching dead subscriptions", { error: fetchError.message });
       throw fetchError;
     }
 
-    if (!expiredSubs || expiredSubs.length === 0) {
-      logStep("No expired subscriptions found (after grace period)");
+    if (!deadSubs || deadSubs.length === 0) {
+      logStep("No orphaned subscriptions found (safety net not needed)");
       return new Response(JSON.stringify({ 
         cleaned: 0, 
-        message: "No expired subscriptions found" 
+        message: "No orphaned subscriptions - webhooks working correctly" 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    logStep("Found expired subscriptions (after grace period)", { count: expiredSubs.length });
+    logStep("Found orphaned subscriptions to clean", { 
+      count: deadSubs.length,
+      statuses: deadSubs.map(s => s.status)
+    });
 
-    // Delete all expired subscriptions with grace period (users revert to free plan)
+    // Delete orphaned subscriptions (webhooks should have handled these)
     const { error: deleteError } = await supabaseClient
       .from('user_subscriptions')
       .delete()
-      .lt('current_period_end', gracePeriodISO)
+      .in('status', ['canceled', 'unpaid', 'past_due', 'incomplete_expired', 'paused'])
       .lt('updated_at', gracePeriodISO)
-      .eq('status', 'active');
+      .lt('current_period_end', sevenDaysAgoISO);
 
     if (deleteError) {
-      logStep("Error deleting expired subscriptions", { error: deleteError.message });
+      logStep("Error deleting orphaned subscriptions", { error: deleteError.message });
       throw deleteError;
     }
 
-    logStep("Successfully cleaned up expired subscriptions", { count: expiredSubs.length });
+    logStep("Successfully cleaned up orphaned subscriptions (safety net)", { count: deadSubs.length });
 
     return new Response(JSON.stringify({
-      cleaned: expiredSubs.length,
-      message: `Successfully downgraded ${expiredSubs.length} expired subscriptions to free plan`
+      cleaned: deadSubs.length,
+      message: `Safety net: Cleaned up ${deadSubs.length} orphaned subscription records`
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
