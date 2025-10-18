@@ -1616,13 +1616,36 @@ export default function Chat() {
       .eq('id', chatId)
       .maybeSingle();
     
-    // CRITICAL: Only set model from DB if user hasn't manually selected one
-    // This prevents the dropdown from resetting when switching tabs
+    // CRITICAL: Only set model from DB if user hasn't manually selected one AND we're not loading from navigation
+    // Check if we have a selectedModel from navigation state that should be preserved
+    const navigationModel = location.state?.selectedModel;
+    
     if (!chatError && chatData?.model_id && !userSelectedModelRef.current) {
-      console.log('[FETCH-MESSAGES] Setting model from DB:', chatData.model_id);
-      setSelectedModel(chatData.model_id);
+      // Only override if there's NO navigation model or if navigation model matches DB
+      if (!navigationModel || navigationModel === chatData.model_id) {
+        console.log('[FETCH-MESSAGES] Setting model from DB:', chatData.model_id);
+        setSelectedModel(chatData.model_id);
+      } else {
+        console.log('[FETCH-MESSAGES] Preserving navigation model over DB:', navigationModel, 'vs DB:', chatData.model_id);
+        // Navigation model takes priority - it's what the user selected
+        setSelectedModel(navigationModel);
+        // Update DB to match user's selection
+        console.log('[FETCH-MESSAGES] Updating DB model to match navigation selection');
+        supabase
+          .from('chats')
+          .update({ model_id: navigationModel })
+          .eq('id', chatId)
+          .then(({ error }) => {
+            if (error) {
+              console.error('[FETCH-MESSAGES] Error updating chat model:', error);
+            }
+          });
+      }
     } else if (userSelectedModelRef.current) {
       console.log('[FETCH-MESSAGES] Preserving user-selected model:', userSelectedModelRef.current);
+    } else if (navigationModel) {
+      console.log('[FETCH-MESSAGES] Using navigation model:', navigationModel);
+      setSelectedModel(navigationModel);
     }
     
     // Then fetch messages
@@ -2456,6 +2479,10 @@ export default function Chat() {
                   console.log('[WEBHOOK-POLLING] ✅ Found new assistant message!', newAssistantMessage.id);
                   console.log('[WEBHOOK-POLLING] Content preview:', newAssistantMessage.content?.substring(0, 100));
                   
+                  // CRITICAL: Track this message ID to prevent duplicates from fetchMessages
+                  fetchedMessageIds.current.add(newAssistantMessage.id);
+                  console.log('[WEBHOOK-POLLING] Tracked message ID in fetchedMessageIds:', newAssistantMessage.id);
+                  
                   // Check if this message is already in state
                   setMessages(prev => {
                     const exists = prev.some(m => m.id === newAssistantMessage.id);
@@ -2510,6 +2537,10 @@ export default function Chat() {
 
         // Mark as processed to prevent auto-trigger
         if (chatId && insertedMessage) {
+          // CRITICAL: Track this message ID to prevent duplicates when navigating back
+          fetchedMessageIds.current.add(insertedMessage.id);
+          console.log('[FILE-MESSAGE] Tracked user message ID in fetchedMessageIds:', insertedMessage.id);
+          
           if (!processedUserMessages.current.has(chatId)) {
             processedUserMessages.current.set(chatId, new Set());
           }
@@ -2597,6 +2628,10 @@ export default function Chat() {
         
         // Replace temp message with real message in state immediately
         if (insertedMessage) {
+          // CRITICAL: Track this message ID to prevent duplicates when navigating back
+          fetchedMessageIds.current.add(insertedMessage.id);
+          console.log('[TEXT-MESSAGE] Tracked user message ID in fetchedMessageIds:', insertedMessage.id);
+          
           setMessages(prev => prev.map(msg => 
             msg.id === tempUserMessage.id ? {
               ...insertedMessage,
