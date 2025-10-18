@@ -28,7 +28,7 @@ const allFeatures: Feature[] = [
   { name: 'All AI Models', free: false, pro: true, ultra: true },
   { name: 'Unlimited Chats', free: false, pro: true, ultra: true },
   { name: 'Voice Mode', free: false, pro: true, ultra: true },
-  { name: 'File Uploads (100MB)', free: false, pro: true, ultra: true },
+  { name: 'File Uploads (20MB)', free: false, pro: true, ultra: true },
   { name: 'Image Generation (500/month)', free: false, pro: true, ultra: false },
   { name: 'Image Generation (2,000/month)', free: false, pro: false, ultra: true },
   { name: 'Priority Support', free: false, pro: true, ultra: false },
