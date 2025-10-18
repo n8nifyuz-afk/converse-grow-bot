@@ -395,6 +395,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_message_usage: {
+        Row: {
+          created_at: string
+          id: string
+          last_reset_at: string | null
+          message_count: number
+          session_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_reset_at?: string | null
+          message_count?: number
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_reset_at?: string | null
+          message_count?: number
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -531,6 +561,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      increment_user_message_count: {
+        Args: { p_session_id?: string; p_user_id?: string }
+        Returns: number
+      }
       ivfflat_bit_support: {
         Args: { "": unknown }
         Returns: unknown
@@ -550,6 +584,10 @@ export type Database = {
       l2_normalize: {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: unknown
+      }
+      reset_user_message_count: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
       sparsevec_out: {
         Args: { "": unknown }
