@@ -36,6 +36,8 @@ import { ImageAnalysisResult, analyzeImageComprehensively } from '@/utils/imageA
 import { getSessionMetadata } from '@/utils/sessionTracking';
 import { handleError, handleFileError, handleDownloadError, validateFileSize } from '@/utils/errorHandler';
 import { FILE_LIMITS, STORAGE_BUCKETS, POLLING_INTERVALS } from '@/utils/constants';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 const models = [{
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
@@ -161,6 +163,7 @@ export default function Chat() {
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
+  const isOnline = useOnlineStatus();
   const { 
     canSendMessage, 
     isAtLimit, 
@@ -1860,6 +1863,12 @@ export default function Chat() {
   
   const sendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    
+    // Check online status first
+    if (!isOnline) {
+      toast.error("You're offline. Please check your internet connection.");
+      return;
+    }
     
     console.log('[MESSAGE-LIMIT-CHECK] Checking message limit...', {
       canSendMessage,
@@ -3929,11 +3938,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                      overflowWrap: 'anywhere'
                    }}>
                                 {message.content.includes("🎨 Generating your image") ? <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
-                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                                    <div>
-                                      <p className="text-sm font-medium">Generating your image...</p>
-                                      <p className="text-xs text-muted-foreground">This may take a few moments</p>
-                                    </div>
+                                    <LoadingSpinner size="sm" label="Generating your image..." />
                                   </div> : <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
                        code({
                          node,
