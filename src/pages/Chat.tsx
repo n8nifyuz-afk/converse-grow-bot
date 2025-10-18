@@ -3217,10 +3217,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       const combinedFiles = [...selectedFiles, ...newFiles];
       
       const totalSize = combinedFiles.reduce((sum, file) => sum + file.size, 0);
-      const maxTotalSize = 20 * 1024 * 1024; // 20MB total per message
+      const maxTotalSize = 10 * 1024 * 1024; // 10MB total per message
 
       if (totalSize > maxTotalSize) {
-        toast.error('Total file size cannot exceed 20MB');
+        toast.error('Total file size cannot exceed 10MB');
         event.target.value = '';
         return;
       }
@@ -3837,10 +3837,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
             const combinedFiles = [...selectedFiles, ...newFiles];
             
             const totalSize = combinedFiles.reduce((sum, file) => sum + file.size, 0);
-            const maxTotalSize = 20 * 1024 * 1024; // 20MB total per message
+            const maxTotalSize = 10 * 1024 * 1024; // 10MB total per message
             
             if (totalSize > maxTotalSize) {
-              toast.error('Total file size cannot exceed 20MB');
+              toast.error('Total file size cannot exceed 10MB');
               return;
             }
             
@@ -4208,10 +4208,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                 const combinedFiles = [...selectedFiles, ...newFiles];
                 
                 const totalSize = combinedFiles.reduce((sum, file) => sum + file.size, 0);
-                const maxTotalSize = 20 * 1024 * 1024;
+                const maxTotalSize = 10 * 1024 * 1024;
                 
                 if (totalSize > maxTotalSize) {
-                  toast.error('Total file size cannot exceed 20MB');
+                  toast.error('Total file size cannot exceed 10MB');
                   return;
                 }
                 

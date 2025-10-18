@@ -58,7 +58,7 @@ const features: PlanFeature[] = [
     ultraPro: true
   },
   {
-    name: 'Unlimited file uploads',
+    name: 'File uploads (10MB per message)',
     free: false,
     pro: true,
     ultraPro: true
@@ -100,7 +100,7 @@ const features: PlanFeature[] = [
     ultraPro: true
   },
   {
-    name: 'Extended limits on messages, file uploads, advanced data analysis, and image generation',
+    name: 'Extended limits on messages, file uploads (10MB), advanced data analysis, and image generation',
     free: false,
     pro: true,
     ultraPro: true
