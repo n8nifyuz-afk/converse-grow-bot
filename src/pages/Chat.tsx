@@ -427,38 +427,7 @@ export default function Chat() {
               setLoading(false);
               setIsGeneratingResponse(false);
               
-              // If we're regenerating, clear regeneration states AND remove the old hidden message
-              // Use the ref to get the current regenerating message ID
-              const currentRegeneratingId = regeneratingMessageIdRef.current;
-              if (currentRegeneratingId) {
-                console.log('[REALTIME-INSERT] Clearing regeneration states and removing old message:', currentRegeneratingId);
-                
-                // Clear the timeout
-                if (regenerateTimeoutRef.current) {
-                  clearTimeout(regenerateTimeoutRef.current);
-                  regenerateTimeoutRef.current = null;
-                }
-                
-                // Remove the old hidden message from state (already deleted from DB)
-                setMessages(prev => {
-                  const filtered = prev.filter(msg => msg.id !== currentRegeneratingId);
-                  console.log('[REALTIME-INSERT] Removed old message, remaining count:', filtered.length);
-                  return filtered;
-                });
-                
-                // Clear regeneration states
-                setRegeneratingMessageId(null);
-                regeneratingMessageIdRef.current = null; // Clear the ref too
-                setIsGeneratingResponse(false);
-                setIsRegenerating(false);
-                isRegeneratingRef.current = false;
-                setHiddenMessageIds(prev => {
-                  const newSet = new Set(prev);
-                  newSet.delete(currentRegeneratingId);
-                  return newSet;
-                });
-                oldMessageBackupRef.current = null;
-              }
+              // Note: We don't handle regeneration here anymore since regeneration uses UPDATE not INSERT
             }
             
             // Add message to state immediately with forced re-render
@@ -579,6 +548,26 @@ export default function Chat() {
           if (updatedMessage.chat_id !== chatId) {
             console.log('[REALTIME-UPDATE] Message rejected - wrong chat_id');
             return;
+          }
+
+          // If this is a regenerated message being updated, clear regeneration states
+          const currentRegeneratingId = regeneratingMessageIdRef.current;
+          if (currentRegeneratingId === updatedMessage.id) {
+            console.log('[REALTIME-UPDATE] Regenerated message updated, clearing states');
+            setRegeneratingMessageId(null);
+            regeneratingMessageIdRef.current = null;
+            setIsGeneratingResponse(false);
+            setIsRegenerating(false);
+            isRegeneratingRef.current = false;
+            setHiddenMessageIds(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(updatedMessage.id);
+              return newSet;
+            });
+            if (regenerateTimeoutRef.current) {
+              clearTimeout(regenerateTimeoutRef.current);
+              regenerateTimeoutRef.current = null;
+            }
           }
 
           setMessages(prev => {
@@ -1140,12 +1129,15 @@ export default function Chat() {
       console.log('[REGENERATE] Request type:', requestType, 'Model:', userModel);
 
       // Build payload - send first attachment directly in the body
+      // CRITICAL: Include messageId so webhook knows to UPDATE instead of INSERT
       let payload: any = {
         type: requestType,
         message: userMessage,
         userId: user.id,
         chatId: chatId,
-        model: userModel
+        model: userModel,
+        messageId: messageId, // Pass the message ID to update
+        isRegenerate: true // Flag to indicate this is a regeneration
       };
 
       if (validAttachments.length > 0) {
@@ -1157,7 +1149,7 @@ export default function Chat() {
         payload.fileData = firstAttachment.fileData;
       }
       
-      console.log('[REGENERATE] Sending webhook payload:', JSON.stringify(payload).substring(0, 500) + '...');
+      console.log('[REGENERATE] Sending webhook payload with messageId:', messageId.substring(0, 10));
 
       // Get session metadata
       const sessionMetadata = await getSessionMetadata();
@@ -1180,92 +1172,68 @@ export default function Chat() {
         throw new Error(`Webhook request failed: ${webhookResponse.status}`);
       }
       
-      console.log('[REGENERATE] Webhook called successfully, now removing old message from state and database');
+      const webhookData = await webhookResponse.json();
+      console.log('[REGENERATE] Webhook response:', webhookData);
       
-      // IMMEDIATELY remove old message from state to prevent showing both old and new
+      // Webhook will UPDATE the message, so fetch the updated content immediately
+      console.log('[REGENERATE] Fetching updated message from database...');
+      const { data: updatedMessage, error: fetchError } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('id', messageId)
+        .single();
+      
+      if (fetchError) {
+        console.error('[REGENERATE] Error fetching updated message:', fetchError);
+        throw fetchError;
+      }
+      
+      console.log('[REGENERATE] Updated message fetched successfully');
+      
+      // IMMEDIATELY update the message in state
       setMessages(prev => {
-        const filtered = prev.filter(msg => msg.id !== messageId);
-        console.log('[REGENERATE] Removed old message from state, messages count:', filtered.length);
-        return filtered;
+        return prev.map(msg => {
+          if (msg.id === messageId) {
+            // Update the message with new content
+            return {
+              ...msg,
+              content: updatedMessage.content,
+              file_attachments: (updatedMessage.file_attachments || []) as any as FileAttachment[],
+              model: updatedMessage.model
+            };
+          }
+          return msg;
+        });
       });
       
-      // NOW delete the old message from database (webhook succeeded)
-      const { error: deleteError } = await supabase
-        .from('messages')
-        .delete()
-        .eq('id', messageId);
+      // Clear regeneration states immediately
+      console.log('[REGENERATE] Clearing regeneration states');
+      setRegeneratingMessageId(null);
+      regeneratingMessageIdRef.current = null;
+      setIsGeneratingResponse(false);
+      setIsRegenerating(false);
+      isRegeneratingRef.current = false;
+      setHiddenMessageIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(messageId);
+        return newSet;
+      });
+      oldMessageBackupRef.current = null;
       
-      if (deleteError) {
-        console.error('[REGENERATE] Error deleting old message:', deleteError);
-        // Don't throw - webhook already succeeded, new message will arrive
-      } else {
-        console.log('[REGENERATE] Successfully deleted old message from database');
+      // Clear timeout
+      if (regenerateTimeoutRef.current) {
+        clearTimeout(regenerateTimeoutRef.current);
+        regenerateTimeoutRef.current = null;
       }
-      
-      // Delete old image from storage if it exists
-      if (assistantMessage.file_attachments && assistantMessage.file_attachments.length > 0) {
-        for (const attachment of assistantMessage.file_attachments) {
-          if (attachment.url && attachment.type.startsWith('image/')) {
-            try {
-              const urlObj = new URL(attachment.url);
-              const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/([^\/]+)\/(.+)/);
-              
-              if (pathMatch) {
-                const bucketName = pathMatch[1];
-                const filePath = pathMatch[2];
-                
-                console.log('[REGENERATE] Deleting old image from storage:', { bucketName, filePath });
-                
-                const { error: deleteStorageError } = await supabase.storage
-                  .from(bucketName)
-                  .remove([filePath]);
-                  
-                if (deleteStorageError) {
-                  console.error('[REGENERATE] Error deleting old image from storage:', deleteStorageError);
-                } else {
-                  console.log('[REGENERATE] Successfully deleted old image from storage');
-                }
-              }
-            } catch (error) {
-              console.error('[REGENERATE] Error parsing image URL:', error);
-            }
-          }
-        }
-      }
-      
-      console.log('[REGENERATE] Webhook completed, waiting for realtime to deliver new message...');
-      
-      // Don't fetch messages - let realtime handle it to avoid race condition with DB deletion
-      // Fallback: Clear regeneration states after 10 seconds if realtime doesn't fire
-      setTimeout(() => {
-        console.log('[REGENERATE] Fallback: Clearing regeneration state after timeout');
-        if (isRegeneratingRef.current || regeneratingMessageIdRef.current) {
-          setRegeneratingMessageId(null);
-          regeneratingMessageIdRef.current = null;
-          setIsGeneratingResponse(false);
-          setIsRegenerating(false);
-          isRegeneratingRef.current = false;
-          setHiddenMessageIds(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(messageId);
-            return newSet;
-          });
-          oldMessageBackupRef.current = null;
-          
-          // Clear timeout
-          if (regenerateTimeoutRef.current) {
-            clearTimeout(regenerateTimeoutRef.current);
-            regenerateTimeoutRef.current = null;
-          }
-        }
-      }, 10000);
       
       scrollToBottom();
       
-      // Note: For image generation, we still need special handling
+      scrollToBottom();
+      
+      // Note: For image generation, we still need special handling  
       const aiResponse = await webhookResponse.json();
       if (userModel === 'generate-image' && aiResponse.image_base64) {
-        console.log('[REGENERATE] Image generation response received, calling webhook-handler...');
+        console.log('[REGENERATE] Image generation response received, calling webhook-handler to update message...');
         
         const { data: handlerData, error: handlerError } = await supabase.functions.invoke('webhook-handler', {
           body: {
@@ -1274,7 +1242,9 @@ export default function Chat() {
             image_base64: aiResponse.image_base64,
             image_name: aiResponse.image_name || 'generated_image.png',
             image_type: aiResponse.image_type || 'image/png',
-            model: 'generate-image'
+            model: 'generate-image',
+            messageId: messageId, // Pass messageId to update existing message
+            isRegenerate: true // Flag to indicate this is a regeneration
           }
         });
         
@@ -1283,8 +1253,31 @@ export default function Chat() {
           throw handlerError;
         }
         
-        console.log('[REGENERATE] Webhook-handler saved new message:', handlerData);
-        console.log('[REGENERATE] Image generation: waiting for realtime subscription to add new message...');
+        console.log('[REGENERATE] Webhook-handler updated message:', handlerData);
+        
+        // Fetch the updated message and update state immediately
+        const { data: updatedMessage, error: fetchError } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('id', messageId)
+          .single();
+        
+        if (!fetchError && updatedMessage) {
+          setMessages(prev => {
+            return prev.map(msg => {
+              if (msg.id === messageId) {
+                return {
+                  ...msg,
+                  content: updatedMessage.content,
+                  file_attachments: (updatedMessage.file_attachments || []) as any as FileAttachment[],
+                  model: updatedMessage.model
+                };
+              }
+              return msg;
+            });
+          });
+        }
+        
         scrollToBottom();
         return;
       }
