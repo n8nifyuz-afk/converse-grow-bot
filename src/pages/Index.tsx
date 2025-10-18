@@ -1353,9 +1353,20 @@ export default function Index() {
 
       <input ref={fileInputRef} type="file" multiple className="sr-only" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" aria-label="File upload input" onChange={e => {
         const files = Array.from(e.target.files || []);
-        setSelectedFiles(prev => [...prev, ...files]);
-        if (files.length > 0) {
-          toast.success(`${files.length} file(s) added successfully`);
+        
+        // File size validation - 10MB limit per file
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+        const validFiles = files.filter(file => {
+          if (file.size > MAX_FILE_SIZE) {
+            toast.error(`${file.name} exceeds 10MB limit and was skipped`);
+            return false;
+          }
+          return true;
+        });
+        
+        if (validFiles.length > 0) {
+          setSelectedFiles(prev => [...prev, ...validFiles]);
+          toast.success(`${validFiles.length} file(s) added successfully`);
         }
       }} />
       

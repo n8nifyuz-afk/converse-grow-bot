@@ -744,7 +744,20 @@ export default function ProjectPage() {
     }
     const files = event.target.files;
     if (files && files.length > 0) {
-      setSelectedFiles(prev => [...prev, ...Array.from(files)]);
+      // File size validation - 10MB limit per file
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      const filesArray = Array.from(files);
+      const validFiles = filesArray.filter(file => {
+        if (file.size > MAX_FILE_SIZE) {
+          toast.error(`${file.name} exceeds 10MB limit and was skipped`);
+          return false;
+        }
+        return true;
+      });
+      
+      if (validFiles.length > 0) {
+        setSelectedFiles(prev => [...prev, ...validFiles]);
+      }
       event.target.value = '';
     }
   };
