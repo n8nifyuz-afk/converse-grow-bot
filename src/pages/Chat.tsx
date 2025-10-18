@@ -4207,7 +4207,32 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                       <Select value={selectedModel} onValueChange={handleModelChange}>
                         <SelectTrigger className="w-[180px] h-8 bg-background border border-border/50 rounded-full z-50">
                           <SelectValue>
-                            <span className="text-sm font-medium">{selectedModelData?.shortLabel}</span>
+                            <div className="flex items-center gap-2">
+                              {selectedModel?.includes('gpt') || selectedModel === 'generate-image' || selectedModel === 'edit-image' ? (
+                                <img src={chatgptLogoSrc} alt="OpenAI" className="w-4 h-4 object-contain" />
+                              ) : selectedModel?.includes('claude') ? (
+                                <img src={claudeLogo} alt="Claude" className="w-4 h-4 object-contain" />
+                              ) : selectedModel?.includes('gemini') ? (
+                                <img src={geminiLogo} alt="Gemini" className="w-4 h-4 object-contain" />
+                              ) : selectedModel?.includes('deepseek') ? (
+                                <img 
+                                  src={deepseekLogo} 
+                                  alt="DeepSeek" 
+                                  className="w-4 h-4 object-contain"
+                                  style={actualTheme === 'light' ? { filter: 'brightness(0) saturate(100%) invert(38%) sepia(98%) saturate(2618%) hue-rotate(221deg) brightness(98%) contrast(101%)' } : {}}
+                                />
+                              ) : selectedModel?.includes('grok') ? (
+                                <img 
+                                  src={grokLogo} 
+                                  alt="Grok" 
+                                  className="w-4 h-4 object-contain"
+                                  style={actualTheme === 'light' ? { filter: 'brightness(0)' } : {}}
+                                />
+                              ) : (
+                                <Bot className="h-4 w-4" />
+                              )}
+                              <span className="text-sm font-medium">{selectedModelData?.shortLabel}</span>
+                            </div>
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="z-[100] bg-background border shadow-lg rounded-lg p-1 w-[calc(100vw-2rem)] max-w-[280px]">
