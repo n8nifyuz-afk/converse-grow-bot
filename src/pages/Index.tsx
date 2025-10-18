@@ -1351,22 +1351,18 @@ export default function Index() {
 
       
 
-      <input ref={fileInputRef} type="file" multiple className="sr-only" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" aria-label="File upload input" onChange={e => {
+      <input ref={fileInputRef} type="file" multiple className="sr-only" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" aria-label="File upload input" onChange={e => {
         const files = Array.from(e.target.files || []);
         
         // Helper functions for file validation
         const getMaxFileSize = (type: string) => {
           if (type.startsWith('image/')) return 10 * 1024 * 1024; // 10MB for images
-          if (type.startsWith('video/')) return 100 * 1024 * 1024; // 100MB for videos
-          if (type.startsWith('audio/')) return 50 * 1024 * 1024; // 50MB for audio
           if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 25 * 1024 * 1024; // 25MB for documents
           return 20 * 1024 * 1024; // 20MB for other files
         };
         
         const getFileTypeCategory = (type: string) => {
           if (type.startsWith('image/')) return 'image';
-          if (type.startsWith('video/')) return 'video';
-          if (type.startsWith('audio/')) return 'audio';
           if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 'document';
           return 'file';
         };

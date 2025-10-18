@@ -1594,18 +1594,14 @@ export default function Chat() {
     }
   };
 
-  // File size limits based on ChatGPT recommendations
+  // File size limits based on supported file types
   const getMaxFileSize = (type: string) => {
     if (type.startsWith('image/')) return 10 * 1024 * 1024; // 10MB for images
-    if (type.startsWith('video/')) return 100 * 1024 * 1024; // 100MB for videos
-    if (type.startsWith('audio/')) return 50 * 1024 * 1024; // 50MB for audio
     if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 25 * 1024 * 1024; // 25MB for documents
     return 20 * 1024 * 1024; // 20MB for other files
   };
   const getFileTypeCategory = (type: string) => {
     if (type.startsWith('image/')) return 'image';
-    if (type.startsWith('video/')) return 'video';
-    if (type.startsWith('audio/')) return 'audio';
     if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 'document';
     return 'file';
   };
@@ -2754,20 +2750,6 @@ Document Properties:
 • Processing: Requires specialized document parsing to extract full content
 
 Note: This document file contains structured content that would need document parsing tools to extract the actual text, formatting, and embedded elements.`;
-      } else if (fileType.startsWith('audio/')) {
-        return `🎵 AUDIO FILE ANALYSIS:
-
-File Details:
-• Name: ${file.name}
-• Size: ${(file.size / 1024).toFixed(2)} KB
-• Format: ${fileType}
-• Estimated Duration: ${Math.round(file.size / 1024 / 60)} minutes (approximate)
-
-Audio Properties:
-• Type: ${fileType.includes('mp3') ? 'MP3 compressed' : fileType.includes('wav') ? 'WAV uncompressed' : 'Digital audio'}
-• Quality: ${file.size > 10000000 ? 'High quality/long duration' : file.size > 3000000 ? 'Standard quality' : 'Compressed/short'}
-
-Note: This audio file could contain speech, music, or other sounds. Speech-to-text processing would be needed to extract any spoken content.`;
       } else {
         return `📋 GENERAL FILE ANALYSIS:
 
@@ -2837,8 +2819,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
   const categorizeFile = (fileType: string): string => {
     if (fileType.startsWith('text/')) return 'Text Document';
     if (fileType.startsWith('image/')) return 'Image File';
-    if (fileType.startsWith('video/')) return 'Video Media';
-    if (fileType.startsWith('audio/')) return 'Audio Media';
     if (fileType.includes('pdf')) return 'PDF Document';
     if (fileType.includes('document') || fileType.includes('word')) return 'Word Document';
     if (fileType.includes('spreadsheet') || fileType.includes('excel')) return 'Spreadsheet';
@@ -3087,8 +3067,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
     if (type.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
     if (type.includes('pdf')) return <FileText className="h-4 w-4 text-red-500" />;
     if (type.includes('document') || type.includes('word')) return <FileText className="h-4 w-4 text-blue-500" />;
-    if (type.startsWith('audio/')) return <FileText className="h-4 w-4 text-green-500" />;
-    if (type.startsWith('video/')) return <FileText className="h-4 w-4 text-purple-500" />;
     return <FileText className="h-4 w-4" />;
   };
   const isImageFile = (type: string) => type.startsWith('image/');
@@ -4383,7 +4361,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       </div>
 
       {/* Hidden file input */}
-      <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />
+      <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />
 
       {/* Image popup modal */}
       {selectedImage && <ImagePopupModal isOpen={!!selectedImage} onClose={() => setSelectedImage(null)} imageUrl={selectedImage.url} prompt={selectedImage.name} />}

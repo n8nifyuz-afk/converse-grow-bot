@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Paperclip, Mic, MicOff, Edit2, Trash2, FolderOpen, Lightbulb, Target, Briefcase, Rocket, Palette, FileText, Code, Zap, Trophy, Heart, Star, Flame, Gem, Sparkles, MoreHorizontal, FileImage, FileVideo, FileAudio, File as FileIcon, X, Image as ImageIcon2, ImageIcon as ImageIcon, Check, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
+import { Plus, Paperclip, Mic, MicOff, Edit2, Trash2, FolderOpen, Lightbulb, Target, Briefcase, Rocket, Palette, FileText, Code, Zap, Trophy, Heart, Star, Flame, Gem, Sparkles, MoreHorizontal, FileImage, File as FileIcon, X, Image as ImageIcon2, ImageIcon as ImageIcon, Check, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SendHorizontalIcon } from '@/components/ui/send-horizontal-icon';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -733,16 +733,12 @@ export default function ProjectPage() {
   // Helper functions for file validation
   const getMaxFileSize = (type: string) => {
     if (type.startsWith('image/')) return 10 * 1024 * 1024; // 10MB for images
-    if (type.startsWith('video/')) return 100 * 1024 * 1024; // 100MB for videos
-    if (type.startsWith('audio/')) return 50 * 1024 * 1024; // 50MB for audio
     if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 25 * 1024 * 1024; // 25MB for documents
     return 20 * 1024 * 1024; // 20MB for other files
   };
   
   const getFileTypeCategory = (type: string) => {
     if (type.startsWith('image/')) return 'image';
-    if (type.startsWith('video/')) return 'video';
-    if (type.startsWith('audio/')) return 'audio';
     if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 'document';
     return 'file';
   };
@@ -788,8 +784,6 @@ export default function ProjectPage() {
   };
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/')) return <FileImage className="h-4 w-4 text-blue-500" />;
-    if (fileType.startsWith('video/')) return <FileVideo className="h-4 w-4 text-purple-500" />;
-    if (fileType.startsWith('audio/')) return <FileAudio className="h-4 w-4 text-green-500" />;
     if (fileType.includes('pdf') || fileType.includes('document') || fileType.includes('text')) return <FileText className="h-4 w-4 text-red-500" />;
     return <FileIcon className="h-4 w-4 text-gray-500" />;
   };
@@ -1523,7 +1517,7 @@ export default function ProjectPage() {
         </div>
 
         {/* Hidden file input */}
-        <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />
+        <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />
       </div>
 
       {/* Edit Project Modal */}
