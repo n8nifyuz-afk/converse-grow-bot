@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Gem } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,12 +8,23 @@ import { useAuth } from '@/contexts/AuthContext';
 interface MessageLimitWarningProps {
   messageCount: number;
   limit: number;
+  show: boolean;
+  onHide: () => void;
 }
 
-export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messageCount, limit }) => {
+export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messageCount, limit, show, onHide }) => {
   const navigate = useNavigate();
   const { subscriptionStatus, loadingSubscription } = useAuth();
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      const timer = setTimeout(() => {
+        onHide();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [show, onHide]);
 
   const handleUpgradeClick = () => {
     // Only show pricing modal for free users
@@ -21,6 +32,8 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
       setIsPricingModalOpen(true);
     }
   };
+
+  if (!show) return null;
 
   return (
     <>

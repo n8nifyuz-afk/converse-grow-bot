@@ -269,6 +269,7 @@ export default function ProjectPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showLimitWarning, setShowLimitWarning] = useState(false);
   
   // Show all models - access control happens on selection
   const availableModelsList = models;
@@ -426,6 +427,7 @@ export default function ProjectPage() {
     if (!subscriptionStatus.subscribed && isAtLimit) {
       console.log('[PROJECT-MESSAGE-LIMIT] ❌ User at limit - showing upgrade message');
       // Message limit warning is now displayed inline above the input
+      setShowLimitWarning(true);
       return;
     }
     
@@ -1295,8 +1297,13 @@ export default function ProjectPage() {
                 </div>}
               
               {/* Message limit warning */}
-              {!subscriptionStatus.subscribed && isAtLimit && (
-                <MessageLimitWarning messageCount={messageCount} limit={limit} />
+              {!subscriptionStatus.subscribed && (
+                <MessageLimitWarning 
+                  messageCount={messageCount} 
+                  limit={limit}
+                  show={showLimitWarning}
+                  onHide={() => setShowLimitWarning(false)}
+                />
               )}
               
               <div className="relative bg-background border border-border rounded-xl sm:rounded-2xl p-3 sm:p-4">

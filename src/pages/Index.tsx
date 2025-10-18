@@ -992,8 +992,13 @@ export default function Index() {
       </div>
 
       {/* Message Limit Warning */}
-      {!subscriptionStatus.subscribed && showLimitWarning && (
-        <MessageLimitWarning messageCount={messageCount} limit={messageLimit} />
+      {!subscriptionStatus.subscribed && (
+        <MessageLimitWarning 
+          messageCount={messageCount} 
+          limit={messageLimit}
+          show={showLimitWarning}
+          onHide={() => setShowLimitWarning(false)}
+        />
       )}
 
       <div className="w-full max-w-3xl mb-4 sm:mb-6">

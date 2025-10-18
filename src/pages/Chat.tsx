@@ -3951,7 +3951,12 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
             
           {/* Message limit warning - only show in this chat if user tried to send and was blocked */}
           {showLimitWarning && (
-            <MessageLimitWarning messageCount={messageCount} limit={messageLimit} />
+            <MessageLimitWarning 
+              messageCount={messageCount} 
+              limit={messageLimit}
+              show={showLimitWarning}
+              onHide={() => setShowLimitWarning(false)}
+            />
           )}
             
           <div ref={messagesEndRef} />
