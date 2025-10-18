@@ -289,6 +289,10 @@ export default function Chat() {
   const sendingInProgressRef = useRef(false);
   // CRITICAL: Track message IDs that were loaded from fetchMessages to prevent realtime duplicates
   const fetchedMessageIds = useRef<Set<string>>(new Set());
+  // CRITICAL: Track all active polling timers to cancel on cleanup
+  const activePollingTimers = useRef<Set<NodeJS.Timeout>>(new Set());
+  // CRITICAL: Flag to stop all polling when message is received
+  const stopAllPollingRef = useRef(false);
   const selectedModelData = models.find(m => m.id === selectedModel);
   
   // Show all models to everyone - access control happens on selection
@@ -305,6 +309,12 @@ export default function Chat() {
       
       // CRITICAL: Clear fetched message IDs when switching chats
       fetchedMessageIds.current.clear();
+      
+      // CRITICAL: Cancel ALL active polling timers immediately
+      console.log('[CHAT-SWITCH] Cancelling all active polling timers');
+      activePollingTimers.current.forEach(timer => clearTimeout(timer));
+      activePollingTimers.current.clear();
+      stopAllPollingRef.current = true; // Signal all polling to stop
       
       // Clear limit warning when switching chats
       setShowLimitWarning(false);
@@ -406,6 +416,12 @@ export default function Chat() {
               console.log('[REALTIME-INSERT] 🤖 Assistant message arrived - clearing loading states');
               console.log('[REALTIME-INSERT] Message ID:', newMessage.id);
               console.log('[REALTIME-INSERT] Loading was:', loading);
+              
+              // CRITICAL: Stop all polling immediately when realtime delivers message
+              console.log('[REALTIME-INSERT] Stopping all active polling');
+              stopAllPollingRef.current = true;
+              activePollingTimers.current.forEach(timer => clearTimeout(timer));
+              activePollingTimers.current.clear();
               
               setLoading(false);
               setIsGeneratingResponse(false);
@@ -626,6 +642,19 @@ export default function Chat() {
       // Overall cleanup function for the useEffect
       return () => {
         console.log('[CHAT-CLEANUP] Cleaning up chat:', chatId);
+        
+        // CRITICAL: Cancel ALL active polling timers on cleanup
+        console.log('[CHAT-CLEANUP] Cancelling all active polling timers');
+        stopAllPollingRef.current = true;
+        activePollingTimers.current.forEach(timer => clearTimeout(timer));
+        activePollingTimers.current.clear();
+        
+        // Clear regenerate timeout if active
+        if (regenerateTimeoutRef.current) {
+          clearTimeout(regenerateTimeoutRef.current);
+          regenerateTimeoutRef.current = null;
+        }
+        
         window.removeEventListener('image-generation-chat', handleImageGenerationChat as EventListener);
         // Execute the realtime cleanup
         cleanupPromise.then(cleanup => cleanup?.());
@@ -1366,6 +1395,12 @@ export default function Chat() {
         const maxPollAttempts = 30; // Poll for up to ~45 seconds
         
         const pollForNewMessages = async () => {
+          // CRITICAL: Check if polling should stop (chat switched or realtime delivered)
+          if (stopAllPollingRef.current) {
+            console.log('[AI-RESPONSE-POLLING] Stopped by flag');
+            return;
+          }
+          
           if (pollAttempts >= maxPollAttempts) {
             console.log('[AI-RESPONSE-POLLING] Max attempts reached');
             setIsGeneratingResponse(false);
@@ -1386,7 +1421,8 @@ export default function Chat() {
             if (fetchError) {
               console.error('[AI-RESPONSE-POLLING] Error fetching messages:', fetchError);
               const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
-              setTimeout(pollForNewMessages, nextPollDelay);
+              const timer = setTimeout(pollForNewMessages, nextPollDelay);
+              activePollingTimers.current.add(timer);
               return;
             }
             
@@ -1464,23 +1500,33 @@ export default function Chat() {
               setLoading(false);
               requestAnimationFrame(() => scrollToBottom());
               
-              // Stop polling
+              // Stop all polling - message found
+              stopAllPollingRef.current = true;
+              activePollingTimers.current.forEach(timer => clearTimeout(timer));
+              activePollingTimers.current.clear();
+              
               return;
             }
             
             console.log('[AI-RESPONSE-POLLING] No new assistant message yet, retrying...');
             // Use faster polling for first 10 attempts (500ms), then slower (2s)
             const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
-            setTimeout(pollForNewMessages, nextPollDelay);
+            const timer = setTimeout(pollForNewMessages, nextPollDelay);
+            activePollingTimers.current.add(timer);
           } catch (pollError) {
             console.error('[AI-RESPONSE-POLLING] Error during polling:', pollError);
             const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
-            setTimeout(pollForNewMessages, nextPollDelay);
+            const timer = setTimeout(pollForNewMessages, nextPollDelay);
+            activePollingTimers.current.add(timer);
           }
         };
         
+        // Reset stop flag before starting new polling
+        stopAllPollingRef.current = false;
+        
         // Start polling immediately for faster response
-        setTimeout(pollForNewMessages, 100);
+        const initialTimer = setTimeout(pollForNewMessages, 100);
+        activePollingTimers.current.add(initialTimer);
         return;
       }
       
@@ -2465,6 +2511,12 @@ export default function Chat() {
             const pollInterval = 2000; // Poll every 2 seconds
             
             const pollForNewMessages = async () => {
+              // CRITICAL: Check if polling should stop (chat switched or realtime delivered)
+              if (stopAllPollingRef.current) {
+                console.log('[WEBHOOK-POLLING] Stopped by flag');
+                return;
+              }
+              
               if (pollAttempts >= maxPollAttempts) {
                 console.log('[WEBHOOK-POLLING] Max attempts reached, stopping');
                 return;
@@ -2509,7 +2561,8 @@ export default function Chat() {
                 
                 if (error) {
                   console.error('[WEBHOOK-POLLING] Error fetching messages:', error);
-                  setTimeout(pollForNewMessages, pollInterval);
+                  const timer = setTimeout(pollForNewMessages, pollInterval);
+                  activePollingTimers.current.add(timer);
                   return;
                 }
                 
@@ -2561,20 +2614,30 @@ export default function Chat() {
                     return newMessages;
                   });
                   
-                  // Stop polling
+                  // Stop all polling - message found
+                  stopAllPollingRef.current = true;
+                  activePollingTimers.current.forEach(timer => clearTimeout(timer));
+                  activePollingTimers.current.clear();
+                  
                   return;
                 }
                 
                 console.log('[WEBHOOK-POLLING] No new assistant message yet, will retry');
-                setTimeout(pollForNewMessages, pollInterval);
+                const timer = setTimeout(pollForNewMessages, pollInterval);
+                activePollingTimers.current.add(timer);
               } catch (pollError) {
                 console.error('[WEBHOOK-POLLING] Error during polling:', pollError);
-                setTimeout(pollForNewMessages, pollInterval);
+                const timer = setTimeout(pollForNewMessages, pollInterval);
+                activePollingTimers.current.add(timer);
               }
             };
             
+            // Reset stop flag before starting new polling
+            stopAllPollingRef.current = false;
+            
             // Start polling after a short delay to let webhook process
-            setTimeout(pollForNewMessages, 3000);
+            const initialTimer = setTimeout(pollForNewMessages, 3000);
+            activePollingTimers.current.add(initialTimer);
           } catch (error) {
             console.error('[WEBHOOK] Error sending file:', error);
           }
