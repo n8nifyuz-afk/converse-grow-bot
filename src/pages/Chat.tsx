@@ -3881,7 +3881,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                         <img 
                           src={file.url} 
                           alt={file.name || "Image"} 
-                          className="max-w-full sm:max-w-[280px] md:max-w-[300px] max-h-[200px] object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity shadow-sm border" 
+                          className="max-w-full sm:max-w-[320px] md:max-w-[400px] max-h-[240px] object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity shadow-sm border"
                           onClick={() => setSelectedImage({
                             url: file.url,
                             name: file.name
@@ -3894,8 +3894,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                           }} 
                         />
                        <div className="flex gap-2">
-                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => downloadImageFromChat(file.url, file.name)}>
-                           <Download className="h-3 w-3 mr-1" />
+                         <Button variant="ghost" size="sm" className="h-9 px-3 text-sm" onClick={() => downloadImageFromChat(file.url, file.name)}>
+                           <Download className="h-4 w-4 mr-1.5" />
                            Download
                          </Button>
                        </div>
@@ -4256,30 +4256,30 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
             
             {/* Recording UI - appears below textarea when recording */}
             {isRecording && (
-              <div className="flex items-center gap-0.5 sm:gap-2 py-1 sm:py-2 px-0">
+              <div className="flex items-center gap-2 py-2 px-0">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-5 w-5 sm:h-7 sm:w-7 rounded-full text-foreground hover:text-foreground hover:bg-accent flex-shrink-0 p-0"
+                  className="h-9 w-9 sm:h-10 sm:w-10 rounded-full text-foreground hover:text-foreground hover:bg-accent flex-shrink-0 p-0"
                   onClick={cancelRecording}
                   aria-label="Cancel recording"
                 >
-                  <X className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
                 
-                <div className="flex-1 flex items-center justify-center gap-0.5 sm:gap-2 min-w-0 overflow-hidden">
+                <div className="flex-1 flex items-center justify-center gap-2 min-w-0 overflow-hidden">
                   {/* Real-time audio waveform visualization - mobile optimized */}
-                  <div className="flex items-center justify-center gap-[0.5px] sm:gap-[2px] h-4 sm:h-8 flex-1 max-w-[320px] sm:max-w-[600px] min-w-0">
+                  <div className="flex items-center justify-center gap-[1px] sm:gap-[2px] h-6 sm:h-8 flex-1 max-w-[280px] sm:max-w-[600px] min-w-0">
                     {audioLevels.map((level, i) => {
                       // Calculate height based on audio level
-                      const minHeight = 2;
-                      const maxHeight = isMobile ? 16 : 32;
+                      const minHeight = 4;
+                      const maxHeight = isMobile ? 24 : 32;
                       const height = minHeight + (level * (maxHeight - minHeight));
                       
                       return (
                         <div
                           key={i}
-                          className="w-[0.5px] sm:w-[2px] bg-foreground rounded-full transition-all duration-75 ease-out"
+                          className="w-[1px] sm:w-[2px] bg-foreground rounded-full transition-all duration-75 ease-out"
                           style={{
                             height: `${height}px`,
                           }}
@@ -4289,18 +4289,18 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   </div>
                   
                   {/* Timer */}
-                  <span className="text-[9px] sm:text-xs font-medium tabular-nums text-foreground flex-shrink-0">
+                  <span className="text-xs sm:text-sm font-medium tabular-nums text-foreground flex-shrink-0">
                     {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
                   </span>
                 </div>
                 
                 <Button
                   size="sm"
-                  className="h-5 w-5 sm:h-7 sm:w-7 rounded-full bg-foreground text-background hover:bg-foreground/90 flex-shrink-0 p-0"
+                  className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-foreground text-background hover:bg-foreground/90 flex-shrink-0 p-0"
                   onClick={stopRecording}
                   aria-label="Send recording"
                 >
-                  <svg className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </Button>
@@ -4495,10 +4495,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="h-8 w-8 rounded-full border border-border/30 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" 
+                            className="h-10 w-10 rounded-full border border-border/30 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" 
                             aria-label="Upload or create content"
                           >
-                            <Plus className="h-3.5 w-3.5" />
+                            <Plus className="h-5 w-5" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-48 p-2 bg-background border shadow-lg z-50" align="start">
@@ -4524,10 +4524,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                       </Popover>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-muted/30 rounded-full p-1">
+                    <div className="flex items-center gap-2 bg-muted/30 rounded-full p-1.5">
                       <Button 
                         size="sm" 
-                        className={`h-7 w-7 rounded-full focus-visible:ring-2 focus-visible:ring-offset-1 flex-shrink-0 ${
+                        className={`h-10 w-10 rounded-full focus-visible:ring-2 focus-visible:ring-offset-1 flex-shrink-0 ${
                           input.trim().length > 0 || selectedFiles.length > 0
                             ? 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
                             : isRecording 
@@ -4540,9 +4540,9 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                         aria-pressed={isRecording}
                       >
                         {input.trim().length > 0 || selectedFiles.length > 0 ? (
-                          <SendHorizontalIcon className="h-3 w-3" />
+                          <SendHorizontalIcon className="h-4 w-4" />
                         ) : (
-                          isRecording ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />
+                          isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />
                         )}
                       </Button>
                     </div>

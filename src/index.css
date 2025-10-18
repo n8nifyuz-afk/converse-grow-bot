@@ -189,11 +189,27 @@ All colors MUST be HSL.
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* Improve text rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+  
+  /* Prevent zoom on input focus for iOS Safari */
+  @supports (-webkit-touch-callout: none) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea {
+      font-size: 16px;
+    }
   }
   
   /* ChatGPT utility classes */
@@ -235,6 +251,14 @@ All colors MUST be HSL.
   .focus-visible\:outline-none:focus-visible {
     outline: 2px solid hsl(var(--sidebar-primary));
     outline-offset: 2px;
+  }
+  
+  /* Better tap targets for mobile */
+  @media (pointer: coarse) {
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 }
 
