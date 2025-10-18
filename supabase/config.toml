@@ -52,7 +52,3 @@ verify_jwt = true
 [functions.cleanup-expired-subscriptions]
 verify_jwt = false
 
-# Regenerate message requires authentication
-[functions.regenerate-message]
-verify_jwt = true
-

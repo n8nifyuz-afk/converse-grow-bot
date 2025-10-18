@@ -24,104 +24,92 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log('[DELETE-ALL-USER-IMAGES] Deleting ALL storage files for user:', userId);
+    console.log('Deleting all images for user:', userId);
 
-    let totalDeletedCount = 0;
+    // List all files in the user's folder
+    const { data: files, error: listError } = await supabase.storage
+      .from('chat-images')
+      .list(userId, {
+        limit: 1000,
+        sortBy: { column: 'name', order: 'asc' }
+      });
 
-    // Define all storage buckets to clean
-    const bucketsToClean = ['chat-images', 'generated-images', 'chat-files'];
+    if (listError) {
+      console.error('Error listing files:', listError);
+      throw new Error(`Failed to list user files: ${listError.message}`);
+    }
 
-    for (const bucketName of bucketsToClean) {
-      console.log(`[DELETE-ALL-USER-IMAGES] Processing bucket: ${bucketName}`);
+    let deletedCount = 0;
+    if (files && files.length > 0) {
+      // Build list of all files to delete
+      const filePaths: string[] = [];
+      
+      for (const file of files) {
+        if (file.name) {
+          filePaths.push(`${userId}/${file.name}`);
+        }
+      }
 
-      // List all files and folders in user's root directory
-      const { data: rootItems, error: rootListError } = await supabase.storage
-        .from(bucketName)
+      // Also check for subdirectories (chat folders)
+      const { data: subFolders, error: subFolderError } = await supabase.storage
+        .from('chat-images')
         .list(userId, {
           limit: 1000,
-          sortBy: { column: 'name', order: 'asc' }
+          offset: 0
         });
 
-      if (rootListError) {
-        console.error(`[DELETE-ALL-USER-IMAGES] Error listing root items in ${bucketName}:`, rootListError);
-        continue; // Continue with next bucket even if one fails
-      }
+      if (!subFolderError && subFolders) {
+        for (const folder of subFolders) {
+          if (folder.name && folder.id) {
+            // List files in each subfolder
+            const { data: subFiles, error: subFileError } = await supabase.storage
+              .from('chat-images')
+              .list(`${userId}/${folder.name}`, {
+                limit: 1000
+              });
 
-      const filePaths: string[] = [];
-
-      if (rootItems && rootItems.length > 0) {
-        console.log(`[DELETE-ALL-USER-IMAGES] Found ${rootItems.length} items in ${bucketName} root`);
-
-        // Process each item (could be file or folder)
-        for (const item of rootItems) {
-          if (item.name) {
-            // Check if it's a file at root level
-            if (item.id && !item.name.includes('/')) {
-              filePaths.push(`${userId}/${item.name}`);
-            }
-            
-            // Check if it's a folder (has id but might contain files)
-            // Try to list contents of potential subfolder
-            try {
-              const { data: subFiles, error: subListError } = await supabase.storage
-                .from(bucketName)
-                .list(`${userId}/${item.name}`, {
-                  limit: 1000
-                });
-
-              if (!subListError && subFiles && subFiles.length > 0) {
-                console.log(`[DELETE-ALL-USER-IMAGES] Found ${subFiles.length} files in subfolder ${item.name}`);
-                for (const subFile of subFiles) {
-                  if (subFile.name) {
-                    filePaths.push(`${userId}/${item.name}/${subFile.name}`);
-                  }
+            if (!subFileError && subFiles) {
+              for (const subFile of subFiles) {
+                if (subFile.name) {
+                  filePaths.push(`${userId}/${folder.name}/${subFile.name}`);
                 }
               }
-            } catch (e) {
-              // Not a folder, skip
-              console.log(`[DELETE-ALL-USER-IMAGES] ${item.name} is not a folder, skipping subfolder check`);
             }
           }
         }
       }
 
-      // Delete all collected files in batches
-      if (filePaths.length > 0) {
-        console.log(`[DELETE-ALL-USER-IMAGES] Total files to delete from ${bucketName}: ${filePaths.length}`);
+      // Delete all files in batches
+      const batchSize = 50; // Supabase storage delete limit
+      for (let i = 0; i < filePaths.length; i += batchSize) {
+        const batch = filePaths.slice(i, i + batchSize);
         
-        const batchSize = 50;
-        for (let i = 0; i < filePaths.length; i += batchSize) {
-          const batch = filePaths.slice(i, i + batchSize);
-          
-          const { error: deleteError } = await supabase.storage
-            .from(bucketName)
-            .remove(batch);
+        const { data: deleteData, error: deleteError } = await supabase.storage
+          .from('chat-images')
+          .remove(batch);
 
-          if (deleteError) {
-            console.error(`[DELETE-ALL-USER-IMAGES] Error deleting batch from ${bucketName}:`, deleteError);
-          } else {
-            totalDeletedCount += batch.length;
-            console.log(`[DELETE-ALL-USER-IMAGES] Deleted batch of ${batch.length} files from ${bucketName}`);
-          }
+        if (deleteError) {
+          console.error('Error deleting batch:', deleteError);
+        } else {
+          deletedCount += batch.length;
+          console.log(`Deleted batch of ${batch.length} files`);
         }
-      } else {
-        console.log(`[DELETE-ALL-USER-IMAGES] No files found in ${bucketName}`);
       }
     }
 
-    console.log(`[DELETE-ALL-USER-IMAGES] ✅ COMPLETED: Deleted total of ${totalDeletedCount} files for user ${userId}`);
+    console.log(`Successfully deleted ${deletedCount} total images for user ${userId}`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        deletedCount: totalDeletedCount,
-        message: `Successfully deleted ${totalDeletedCount} files`
+        deletedCount,
+        message: `Successfully deleted ${deletedCount} images`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('[DELETE-ALL-USER-IMAGES] ❌ ERROR:', error);
+    console.error('Error in delete-all-user-images function:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
       JSON.stringify({ 

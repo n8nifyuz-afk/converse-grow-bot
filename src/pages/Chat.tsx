@@ -33,7 +33,6 @@ import grokLogo from '@/assets/grok-logo.png';
 
 // Speech recognition will be accessed with type casting to avoid global conflicts
 import { ImageAnalysisResult, analyzeImageComprehensively } from '@/utils/imageAnalysis';
-import { getSessionMetadata } from '@/utils/sessionTracking';
 const models = [{
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
@@ -236,7 +235,6 @@ export default function Chat() {
   const [isStylesOpen, setIsStylesOpen] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false);
-  const [isRegenerating, setIsRegenerating] = useState(false); // State for UI updates
   const isRegeneratingRef = useRef(false); // Immediate lock to prevent duplicate regenerate calls
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -288,12 +286,6 @@ export default function Chat() {
   const userSelectedModelRef = useRef<string | null>(null);
   // Track if a send is in progress to prevent duplicates
   const sendingInProgressRef = useRef(false);
-  // CRITICAL: Track message IDs that were loaded from fetchMessages to prevent realtime duplicates
-  const fetchedMessageIds = useRef<Set<string>>(new Set());
-  // CRITICAL: Track all active polling timers to cancel on cleanup
-  const activePollingTimers = useRef<Set<NodeJS.Timeout>>(new Set());
-  // CRITICAL: Flag to stop all polling when message is received
-  const stopAllPollingRef = useRef(false);
   const selectedModelData = models.find(m => m.id === selectedModel);
   
   // Show all models to everyone - access control happens on selection
@@ -307,15 +299,6 @@ export default function Chat() {
 
       // CRITICAL: Clear messages state immediately when switching chats to prevent cross-chat bleeding
       setMessages([]);
-      
-      // CRITICAL: Clear fetched message IDs when switching chats
-      fetchedMessageIds.current.clear();
-      
-      // CRITICAL: Cancel ALL active polling timers immediately
-      console.log('[CHAT-SWITCH] Cancelling all active polling timers');
-      activePollingTimers.current.forEach(timer => clearTimeout(timer));
-      activePollingTimers.current.clear();
-      stopAllPollingRef.current = true; // Signal all polling to stop
       
       // Clear limit warning when switching chats
       setShowLimitWarning(false);
@@ -340,6 +323,15 @@ export default function Chat() {
       setPendingImageGenerations(new Set());
       setLoading(false);
       
+      // Only fetch messages if we're NOT about to auto-send
+      // Auto-send will show temp message and handle everything via realtime
+      if (!shouldAutoSend.current) {
+        console.log('[CHAT-INIT] Fetching messages normally');
+        fetchMessages();
+      } else {
+        console.log('[CHAT-INIT] Skipping fetchMessages - auto-send will handle it');
+      }
+
       // Listen for image generation chat events
       const handleImageGenerationChat = (event: CustomEvent) => {
         if (event.detail?.chatId === chatId) {
@@ -352,188 +344,186 @@ export default function Chat() {
       };
       window.addEventListener('image-generation-chat', handleImageGenerationChat as EventListener);
 
-      // CRITICAL FIX: Fetch messages FIRST, then set up realtime subscription
-      // This ensures messages are loaded before any realtime events can add duplicates
-      const initializeChat = async () => {
-        // Only fetch messages if we're NOT about to auto-send
-        // Auto-send will show temp message and handle everything via realtime
-        if (!shouldAutoSend.current) {
-          console.log('[CHAT-INIT] Fetching messages normally');
-          await fetchMessages();
-          console.log('[CHAT-INIT] Messages fetched, now setting up realtime');
-        } else {
-          console.log('[CHAT-INIT] Skipping fetchMessages - auto-send will handle it');
+      // Set up real-time subscription for new messages with proper channel configuration
+      const channel = supabase.channel(`messages-${chatId}`, {
+        config: {
+          broadcast: { self: true },
+          presence: { key: chatId }
         }
+      });
 
-        // Set up real-time subscription AFTER messages are loaded
-        const channel = supabase.channel(`messages-${chatId}`, {
-          config: {
-            broadcast: { self: true },
-            presence: { key: chatId }
+      channel
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `chat_id=eq.${chatId}`
+        }, payload => {
+          console.log('[REALTIME-INSERT] ===== NEW MESSAGE EVENT =====');
+          console.log('[REALTIME-INSERT] Raw payload:', JSON.stringify(payload, null, 2));
+          const newMessage = payload.new as Message;
+
+          console.log('[REALTIME-INSERT] Message details:', {
+            id: newMessage.id,
+            role: newMessage.role,
+            chat_id: newMessage.chat_id,
+            currentChatId: chatId,
+            content_length: newMessage.content?.length || 0,
+            content_preview: newMessage.content?.substring(0, 100),
+            hasFileAttachments: !!newMessage.file_attachments
+          });
+
+          // CRITICAL: Double-check message belongs to current chat to prevent leakage
+          if (newMessage.chat_id !== chatId) {
+            console.log('[REALTIME-INSERT] ❌ REJECTED - wrong chat_id');
+            console.log('[REALTIME-INSERT] Expected:', chatId);
+            console.log('[REALTIME-INSERT] Got:', newMessage.chat_id);
+            return;
           }
-        });
-
-        channel
-          .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `chat_id=eq.${chatId}`
-          }, payload => {
-            console.log('[REALTIME-INSERT] ===== NEW MESSAGE EVENT =====');
-            console.log('[REALTIME-INSERT] Raw payload:', JSON.stringify(payload, null, 2));
-            const newMessage = payload.new as Message;
-
-            console.log('[REALTIME-INSERT] Message details:', {
-              id: newMessage.id,
-              role: newMessage.role,
-              chat_id: newMessage.chat_id,
-              currentChatId: chatId,
-              content_length: newMessage.content?.length || 0,
-              content_preview: newMessage.content?.substring(0, 100),
-              hasFileAttachments: !!newMessage.file_attachments
-            });
-
-            // CRITICAL: Double-check message belongs to current chat to prevent leakage
-            if (newMessage.chat_id !== chatId) {
-              console.log('[REALTIME-INSERT] ❌ REJECTED - wrong chat_id');
-              console.log('[REALTIME-INSERT] Expected:', chatId);
-              console.log('[REALTIME-INSERT] Got:', newMessage.chat_id);
-              return;
-            }
+          
+          console.log('[REALTIME-INSERT] ✅ Message belongs to current chat');
+          console.log('[REALTIME-INSERT] Message accepted:', {
+            id: newMessage.id,
+            role: newMessage.role,
+            content: newMessage.content?.substring(0, 50),
+            hasFileAttachments: !!newMessage.file_attachments,
+            fileAttachmentsCount: newMessage.file_attachments?.length || 0,
+            fileAttachments: newMessage.file_attachments
+          });
+          
+          // If this is a new assistant message, clear ALL loading states immediately
+          if (newMessage.role === 'assistant') {
+            console.log('[REALTIME-INSERT] 🤖 Assistant message arrived - clearing loading states');
+            console.log('[REALTIME-INSERT] Message ID:', newMessage.id);
+            console.log('[REALTIME-INSERT] Loading was:', loading);
             
-            console.log('[REALTIME-INSERT] ✅ Message belongs to current chat');
-            console.log('[REALTIME-INSERT] Message accepted:', {
-              id: newMessage.id,
-              role: newMessage.role,
-              content: newMessage.content?.substring(0, 50),
-              hasFileAttachments: !!newMessage.file_attachments,
-              fileAttachmentsCount: newMessage.file_attachments?.length || 0,
-              fileAttachments: newMessage.file_attachments
-            });
+            setLoading(false);
+            setIsGeneratingResponse(false);
             
-            // If this is a new assistant message, clear ALL loading states immediately
-            if (newMessage.role === 'assistant') {
-              console.log('[REALTIME-INSERT] 🤖 Assistant message arrived - clearing loading states');
-              console.log('[REALTIME-INSERT] Message ID:', newMessage.id);
-              console.log('[REALTIME-INSERT] Loading was:', loading);
+            // If we're regenerating, clear regeneration states AND remove the old hidden message
+            // Use the ref to get the current regenerating message ID
+            const currentRegeneratingId = regeneratingMessageIdRef.current;
+            if (currentRegeneratingId) {
+              console.log('[REALTIME-INSERT] Clearing regeneration states and removing old message:', currentRegeneratingId);
               
-              // CRITICAL: Stop all polling immediately when realtime delivers message
-              console.log('[REALTIME-INSERT] Stopping all active polling');
-              stopAllPollingRef.current = true;
-              activePollingTimers.current.forEach(timer => clearTimeout(timer));
-              activePollingTimers.current.clear();
-              
-              setLoading(false);
-              setIsGeneratingResponse(false);
-              
-              // Note: We don't handle regeneration here anymore since regeneration uses UPDATE not INSERT
-            }
-            
-            // Add message to state immediately with forced re-render
-            setMessages(prev => {
-              console.log('[REALTIME-INSERT] 📝 Adding to state...');
-              console.log('[REALTIME-INSERT] Current state has', prev.length, 'messages');
-              console.log('[REALTIME-INSERT] Current messages:', prev.map(m => ({
-                id: m.id.substring(0, 10),
-                role: m.role,
-                chat_id: m.chat_id
-              })));
-              
-              // CRITICAL: Check if this message was already loaded via fetchMessages
-              if (fetchedMessageIds.current.has(newMessage.id)) {
-                console.log('[REALTIME-INSERT] ⚠️ Message was already fetched from DB - skipping:', newMessage.id.substring(0, 10));
-                return prev;
+              // Clear the timeout
+              if (regenerateTimeoutRef.current) {
+                clearTimeout(regenerateTimeoutRef.current);
+                regenerateTimeoutRef.current = null;
               }
               
-              // ENHANCED: Check if message already exists by ID (most reliable)
-              const existsById = prev.find(msg => msg.id === newMessage.id);
-              if (existsById) {
-                console.log('[REALTIME-INSERT] ⚠️ Duplicate by ID in state - skipping');
-                return prev;
-              }
-              
-              // For user messages, check if there's a temp message to replace
-              if (newMessage.role === 'user') {
-                const tempMessageIndex = prev.findIndex(msg => 
-                  msg.id.startsWith('temp-') && 
-                  msg.role === 'user' &&
-                  msg.content === newMessage.content &&
-                  msg.chat_id === newMessage.chat_id
-                );
-                
-                if (tempMessageIndex !== -1) {
-                  const tempMessage = prev[tempMessageIndex];
-                  console.log('[REALTIME-INSERT] 🔄 Replacing temp message at index', tempMessageIndex);
-                  console.log('[REALTIME-INSERT] Temp ID:', tempMessage.id, '-> Real ID:', newMessage.id);
-                  
-                  // CRITICAL: Mark real message as processed to prevent duplicate AUTO-TRIGGER
-                  // Check if temp was already processed by AUTO-TRIGGER
-                  if (!processedUserMessages.current.has(chatId)) {
-                    processedUserMessages.current.set(chatId, new Set());
-                  }
-                  
-                  const wasProcessed = processedUserMessages.current.get(chatId)!.has(tempMessage.id);
-                  if (wasProcessed) {
-                    console.log('[REALTIME-INSERT] Temp was processed, marking real message as processed:', newMessage.id);
-                    processedUserMessages.current.get(chatId)!.add(newMessage.id);
-                    
-                    // Persist to sessionStorage
-                    const storageKey = `processed_messages_${chatId}`;
-                    const processedArray = Array.from(processedUserMessages.current.get(chatId)!);
-                    sessionStorage.setItem(storageKey, JSON.stringify(processedArray));
-                  } else {
-                    console.log('[REALTIME-INSERT] Temp was NOT processed yet');
-                  }
-                  
-                  const updated = [...prev];
-                  updated[tempMessageIndex] = newMessage;
-                  return updated;
-                }
-              }
-              
-              // ENHANCED: More strict duplicate check by content and timestamp
-              // Check if there's any message with the same content, role, and very close timestamp
-              const existsByContent = prev.find(msg => 
-                msg.content === newMessage.content && 
-                msg.role === newMessage.role && 
-                msg.chat_id === newMessage.chat_id &&
-                Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 2000
-              );
-              
-              if (existsByContent) {
-                console.log('[REALTIME-INSERT] ⚠️ Duplicate by content and timestamp - skipping');
-                return prev;
-              }
-            
-              console.log('[REALTIME-INSERT] 🆕 Message is NEW - adding to state');
-              
-              // CRITICAL: Add this new message ID to fetched set to prevent future duplicates
-              fetchedMessageIds.current.add(newMessage.id);
-              
-              // CRITICAL: Filter out any messages not belonging to current chat before adding new message
-              const filteredPrev = prev.filter(msg => !msg.chat_id || msg.chat_id === chatId);
-              console.log('[REALTIME-INSERT] After filtering by chat_id:', filteredPrev.length, 'messages');
-              
-              // Create new array with new message and sort by created_at to ensure proper ordering
-              const newMessages = [...filteredPrev, newMessage].sort((a, b) => 
-                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-              );
-              console.log('[REALTIME-INSERT] ✅ Final message count:', newMessages.length);
-              console.log('[REALTIME-INSERT] Final messages:', newMessages.map(m => ({
-                id: m.id.substring(0, 10),
-                role: m.role,
-                preview: m.content?.substring(0, 30)
-              })));
-              
-              // Force immediate scroll
-              requestAnimationFrame(() => {
-                scrollToBottom();
+              // Remove the old hidden message from state (it was deleted from DB but kept for animation)
+              setMessages(prev => {
+                const filtered = prev.filter(msg => msg.id !== currentRegeneratingId);
+                console.log('[REALTIME-INSERT] Removed old message, remaining count:', filtered.length);
+                return filtered;
               });
               
-              // Return new array to trigger re-render
-              return newMessages;
+              // Clear regeneration states
+              setRegeneratingMessageId(null);
+              regeneratingMessageIdRef.current = null; // Clear the ref too
+              isRegeneratingRef.current = false;
+              setHiddenMessageIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(currentRegeneratingId);
+                return newSet;
+              });
+              oldMessageBackupRef.current = null;
+            }
+          }
+          
+          // Add message to state immediately with forced re-render
+          setMessages(prev => {
+            console.log('[REALTIME-INSERT] 📝 Adding to state...');
+            console.log('[REALTIME-INSERT] Current state has', prev.length, 'messages');
+            console.log('[REALTIME-INSERT] Current messages:', prev.map(m => ({
+              id: m.id.substring(0, 10),
+              role: m.role,
+              chat_id: m.chat_id
+            })));
+            
+            // Check if message already exists to prevent duplicates
+            const existsById = prev.find(msg => msg.id === newMessage.id);
+            if (existsById) {
+              console.log('[REALTIME-INSERT] ⚠️ Duplicate by ID - skipping');
+              return prev;
+            }
+            
+            // For user messages, check if there's a temp message to replace
+            if (newMessage.role === 'user') {
+              const tempMessageIndex = prev.findIndex(msg => 
+                msg.id.startsWith('temp-') && 
+                msg.role === 'user' &&
+                msg.content === newMessage.content &&
+                msg.chat_id === newMessage.chat_id
+              );
+              
+              if (tempMessageIndex !== -1) {
+                const tempMessage = prev[tempMessageIndex];
+                console.log('[REALTIME-INSERT] 🔄 Replacing temp message at index', tempMessageIndex);
+                console.log('[REALTIME-INSERT] Temp ID:', tempMessage.id, '-> Real ID:', newMessage.id);
+                
+                // CRITICAL: Mark real message as processed to prevent duplicate AUTO-TRIGGER
+                // Check if temp was already processed by AUTO-TRIGGER
+                if (!processedUserMessages.current.has(chatId)) {
+                  processedUserMessages.current.set(chatId, new Set());
+                }
+                
+                const wasProcessed = processedUserMessages.current.get(chatId)!.has(tempMessage.id);
+                if (wasProcessed) {
+                  console.log('[REALTIME-INSERT] Temp was processed, marking real message as processed:', newMessage.id);
+                  processedUserMessages.current.get(chatId)!.add(newMessage.id);
+                  
+                  // Persist to sessionStorage
+                  const storageKey = `processed_messages_${chatId}`;
+                  const processedArray = Array.from(processedUserMessages.current.get(chatId)!);
+                  sessionStorage.setItem(storageKey, JSON.stringify(processedArray));
+                } else {
+                  console.log('[REALTIME-INSERT] Temp was NOT processed yet');
+                }
+                
+                const updated = [...prev];
+                updated[tempMessageIndex] = newMessage;
+                return updated;
+              }
+            }
+            
+            const existsByContent = prev.find(msg => 
+              msg.content === newMessage.content && 
+              msg.role === newMessage.role && 
+              Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
+            );
+            
+            if (existsByContent) {
+              console.log('[REALTIME-INSERT] ⚠️ Duplicate by content - skipping');
+              return prev;
+            }
+            
+            console.log('[REALTIME-INSERT] 🆕 Message is NEW - adding to state');
+            
+            // CRITICAL: Filter out any messages not belonging to current chat before adding new message
+            const filteredPrev = prev.filter(msg => !msg.chat_id || msg.chat_id === chatId);
+            console.log('[REALTIME-INSERT] After filtering by chat_id:', filteredPrev.length, 'messages');
+            
+            // Create new array with new message and sort by created_at to ensure proper ordering
+            const newMessages = [...filteredPrev, newMessage].sort((a, b) => 
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            );
+            console.log('[REALTIME-INSERT] ✅ Final message count:', newMessages.length);
+            console.log('[REALTIME-INSERT] Final messages:', newMessages.map(m => ({
+              id: m.id.substring(0, 10),
+              role: m.role,
+              preview: m.content?.substring(0, 30)
+            })));
+            
+            // Force immediate scroll
+            requestAnimationFrame(() => {
+              scrollToBottom();
             });
+            
+            // Return new array to trigger re-render
+            return newMessages;
+          });
         })
         .on('postgres_changes', {
           event: 'UPDATE',
@@ -548,26 +538,6 @@ export default function Chat() {
           if (updatedMessage.chat_id !== chatId) {
             console.log('[REALTIME-UPDATE] Message rejected - wrong chat_id');
             return;
-          }
-
-          // If this is a regenerated message being updated, clear regeneration states
-          const currentRegeneratingId = regeneratingMessageIdRef.current;
-          if (currentRegeneratingId === updatedMessage.id) {
-            console.log('[REALTIME-UPDATE] Regenerated message updated, clearing states');
-            setRegeneratingMessageId(null);
-            regeneratingMessageIdRef.current = null;
-            setIsGeneratingResponse(false);
-            setIsRegenerating(false);
-            isRegeneratingRef.current = false;
-            setHiddenMessageIds(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(updatedMessage.id);
-              return newSet;
-            });
-            if (regenerateTimeoutRef.current) {
-              clearTimeout(regenerateTimeoutRef.current);
-              regenerateTimeoutRef.current = null;
-            }
           }
 
           setMessages(prev => {
@@ -620,36 +590,12 @@ export default function Chat() {
           }
         });
 
-        // Return cleanup function for realtime subscription
-        return () => {
-          console.log('[REALTIME-CLEANUP] Unsubscribing from chat:', chatId);
-          channel.unsubscribe();
-          supabase.removeChannel(channel);
-        };
-      };
-      
-      // Initialize the chat and store the cleanup function
-      const cleanupPromise = initializeChat();
-
-      // Overall cleanup function for the useEffect
+      // SINGLE cleanup function that handles both event listener AND channel
       return () => {
-        console.log('[CHAT-CLEANUP] Cleaning up chat:', chatId);
-        
-        // CRITICAL: Cancel ALL active polling timers on cleanup
-        console.log('[CHAT-CLEANUP] Cancelling all active polling timers');
-        stopAllPollingRef.current = true;
-        activePollingTimers.current.forEach(timer => clearTimeout(timer));
-        activePollingTimers.current.clear();
-        
-        // Clear regenerate timeout if active
-        if (regenerateTimeoutRef.current) {
-          clearTimeout(regenerateTimeoutRef.current);
-          regenerateTimeoutRef.current = null;
-        }
-        
+        console.log('[REALTIME-CLEANUP] Unsubscribing from chat:', chatId);
         window.removeEventListener('image-generation-chat', handleImageGenerationChat as EventListener);
-        // Execute the realtime cleanup
-        cleanupPromise.then(cleanup => cleanup?.());
+        channel.unsubscribe();
+        supabase.removeChannel(channel);
       };
     }
   }, [chatId, user]);
@@ -789,12 +735,7 @@ export default function Chat() {
   // Check IMMEDIATELY if we should auto-send (before chat init effect runs)
   const initialFiles = location.state?.initialFiles;
   const initialMessage = location.state?.initialMessage;
-  
-  // CRITICAL: Check sessionStorage to see if this chat already processed initial data
-  const processedInitialKey = `processed_initial_${chatId}`;
-  const alreadyProcessedInitial = sessionStorage.getItem(processedInitialKey);
-  
-  if ((initialMessage || (initialFiles && initialFiles?.length > 0)) && chatId && !hasProcessedInitialData.current && !alreadyProcessedInitial) {
+  if ((initialMessage || (initialFiles && initialFiles?.length > 0)) && chatId && !hasProcessedInitialData.current) {
     shouldAutoSend.current = true;
     console.log('[CHAT-INITIAL] Set shouldAutoSend to true BEFORE chat init');
   }
@@ -811,19 +752,11 @@ export default function Chat() {
       hasProcessed: hasProcessedInitialData.current
     });
     
-    // CRITICAL: Check sessionStorage to prevent re-processing on navigation back
-    const processedInitialKey = `processed_initial_${chatId}`;
-    const alreadyProcessedInitial = sessionStorage.getItem(processedInitialKey);
-    
     // Handle message with or without files
-    if ((initialMessage || (initialFiles && initialFiles.length > 0)) && chatId && !hasProcessedInitialData.current && !alreadyProcessedInitial) {
+    if ((initialMessage || (initialFiles && initialFiles.length > 0)) && chatId && !hasProcessedInitialData.current) {
       console.log('[CHAT-INITIAL] Processing from home page:', { initialFiles, initialMessage: initialMessage?.substring(0, 50) });
       hasProcessedInitialData.current = true;
       shouldAutoSend.current = true;
-      
-      // Mark this chat as having processed initial data in sessionStorage
-      sessionStorage.setItem(processedInitialKey, 'true');
-      console.log('[CHAT-INITIAL] Marked chat as processed in sessionStorage:', processedInitialKey);
       
       // Set the message and files
       setInput(initialMessage || '');
@@ -919,20 +852,18 @@ export default function Chat() {
 
   const regenerateResponse = async (messageId: string) => {
     // Immediate synchronous check to prevent race conditions
-    if (isRegeneratingRef.current || isGeneratingResponse || loading || isRegenerating) {
+    if (isRegeneratingRef.current || isGeneratingResponse || loading) {
       console.log('[REGENERATE] Already regenerating, skipping duplicate call');
       return;
     }
 
-    // Set lock immediately - both ref and state
+    // Set lock immediately
     isRegeneratingRef.current = true;
-    setIsRegenerating(true);
 
     // Check if user is authenticated
     if (!user) {
       console.warn('[REGENERATE] User not authenticated');
       isRegeneratingRef.current = false;
-      setIsRegenerating(false);
       return;
     }
 
@@ -940,7 +871,6 @@ export default function Chat() {
     const assistantMessage = messages.find(msg => msg.id === messageId && msg.role === 'assistant');
     if (!assistantMessage) {
       isRegeneratingRef.current = false;
-      setIsRegenerating(false);
       return;
     }
 
@@ -972,7 +902,6 @@ export default function Chat() {
           description: `You've used all ${usageLimits.limit} image generations this month. Upgrade your plan for more!`
         });
         isRegeneratingRef.current = false;
-        setIsRegenerating(false);
         return;
       }
     }
@@ -981,7 +910,6 @@ export default function Chat() {
     if (!userMessage && userMessageAttachments.length === 0) {
       console.log('[REGENERATE] No message or attachments to regenerate');
       isRegeneratingRef.current = false;
-      setIsRegenerating(false);
       return;
     }
 
@@ -1013,7 +941,6 @@ export default function Chat() {
         return newSet;
       });
       setIsGeneratingResponse(false);
-      setIsRegenerating(false);
       isRegeneratingRef.current = false;
       oldMessageBackupRef.current = null;
     }, 60000); // 60 seconds
@@ -1116,63 +1043,163 @@ export default function Chat() {
         });
       }
 
-      // Call the dedicated regenerate-message edge function
-      console.log('[REGENERATE] Calling regenerate-message function...');
+      // Determine request type based on model and file type
+      let requestType = 'text';
       
-      const { data: regenerateData, error: regenerateError } = await supabase.functions.invoke('regenerate-message', {
-        body: {
-          messageId: messageId,
-          userId: user.id,
-          model: userModel,
-          userMessage: userMessage,
-          fileAttachments: validAttachments
-        }
-      });
-
-      if (regenerateError) {
-        console.error('[REGENERATE] Regenerate function error:', regenerateError);
-        throw regenerateError;
+      // Check if this was originally an image generation request
+      if (userModel === 'generate-image') {
+        requestType = 'generate_image';
+      } else if (validAttachments.length > 0) {
+        // Check if the first attachment is an image
+        requestType = validAttachments[0].isImage ? 'analyse-image' : 'analyse-files';
       }
+      console.log('[REGENERATE] Request type:', requestType, 'Model:', userModel);
 
-      console.log('[REGENERATE] Message updated successfully via function:', regenerateData);
+      // Build payload - send first attachment directly in the body
+      let payload: any = {
+        type: requestType,
+        message: userMessage,
+        userId: user.id,
+        chatId: chatId,
+        model: userModel
+      };
 
-      // Update state immediately with the returned message
-      if (regenerateData?.message) {
-        setMessages(prev => {
-          return prev.map(msg => {
-            if (msg.id === messageId) {
-              return {
-                ...msg,
-                content: regenerateData.message.content,
-                file_attachments: (regenerateData.message.file_attachments || []) as any as FileAttachment[],
-                model: regenerateData.message.model
-              };
+      if (validAttachments.length > 0) {
+        // Send first attachment directly in body
+        const firstAttachment = validAttachments[0];
+        payload.fileName = firstAttachment.fileName;
+        payload.fileSize = firstAttachment.fileSize;
+        payload.fileType = firstAttachment.fileType;
+        payload.fileData = firstAttachment.fileData;
+      }
+      
+      console.log('[REGENERATE] Sending webhook payload:', JSON.stringify(payload).substring(0, 500) + '...');
+
+      // Call N8n webhook (N8n will call webhook-handler in background to create new message)
+      console.log('[REGENERATE] Calling N8n webhook (N8n will call webhook-handler)');
+      
+      const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook request failed: ${webhookResponse.status}`);
+      }
+      
+      console.log('[REGENERATE] Webhook called successfully, now removing old message from state and database');
+      
+      // IMMEDIATELY remove old message from state to prevent showing both old and new
+      setMessages(prev => {
+        const filtered = prev.filter(msg => msg.id !== messageId);
+        console.log('[REGENERATE] Removed old message from state, messages count:', filtered.length);
+        return filtered;
+      });
+      
+      // NOW delete the old message from database (webhook succeeded)
+      const { error: deleteError } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', messageId);
+      
+      if (deleteError) {
+        console.error('[REGENERATE] Error deleting old message:', deleteError);
+        // Don't throw - webhook already succeeded, new message will arrive
+      } else {
+        console.log('[REGENERATE] Successfully deleted old message from database');
+      }
+      
+      // Delete old image from storage if it exists
+      if (assistantMessage.file_attachments && assistantMessage.file_attachments.length > 0) {
+        for (const attachment of assistantMessage.file_attachments) {
+          if (attachment.url && attachment.type.startsWith('image/')) {
+            try {
+              const urlObj = new URL(attachment.url);
+              const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/([^\/]+)\/(.+)/);
+              
+              if (pathMatch) {
+                const bucketName = pathMatch[1];
+                const filePath = pathMatch[2];
+                
+                console.log('[REGENERATE] Deleting old image from storage:', { bucketName, filePath });
+                
+                const { error: deleteStorageError } = await supabase.storage
+                  .from(bucketName)
+                  .remove([filePath]);
+                  
+                if (deleteStorageError) {
+                  console.error('[REGENERATE] Error deleting old image from storage:', deleteStorageError);
+                } else {
+                  console.log('[REGENERATE] Successfully deleted old image from storage');
+                }
+              }
+            } catch (error) {
+              console.error('[REGENERATE] Error parsing image URL:', error);
             }
-            return msg;
+          }
+        }
+      }
+      
+      console.log('[REGENERATE] Webhook completed, fetching messages immediately...');
+      
+      // Immediately fetch messages to show new response without waiting for realtime
+      setTimeout(async () => {
+        await fetchMessages();
+        
+        // Clear regeneration states after messages are fetched
+        // This handles the case where realtime INSERT doesn't fire or messages are already in DB
+        setTimeout(() => {
+          console.log('[REGENERATE] Clearing regeneration state after fetch');
+          setRegeneratingMessageId(null);
+          regeneratingMessageIdRef.current = null;
+          setIsGeneratingResponse(false);
+          isRegeneratingRef.current = false;
+          setHiddenMessageIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(messageId);
+            return newSet;
           });
-        });
-      }
-
-      // Clear regeneration states immediately
-      console.log('[REGENERATE] Clearing regeneration states');
-      setRegeneratingMessageId(null);
-      regeneratingMessageIdRef.current = null;
-      setIsGeneratingResponse(false);
-      setIsRegenerating(false);
-      isRegeneratingRef.current = false;
-      setHiddenMessageIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(messageId);
-        return newSet;
-      });
-
-      // Clear timeout
-      if (regenerateTimeoutRef.current) {
-        clearTimeout(regenerateTimeoutRef.current);
-        regenerateTimeoutRef.current = null;
-      }
-
+          oldMessageBackupRef.current = null;
+          
+          // Clear timeout
+          if (regenerateTimeoutRef.current) {
+            clearTimeout(regenerateTimeoutRef.current);
+            regenerateTimeoutRef.current = null;
+          }
+        }, 500);
+      }, 200);
+      
       scrollToBottom();
+      
+      // Note: For image generation, we still need special handling
+      const aiResponse = await webhookResponse.json();
+      if (userModel === 'generate-image' && aiResponse.image_base64) {
+        console.log('[REGENERATE] Image generation response received, calling webhook-handler...');
+        
+        const { data: handlerData, error: handlerError } = await supabase.functions.invoke('webhook-handler', {
+          body: {
+            chat_id: chatId,
+            user_id: user.id,
+            image_base64: aiResponse.image_base64,
+            image_name: aiResponse.image_name || 'generated_image.png',
+            image_type: aiResponse.image_type || 'image/png',
+            model: 'generate-image'
+          }
+        });
+        
+        if (handlerError) {
+          console.error('[REGENERATE] Webhook-handler error:', handlerError);
+          throw handlerError;
+        }
+        
+        console.log('[REGENERATE] Webhook-handler saved new message:', handlerData);
+        console.log('[REGENERATE] Image generation: waiting for realtime subscription to add new message...');
+        scrollToBottom();
+        return;
+      }
     } catch (error) {
       console.error('[REGENERATE] Error:', error);
       
@@ -1186,7 +1213,6 @@ export default function Chat() {
       console.log('[REGENERATE] Error occurred, restoring message visibility');
       
       setIsGeneratingResponse(false);
-      setIsRegenerating(false);
       setRegeneratingMessageId(null);
       regeneratingMessageIdRef.current = null; // Clear the ref
       setHiddenMessageIds(prev => {
@@ -1243,9 +1269,6 @@ export default function Chat() {
       // Image generation models are handled separately
       console.log('[AI-RESPONSE] Calling webhook with type: text, model:', selectedModel);
       
-      // Get session metadata
-      const sessionMetadata = await getSessionMetadata();
-      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
@@ -1256,7 +1279,6 @@ export default function Chat() {
           message: userMessage,
           userId: user.id,
           chatId: originalChatId,
-          ...sessionMetadata,
           model: selectedModel
         })
       });
@@ -1288,12 +1310,6 @@ export default function Chat() {
         const maxPollAttempts = 30; // Poll for up to ~45 seconds
         
         const pollForNewMessages = async () => {
-          // CRITICAL: Check if polling should stop (chat switched or realtime delivered)
-          if (stopAllPollingRef.current) {
-            console.log('[AI-RESPONSE-POLLING] Stopped by flag');
-            return;
-          }
-          
           if (pollAttempts >= maxPollAttempts) {
             console.log('[AI-RESPONSE-POLLING] Max attempts reached');
             setIsGeneratingResponse(false);
@@ -1314,8 +1330,7 @@ export default function Chat() {
             if (fetchError) {
               console.error('[AI-RESPONSE-POLLING] Error fetching messages:', fetchError);
               const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
-              const timer = setTimeout(pollForNewMessages, nextPollDelay);
-              activePollingTimers.current.add(timer);
+              setTimeout(pollForNewMessages, nextPollDelay);
               return;
             }
             
@@ -1359,10 +1374,6 @@ export default function Chat() {
             if (newAssistantMessage) {
               console.log('[AI-RESPONSE-POLLING] ✅ Found new assistant message!', newAssistantMessage.id);
               
-              // CRITICAL: Track this message ID to prevent duplicates from fetchMessages or realtime
-              fetchedMessageIds.current.add(newAssistantMessage.id);
-              console.log('[AI-RESPONSE-POLLING] Tracked message ID in fetchedMessageIds:', newAssistantMessage.id);
-              
               // Check if already in state
               setMessages(prev => {
                 const exists = prev.some(m => m.id === newAssistantMessage.id);
@@ -1393,33 +1404,23 @@ export default function Chat() {
               setLoading(false);
               requestAnimationFrame(() => scrollToBottom());
               
-              // Stop all polling - message found
-              stopAllPollingRef.current = true;
-              activePollingTimers.current.forEach(timer => clearTimeout(timer));
-              activePollingTimers.current.clear();
-              
+              // Stop polling
               return;
             }
             
             console.log('[AI-RESPONSE-POLLING] No new assistant message yet, retrying...');
             // Use faster polling for first 10 attempts (500ms), then slower (2s)
             const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
-            const timer = setTimeout(pollForNewMessages, nextPollDelay);
-            activePollingTimers.current.add(timer);
+            setTimeout(pollForNewMessages, nextPollDelay);
           } catch (pollError) {
             console.error('[AI-RESPONSE-POLLING] Error during polling:', pollError);
             const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
-            const timer = setTimeout(pollForNewMessages, nextPollDelay);
-            activePollingTimers.current.add(timer);
+            setTimeout(pollForNewMessages, nextPollDelay);
           }
         };
         
-        // Reset stop flag before starting new polling
-        stopAllPollingRef.current = false;
-        
         // Start polling immediately for faster response
-        const initialTimer = setTimeout(pollForNewMessages, 100);
-        activePollingTimers.current.add(initialTimer);
+        setTimeout(pollForNewMessages, 100);
         return;
       }
       
@@ -1566,36 +1567,13 @@ export default function Chat() {
       .eq('id', chatId)
       .maybeSingle();
     
-    // CRITICAL: Only set model from DB if user hasn't manually selected one AND we're not loading from navigation
-    // Check if we have a selectedModel from navigation state that should be preserved
-    const navigationModel = location.state?.selectedModel;
-    
+    // CRITICAL: Only set model from DB if user hasn't manually selected one
+    // This prevents the dropdown from resetting when switching tabs
     if (!chatError && chatData?.model_id && !userSelectedModelRef.current) {
-      // Only override if there's NO navigation model or if navigation model matches DB
-      if (!navigationModel || navigationModel === chatData.model_id) {
-        console.log('[FETCH-MESSAGES] Setting model from DB:', chatData.model_id);
-        setSelectedModel(chatData.model_id);
-      } else {
-        console.log('[FETCH-MESSAGES] Preserving navigation model over DB:', navigationModel, 'vs DB:', chatData.model_id);
-        // Navigation model takes priority - it's what the user selected
-        setSelectedModel(navigationModel);
-        // Update DB to match user's selection
-        console.log('[FETCH-MESSAGES] Updating DB model to match navigation selection');
-        supabase
-          .from('chats')
-          .update({ model_id: navigationModel })
-          .eq('id', chatId)
-          .then(({ error }) => {
-            if (error) {
-              console.error('[FETCH-MESSAGES] Error updating chat model:', error);
-            }
-          });
-      }
+      console.log('[FETCH-MESSAGES] Setting model from DB:', chatData.model_id);
+      setSelectedModel(chatData.model_id);
     } else if (userSelectedModelRef.current) {
       console.log('[FETCH-MESSAGES] Preserving user-selected model:', userSelectedModelRef.current);
-    } else if (navigationModel) {
-      console.log('[FETCH-MESSAGES] Using navigation model:', navigationModel);
-      setSelectedModel(navigationModel);
     }
     
     // Then fetch messages
@@ -1611,14 +1589,6 @@ export default function Chat() {
         ...msg,
         file_attachments: msg.file_attachments as any || []
       })) as Message[];
-
-      // CRITICAL: Track all fetched message IDs to prevent realtime duplicates
-      console.log('[FETCH-MESSAGES] Tracking', typedMessages.length, 'fetched message IDs');
-      fetchedMessageIds.current.clear();
-      typedMessages.forEach(msg => {
-        fetchedMessageIds.current.add(msg.id);
-        console.log('[FETCH-MESSAGES] Tracked ID:', msg.id.substring(0, 10), '...', msg.role);
-      });
 
       setMessages(typedMessages);
     }
@@ -1990,10 +1960,6 @@ export default function Chat() {
         
         // Send to N8n webhook for image generation
         console.log('[IMAGE-GEN] Calling N8n webhook with prompt:', userMessage);
-        
-        // Get session metadata
-        const sessionMetadata = await getSessionMetadata();
-        
         const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
           method: 'POST',
           headers: {
@@ -2004,7 +1970,6 @@ export default function Chat() {
             message: userMessage,
             userId: user.id,
             chatId: chatId,
-            ...sessionMetadata,
             model: 'generate-image'
           })
         });
@@ -2369,9 +2334,6 @@ export default function Chat() {
           try {
             console.log('[WEBHOOK] Sending file to webhook:', attachment.name);
             
-            // Get session metadata
-            const sessionMetadata = await getSessionMetadata();
-            
             // Build webhook body conditionally based on model
             const webhookBody: any = {
               fileName: attachment.name,
@@ -2381,8 +2343,7 @@ export default function Chat() {
               userId: user.id,
               chatId: chatId,
               message: userMessage,
-              model: selectedModel,
-              ...sessionMetadata
+              model: selectedModel
             };
             
             // Only add type field if not edit-image model
@@ -2404,12 +2365,6 @@ export default function Chat() {
             const pollInterval = 2000; // Poll every 2 seconds
             
             const pollForNewMessages = async () => {
-              // CRITICAL: Check if polling should stop (chat switched or realtime delivered)
-              if (stopAllPollingRef.current) {
-                console.log('[WEBHOOK-POLLING] Stopped by flag');
-                return;
-              }
-              
               if (pollAttempts >= maxPollAttempts) {
                 console.log('[WEBHOOK-POLLING] Max attempts reached, stopping');
                 return;
@@ -2419,31 +2374,6 @@ export default function Chat() {
               console.log(`[WEBHOOK-POLLING] Attempt ${pollAttempts}/${maxPollAttempts}`);
               
               try {
-                // FIRST: Check current state before even querying database
-                // This prevents race condition with realtime
-                let foundInState = false;
-                setMessages(prev => {
-                  const assistantMsg = prev.find(
-                    msg => msg.role === 'assistant' && 
-                           msg.chat_id === chatId &&
-                           new Date(msg.created_at) > new Date(insertedMessage.created_at)
-                  );
-                  
-                  if (assistantMsg) {
-                    console.log('[WEBHOOK-POLLING] ✅ Assistant message already in state (likely from realtime):', assistantMsg.id);
-                    foundInState = true;
-                    // Clear loading states
-                    setLoading(false);
-                    setIsGeneratingResponse(false);
-                  }
-                  return prev;
-                });
-                
-                // Stop polling if message found in state (realtime already handled it)
-                if (foundInState) {
-                  return;
-                }
-                
                 // Fetch the latest messages to check for the assistant response
                 const { data: latestMessages, error } = await supabase
                   .from('messages')
@@ -2454,8 +2384,7 @@ export default function Chat() {
                 
                 if (error) {
                   console.error('[WEBHOOK-POLLING] Error fetching messages:', error);
-                  const timer = setTimeout(pollForNewMessages, pollInterval);
-                  activePollingTimers.current.add(timer);
+                  setTimeout(pollForNewMessages, pollInterval);
                   return;
                 }
                 
@@ -2467,18 +2396,14 @@ export default function Chat() {
                 );
                 
                 if (newAssistantMessage) {
-                  console.log('[WEBHOOK-POLLING] ✅ Found new assistant message in DB!', newAssistantMessage.id);
+                  console.log('[WEBHOOK-POLLING] ✅ Found new assistant message!', newAssistantMessage.id);
                   console.log('[WEBHOOK-POLLING] Content preview:', newAssistantMessage.content?.substring(0, 100));
                   
-                  // CRITICAL: Add to tracked set IMMEDIATELY to prevent race conditions
-                  fetchedMessageIds.current.add(newAssistantMessage.id);
-                  console.log('[WEBHOOK-POLLING] Tracked message ID in fetchedMessageIds:', newAssistantMessage.id);
-                  
-                  // Check if this message is already in state (double-check after DB query)
+                  // Check if this message is already in state
                   setMessages(prev => {
                     const exists = prev.some(m => m.id === newAssistantMessage.id);
                     if (exists) {
-                      console.log('[WEBHOOK-POLLING] Message already in state after DB check, skipping');
+                      console.log('[WEBHOOK-POLLING] Message already in state, skipping');
                       return prev;
                     }
                     
@@ -2507,30 +2432,20 @@ export default function Chat() {
                     return newMessages;
                   });
                   
-                  // Stop all polling - message found
-                  stopAllPollingRef.current = true;
-                  activePollingTimers.current.forEach(timer => clearTimeout(timer));
-                  activePollingTimers.current.clear();
-                  
+                  // Stop polling
                   return;
                 }
                 
                 console.log('[WEBHOOK-POLLING] No new assistant message yet, will retry');
-                const timer = setTimeout(pollForNewMessages, pollInterval);
-                activePollingTimers.current.add(timer);
+                setTimeout(pollForNewMessages, pollInterval);
               } catch (pollError) {
                 console.error('[WEBHOOK-POLLING] Error during polling:', pollError);
-                const timer = setTimeout(pollForNewMessages, pollInterval);
-                activePollingTimers.current.add(timer);
+                setTimeout(pollForNewMessages, pollInterval);
               }
             };
             
-            // Reset stop flag before starting new polling
-            stopAllPollingRef.current = false;
-            
             // Start polling after a short delay to let webhook process
-            const initialTimer = setTimeout(pollForNewMessages, 3000);
-            activePollingTimers.current.add(initialTimer);
+            setTimeout(pollForNewMessages, 3000);
           } catch (error) {
             console.error('[WEBHOOK] Error sending file:', error);
           }
@@ -2538,10 +2453,6 @@ export default function Chat() {
 
         // Mark as processed to prevent auto-trigger
         if (chatId && insertedMessage) {
-          // CRITICAL: Track this message ID to prevent duplicates when navigating back
-          fetchedMessageIds.current.add(insertedMessage.id);
-          console.log('[FILE-MESSAGE] Tracked user message ID in fetchedMessageIds:', insertedMessage.id);
-          
           if (!processedUserMessages.current.has(chatId)) {
             processedUserMessages.current.set(chatId, new Set());
           }
@@ -2629,10 +2540,6 @@ export default function Chat() {
         
         // Replace temp message with real message in state immediately
         if (insertedMessage) {
-          // CRITICAL: Track this message ID to prevent duplicates when navigating back
-          fetchedMessageIds.current.add(insertedMessage.id);
-          console.log('[TEXT-MESSAGE] Tracked user message ID in fetchedMessageIds:', insertedMessage.id);
-          
           setMessages(prev => prev.map(msg => 
             msg.id === tempUserMessage.id ? {
               ...insertedMessage,
@@ -3110,10 +3017,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       const combinedFiles = [...selectedFiles, ...newFiles];
       
       const totalSize = combinedFiles.reduce((sum, file) => sum + file.size, 0);
-      const maxTotalSize = 10 * 1024 * 1024; // 10MB total per message
+      const maxTotalSize = 100 * 1024 * 1024; // 100MB total per message
 
       if (totalSize > maxTotalSize) {
-        toast.error('Total file size cannot exceed 10MB');
+        toast.error('Total file size cannot exceed 100MB');
         event.target.value = '';
         return;
       }
@@ -3479,12 +3386,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
           filePath = urlParts[1];
           bucketName = 'chat-files';
         }
-        // Check for generated-images bucket
-        else if (imageUrl.includes('/storage/v1/object/public/generated-images/')) {
-          const urlParts = imageUrl.split('/storage/v1/object/public/generated-images/');
-          filePath = urlParts[1];
-          bucketName = 'generated-images';
-        }
 
         if (filePath) {
           console.log('Downloading from Supabase storage:', { bucketName, filePath });
@@ -3730,10 +3631,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
             const combinedFiles = [...selectedFiles, ...newFiles];
             
             const totalSize = combinedFiles.reduce((sum, file) => sum + file.size, 0);
-            const maxTotalSize = 10 * 1024 * 1024; // 10MB total per message
+            const maxTotalSize = 100 * 1024 * 1024; // 100MB total per message
             
             if (totalSize > maxTotalSize) {
-              toast.error('Total file size cannot exceed 10MB');
+              toast.error('Total file size cannot exceed 100MB');
               return;
             }
             
@@ -3774,7 +3675,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                         <img 
                           src={file.url} 
                           alt={file.name || "Image"} 
-                          className="max-w-full sm:max-w-[320px] md:max-w-[400px] max-h-[240px] object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity shadow-sm border"
+                          className="max-w-full sm:max-w-[280px] md:max-w-[300px] max-h-[200px] object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity shadow-sm border" 
                           onClick={() => setSelectedImage({
                             url: file.url,
                             name: file.name
@@ -3787,8 +3688,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                           }} 
                         />
                        <div className="flex gap-2">
-                         <Button variant="ghost" size="sm" className="h-9 px-3 text-sm" onClick={() => downloadImageFromChat(file.url, file.name)}>
-                           <Download className="h-4 w-4 mr-1.5" />
+                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => downloadImageFromChat(file.url, file.name)}>
+                           <Download className="h-3 w-3 mr-1" />
                            Download
                          </Button>
                        </div>
@@ -3982,15 +3883,12 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                                     // Hide button immediately if there are any messages after it
                                     return !hasMessagesAfter;
                                    })() && (
-                                     <Button 
+                                    <Button 
                                       variant="ghost" 
                                       size="sm" 
                                       className="h-7 w-7 p-0 bg-background/80 backdrop-blur-sm hover:bg-muted transition-opacity"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        regenerateResponse(message.id);
-                                      }}
-                                      disabled={isGeneratingResponse || isRegenerating}
+                                      onClick={() => regenerateResponse(message.id)}
+                                      disabled={isGeneratingResponse}
                                     >
                                       {isGeneratingResponse ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -4104,10 +4002,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                 const combinedFiles = [...selectedFiles, ...newFiles];
                 
                 const totalSize = combinedFiles.reduce((sum, file) => sum + file.size, 0);
-                const maxTotalSize = 10 * 1024 * 1024;
+                const maxTotalSize = 100 * 1024 * 1024;
                 
                 if (totalSize > maxTotalSize) {
-                  toast.error('Total file size cannot exceed 10MB');
+                  toast.error('Total file size cannot exceed 100MB');
                   return;
                 }
                 
@@ -4152,30 +4050,30 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
             
             {/* Recording UI - appears below textarea when recording */}
             {isRecording && (
-              <div className="flex items-center gap-2 py-2 px-0">
+              <div className="flex items-center gap-0.5 sm:gap-2 py-1 sm:py-2 px-0">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-9 w-9 sm:h-10 sm:w-10 rounded-full text-foreground hover:text-foreground hover:bg-accent flex-shrink-0 p-0"
+                  className="h-5 w-5 sm:h-7 sm:w-7 rounded-full text-foreground hover:text-foreground hover:bg-accent flex-shrink-0 p-0"
                   onClick={cancelRecording}
                   aria-label="Cancel recording"
                 >
-                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <X className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                 </Button>
                 
-                <div className="flex-1 flex items-center justify-center gap-2 min-w-0 overflow-hidden">
+                <div className="flex-1 flex items-center justify-center gap-0.5 sm:gap-2 min-w-0 overflow-hidden">
                   {/* Real-time audio waveform visualization - mobile optimized */}
-                  <div className="flex items-center justify-center gap-[1px] sm:gap-[2px] h-6 sm:h-8 flex-1 max-w-[280px] sm:max-w-[600px] min-w-0">
+                  <div className="flex items-center justify-center gap-[0.5px] sm:gap-[2px] h-4 sm:h-8 flex-1 max-w-[320px] sm:max-w-[600px] min-w-0">
                     {audioLevels.map((level, i) => {
                       // Calculate height based on audio level
-                      const minHeight = 4;
-                      const maxHeight = isMobile ? 24 : 32;
+                      const minHeight = 2;
+                      const maxHeight = isMobile ? 16 : 32;
                       const height = minHeight + (level * (maxHeight - minHeight));
                       
                       return (
                         <div
                           key={i}
-                          className="w-[1px] sm:w-[2px] bg-foreground rounded-full transition-all duration-75 ease-out"
+                          className="w-[0.5px] sm:w-[2px] bg-foreground rounded-full transition-all duration-75 ease-out"
                           style={{
                             height: `${height}px`,
                           }}
@@ -4185,18 +4083,18 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   </div>
                   
                   {/* Timer */}
-                  <span className="text-xs sm:text-sm font-medium tabular-nums text-foreground flex-shrink-0">
+                  <span className="text-[9px] sm:text-xs font-medium tabular-nums text-foreground flex-shrink-0">
                     {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
                   </span>
                 </div>
                 
                 <Button
                   size="sm"
-                  className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-foreground text-background hover:bg-foreground/90 flex-shrink-0 p-0"
+                  className="h-5 w-5 sm:h-7 sm:w-7 rounded-full bg-foreground text-background hover:bg-foreground/90 flex-shrink-0 p-0"
                   onClick={stopRecording}
                   aria-label="Send recording"
                 >
-                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <svg className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </Button>
@@ -4391,10 +4289,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="h-10 w-10 rounded-full border border-border/30 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" 
+                            className="h-8 w-8 rounded-full border border-border/30 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" 
                             aria-label="Upload or create content"
                           >
-                            <Plus className="h-5 w-5" />
+                            <Plus className="h-3.5 w-3.5" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-48 p-2 bg-background border shadow-lg z-50" align="start">
@@ -4420,10 +4318,10 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                       </Popover>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-muted/30 rounded-full p-1.5">
+                    <div className="flex items-center gap-2 bg-muted/30 rounded-full p-1">
                       <Button 
                         size="sm" 
-                        className={`h-10 w-10 rounded-full focus-visible:ring-2 focus-visible:ring-offset-1 flex-shrink-0 ${
+                        className={`h-7 w-7 rounded-full focus-visible:ring-2 focus-visible:ring-offset-1 flex-shrink-0 ${
                           input.trim().length > 0 || selectedFiles.length > 0
                             ? 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
                             : isRecording 
@@ -4436,9 +4334,9 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                         aria-pressed={isRecording}
                       >
                         {input.trim().length > 0 || selectedFiles.length > 0 ? (
-                          <SendHorizontalIcon className="h-4 w-4" />
+                          <SendHorizontalIcon className="h-3 w-3" />
                         ) : (
-                          isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />
+                          isRecording ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />
                         )}
                       </Button>
                     </div>

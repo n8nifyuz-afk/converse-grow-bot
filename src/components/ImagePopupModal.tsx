@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Download, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -17,18 +17,18 @@ export function ImagePopupModal({ isOpen, onClose, imageUrl, prompt = '' }: Imag
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handleZoomIn = () => {
-    setIsTransitioning(true);
     setZoom(prev => Math.min(prev + 0.25, 4));
-    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const handleZoomOut = () => {
-    setIsTransitioning(true);
     setZoom(prev => Math.max(prev - 0.25, 0.25));
-    setTimeout(() => setIsTransitioning(false), 300);
+  };
+
+  const handleReset = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -44,11 +44,9 @@ export function ImagePopupModal({ isOpen, onClose, imageUrl, prompt = '' }: Imag
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging && zoom > 1) {
-      requestAnimationFrame(() => {
-        setPosition({
-          x: e.clientX - dragStart.x,
-          y: e.clientY - dragStart.y
-        });
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
       });
     }
   };
@@ -59,17 +57,8 @@ export function ImagePopupModal({ isOpen, onClose, imageUrl, prompt = '' }: Imag
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    
-    // Smoother zoom with dynamic delta based on current zoom level
-    const zoomSpeed = 0.002;
-    const delta = -e.deltaY * zoomSpeed;
-    
-    requestAnimationFrame(() => {
-      setZoom(prev => {
-        const newZoom = prev + delta;
-        return Math.max(0.25, Math.min(4, newZoom));
-      });
-    });
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom(prev => Math.max(0.25, Math.min(4, prev + delta)));
   };
 
   const downloadImage = async () => {
@@ -170,6 +159,15 @@ export function ImagePopupModal({ isOpen, onClose, imageUrl, prompt = '' }: Imag
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReset}
+                className="h-8 px-2 text-xs"
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                Reset
+              </Button>
             </div>
             
             <div className="flex items-center gap-2">
@@ -215,7 +213,7 @@ export function ImagePopupModal({ isOpen, onClose, imageUrl, prompt = '' }: Imag
                 transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
                 maxHeight: 'calc(95vh - 60px)',
                 maxWidth: '95vw',
-                transition: (isDragging || !isTransitioning) ? 'none' : 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                transition: isDragging ? 'none' : 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
                 willChange: 'transform'
               }}
               onMouseDown={handleMouseDown}

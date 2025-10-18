@@ -22,8 +22,6 @@ const webhookSchema = z.object({
   image_base64: z.string().optional().nullable(),
   image_name: z.string().optional().nullable(),
   image_type: z.string().optional().nullable(),
-  messageId: z.string().uuid().optional().nullable(), // For regenerate updates
-  isRegenerate: z.boolean().optional().nullable(), // Flag for regenerate
   body: z.object({
     chatId: z.string().uuid().optional().nullable(),
     userId: z.string().uuid().optional().nullable(),
@@ -102,8 +100,6 @@ serve(async (req) => {
     const image_base64 = body.image_base64;
     const response_data = body.response_data || body.response || body.text || body.content;
     const model = body.model || body.body?.model || body.type; // Extract model from request
-    const messageId = body.messageId; // For regenerate updates
-    const isRegenerate = body.isRegenerate; // Check if this is a regenerate
 
     if (!chat_id) {
       console.error('[WEBHOOK-HANDLER] ERROR: Missing chat_id');
@@ -211,81 +207,22 @@ serve(async (req) => {
 
     console.log('[WEBHOOK-HANDLER] ===== SAVING TO DATABASE =====');
 
+    // Save the assistant message to the database
     // If only image without text, provide default message
     const messageContent = responseContent || (imageUrl ? '' : '');
     
-    let data, error;
-    
-    // Check if this is a regenerate (UPDATE existing message)
-    if (isRegenerate && messageId) {
-      console.log('[WEBHOOK-HANDLER] UPDATING existing message:', messageId);
-      
-      // Delete old image from storage if it exists and we have a new image
-      if (imageUrl) {
-        const { data: oldMessage } = await supabaseClient
-          .from('messages')
-          .select('file_attachments')
-          .eq('id', messageId)
-          .single();
-        
-        if (oldMessage?.file_attachments && Array.isArray(oldMessage.file_attachments)) {
-          for (const attachment of oldMessage.file_attachments) {
-            if (attachment.url && attachment.url.includes('generated-images')) {
-              try {
-                const urlObj = new URL(attachment.url);
-                const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/([^\/]+)\/(.+)/);
-                
-                if (pathMatch) {
-                  const bucketName = pathMatch[1];
-                  const filePath = pathMatch[2];
-                  console.log('[WEBHOOK-HANDLER] Deleting old image from storage:', filePath);
-                  
-                  await supabaseClient.storage
-                    .from(bucketName)
-                    .remove([filePath]);
-                }
-              } catch (e) {
-                console.error('[WEBHOOK-HANDLER] Error deleting old image:', e);
-              }
-            }
-          }
-        }
-      }
-      
-      // UPDATE the existing message
-      const updateResult = await supabaseClient
-        .from('messages')
-        .update({
-          content: messageContent,
-          file_attachments: fileAttachments,
-          model: model
-        })
-        .eq('id', messageId)
-        .select()
-        .single();
-      
-      data = updateResult.data;
-      error = updateResult.error;
-    } else {
-      console.log('[WEBHOOK-HANDLER] INSERTING new message');
-      
-      // INSERT a new message (original behavior)
-      const insertResult = await supabaseClient
-        .from('messages')
-        .insert({
-          chat_id: chat_id,
-          content: messageContent,
-          role: 'assistant',
-          file_attachments: fileAttachments,
-          model: model,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-      
-      data = insertResult.data;
-      error = insertResult.error;
-    }
+    const { data, error } = await supabaseClient
+      .from('messages')
+      .insert({
+        chat_id: chat_id,
+        content: messageContent,
+        role: 'assistant',
+        file_attachments: fileAttachments,
+        model: model,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error('[WEBHOOK-HANDLER] Database error:', error);
