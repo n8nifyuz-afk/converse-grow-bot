@@ -286,6 +286,8 @@ export default function Chat() {
   const userSelectedModelRef = useRef<string | null>(null);
   // Track if a send is in progress to prevent duplicates
   const sendingInProgressRef = useRef(false);
+  // CRITICAL: Track message IDs that were loaded from fetchMessages to prevent realtime duplicates
+  const fetchedMessageIds = useRef<Set<string>>(new Set());
   const selectedModelData = models.find(m => m.id === selectedModel);
   
   // Show all models to everyone - access control happens on selection
@@ -299,6 +301,9 @@ export default function Chat() {
 
       // CRITICAL: Clear messages state immediately when switching chats to prevent cross-chat bleeding
       setMessages([]);
+      
+      // CRITICAL: Clear fetched message IDs when switching chats
+      fetchedMessageIds.current.clear();
       
       // Clear limit warning when switching chats
       setShowLimitWarning(false);
@@ -446,10 +451,16 @@ export default function Chat() {
                 chat_id: m.chat_id
               })));
               
+              // CRITICAL: Check if this message was already loaded via fetchMessages
+              if (fetchedMessageIds.current.has(newMessage.id)) {
+                console.log('[REALTIME-INSERT] ⚠️ Message was already fetched from DB - skipping:', newMessage.id.substring(0, 10));
+                return prev;
+              }
+              
               // ENHANCED: Check if message already exists by ID (most reliable)
               const existsById = prev.find(msg => msg.id === newMessage.id);
               if (existsById) {
-                console.log('[REALTIME-INSERT] ⚠️ Duplicate by ID - skipping');
+                console.log('[REALTIME-INSERT] ⚠️ Duplicate by ID in state - skipping');
                 return prev;
               }
               
@@ -506,31 +517,34 @@ export default function Chat() {
                 return prev;
               }
             
-            console.log('[REALTIME-INSERT] 🆕 Message is NEW - adding to state');
-            
-            // CRITICAL: Filter out any messages not belonging to current chat before adding new message
-            const filteredPrev = prev.filter(msg => !msg.chat_id || msg.chat_id === chatId);
-            console.log('[REALTIME-INSERT] After filtering by chat_id:', filteredPrev.length, 'messages');
-            
-            // Create new array with new message and sort by created_at to ensure proper ordering
-            const newMessages = [...filteredPrev, newMessage].sort((a, b) => 
-              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-            );
-            console.log('[REALTIME-INSERT] ✅ Final message count:', newMessages.length);
-            console.log('[REALTIME-INSERT] Final messages:', newMessages.map(m => ({
-              id: m.id.substring(0, 10),
-              role: m.role,
-              preview: m.content?.substring(0, 30)
-            })));
-            
-            // Force immediate scroll
-            requestAnimationFrame(() => {
-              scrollToBottom();
+              console.log('[REALTIME-INSERT] 🆕 Message is NEW - adding to state');
+              
+              // CRITICAL: Add this new message ID to fetched set to prevent future duplicates
+              fetchedMessageIds.current.add(newMessage.id);
+              
+              // CRITICAL: Filter out any messages not belonging to current chat before adding new message
+              const filteredPrev = prev.filter(msg => !msg.chat_id || msg.chat_id === chatId);
+              console.log('[REALTIME-INSERT] After filtering by chat_id:', filteredPrev.length, 'messages');
+              
+              // Create new array with new message and sort by created_at to ensure proper ordering
+              const newMessages = [...filteredPrev, newMessage].sort((a, b) => 
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+              );
+              console.log('[REALTIME-INSERT] ✅ Final message count:', newMessages.length);
+              console.log('[REALTIME-INSERT] Final messages:', newMessages.map(m => ({
+                id: m.id.substring(0, 10),
+                role: m.role,
+                preview: m.content?.substring(0, 30)
+              })));
+              
+              // Force immediate scroll
+              requestAnimationFrame(() => {
+                scrollToBottom();
+              });
+              
+              // Return new array to trigger re-render
+              return newMessages;
             });
-            
-            // Return new array to trigger re-render
-            return newMessages;
-          });
         })
         .on('postgres_changes', {
           event: 'UPDATE',
@@ -1607,6 +1621,14 @@ export default function Chat() {
         ...msg,
         file_attachments: msg.file_attachments as any || []
       })) as Message[];
+
+      // CRITICAL: Track all fetched message IDs to prevent realtime duplicates
+      console.log('[FETCH-MESSAGES] Tracking', typedMessages.length, 'fetched message IDs');
+      fetchedMessageIds.current.clear();
+      typedMessages.forEach(msg => {
+        fetchedMessageIds.current.add(msg.id);
+        console.log('[FETCH-MESSAGES] Tracked ID:', msg.id.substring(0, 10), '...', msg.role);
+      });
 
       setMessages(typedMessages);
     }
