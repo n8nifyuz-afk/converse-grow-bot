@@ -497,31 +497,57 @@ export default function ProjectPage() {
 
           // Convert first file to base64 for webhook
           const file = files[0]; // Handle first file for now
-          const base64Data = await new Promise<string>(resolve => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              // Remove data URL prefix to get pure base64
-              const base64 = result.split(',')[1];
-              resolve(base64);
-            };
-            reader.readAsDataURL(file);
-          });
+          
+          // Convert to PNG for images, otherwise use original format
+          let base64Data = '';
+          if (file.type.startsWith('image/')) {
+            // For images, convert to PNG base64
+            const img = new Image();
+            const imgUrl = URL.createObjectURL(file);
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = imgUrl;
+            });
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0);
+            URL.revokeObjectURL(imgUrl);
+            base64Data = canvas.toDataURL('image/png').split(',')[1];
+          } else {
+            // For non-images, read as base64
+            base64Data = await new Promise<string>(resolve => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const result = reader.result as string;
+                // Remove data URL prefix to get pure base64
+                const base64 = result.split(',')[1];
+                resolve(base64);
+              };
+              reader.readAsDataURL(file);
+            });
+          }
+          
+          // Determine correct type based on file type
+          const webhookType = file.type.startsWith('image/') ? 'analyse-image' : 'analyse-files';
+          
           const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+              type: webhookType,
               message: userMessage,
               chatId: newChat.id,
               userId: user.id,
-              projectId: project.id,
-              type: file.type.split('/')[1] || 'file',
               fileName: file.name,
               fileSize: file.size,
-              fileType: file.type,
-              fileData: base64Data
+              fileType: file.type.startsWith('image/') ? 'image/png' : file.type,
+              fileData: base64Data,
+              model: selectedModel
             })
           });
           if (response.ok) {
