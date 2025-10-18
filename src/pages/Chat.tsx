@@ -34,10 +34,6 @@ import grokLogo from '@/assets/grok-logo.png';
 // Speech recognition will be accessed with type casting to avoid global conflicts
 import { ImageAnalysisResult, analyzeImageComprehensively } from '@/utils/imageAnalysis';
 import { getSessionMetadata } from '@/utils/sessionTracking';
-import { handleError, handleFileError, handleDownloadError, validateFileSize } from '@/utils/errorHandler';
-import { FILE_LIMITS, STORAGE_BUCKETS, POLLING_INTERVALS } from '@/utils/constants';
-import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 const models = [{
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
@@ -163,7 +159,6 @@ export default function Chat() {
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
-  const isOnline = useOnlineStatus();
   const { 
     canSendMessage, 
     isAtLimit, 
@@ -1864,12 +1859,6 @@ export default function Chat() {
   const sendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    // Check online status first
-    if (!isOnline) {
-      toast.error("You're offline. Please check your internet connection.");
-      return;
-    }
-    
     console.log('[MESSAGE-LIMIT-CHECK] Checking message limit...', {
       canSendMessage,
       isAtLimit,
@@ -2215,7 +2204,12 @@ export default function Chat() {
         
         // Process files first to get URLs
         for (const file of files) {
-          // Process all files without size restrictions
+          // Check file size limits
+          const maxSize = getMaxFileSize(file.type);
+          if (file.size > maxSize) {
+            console.error(`File ${file.name} exceeds size limit`);
+            continue;
+          }
 
           // For images, convert to PNG and upload to storage
           let finalFileUrl = '';
@@ -2282,9 +2276,11 @@ export default function Chat() {
               
               console.log('[IMAGE-UPLOAD] Public URL:', finalFileUrl);
             } catch (error) {
-              handleFileError(error, file.name);
+              console.error('[IMAGE-UPLOAD] Error converting/uploading image:', error);
+              // Don't use blob URLs - they won't work after page refresh
               // Leave finalFileUrl empty to skip this file
               finalFileUrl = '';
+              toast.error(`Failed to upload image: ${file.name}`);
             }
           } else {
             // For non-image files, upload to Supabase storage
@@ -3636,7 +3632,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
         document.body.removeChild(a);
       }, 100);
     } catch (error) {
-      handleDownloadError(error, fileName);
+      console.error('Download failed:', error);
+      toast.error('Failed to download image');
     }
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -3935,7 +3932,11 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                      overflowWrap: 'anywhere'
                    }}>
                                 {message.content.includes("🎨 Generating your image") ? <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
-                                    <LoadingSpinner size="sm" label="Generating your image..." />
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                                    <div>
+                                      <p className="text-sm font-medium">Generating your image...</p>
+                                      <p className="text-xs text-muted-foreground">This may take a few moments</p>
+                                    </div>
                                   </div> : <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
                        code({
                          node,

@@ -6,7 +6,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { OfflineBanner } from '@/components/OfflineBanner';
 import MainLayout from '@/layouts/MainLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -37,7 +36,6 @@ function App() {
       <TooltipProvider>
         <AuthProvider>
       <ThemeProvider>
-            <OfflineBanner />
             <SubscriptionCheckingOverlay />
             <Router>
                 <Routes>
