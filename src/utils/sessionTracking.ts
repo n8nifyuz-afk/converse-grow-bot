@@ -28,15 +28,11 @@ export const isMobileDevice = (): boolean => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
 
-// Get full current URL and parameters
+// Get URL query parameters only (Google Ads tracking params)
 export const getUrlParams = (): Record<string, string> => {
-  const params: Record<string, string> = {
-    currentUrl: window.location.href, // Full current page URL
-    pathname: window.location.pathname,
-    host: window.location.host
-  };
-  
+  const params: Record<string, string> = {};
   const searchParams = new URLSearchParams(window.location.search);
+  
   searchParams.forEach((value, key) => {
     params[key] = value;
   });
