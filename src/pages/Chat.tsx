@@ -767,7 +767,12 @@ export default function Chat() {
   // Check IMMEDIATELY if we should auto-send (before chat init effect runs)
   const initialFiles = location.state?.initialFiles;
   const initialMessage = location.state?.initialMessage;
-  if ((initialMessage || (initialFiles && initialFiles?.length > 0)) && chatId && !hasProcessedInitialData.current) {
+  
+  // CRITICAL: Check sessionStorage to see if this chat already processed initial data
+  const processedInitialKey = `processed_initial_${chatId}`;
+  const alreadyProcessedInitial = sessionStorage.getItem(processedInitialKey);
+  
+  if ((initialMessage || (initialFiles && initialFiles?.length > 0)) && chatId && !hasProcessedInitialData.current && !alreadyProcessedInitial) {
     shouldAutoSend.current = true;
     console.log('[CHAT-INITIAL] Set shouldAutoSend to true BEFORE chat init');
   }
@@ -784,11 +789,19 @@ export default function Chat() {
       hasProcessed: hasProcessedInitialData.current
     });
     
+    // CRITICAL: Check sessionStorage to prevent re-processing on navigation back
+    const processedInitialKey = `processed_initial_${chatId}`;
+    const alreadyProcessedInitial = sessionStorage.getItem(processedInitialKey);
+    
     // Handle message with or without files
-    if ((initialMessage || (initialFiles && initialFiles.length > 0)) && chatId && !hasProcessedInitialData.current) {
+    if ((initialMessage || (initialFiles && initialFiles.length > 0)) && chatId && !hasProcessedInitialData.current && !alreadyProcessedInitial) {
       console.log('[CHAT-INITIAL] Processing from home page:', { initialFiles, initialMessage: initialMessage?.substring(0, 50) });
       hasProcessedInitialData.current = true;
       shouldAutoSend.current = true;
+      
+      // Mark this chat as having processed initial data in sessionStorage
+      sessionStorage.setItem(processedInitialKey, 'true');
+      console.log('[CHAT-INITIAL] Marked chat as processed in sessionStorage:', processedInitialKey);
       
       // Set the message and files
       setInput(initialMessage || '');
@@ -1405,6 +1418,10 @@ export default function Chat() {
             
             if (newAssistantMessage) {
               console.log('[AI-RESPONSE-POLLING] ✅ Found new assistant message!', newAssistantMessage.id);
+              
+              // CRITICAL: Track this message ID to prevent duplicates from fetchMessages or realtime
+              fetchedMessageIds.current.add(newAssistantMessage.id);
+              console.log('[AI-RESPONSE-POLLING] Tracked message ID in fetchedMessageIds:', newAssistantMessage.id);
               
               // Check if already in state
               setMessages(prev => {
