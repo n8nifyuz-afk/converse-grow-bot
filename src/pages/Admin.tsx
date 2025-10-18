@@ -45,8 +45,8 @@ const MODEL_PRICING: Record<string, {
   tier2Threshold?: number; // Token threshold for tier 2 pricing
 }> = {
   'gpt-4o-mini': {
-    input: 0.15,
-    output: 0.60
+    input: 0.075,
+    output: 0.30
   },
   'gpt-4o': {
     input: 2.50,
@@ -57,12 +57,8 @@ const MODEL_PRICING: Record<string, {
     output: 10.00
   },
   'gpt-5': {
-    input: 1.25,
-    output: 10.00
-  },
-  'gpt-5-mini': {
-    input: 0.25,
-    output: 2.00
+    input: 30.00,
+    output: 60.00
   },
   'gpt-5-nano': {
     input: 0.05,
@@ -79,16 +75,16 @@ const MODEL_PRICING: Record<string, {
     output: 15.00
   },
   'deepseek-chat': {
-    input: 0.07,
-    output: 1.10
+    input: 0.56,
+    output: 1.68
   },
   'deepseek-reasoner': {
     input: 0.14,
     output: 2.19
   },
   'deepseek-v2': { // Alias for deepseek-chat
-    input: 0.07,
-    output: 1.10
+    input: 0.56,
+    output: 1.68
   },
   'google/gemini-2.5-pro': {
     input: 1.25,
