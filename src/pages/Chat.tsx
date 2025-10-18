@@ -1116,96 +1116,43 @@ export default function Chat() {
         });
       }
 
-      // Determine request type based on model and file type
-      let requestType = 'text';
+      // Call the dedicated regenerate-message edge function
+      console.log('[REGENERATE] Calling regenerate-message function...');
       
-      // Check if this was originally an image generation request
-      if (userModel === 'generate-image') {
-        requestType = 'generate_image';
-      } else if (validAttachments.length > 0) {
-        // Check if the first attachment is an image
-        requestType = validAttachments[0].isImage ? 'analyse-image' : 'analyse-files';
-      }
-      console.log('[REGENERATE] Request type:', requestType, 'Model:', userModel);
-
-      // Build payload - send first attachment directly in the body
-      // CRITICAL: Include messageId so webhook knows to UPDATE instead of INSERT
-      let payload: any = {
-        type: requestType,
-        message: userMessage,
-        userId: user.id,
-        chatId: chatId,
-        model: userModel,
-        messageId: messageId, // Pass the message ID to update
-        isRegenerate: true // Flag to indicate this is a regeneration
-      };
-
-      if (validAttachments.length > 0) {
-        // Send first attachment directly in body
-        const firstAttachment = validAttachments[0];
-        payload.fileName = firstAttachment.fileName;
-        payload.fileSize = firstAttachment.fileSize;
-        payload.fileType = firstAttachment.fileType;
-        payload.fileData = firstAttachment.fileData;
-      }
-      
-      console.log('[REGENERATE] Sending webhook payload with messageId:', messageId.substring(0, 10));
-
-      // Get session metadata
-      const sessionMetadata = await getSessionMetadata();
-
-      // Call N8n webhook (N8n will call webhook-handler in background to create new message)
-      console.log('[REGENERATE] Calling N8n webhook (N8n will call webhook-handler)');
-      
-      const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...payload,
-          ...sessionMetadata
-        })
+      const { data: regenerateData, error: regenerateError } = await supabase.functions.invoke('regenerate-message', {
+        body: {
+          messageId: messageId,
+          userId: user.id,
+          model: userModel,
+          userMessage: userMessage,
+          fileAttachments: validAttachments
+        }
       });
-      
-      if (!webhookResponse.ok) {
-        throw new Error(`Webhook request failed: ${webhookResponse.status}`);
+
+      if (regenerateError) {
+        console.error('[REGENERATE] Regenerate function error:', regenerateError);
+        throw regenerateError;
       }
-      
-      const webhookData = await webhookResponse.json();
-      console.log('[REGENERATE] Webhook response:', webhookData);
-      
-      // Webhook will UPDATE the message, so fetch the updated content immediately
-      console.log('[REGENERATE] Fetching updated message from database...');
-      const { data: updatedMessage, error: fetchError } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('id', messageId)
-        .single();
-      
-      if (fetchError) {
-        console.error('[REGENERATE] Error fetching updated message:', fetchError);
-        throw fetchError;
-      }
-      
-      console.log('[REGENERATE] Updated message fetched successfully');
-      
-      // IMMEDIATELY update the message in state
-      setMessages(prev => {
-        return prev.map(msg => {
-          if (msg.id === messageId) {
-            // Update the message with new content
-            return {
-              ...msg,
-              content: updatedMessage.content,
-              file_attachments: (updatedMessage.file_attachments || []) as any as FileAttachment[],
-              model: updatedMessage.model
-            };
-          }
-          return msg;
+
+      console.log('[REGENERATE] Message updated successfully via function:', regenerateData);
+
+      // Update state immediately with the returned message
+      if (regenerateData?.message) {
+        setMessages(prev => {
+          return prev.map(msg => {
+            if (msg.id === messageId) {
+              return {
+                ...msg,
+                content: regenerateData.message.content,
+                file_attachments: (regenerateData.message.file_attachments || []) as any as FileAttachment[],
+                model: regenerateData.message.model
+              };
+            }
+            return msg;
+          });
         });
-      });
-      
+      }
+
       // Clear regeneration states immediately
       console.log('[REGENERATE] Clearing regeneration states');
       setRegeneratingMessageId(null);
@@ -1218,69 +1165,14 @@ export default function Chat() {
         newSet.delete(messageId);
         return newSet;
       });
-      oldMessageBackupRef.current = null;
-      
+
       // Clear timeout
       if (regenerateTimeoutRef.current) {
         clearTimeout(regenerateTimeoutRef.current);
         regenerateTimeoutRef.current = null;
       }
-      
+
       scrollToBottom();
-      
-      scrollToBottom();
-      
-      // Note: For image generation, we still need special handling  
-      const aiResponse = await webhookResponse.json();
-      if (userModel === 'generate-image' && aiResponse.image_base64) {
-        console.log('[REGENERATE] Image generation response received, calling webhook-handler to update message...');
-        
-        const { data: handlerData, error: handlerError } = await supabase.functions.invoke('webhook-handler', {
-          body: {
-            chat_id: chatId,
-            user_id: user.id,
-            image_base64: aiResponse.image_base64,
-            image_name: aiResponse.image_name || 'generated_image.png',
-            image_type: aiResponse.image_type || 'image/png',
-            model: 'generate-image',
-            messageId: messageId, // Pass messageId to update existing message
-            isRegenerate: true // Flag to indicate this is a regeneration
-          }
-        });
-        
-        if (handlerError) {
-          console.error('[REGENERATE] Webhook-handler error:', handlerError);
-          throw handlerError;
-        }
-        
-        console.log('[REGENERATE] Webhook-handler updated message:', handlerData);
-        
-        // Fetch the updated message and update state immediately
-        const { data: updatedMessage, error: fetchError } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('id', messageId)
-          .single();
-        
-        if (!fetchError && updatedMessage) {
-          setMessages(prev => {
-            return prev.map(msg => {
-              if (msg.id === messageId) {
-                return {
-                  ...msg,
-                  content: updatedMessage.content,
-                  file_attachments: (updatedMessage.file_attachments || []) as any as FileAttachment[],
-                  model: updatedMessage.model
-                };
-              }
-              return msg;
-            });
-          });
-        }
-        
-        scrollToBottom();
-        return;
-      }
     } catch (error) {
       console.error('[REGENERATE] Error:', error);
       
