@@ -439,7 +439,7 @@ export default function Chat() {
                   regenerateTimeoutRef.current = null;
                 }
                 
-                // Remove the old hidden message from state (it was deleted from DB but kept for animation)
+                // Remove the old hidden message from state (already deleted from DB)
                 setMessages(prev => {
                   const filtered = prev.filter(msg => msg.id !== currentRegeneratingId);
                   console.log('[REALTIME-INSERT] Removed old message, remaining count:', filtered.length);
@@ -449,6 +449,8 @@ export default function Chat() {
                 // Clear regeneration states
                 setRegeneratingMessageId(null);
                 regeneratingMessageIdRef.current = null; // Clear the ref too
+                setIsGeneratingResponse(false);
+                setIsRegenerating(false);
                 isRegeneratingRef.current = false;
                 setHiddenMessageIds(prev => {
                   const newSet = new Set(prev);
@@ -1231,16 +1233,13 @@ export default function Chat() {
         }
       }
       
-      console.log('[REGENERATE] Webhook completed, fetching messages immediately...');
+      console.log('[REGENERATE] Webhook completed, waiting for realtime to deliver new message...');
       
-      // Immediately fetch messages to show new response without waiting for realtime
-      setTimeout(async () => {
-        await fetchMessages();
-        
-        // Clear regeneration states after messages are fetched
-        // This handles the case where realtime INSERT doesn't fire or messages are already in DB
-        setTimeout(() => {
-          console.log('[REGENERATE] Clearing regeneration state after fetch');
+      // Don't fetch messages - let realtime handle it to avoid race condition with DB deletion
+      // Fallback: Clear regeneration states after 10 seconds if realtime doesn't fire
+      setTimeout(() => {
+        console.log('[REGENERATE] Fallback: Clearing regeneration state after timeout');
+        if (isRegeneratingRef.current || regeneratingMessageIdRef.current) {
           setRegeneratingMessageId(null);
           regeneratingMessageIdRef.current = null;
           setIsGeneratingResponse(false);
@@ -1258,8 +1257,8 @@ export default function Chat() {
             clearTimeout(regenerateTimeoutRef.current);
             regenerateTimeoutRef.current = null;
           }
-        }, 500);
-      }, 200);
+        }
+      }, 10000);
       
       scrollToBottom();
       
