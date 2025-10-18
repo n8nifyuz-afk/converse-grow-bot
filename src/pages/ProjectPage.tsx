@@ -452,36 +452,120 @@ export default function ProjectPage() {
       }).select().single();
       if (error) throw error;
 
-      // Upload files for display in chat only
+      // Upload files for display in chat - use correct bucket based on file type
       const uploadedFiles = [];
       for (const file of files) {
-        const fileExtension = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
-        const {
-          data: uploadData,
-          error: uploadError
-        } = await supabase.storage.from('chat-files').upload(fileName, file);
-        if (!uploadError) {
-          const {
-            data: urlData
-          } = supabase.storage.from('chat-files').getPublicUrl(fileName);
+        let finalFileUrl = '';
+        let finalFileType = file.type;
+        let finalFileName = file.name;
+        
+        if (file.type.startsWith('image/')) {
+          // For images, convert to PNG and upload to chat-images bucket
+          try {
+            console.log('[PROJECT-IMAGE-UPLOAD] Converting image to PNG format...');
+            
+            const img = new Image();
+            const imgUrl = URL.createObjectURL(file);
+            
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = imgUrl;
+            });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0);
+            URL.revokeObjectURL(imgUrl);
+
+            // Convert to PNG base64 then blob
+            const pngBase64 = canvas.toDataURL('image/png').split(',')[1];
+            const pngBlob = await (await fetch(`data:image/png;base64,${pngBase64}`)).blob();
+            
+            // Upload to chat-images bucket
+            const timestamp = Date.now();
+            finalFileName = `${file.name.replace(/\.[^/.]+$/, '')}.png`;
+            const filePath = `${user.id}/${newChat.id}/${timestamp}_${finalFileName}`;
+            
+            console.log('[PROJECT-IMAGE-UPLOAD] Uploading to chat-images:', filePath);
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('chat-images')
+              .upload(filePath, pngBlob, {
+                contentType: 'image/png',
+                upsert: false
+              });
+
+            if (uploadError) {
+              console.error('[PROJECT-IMAGE-UPLOAD] Upload error:', uploadError);
+              throw uploadError;
+            }
+
+            // Get public URL
+            const { data: urlData } = supabase.storage
+              .from('chat-images')
+              .getPublicUrl(filePath);
+
+            finalFileUrl = urlData.publicUrl;
+            finalFileType = 'image/png';
+            
+            console.log('[PROJECT-IMAGE-UPLOAD] Upload successful, URL:', finalFileUrl);
+          } catch (error) {
+            console.error('[PROJECT-IMAGE-UPLOAD] Error:', error);
+            continue; // Skip this file
+          }
+        } else {
+          // For non-image files, upload to chat-files bucket
+          try {
+            const filePath = `${user.id}/${newChat.id}/${Date.now()}_${finalFileName}`;
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('chat-files')
+              .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (uploadError) {
+              console.error('[PROJECT-FILE-UPLOAD] Upload error:', uploadError);
+              throw uploadError;
+            }
+
+            // Get public URL
+            const { data: urlData } = supabase.storage
+              .from('chat-files')
+              .getPublicUrl(filePath);
+
+            finalFileUrl = urlData.publicUrl;
+          } catch (error) {
+            console.error('[PROJECT-FILE-UPLOAD] Error:', error);
+            continue; // Skip this file
+          }
+        }
+        
+        // Only add if we have a valid URL
+        if (finalFileUrl) {
           uploadedFiles.push({
-            id: uploadData.id || Date.now().toString(),
-            name: file.name,
+            id: Date.now().toString() + Math.random().toString(36).substring(2),
+            name: finalFileName,
             size: file.size,
-            type: file.type,
-            url: urlData.publicUrl
+            type: finalFileType,
+            url: finalFileUrl
           });
         }
       }
 
       // Add initial message with files for display
-      await supabase.from('messages').insert({
+      const { data: insertedMessage, error: insertError } = await supabase.from('messages').insert({
         chat_id: newChat.id,
         content: userMessage,
         role: 'user',
         file_attachments: uploadedFiles
-      });
+      }).select().single();
+      
+      if (insertError) throw insertError;
       
       // Increment message count for free users (limit already checked above)
       if (!subscriptionStatus.subscribed) {
@@ -489,158 +573,99 @@ export default function ProjectPage() {
         console.log('[PROJECT-MESSAGE-LIMIT] Message count incremented');
       }
 
-      // Handle files vs text-only messages differently
-      if (files.length > 0) {
-        // Send files directly to webhook in base64 format
-        try {
-          const webhookUrl = 'https://adsgbt.app.n8n.cloud/webhook/adamGPT';
-
-          // Convert first file to base64 for webhook
-          const file = files[0]; // Handle first file for now
-          
-          // Convert to PNG for images, otherwise use original format
-          let base64Data = '';
-          if (file.type.startsWith('image/')) {
-            // For images, convert to PNG base64
-            const img = new Image();
-            const imgUrl = URL.createObjectURL(file);
-            await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = imgUrl;
-            });
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0);
-            URL.revokeObjectURL(imgUrl);
-            base64Data = canvas.toDataURL('image/png').split(',')[1];
-          } else {
-            // For non-images, read as base64
-            base64Data = await new Promise<string>(resolve => {
-              const reader = new FileReader();
-              reader.onload = () => {
-                const result = reader.result as string;
-                // Remove data URL prefix to get pure base64
-                const base64 = result.split(',')[1];
-                resolve(base64);
-              };
-              reader.readAsDataURL(file);
-            });
-          }
-          
-          // Determine correct type based on file type
-          const webhookType = file.type.startsWith('image/') ? 'analyse-image' : 'analyse-files';
-          
-          const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              type: webhookType,
-              message: userMessage,
-              chatId: newChat.id,
-              userId: user.id,
-              fileName: file.name,
-              fileSize: file.size,
-              fileType: file.type.startsWith('image/') ? 'image/png' : file.type,
-              fileData: base64Data,
-              model: selectedModel
-            })
-          });
-          if (response.ok) {
-            const webhookData = await response.json();
-            console.log('Webhook response:', webhookData);
-
-            // Parse webhook response using same logic as Chat component
-            let responseContent = '';
-            if (Array.isArray(webhookData) && webhookData.length > 0) {
-              const analysisTexts = webhookData.map(item => item.text || item.content || '').filter(text => text);
-              if (analysisTexts.length > 0) {
-                responseContent = analysisTexts.join('\n\n');
-              } else {
-                responseContent = 'File analyzed successfully';
-              }
-            } else if (webhookData.text) {
-              responseContent = webhookData.text;
-            } else if (webhookData.analysis || webhookData.content) {
-              responseContent = webhookData.analysis || webhookData.content;
-            } else if (webhookData.response || webhookData.message) {
-              responseContent = webhookData.response || webhookData.message;
-            } else {
-              responseContent = 'File processed successfully';
-            }
-
-            // Save actual webhook response as AI message
-            await supabase.from('messages').insert({
-              chat_id: newChat.id,
-              content: responseContent,
-              role: 'assistant'
-            });
-          }
-        } catch (webhookError) {
-          console.error('Webhook error:', webhookError);
-          // Add fallback message
-          await supabase.from('messages').insert({
-            chat_id: newChat.id,
-            content: 'I received your file but encountered an error processing it. Please try again.',
-            role: 'assistant'
-          });
-        }
-      } else {
-        // Send text-only message to OpenAI via existing chat function
-        try {
-          const {
-            data,
-            error
-          } = await supabase.functions.invoke('chat-with-ai-optimized', {
-            body: {
-              message: userMessage,
-              chatId: newChat.id,
-              userId: user.id
-            }
-          });
-          if (!error && data?.response) {
-            // Save OpenAI response
-            await supabase.from('messages').insert({
-              chat_id: newChat.id,
-              content: data.response,
-              role: 'assistant'
-            });
-          }
-        } catch (aiError) {
-          console.error('AI response error:', aiError);
-          // Add fallback message
-          await supabase.from('messages').insert({
-            chat_id: newChat.id,
-            content: 'I apologize, but I encountered an error processing your message. Please try again.',
-            role: 'assistant'
-          });
-        }
-      }
-
-      // Update chat title after messages are added
-      setTimeout(async () => {
-        const {
-          data: chatMessages
-        } = await supabase.from('messages').select('*').eq('chat_id', newChat.id).order('created_at', {
-          ascending: true
-        });
-        if (chatMessages && chatMessages.length >= 2) {
-          await updateChatTitle(newChat.id, chatMessages);
-        }
-      }, 2000);
-
-      // Refresh chats and navigate
-      fetchProjectChats();
+      // IMMEDIATELY navigate to chat page so user sees their message and image
+      console.log('[PROJECT-SEND] Navigating to chat page immediately');
       navigate(`/chat/${newChat.id}`);
-
+      
+      // Refresh chats list
+      fetchProjectChats();
+      
       // Force sidebar update
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('force-chat-refresh'));
       }, 100);
+
+      // NOW send to webhook in background - realtime subscription will catch the AI response
+      if (files.length > 0) {
+        // Send files to webhook in background
+        (async () => {
+          try {
+            const webhookUrl = 'https://adsgbt.app.n8n.cloud/webhook/adamGPT';
+
+            // Convert first file to base64 for webhook
+            const file = files[0];
+            
+            // Convert to PNG for images, otherwise use original format
+            let base64Data = '';
+            if (file.type.startsWith('image/')) {
+              const img = new Image();
+              const imgUrl = URL.createObjectURL(file);
+              await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = imgUrl;
+              });
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              ctx?.drawImage(img, 0, 0);
+              URL.revokeObjectURL(imgUrl);
+              base64Data = canvas.toDataURL('image/png').split(',')[1];
+            } else {
+              base64Data = await new Promise<string>(resolve => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const result = reader.result as string;
+                  const base64 = result.split(',')[1];
+                  resolve(base64);
+                };
+                reader.readAsDataURL(file);
+              });
+            }
+            
+            // Determine correct type based on file type
+            const webhookType = file.type.startsWith('image/') ? 'analyse-image' : 'analyse-files';
+            
+            await fetch(webhookUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                type: webhookType,
+                message: userMessage,
+                chatId: newChat.id,
+                userId: user.id,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: file.type.startsWith('image/') ? 'image/png' : file.type,
+                fileData: base64Data,
+                model: selectedModel
+              })
+            });
+            console.log('[PROJECT-WEBHOOK] File sent to webhook, AI response will arrive via realtime');
+          } catch (webhookError) {
+            console.error('[PROJECT-WEBHOOK] Error:', webhookError);
+          }
+        })();
+      } else {
+        // Send text-only message to OpenAI in background
+        (async () => {
+          try {
+            await supabase.functions.invoke('chat-with-ai-optimized', {
+              body: {
+                message: userMessage,
+                chatId: newChat.id,
+                userId: user.id
+              }
+            });
+            console.log('[PROJECT-AI] Text message sent to AI, response will arrive via realtime');
+          } catch (aiError) {
+            console.error('[PROJECT-AI] Error:', aiError);
+          }
+        })();
+      }
     } catch (error: any) {
       console.error('Send message error:', error);
     } finally {
