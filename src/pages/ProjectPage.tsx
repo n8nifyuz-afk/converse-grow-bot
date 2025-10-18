@@ -729,6 +729,24 @@ export default function ProjectPage() {
     fileInputRef.current?.click();
     setIsPopoverOpen(false);
   };
+  
+  // Helper functions for file validation
+  const getMaxFileSize = (type: string) => {
+    if (type.startsWith('image/')) return 10 * 1024 * 1024; // 10MB for images
+    if (type.startsWith('video/')) return 100 * 1024 * 1024; // 100MB for videos
+    if (type.startsWith('audio/')) return 50 * 1024 * 1024; // 50MB for audio
+    if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 25 * 1024 * 1024; // 25MB for documents
+    return 20 * 1024 * 1024; // 20MB for other files
+  };
+  
+  const getFileTypeCategory = (type: string) => {
+    if (type.startsWith('image/')) return 'image';
+    if (type.startsWith('video/')) return 'video';
+    if (type.startsWith('audio/')) return 'audio';
+    if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 'document';
+    return 'file';
+  };
+  
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (selectedModel === 'generate-image') {
       toast.error("Cannot upload files in Generate Image mode", {
@@ -744,20 +762,24 @@ export default function ProjectPage() {
     }
     const files = event.target.files;
     if (files && files.length > 0) {
-      // File size validation - 10MB limit per file
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
       const filesArray = Array.from(files);
-      const validFiles = filesArray.filter(file => {
-        if (file.size > MAX_FILE_SIZE) {
-          toast.error(`${file.name} exceeds 10MB limit and was skipped`);
-          return false;
-        }
-        return true;
-      });
       
-      if (validFiles.length > 0) {
-        setSelectedFiles(prev => [...prev, ...validFiles]);
+      // Validate each file's size before adding
+      for (const file of filesArray) {
+        const maxSize = getMaxFileSize(file.type);
+        if (file.size > maxSize) {
+          const maxSizeMB = Math.round(maxSize / (1024 * 1024));
+          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+          toast.error(`File size limit exceeded`, {
+            description: `"${file.name}" (${fileSizeMB}MB) exceeds the ${maxSizeMB}MB limit for ${getFileTypeCategory(file.type)} files`
+          });
+          event.target.value = '';
+          return; // Stop processing if any file exceeds limit
+        }
       }
+      
+      setSelectedFiles(prev => [...prev, ...filesArray]);
+      toast.success(`${filesArray.length} file(s) added successfully`);
       event.target.value = '';
     }
   };

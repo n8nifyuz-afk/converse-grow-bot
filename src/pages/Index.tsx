@@ -1354,20 +1354,40 @@ export default function Index() {
       <input ref={fileInputRef} type="file" multiple className="sr-only" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" aria-label="File upload input" onChange={e => {
         const files = Array.from(e.target.files || []);
         
-        // File size validation - 10MB limit per file
-        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-        const validFiles = files.filter(file => {
-          if (file.size > MAX_FILE_SIZE) {
-            toast.error(`${file.name} exceeds 10MB limit and was skipped`);
-            return false;
-          }
-          return true;
-        });
+        // Helper functions for file validation
+        const getMaxFileSize = (type: string) => {
+          if (type.startsWith('image/')) return 10 * 1024 * 1024; // 10MB for images
+          if (type.startsWith('video/')) return 100 * 1024 * 1024; // 100MB for videos
+          if (type.startsWith('audio/')) return 50 * 1024 * 1024; // 50MB for audio
+          if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 25 * 1024 * 1024; // 25MB for documents
+          return 20 * 1024 * 1024; // 20MB for other files
+        };
         
-        if (validFiles.length > 0) {
-          setSelectedFiles(prev => [...prev, ...validFiles]);
-          toast.success(`${validFiles.length} file(s) added successfully`);
+        const getFileTypeCategory = (type: string) => {
+          if (type.startsWith('image/')) return 'image';
+          if (type.startsWith('video/')) return 'video';
+          if (type.startsWith('audio/')) return 'audio';
+          if (type.includes('pdf') || type.includes('document') || type.includes('text')) return 'document';
+          return 'file';
+        };
+        
+        // Validate file sizes
+        for (const file of files) {
+          const maxSize = getMaxFileSize(file.type);
+          if (file.size > maxSize) {
+            const maxSizeMB = Math.round(maxSize / (1024 * 1024));
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+            toast.error(`File size limit exceeded`, {
+              description: `"${file.name}" (${fileSizeMB}MB) exceeds the ${maxSizeMB}MB limit for ${getFileTypeCategory(file.type)} files`
+            });
+            e.target.value = '';
+            return; // Stop processing if any file exceeds limit
+          }
         }
+        
+        setSelectedFiles(prev => [...prev, ...files]);
+        toast.success(`${files.length} file(s) added successfully`);
+        e.target.value = '';
       }} />
       
       <AuthModal isOpen={showAuthModal} onClose={() => {

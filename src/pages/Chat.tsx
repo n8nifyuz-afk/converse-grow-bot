@@ -2060,14 +2060,34 @@ export default function Chat() {
       if (files.length > 0) {
         console.log('[FILE-PATH] Processing message with files, count:', files.length);
         
-        // Process files first to get URLs
+        // VALIDATE ALL FILES FIRST - before processing anything
         for (const file of files) {
-          // Check file size limits
           const maxSize = getMaxFileSize(file.type);
           if (file.size > maxSize) {
-            console.error(`File ${file.name} exceeds size limit`);
-            continue;
+            const maxSizeMB = Math.round(maxSize / (1024 * 1024));
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+            console.error(`[FILE-VALIDATION] File ${file.name} (${fileSizeMB}MB) exceeds ${maxSizeMB}MB limit`);
+            
+            // Remove the temp message that was already added
+            setMessages(prev => prev.filter(m => m.id !== tempUserMessage.id));
+            
+            // Show error and stop the entire send process
+            toast.error(`File size limit exceeded`, {
+              description: `"${file.name}" (${fileSizeMB}MB) exceeds the ${maxSizeMB}MB limit for ${getFileTypeCategory(file.type)} files`
+            });
+            
+            // Release locks
+            sendingInProgressRef.current = false;
+            sessionStorage.removeItem(sendLockKey);
+            sessionStorage.removeItem(`${sendLockKey}_time`);
+            setLoading(false);
+            
+            return; // Stop the entire send process
           }
+        }
+        
+        // Process files to get URLs
+        for (const file of files) {
 
           // For images, convert to PNG and upload to storage
           let finalFileUrl = '';
@@ -3015,6 +3035,20 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
       const combinedFiles = [...selectedFiles, ...newFiles];
+      
+      // Check individual file size limits FIRST
+      for (const file of combinedFiles) {
+        const maxSize = getMaxFileSize(file.type);
+        if (file.size > maxSize) {
+          const maxSizeMB = Math.round(maxSize / (1024 * 1024));
+          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+          toast.error(`File size limit exceeded`, {
+            description: `"${file.name}" (${fileSizeMB}MB) exceeds the ${maxSizeMB}MB limit for ${getFileTypeCategory(file.type)} files`
+          });
+          event.target.value = '';
+          return;
+        }
+      }
       
       const totalSize = combinedFiles.reduce((sum, file) => sum + file.size, 0);
       const maxTotalSize = 100 * 1024 * 1024; // 100MB total per message
