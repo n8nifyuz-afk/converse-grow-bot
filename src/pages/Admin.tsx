@@ -64,11 +64,9 @@ const MODEL_PRICING: Record<string, {
     input: 0.05,
     output: 0.40
   },
-  'claude-sonnet-4': {
-    input: 3.00,
-    output: 15.00,
-    inputTier2: 6.00, // >200k tokens rate
-    tier2Threshold: 200000
+  'claude-haiku-4.5': {
+    input: 1.00,
+    output: 5.00
   },
   'grok-4': {
     input: 3.00,

@@ -52,10 +52,10 @@ const models = [{
   description: "Most advanced AI model",
   type: 'pro'
 }, {
-  id: 'claude-sonnet-4',
-  name: 'Claude Sonnet 4',
-  shortLabel: 'Sonnet 4',
-  description: "Great for writing tasks",
+  id: 'claude-haiku-4.5',
+  name: 'Claude Haiku 4.5',
+  shortLabel: 'Haiku 4.5',
+  description: "NEW: Small model with big capabilities",
   type: 'pro'
 }, {
   id: 'gemini-2.5-flash',
@@ -102,10 +102,10 @@ const availableModels = [{
   description: 'Most advanced OpenAI model with superior capabilities and reasoning.',
   icon: 'openai'
 }, {
-  id: 'claude-sonnet-4',
-  name: 'Claude Sonnet 4',
-  shortLabel: 'Sonnet 4',
-  description: 'Great for writing tasks',
+  id: 'claude-haiku-4.5',
+  name: 'Claude Haiku 4.5',
+  shortLabel: 'Haiku 4.5',
+  description: 'NEW: Small model with big capabilities - great value',
   icon: 'claude'
 }, {
   id: 'gemini-2.5-flash',

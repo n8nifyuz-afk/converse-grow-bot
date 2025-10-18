@@ -107,12 +107,12 @@ const Home = () => {
               <Button variant="secondary" className="w-full mt-auto bg-black dark:bg-secondary text-white dark:text-secondary-foreground hover:bg-black/90 dark:hover:bg-secondary/90 whitespace-normal h-auto py-2" onClick={() => {
               if (typeof window !== 'undefined' && (window as any).gtag) {
                 (window as any).gtag('event', 'model_select', {
-                  model: 'claude-sonnet-4'
+                  model: 'claude-haiku-4.5'
                 });
               }
               navigate('/', {
                 state: {
-                  selectedModel: 'claude-sonnet-4'
+                  selectedModel: 'claude-haiku-4.5'
                 }
               });
             }} aria-label="Switch to Claude and start a new chat">
