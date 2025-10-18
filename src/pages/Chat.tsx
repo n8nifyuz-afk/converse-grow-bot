@@ -323,15 +323,6 @@ export default function Chat() {
       setPendingImageGenerations(new Set());
       setLoading(false);
       
-      // Only fetch messages if we're NOT about to auto-send
-      // Auto-send will show temp message and handle everything via realtime
-      if (!shouldAutoSend.current) {
-        console.log('[CHAT-INIT] Fetching messages normally');
-        fetchMessages();
-      } else {
-        console.log('[CHAT-INIT] Skipping fetchMessages - auto-send will handle it');
-      }
-
       // Listen for image generation chat events
       const handleImageGenerationChat = (event: CustomEvent) => {
         if (event.detail?.chatId === chatId) {
@@ -344,160 +335,176 @@ export default function Chat() {
       };
       window.addEventListener('image-generation-chat', handleImageGenerationChat as EventListener);
 
-      // Set up real-time subscription for new messages with proper channel configuration
-      const channel = supabase.channel(`messages-${chatId}`, {
-        config: {
-          broadcast: { self: true },
-          presence: { key: chatId }
+      // CRITICAL FIX: Fetch messages FIRST, then set up realtime subscription
+      // This ensures messages are loaded before any realtime events can add duplicates
+      const initializeChat = async () => {
+        // Only fetch messages if we're NOT about to auto-send
+        // Auto-send will show temp message and handle everything via realtime
+        if (!shouldAutoSend.current) {
+          console.log('[CHAT-INIT] Fetching messages normally');
+          await fetchMessages();
+          console.log('[CHAT-INIT] Messages fetched, now setting up realtime');
+        } else {
+          console.log('[CHAT-INIT] Skipping fetchMessages - auto-send will handle it');
         }
-      });
 
-      channel
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `chat_id=eq.${chatId}`
-        }, payload => {
-          console.log('[REALTIME-INSERT] ===== NEW MESSAGE EVENT =====');
-          console.log('[REALTIME-INSERT] Raw payload:', JSON.stringify(payload, null, 2));
-          const newMessage = payload.new as Message;
-
-          console.log('[REALTIME-INSERT] Message details:', {
-            id: newMessage.id,
-            role: newMessage.role,
-            chat_id: newMessage.chat_id,
-            currentChatId: chatId,
-            content_length: newMessage.content?.length || 0,
-            content_preview: newMessage.content?.substring(0, 100),
-            hasFileAttachments: !!newMessage.file_attachments
-          });
-
-          // CRITICAL: Double-check message belongs to current chat to prevent leakage
-          if (newMessage.chat_id !== chatId) {
-            console.log('[REALTIME-INSERT] ❌ REJECTED - wrong chat_id');
-            console.log('[REALTIME-INSERT] Expected:', chatId);
-            console.log('[REALTIME-INSERT] Got:', newMessage.chat_id);
-            return;
+        // Set up real-time subscription AFTER messages are loaded
+        const channel = supabase.channel(`messages-${chatId}`, {
+          config: {
+            broadcast: { self: true },
+            presence: { key: chatId }
           }
-          
-          console.log('[REALTIME-INSERT] ✅ Message belongs to current chat');
-          console.log('[REALTIME-INSERT] Message accepted:', {
-            id: newMessage.id,
-            role: newMessage.role,
-            content: newMessage.content?.substring(0, 50),
-            hasFileAttachments: !!newMessage.file_attachments,
-            fileAttachmentsCount: newMessage.file_attachments?.length || 0,
-            fileAttachments: newMessage.file_attachments
-          });
-          
-          // If this is a new assistant message, clear ALL loading states immediately
-          if (newMessage.role === 'assistant') {
-            console.log('[REALTIME-INSERT] 🤖 Assistant message arrived - clearing loading states');
-            console.log('[REALTIME-INSERT] Message ID:', newMessage.id);
-            console.log('[REALTIME-INSERT] Loading was:', loading);
+        });
+
+        channel
+          .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `chat_id=eq.${chatId}`
+          }, payload => {
+            console.log('[REALTIME-INSERT] ===== NEW MESSAGE EVENT =====');
+            console.log('[REALTIME-INSERT] Raw payload:', JSON.stringify(payload, null, 2));
+            const newMessage = payload.new as Message;
+
+            console.log('[REALTIME-INSERT] Message details:', {
+              id: newMessage.id,
+              role: newMessage.role,
+              chat_id: newMessage.chat_id,
+              currentChatId: chatId,
+              content_length: newMessage.content?.length || 0,
+              content_preview: newMessage.content?.substring(0, 100),
+              hasFileAttachments: !!newMessage.file_attachments
+            });
+
+            // CRITICAL: Double-check message belongs to current chat to prevent leakage
+            if (newMessage.chat_id !== chatId) {
+              console.log('[REALTIME-INSERT] ❌ REJECTED - wrong chat_id');
+              console.log('[REALTIME-INSERT] Expected:', chatId);
+              console.log('[REALTIME-INSERT] Got:', newMessage.chat_id);
+              return;
+            }
             
-            setLoading(false);
-            setIsGeneratingResponse(false);
+            console.log('[REALTIME-INSERT] ✅ Message belongs to current chat');
+            console.log('[REALTIME-INSERT] Message accepted:', {
+              id: newMessage.id,
+              role: newMessage.role,
+              content: newMessage.content?.substring(0, 50),
+              hasFileAttachments: !!newMessage.file_attachments,
+              fileAttachmentsCount: newMessage.file_attachments?.length || 0,
+              fileAttachments: newMessage.file_attachments
+            });
             
-            // If we're regenerating, clear regeneration states AND remove the old hidden message
-            // Use the ref to get the current regenerating message ID
-            const currentRegeneratingId = regeneratingMessageIdRef.current;
-            if (currentRegeneratingId) {
-              console.log('[REALTIME-INSERT] Clearing regeneration states and removing old message:', currentRegeneratingId);
+            // If this is a new assistant message, clear ALL loading states immediately
+            if (newMessage.role === 'assistant') {
+              console.log('[REALTIME-INSERT] 🤖 Assistant message arrived - clearing loading states');
+              console.log('[REALTIME-INSERT] Message ID:', newMessage.id);
+              console.log('[REALTIME-INSERT] Loading was:', loading);
               
-              // Clear the timeout
-              if (regenerateTimeoutRef.current) {
-                clearTimeout(regenerateTimeoutRef.current);
-                regenerateTimeoutRef.current = null;
+              setLoading(false);
+              setIsGeneratingResponse(false);
+              
+              // If we're regenerating, clear regeneration states AND remove the old hidden message
+              // Use the ref to get the current regenerating message ID
+              const currentRegeneratingId = regeneratingMessageIdRef.current;
+              if (currentRegeneratingId) {
+                console.log('[REALTIME-INSERT] Clearing regeneration states and removing old message:', currentRegeneratingId);
+                
+                // Clear the timeout
+                if (regenerateTimeoutRef.current) {
+                  clearTimeout(regenerateTimeoutRef.current);
+                  regenerateTimeoutRef.current = null;
+                }
+                
+                // Remove the old hidden message from state (it was deleted from DB but kept for animation)
+                setMessages(prev => {
+                  const filtered = prev.filter(msg => msg.id !== currentRegeneratingId);
+                  console.log('[REALTIME-INSERT] Removed old message, remaining count:', filtered.length);
+                  return filtered;
+                });
+                
+                // Clear regeneration states
+                setRegeneratingMessageId(null);
+                regeneratingMessageIdRef.current = null; // Clear the ref too
+                isRegeneratingRef.current = false;
+                setHiddenMessageIds(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(currentRegeneratingId);
+                  return newSet;
+                });
+                oldMessageBackupRef.current = null;
+              }
+            }
+            
+            // Add message to state immediately with forced re-render
+            setMessages(prev => {
+              console.log('[REALTIME-INSERT] 📝 Adding to state...');
+              console.log('[REALTIME-INSERT] Current state has', prev.length, 'messages');
+              console.log('[REALTIME-INSERT] Current messages:', prev.map(m => ({
+                id: m.id.substring(0, 10),
+                role: m.role,
+                chat_id: m.chat_id
+              })));
+              
+              // ENHANCED: Check if message already exists by ID (most reliable)
+              const existsById = prev.find(msg => msg.id === newMessage.id);
+              if (existsById) {
+                console.log('[REALTIME-INSERT] ⚠️ Duplicate by ID - skipping');
+                return prev;
               }
               
-              // Remove the old hidden message from state (it was deleted from DB but kept for animation)
-              setMessages(prev => {
-                const filtered = prev.filter(msg => msg.id !== currentRegeneratingId);
-                console.log('[REALTIME-INSERT] Removed old message, remaining count:', filtered.length);
-                return filtered;
-              });
+              // For user messages, check if there's a temp message to replace
+              if (newMessage.role === 'user') {
+                const tempMessageIndex = prev.findIndex(msg => 
+                  msg.id.startsWith('temp-') && 
+                  msg.role === 'user' &&
+                  msg.content === newMessage.content &&
+                  msg.chat_id === newMessage.chat_id
+                );
+                
+                if (tempMessageIndex !== -1) {
+                  const tempMessage = prev[tempMessageIndex];
+                  console.log('[REALTIME-INSERT] 🔄 Replacing temp message at index', tempMessageIndex);
+                  console.log('[REALTIME-INSERT] Temp ID:', tempMessage.id, '-> Real ID:', newMessage.id);
+                  
+                  // CRITICAL: Mark real message as processed to prevent duplicate AUTO-TRIGGER
+                  // Check if temp was already processed by AUTO-TRIGGER
+                  if (!processedUserMessages.current.has(chatId)) {
+                    processedUserMessages.current.set(chatId, new Set());
+                  }
+                  
+                  const wasProcessed = processedUserMessages.current.get(chatId)!.has(tempMessage.id);
+                  if (wasProcessed) {
+                    console.log('[REALTIME-INSERT] Temp was processed, marking real message as processed:', newMessage.id);
+                    processedUserMessages.current.get(chatId)!.add(newMessage.id);
+                    
+                    // Persist to sessionStorage
+                    const storageKey = `processed_messages_${chatId}`;
+                    const processedArray = Array.from(processedUserMessages.current.get(chatId)!);
+                    sessionStorage.setItem(storageKey, JSON.stringify(processedArray));
+                  } else {
+                    console.log('[REALTIME-INSERT] Temp was NOT processed yet');
+                  }
+                  
+                  const updated = [...prev];
+                  updated[tempMessageIndex] = newMessage;
+                  return updated;
+                }
+              }
               
-              // Clear regeneration states
-              setRegeneratingMessageId(null);
-              regeneratingMessageIdRef.current = null; // Clear the ref too
-              isRegeneratingRef.current = false;
-              setHiddenMessageIds(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(currentRegeneratingId);
-                return newSet;
-              });
-              oldMessageBackupRef.current = null;
-            }
-          }
-          
-          // Add message to state immediately with forced re-render
-          setMessages(prev => {
-            console.log('[REALTIME-INSERT] 📝 Adding to state...');
-            console.log('[REALTIME-INSERT] Current state has', prev.length, 'messages');
-            console.log('[REALTIME-INSERT] Current messages:', prev.map(m => ({
-              id: m.id.substring(0, 10),
-              role: m.role,
-              chat_id: m.chat_id
-            })));
-            
-            // Check if message already exists to prevent duplicates
-            const existsById = prev.find(msg => msg.id === newMessage.id);
-            if (existsById) {
-              console.log('[REALTIME-INSERT] ⚠️ Duplicate by ID - skipping');
-              return prev;
-            }
-            
-            // For user messages, check if there's a temp message to replace
-            if (newMessage.role === 'user') {
-              const tempMessageIndex = prev.findIndex(msg => 
-                msg.id.startsWith('temp-') && 
-                msg.role === 'user' &&
-                msg.content === newMessage.content &&
-                msg.chat_id === newMessage.chat_id
+              // ENHANCED: More strict duplicate check by content and timestamp
+              // Check if there's any message with the same content, role, and very close timestamp
+              const existsByContent = prev.find(msg => 
+                msg.content === newMessage.content && 
+                msg.role === newMessage.role && 
+                msg.chat_id === newMessage.chat_id &&
+                Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 2000
               );
               
-              if (tempMessageIndex !== -1) {
-                const tempMessage = prev[tempMessageIndex];
-                console.log('[REALTIME-INSERT] 🔄 Replacing temp message at index', tempMessageIndex);
-                console.log('[REALTIME-INSERT] Temp ID:', tempMessage.id, '-> Real ID:', newMessage.id);
-                
-                // CRITICAL: Mark real message as processed to prevent duplicate AUTO-TRIGGER
-                // Check if temp was already processed by AUTO-TRIGGER
-                if (!processedUserMessages.current.has(chatId)) {
-                  processedUserMessages.current.set(chatId, new Set());
-                }
-                
-                const wasProcessed = processedUserMessages.current.get(chatId)!.has(tempMessage.id);
-                if (wasProcessed) {
-                  console.log('[REALTIME-INSERT] Temp was processed, marking real message as processed:', newMessage.id);
-                  processedUserMessages.current.get(chatId)!.add(newMessage.id);
-                  
-                  // Persist to sessionStorage
-                  const storageKey = `processed_messages_${chatId}`;
-                  const processedArray = Array.from(processedUserMessages.current.get(chatId)!);
-                  sessionStorage.setItem(storageKey, JSON.stringify(processedArray));
-                } else {
-                  console.log('[REALTIME-INSERT] Temp was NOT processed yet');
-                }
-                
-                const updated = [...prev];
-                updated[tempMessageIndex] = newMessage;
-                return updated;
+              if (existsByContent) {
+                console.log('[REALTIME-INSERT] ⚠️ Duplicate by content and timestamp - skipping');
+                return prev;
               }
-            }
-            
-            const existsByContent = prev.find(msg => 
-              msg.content === newMessage.content && 
-              msg.role === newMessage.role && 
-              Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 5000
-            );
-            
-            if (existsByContent) {
-              console.log('[REALTIME-INSERT] ⚠️ Duplicate by content - skipping');
-              return prev;
-            }
             
             console.log('[REALTIME-INSERT] 🆕 Message is NEW - adding to state');
             
@@ -590,12 +597,23 @@ export default function Chat() {
           }
         });
 
-      // SINGLE cleanup function that handles both event listener AND channel
+        // Return cleanup function for realtime subscription
+        return () => {
+          console.log('[REALTIME-CLEANUP] Unsubscribing from chat:', chatId);
+          channel.unsubscribe();
+          supabase.removeChannel(channel);
+        };
+      };
+      
+      // Initialize the chat and store the cleanup function
+      const cleanupPromise = initializeChat();
+
+      // Overall cleanup function for the useEffect
       return () => {
-        console.log('[REALTIME-CLEANUP] Unsubscribing from chat:', chatId);
+        console.log('[CHAT-CLEANUP] Cleaning up chat:', chatId);
         window.removeEventListener('image-generation-chat', handleImageGenerationChat as EventListener);
-        channel.unsubscribe();
-        supabase.removeChannel(channel);
+        // Execute the realtime cleanup
+        cleanupPromise.then(cleanup => cleanup?.());
       };
     }
   }, [chatId, user]);
