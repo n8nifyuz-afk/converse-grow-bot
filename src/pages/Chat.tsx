@@ -3586,6 +3586,12 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
           filePath = urlParts[1];
           bucketName = 'chat-files';
         }
+        // Check for generated-images bucket
+        else if (imageUrl.includes('/storage/v1/object/public/generated-images/')) {
+          const urlParts = imageUrl.split('/storage/v1/object/public/generated-images/');
+          filePath = urlParts[1];
+          bucketName = 'generated-images';
+        }
 
         if (filePath) {
           console.log('Downloading from Supabase storage:', { bucketName, filePath });
