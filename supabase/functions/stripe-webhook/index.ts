@@ -122,7 +122,8 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Processing subscription update", { 
           subscriptionId: subscription.id,
-          status: subscription.status 
+          status: subscription.status,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end
         });
 
         // Get customer email
@@ -142,6 +143,16 @@ serve(async (req) => {
           break;
         }
 
+        // CRITICAL: Check cancel_at_period_end flag
+        // If true, keep user active until period end, don't downgrade yet
+        if (subscription.cancel_at_period_end) {
+          logStep("Subscription set to cancel at period end, keeping active until then", { 
+            subscriptionId: subscription.id,
+            periodEnd: new Date(subscription.current_period_end * 1000).toISOString()
+          });
+          // Continue processing - user stays active until subscription.deleted fires
+        }
+
         // If subscription is canceled, past_due, unpaid, or incomplete_expired, revert to free
         if (['canceled', 'past_due', 'unpaid', 'incomplete_expired'].includes(subscription.status)) {
           logStep("Subscription cancelled/expired, reverting to free plan", { 
@@ -151,6 +162,11 @@ serve(async (req) => {
           
           await supabaseClient
             .from('user_subscriptions')
+            .delete()
+            .eq('user_id', user.id);
+          
+          await supabaseClient
+            .from('usage_limits')
             .delete()
             .eq('user_id', user.id);
           
@@ -223,13 +239,17 @@ serve(async (req) => {
         logStep("Subscription updated successfully", { userId: user.id, plan });
 
         // CRITICAL: Reset image generation limits when subscription is activated/renewed
-        // This ensures users get fresh limits when they pay (including after payment failures)
+        // Add timestamp to prevent double reset if invoice.payment_succeeded arrives later
+        const resetTimestamp = new Date().toISOString();
         await supabaseClient
           .from('usage_limits')
           .delete()
           .eq('user_id', user.id);
         
-        logStep("Reset image generation limits for fresh subscription period", { userId: user.id });
+        logStep("Reset image generation limits for fresh subscription period", { 
+          userId: user.id,
+          resetAt: resetTimestamp
+        });
         break;
       }
 
@@ -280,13 +300,27 @@ serve(async (req) => {
 
         if (error) throw error;
         
-        // Reset image generation limits when payment succeeds (fresh 30-day period)
-        await supabaseClient
+        // Check if limits were already reset by subscription.updated (within last 60 seconds)
+        // This prevents double reset when events arrive out of order
+        const { data: existingLimits } = await supabaseClient
           .from('usage_limits')
-          .delete()
-          .eq('user_id', user.id);
+          .select('created_at')
+          .eq('user_id', user.id)
+          .single();
         
-        logStep("Subscription activated and limits reset", { userId: user.id });
+        const shouldReset = !existingLimits || 
+          (Date.now() - new Date(existingLimits.created_at).getTime() > 60000);
+        
+        if (shouldReset) {
+          await supabaseClient
+            .from('usage_limits')
+            .delete()
+            .eq('user_id', user.id);
+          
+          logStep("Subscription activated and limits reset", { userId: user.id });
+        } else {
+          logStep("Subscription activated, limits already reset recently", { userId: user.id });
+        }
         break;
       }
 
@@ -317,7 +351,11 @@ serve(async (req) => {
 
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
-        logStep("Charge refunded", { chargeId: charge.id });
+        logStep("Charge refunded", { 
+          chargeId: charge.id,
+          amountRefunded: charge.amount_refunded,
+          totalAmount: charge.amount
+        });
 
         if (!charge.billing_details.email) break;
 
@@ -325,8 +363,9 @@ serve(async (req) => {
         const user = users.users.find(u => u.email === charge.billing_details.email);
         if (!user) break;
 
-        // Only revert if fully refunded
-        if (charge.amount_refunded === charge.amount) {
+        // CRITICAL: Revert to free plan for ANY refund (partial or full)
+        // Policy: Any refund removes subscription access
+        if (charge.amount_refunded > 0) {
           await supabaseClient
             .from('user_subscriptions')
             .delete()
@@ -337,7 +376,10 @@ serve(async (req) => {
             .delete()
             .eq('user_id', user.id);
 
-          logStep("User reverted to free after full refund, limits cleaned up", { userId: user.id });
+          logStep("User reverted to free after refund", { 
+            userId: user.id,
+            refundType: charge.amount_refunded === charge.amount ? 'full' : 'partial'
+          });
         }
         break;
       }
@@ -437,6 +479,49 @@ serve(async (req) => {
             logStep("User reverted to free after async payment failure, limits cleaned", { userId: user.id });
           }
         }
+        break;
+      }
+
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Stripe.Dispute;
+        logStep("Dispute/chargeback created", { 
+          disputeId: dispute.id,
+          chargeId: dispute.charge,
+          amount: dispute.amount
+        });
+
+        // Get charge to find customer email
+        const charge = await stripe.charges.retrieve(dispute.charge as string);
+        if (!charge.billing_details.email) break;
+
+        const { data: users } = await supabaseClient.auth.admin.listUsers();
+        const user = users.users.find(u => u.email === charge.billing_details.email);
+        if (!user) break;
+
+        // CRITICAL: Immediately revert to free plan on chargeback
+        await supabaseClient
+          .from('user_subscriptions')
+          .delete()
+          .eq('user_id', user.id);
+
+        await supabaseClient
+          .from('usage_limits')
+          .delete()
+          .eq('user_id', user.id);
+
+        logStep("User reverted to free after chargeback/dispute", { userId: user.id });
+        break;
+      }
+
+      case "payment_method.attached": {
+        const paymentMethod = event.data.object as Stripe.PaymentMethod;
+        logStep("Payment method attached", { 
+          paymentMethodId: paymentMethod.id,
+          customerId: paymentMethod.customer
+        });
+
+        // No action needed - Stripe handles this automatically
+        // This is just for logging/monitoring card updates
         break;
       }
 
