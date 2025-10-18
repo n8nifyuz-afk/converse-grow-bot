@@ -2474,6 +2474,31 @@ export default function Chat() {
               console.log(`[WEBHOOK-POLLING] Attempt ${pollAttempts}/${maxPollAttempts}`);
               
               try {
+                // FIRST: Check current state before even querying database
+                // This prevents race condition with realtime
+                let foundInState = false;
+                setMessages(prev => {
+                  const assistantMsg = prev.find(
+                    msg => msg.role === 'assistant' && 
+                           msg.chat_id === chatId &&
+                           new Date(msg.created_at) > new Date(insertedMessage.created_at)
+                  );
+                  
+                  if (assistantMsg) {
+                    console.log('[WEBHOOK-POLLING] ✅ Assistant message already in state (likely from realtime):', assistantMsg.id);
+                    foundInState = true;
+                    // Clear loading states
+                    setLoading(false);
+                    setIsGeneratingResponse(false);
+                  }
+                  return prev;
+                });
+                
+                // Stop polling if message found in state (realtime already handled it)
+                if (foundInState) {
+                  return;
+                }
+                
                 // Fetch the latest messages to check for the assistant response
                 const { data: latestMessages, error } = await supabase
                   .from('messages')
@@ -2496,18 +2521,18 @@ export default function Chat() {
                 );
                 
                 if (newAssistantMessage) {
-                  console.log('[WEBHOOK-POLLING] ✅ Found new assistant message!', newAssistantMessage.id);
+                  console.log('[WEBHOOK-POLLING] ✅ Found new assistant message in DB!', newAssistantMessage.id);
                   console.log('[WEBHOOK-POLLING] Content preview:', newAssistantMessage.content?.substring(0, 100));
                   
-                  // CRITICAL: Track this message ID to prevent duplicates from fetchMessages
+                  // CRITICAL: Add to tracked set IMMEDIATELY to prevent race conditions
                   fetchedMessageIds.current.add(newAssistantMessage.id);
                   console.log('[WEBHOOK-POLLING] Tracked message ID in fetchedMessageIds:', newAssistantMessage.id);
                   
-                  // Check if this message is already in state
+                  // Check if this message is already in state (double-check after DB query)
                   setMessages(prev => {
                     const exists = prev.some(m => m.id === newAssistantMessage.id);
                     if (exists) {
-                      console.log('[WEBHOOK-POLLING] Message already in state, skipping');
+                      console.log('[WEBHOOK-POLLING] Message already in state after DB check, skipping');
                       return prev;
                     }
                     
