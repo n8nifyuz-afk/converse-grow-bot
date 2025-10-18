@@ -35,54 +35,34 @@ export const useMessageLimit = () => {
         });
 
         if (user) {
-          // Authenticated user - count ALL user messages across ALL chats
-          // First get all chat IDs for this user
-          const { data: userChats, error: chatsError } = await supabase
-            .from('chats')
-            .select('id')
-            .eq('user_id', user.id);
-
-          if (chatsError) {
-            console.error('[MESSAGE-LIMIT] Error fetching user chats:', chatsError);
-            setLoading(false);
-            return;
-          }
-
-          const chatIds = userChats?.map(chat => chat.id) || [];
-          
-          if (chatIds.length === 0) {
-            console.log('[MESSAGE-LIMIT] No chats found for user');
-            setMessageCount(0);
-            setLoading(false);
-            return;
-          }
-
-          // Count all user messages in those chats
-          const { count, error } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('role', 'user')
-            .in('chat_id', chatIds);
+          // Authenticated user - get persistent usage count
+          const { data: usage, error } = await supabase
+            .from('user_message_usage')
+            .select('message_count')
+            .eq('user_id', user.id)
+            .maybeSingle();
 
           if (error) {
-            console.error('[MESSAGE-LIMIT] Error fetching user message count:', error);
+            console.error('[MESSAGE-LIMIT] Error fetching user message usage:', error);
           } else {
+            const count = usage?.message_count || 0;
             console.log('[MESSAGE-LIMIT] User message count:', count);
-            setMessageCount(count || 0);
+            setMessageCount(count);
           }
         } else if (sessionId) {
-          // Anonymous user - get from anonymous_messages table
-          const { count, error } = await supabase
-            .from('anonymous_messages')
-            .select('*', { count: 'exact', head: true })
+          // Anonymous user - get from usage table
+          const { data: usage, error } = await supabase
+            .from('user_message_usage')
+            .select('message_count')
             .eq('session_id', sessionId)
-            .eq('role', 'user');
+            .maybeSingle();
 
           if (error) {
-            console.error('[MESSAGE-LIMIT] Error fetching anonymous message count:', error);
+            console.error('[MESSAGE-LIMIT] Error fetching anonymous message usage:', error);
           } else {
+            const count = usage?.message_count || 0;
             console.log('[MESSAGE-LIMIT] Anonymous message count:', count);
-            setMessageCount(count || 0);
+            setMessageCount(count);
           }
         }
       } catch (error) {
@@ -105,9 +85,29 @@ export const useMessageLimit = () => {
     return can;
   };
 
-  const incrementMessageCount = () => {
+  const incrementMessageCount = async () => {
     console.log('[MESSAGE-LIMIT] Incrementing message count:', messageCount, '->', messageCount + 1);
-    setMessageCount(prev => prev + 1);
+    
+    try {
+      // Call the database function to increment
+      const { data, error } = await supabase.rpc('increment_user_message_count', {
+        p_user_id: user?.id || null,
+        p_session_id: !user ? sessionId : null
+      });
+
+      if (error) {
+        console.error('[MESSAGE-LIMIT] Error incrementing count:', error);
+        // Still update local state as fallback
+        setMessageCount(prev => prev + 1);
+      } else {
+        console.log('[MESSAGE-LIMIT] Server returned count:', data);
+        setMessageCount(data || messageCount + 1);
+      }
+    } catch (error) {
+      console.error('[MESSAGE-LIMIT] Exception incrementing count:', error);
+      // Fallback to local increment
+      setMessageCount(prev => prev + 1);
+    }
   };
 
   const isAtLimit = () => {
