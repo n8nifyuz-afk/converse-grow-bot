@@ -506,14 +506,6 @@ export type Database = {
           reset_date: string
         }[]
       }
-      cleanup_expired_usage_periods: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_free_user_image_usage: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       delete_user_account: {
         Args: Record<PropertyKey, never>
         Returns: undefined
