@@ -96,10 +96,10 @@ const Pricing = () => {
       text: "Voice mode (text-to-speech)",
       included: true
     }, {
-      text: "File uploads (up to 100MB)",
+      text: "File uploads",
       included: true
     }, {
-      text: "Chat with PDFs (full access)",
+      text: "Chat with Files",
       included: true
     }, {
       text: "Image generation (500 / month)",
@@ -123,9 +123,6 @@ const Pricing = () => {
       included: true
     }, {
       text: "Extended file & message limits",
-      included: true
-    }, {
-      text: "Premium 24/7 support",
       included: true
     }, {
       text: "Image generation (2,000 / month)",

@@ -82,7 +82,7 @@ const features: PlanFeature[] = [
     ultraPro: true
   },
   {
-    name: 'Chat with PDF files',
+    name: 'Chat with Files',
     free: false,
     pro: true,
     ultraPro: true
