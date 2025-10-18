@@ -775,7 +775,6 @@ export default function ProjectPage() {
       }
       
       setSelectedFiles(prev => [...prev, ...filesArray]);
-      toast.success(`${filesArray.length} file(s) added successfully`);
       event.target.value = '';
     }
   };

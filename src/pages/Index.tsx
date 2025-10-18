@@ -385,7 +385,6 @@ export default function Index() {
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       setSelectedFiles(prev => [...prev, ...files]);
-      toast.success(`${files.length} file(s) added successfully`);
     }
   };
   const removeFile = (index: number) => {
@@ -1382,7 +1381,6 @@ export default function Index() {
         }
         
         setSelectedFiles(prev => [...prev, ...files]);
-        toast.success(`${files.length} file(s) added successfully`);
         e.target.value = '';
       }} />
       
