@@ -2215,10 +2215,7 @@ export default function Chat() {
         
         // Process files first to get URLs
         for (const file of files) {
-          // Check file size limits using utility
-          if (!validateFileSize(file, FILE_LIMITS.MAX_SIZE_MB)) {
-            continue;
-          }
+          // Process all files without size restrictions
 
           // For images, convert to PNG and upload to storage
           let finalFileUrl = '';
