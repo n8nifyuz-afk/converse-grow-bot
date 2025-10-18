@@ -349,7 +349,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 {/* Payment Cards */}
                 <div className="flex items-center justify-center gap-2 sm:gap-3 py-1 sm:py-2">
                   {/* Visa */}
-                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
+                  <div className="w-8 h-6 sm:w-10 sm:h-7 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 750 471" fill="none">
                       <rect fill="#0E4595" x="0" y="0" width="750" height="471" rx="40" />
                       <polygon fill="#FFFFFF" points="278.1975 334.2275 311.5585 138.4655 364.9175 138.4655 331.5335 334.2275" />
