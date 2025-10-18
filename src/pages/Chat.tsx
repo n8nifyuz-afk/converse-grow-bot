@@ -236,6 +236,7 @@ export default function Chat() {
   const [isStylesOpen, setIsStylesOpen] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false); // State for UI updates
   const isRegeneratingRef = useRef(false); // Immediate lock to prevent duplicate regenerate calls
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -927,18 +928,20 @@ export default function Chat() {
 
   const regenerateResponse = async (messageId: string) => {
     // Immediate synchronous check to prevent race conditions
-    if (isRegeneratingRef.current || isGeneratingResponse || loading) {
+    if (isRegeneratingRef.current || isGeneratingResponse || loading || isRegenerating) {
       console.log('[REGENERATE] Already regenerating, skipping duplicate call');
       return;
     }
 
-    // Set lock immediately
+    // Set lock immediately - both ref and state
     isRegeneratingRef.current = true;
+    setIsRegenerating(true);
 
     // Check if user is authenticated
     if (!user) {
       console.warn('[REGENERATE] User not authenticated');
       isRegeneratingRef.current = false;
+      setIsRegenerating(false);
       return;
     }
 
@@ -946,6 +949,7 @@ export default function Chat() {
     const assistantMessage = messages.find(msg => msg.id === messageId && msg.role === 'assistant');
     if (!assistantMessage) {
       isRegeneratingRef.current = false;
+      setIsRegenerating(false);
       return;
     }
 
@@ -977,6 +981,7 @@ export default function Chat() {
           description: `You've used all ${usageLimits.limit} image generations this month. Upgrade your plan for more!`
         });
         isRegeneratingRef.current = false;
+        setIsRegenerating(false);
         return;
       }
     }
@@ -985,6 +990,7 @@ export default function Chat() {
     if (!userMessage && userMessageAttachments.length === 0) {
       console.log('[REGENERATE] No message or attachments to regenerate');
       isRegeneratingRef.current = false;
+      setIsRegenerating(false);
       return;
     }
 
@@ -1016,6 +1022,7 @@ export default function Chat() {
         return newSet;
       });
       setIsGeneratingResponse(false);
+      setIsRegenerating(false);
       isRegeneratingRef.current = false;
       oldMessageBackupRef.current = null;
     }, 60000); // 60 seconds
@@ -1237,6 +1244,7 @@ export default function Chat() {
           setRegeneratingMessageId(null);
           regeneratingMessageIdRef.current = null;
           setIsGeneratingResponse(false);
+          setIsRegenerating(false);
           isRegeneratingRef.current = false;
           setHiddenMessageIds(prev => {
             const newSet = new Set(prev);
@@ -1294,6 +1302,7 @@ export default function Chat() {
       console.log('[REGENERATE] Error occurred, restoring message visibility');
       
       setIsGeneratingResponse(false);
+      setIsRegenerating(false);
       setRegeneratingMessageId(null);
       regeneratingMessageIdRef.current = null; // Clear the ref
       setHiddenMessageIds(prev => {
@@ -4089,12 +4098,15 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                                     // Hide button immediately if there are any messages after it
                                     return !hasMessagesAfter;
                                    })() && (
-                                    <Button 
+                                     <Button 
                                       variant="ghost" 
                                       size="sm" 
                                       className="h-7 w-7 p-0 bg-background/80 backdrop-blur-sm hover:bg-muted transition-opacity"
-                                      onClick={() => regenerateResponse(message.id)}
-                                      disabled={isGeneratingResponse}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        regenerateResponse(message.id);
+                                      }}
+                                      disabled={isGeneratingResponse || isRegenerating}
                                     >
                                       {isGeneratingResponse ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
