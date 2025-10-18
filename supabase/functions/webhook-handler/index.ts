@@ -7,6 +7,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
 };
 
+// Rate limiting configuration
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute in milliseconds
+const RATE_LIMIT_MAX_REQUESTS = 30; // 30 requests per minute
+
+function checkRateLimit(identifier: string): { allowed: boolean; remaining: number; resetTime: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(identifier);
+
+  // Clean up expired entries
+  if (record && now > record.resetTime) {
+    rateLimitMap.delete(identifier);
+  }
+
+  const current = rateLimitMap.get(identifier);
+
+  if (!current) {
+    const resetTime = now + RATE_LIMIT_WINDOW;
+    rateLimitMap.set(identifier, { count: 1, resetTime });
+    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetTime };
+  }
+
+  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return { allowed: false, remaining: 0, resetTime: current.resetTime };
+  }
+
+  current.count++;
+  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - current.count, resetTime: current.resetTime };
+}
+
 // Input validation schema
 const webhookSchema = z.object({
   chatId: z.string().uuid().optional().nullable(),
@@ -46,6 +76,36 @@ serve(async (req) => {
 
   const requestId = crypto.randomUUID();
   
+  // Get client identifier for rate limiting
+  const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0] || 
+                   req.headers.get('x-real-ip') || 
+                   'unknown';
+
+  // Check rate limit
+  const rateLimitResult = checkRateLimit(clientIp);
+  if (!rateLimitResult.allowed) {
+    const retryAfterSeconds = Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000);
+    console.error('[WEBHOOK-HANDLER] Rate limit exceeded', { requestId, clientIp });
+    return new Response(
+      JSON.stringify({ 
+        error: 'Rate limit exceeded',
+        requestId,
+        retryAfter: retryAfterSeconds
+      }),
+      { 
+        status: 429,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(Math.ceil(rateLimitResult.resetTime / 1000)),
+          'Retry-After': String(retryAfterSeconds)
+        }
+      }
+    );
+  }
+  
   // Verify API key
   const apiKey = req.headers.get('x-api-key');
   const expectedApiKey = Deno.env.get('WEBHOOK_API_KEY');
@@ -54,7 +114,15 @@ serve(async (req) => {
     console.error('[WEBHOOK-HANDLER] Unauthorized: Invalid or missing API key', { requestId });
     return new Response(
       JSON.stringify({ error: 'Unauthorized', requestId }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 401, 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining)
+        }
+      }
     );
   }
   
@@ -253,7 +321,12 @@ serve(async (req) => {
       JSON.stringify({ success: true, message_id: data.id }),
       { 
         status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining)
+        }
       }
     );
 

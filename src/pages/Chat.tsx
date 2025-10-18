@@ -34,6 +34,8 @@ import grokLogo from '@/assets/grok-logo.png';
 // Speech recognition will be accessed with type casting to avoid global conflicts
 import { ImageAnalysisResult, analyzeImageComprehensively } from '@/utils/imageAnalysis';
 import { getSessionMetadata } from '@/utils/sessionTracking';
+import { handleError, handleFileError, handleDownloadError, validateFileSize } from '@/utils/errorHandler';
+import { FILE_LIMITS, STORAGE_BUCKETS, POLLING_INTERVALS } from '@/utils/constants';
 const models = [{
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
@@ -2204,10 +2206,8 @@ export default function Chat() {
         
         // Process files first to get URLs
         for (const file of files) {
-          // Check file size limits
-          const maxSize = getMaxFileSize(file.type);
-          if (file.size > maxSize) {
-            console.error(`File ${file.name} exceeds size limit`);
+          // Check file size limits using utility
+          if (!validateFileSize(file, FILE_LIMITS.MAX_SIZE_MB)) {
             continue;
           }
 
@@ -2276,11 +2276,9 @@ export default function Chat() {
               
               console.log('[IMAGE-UPLOAD] Public URL:', finalFileUrl);
             } catch (error) {
-              console.error('[IMAGE-UPLOAD] Error converting/uploading image:', error);
-              // Don't use blob URLs - they won't work after page refresh
+              handleFileError(error, file.name);
               // Leave finalFileUrl empty to skip this file
               finalFileUrl = '';
-              toast.error(`Failed to upload image: ${file.name}`);
             }
           } else {
             // For non-image files, upload to Supabase storage
@@ -3632,8 +3630,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
         document.body.removeChild(a);
       }, 100);
     } catch (error) {
-      console.error('Download failed:', error);
-      toast.error('Failed to download image');
+      handleDownloadError(error, fileName);
     }
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
