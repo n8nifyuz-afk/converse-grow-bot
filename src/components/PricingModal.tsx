@@ -52,9 +52,9 @@ const pricingOptions = {
 
 const priceIds = {
   pro: {
-    monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
-    '3month': 'price_1SKIqaL8Zm4LqDn4gRjZxG1F',
-    yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
+    monthly: 'price_1SKJ30L8Zm4LqDn42Tj2Ixfo',
+    '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',
+    yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
   },
   ultra: {
     monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
@@ -75,9 +75,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
-    'prod_TGqXYMAmHmvKsG': 'Pro',        // Pro 3-Month
-    'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
+    'prod_TGqk9k16XhvCIn': 'Pro',        // Pro Monthly
+    'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month
+    'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly
     'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
     'prod_TGqalnUwWUES52': 'Ultra Pro',  // Ultra Pro 3-Month
     'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
