@@ -180,8 +180,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 pb-2 sm:pb-3 md:pb-4 border-b border-zinc-700/50 mb-1 sm:mb-2 flex-shrink-0">
                   <div className="text-xs sm:text-sm md:text-base font-bold text-zinc-400">Feature</div>
                   <div className="text-xs sm:text-sm md:text-base font-bold text-center text-zinc-400">Free</div>
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    {selectedPlan === 'pro' ? '⭐ Pro' : '👑 Ultra'}
+                  <div className="text-xs sm:text-sm md:text-base font-bold text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent flex items-center justify-center gap-1 sm:gap-2">
+                    {selectedPlan === 'pro' ? (
+                      <>
+                        <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+                        Pro
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="w-3 h-3 sm:w-4 sm:h-4" />
+                        Ultra
+                      </>
+                    )}
                   </div>
                 </div>
                 
