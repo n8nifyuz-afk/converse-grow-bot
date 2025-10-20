@@ -265,7 +265,7 @@ export default function AuthModal({
       setAppleLoading(false);
     }
   };
-  const authContent = <div className="flex flex-col min-h-[350px] md:min-h-[450px]">
+  const authContent = <div className="flex flex-col min-h-[400px] md:min-h-[550px]">
           {/* Auth Form */}
           <div className="w-full p-6 md:p-8 lg:p-10 flex flex-col">
             {/* Powered By */}
