@@ -157,15 +157,15 @@ const availableModels = [{
   icon: 'image'
 }];
 
-// Suggestion buttons for quick actions
+// Suggestion buttons for quick actions - labels will be translated dynamically
 const suggestionButtons = [
-  { label: 'Document Summary', action: 'document-summary', icon: FileText },
-  { label: 'Email Response', action: 'email-response', icon: Mail },
-  { label: 'Improve Writing', action: 'improve-writing', icon: Pen },
-  { label: 'Knowledge Boost', action: 'learning-help', icon: BookOpen },
-  { label: 'Business Ideas', action: 'business-ideas', icon: Briefcase },
-  { label: 'Text Summary', action: 'text-summary', icon: FileText },
-  { label: 'Calorie Check', action: 'calorie-check', icon: Apple },
+  { labelKey: 'suggestions.documentSummary', action: 'document-summary', icon: FileText },
+  { labelKey: 'suggestions.emailResponse', action: 'email-response', icon: Mail },
+  { labelKey: 'suggestions.improveWriting', action: 'improve-writing', icon: Pen },
+  { labelKey: 'suggestions.knowledgeBoost', action: 'learning-help', icon: BookOpen },
+  { labelKey: 'suggestions.businessIdeas', action: 'business-ideas', icon: Briefcase },
+  { labelKey: 'suggestions.textSummary', action: 'text-summary', icon: FileText },
+  { labelKey: 'suggestions.calorieCheck', action: 'calorie-check', icon: Apple },
 ];
 
 const additionalButtons: typeof suggestionButtons = [];
@@ -234,13 +234,13 @@ export default function Index() {
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
-      return 'Good morning';
+      return t('chat.goodMorning');
     } else if (hour >= 12 && hour < 17) {
-      return 'Good afternoon';
+      return t('chat.goodAfternoon');
     } else if (hour >= 17 && hour < 22) {
-      return 'Good evening';
+      return t('chat.goodEvening');
     } else {
-      return 'Good night';
+      return t('chat.goodNight');
     }
   };
   const getDisplayName = () => {
@@ -256,7 +256,7 @@ export default function Index() {
     if (user?.email) {
       return user.email.split('@')[0];
     }
-    return 'there';
+    return t('chat.there');
   };
   const timeGreeting = getTimeBasedGreeting();
   const displayName = getDisplayName();
@@ -341,7 +341,7 @@ export default function Index() {
     return <div className="flex-1 flex items-center justify-center">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
-          <span className="text-gray-600">Loading...</span>
+          <span className="text-gray-600">{t('chat.loading')}</span>
         </div>
       </div>;
   }
@@ -962,13 +962,13 @@ export default function Index() {
               onClick={() => setShowAuthModal(true)}
               className="font-medium"
             >
-              Log in
+              {t('chat.logIn')}
             </Button>
             <Button 
               onClick={() => setShowAuthModal(true)}
               className="font-medium bg-black text-white hover:bg-black/90"
             >
-              Sign up
+              {t('chat.signUp')}
             </Button>
           </div>
         )}
@@ -1037,7 +1037,7 @@ export default function Index() {
                   block: 'center'
                 });
               }
-            }} placeholder={isImageMode ? "Describe an image..." : "ask me anything..."} className="w-full min-h-[24px] max-h-[120px] border-0 resize-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 outline-none px-0 py-0 mb-3 text-sm sm:text-base" rows={1} aria-label={isImageMode ? "Describe an image" : "Type your message"} />
+            }} placeholder={isImageMode ? t('chat.describeImage') : t('chat.askAnything')} className="w-full min-h-[24px] max-h-[120px] border-0 resize-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 outline-none px-0 py-0 mb-3 text-sm sm:text-base" rows={1} aria-label={isImageMode ? t('chat.describeImage') : t('chat.askAnything')} />
           
           {/* Recording UI - replaces buttons when recording */}
           {isRecording ? (
@@ -1104,9 +1104,9 @@ export default function Index() {
                     
                     {isImageMode && !selectedStyle ? <div className="flex items-center gap-2">
                         {/* Image mode indicator */}
-                        <div className="group flex items-center gap-1 bg-muted px-3 py-2 rounded-full text-xs">
-                          <ImageIcon className="h-3 w-3" />
-                          <span>Image</span>
+                       <div className="group flex items-center gap-1 bg-muted px-3 py-2 rounded-full text-xs">
+                           <ImageIcon className="h-3 w-3" />
+                           <span>{t('chat.image')}</span>
                           <button onClick={handleExitImageMode} className="opacity-70 group-hover:opacity-100 transition-opacity ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary" aria-label="Exit image mode">
                             <X className="h-3 w-3" />
                           </button>
@@ -1114,10 +1114,10 @@ export default function Index() {
                         
                         {/* Styles dropdown */}
                         <Popover open={isStylesOpen} onOpenChange={setIsStylesOpen}>
-                          <PopoverTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-9 px-3 text-xs gap-1 bg-muted hover:bg-muted/80 rounded-full border border-border/50 focus-visible:ring-2 focus-visible:ring-primary" aria-label="Select image style" aria-expanded={isStylesOpen} aria-haspopup="true">
-                              <Palette className="h-3 w-3" />
-                              <span>Styles</span>
+                           <PopoverTrigger asChild>
+                             <Button variant="ghost" size="sm" className="h-9 px-3 text-xs gap-1 bg-muted hover:bg-muted/80 rounded-full border border-border/50 focus-visible:ring-2 focus-visible:ring-primary" aria-label="Select image style" aria-expanded={isStylesOpen} aria-haspopup="true">
+                               <Palette className="h-3 w-3" />
+                               <span>{t('chat.styles')}</span>
                               <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                               </svg>
@@ -1227,11 +1227,11 @@ export default function Index() {
                     <PopoverContent className="w-48 p-2 bg-background border shadow-lg z-50" align="start">
                       <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleFileUpload}>
                         <Paperclip className="h-4 w-4" />
-                        Add photos & files
-                      </Button>
-                      <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleCreateImageClick}>
-                        <ImageIcon className="h-4 w-4" />
-                        Generate image
+                         {t('chat.addPhotosFiles')}
+                       </Button>
+                       <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleCreateImageClick}>
+                         <ImageIcon className="h-4 w-4" />
+                         {t('chat.generateImage')}
                       </Button>
                     </PopoverContent>
                   </Popover>
@@ -1239,19 +1239,19 @@ export default function Index() {
                   {/* Image mode controls inline */}
                   {!isRecording && isImageMode && (
                     <>
-                      <div className="group flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-xs">
-                        <ImageIcon className="h-3 w-3" />
-                        <span>Image</span>
+                       <div className="group flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-xs">
+                         <ImageIcon className="h-3 w-3" />
+                         <span>{t('chat.image')}</span>
                         <button onClick={handleExitImageMode} className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5">
                           <X className="h-3 w-3" />
                         </button>
                       </div>
                       
                       <Popover open={isStylesOpen} onOpenChange={setIsStylesOpen}>
-                        <PopoverTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 bg-muted hover:bg-muted/80 rounded-full">
-                            <Palette className="h-3 w-3" />
-                            Styles
+                         <PopoverTrigger asChild>
+                           <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 bg-muted hover:bg-muted/80 rounded-full">
+                             <Palette className="h-3 w-3" />
+                             {t('chat.styles')}
                             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
@@ -1308,15 +1308,15 @@ export default function Index() {
           {/* Mobile: Wrapped layout like desktop */}
           <div className="sm:hidden">
             <div className="flex flex-wrap gap-2 justify-center" role="group" aria-label="Quick suggestions">
-              {suggestionButtons.map((suggestion, index) => <Button key={index} onClick={() => handleSuggestionClick(suggestion.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${suggestion.label} suggestion`}>
+              {suggestionButtons.map((suggestion, index) => <Button key={index} onClick={() => handleSuggestionClick(suggestion.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${t(suggestion.labelKey)} suggestion`}>
                   <suggestion.icon className="h-3.5 w-3.5 mr-1.5" />
-                  <span className="text-sm font-medium">{suggestion.label}</span>
+                  <span className="text-sm font-medium">{t(suggestion.labelKey)}</span>
                 </Button>)}
               
               {/* Additional buttons - mobile */}
-              {additionalButtons.map((button, index) => <Button key={`mobile-${index}`} onClick={() => handleSuggestionClick(button.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${button.label} suggestion`}>
+              {additionalButtons.map((button, index) => <Button key={`mobile-${index}`} onClick={() => handleSuggestionClick(button.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${t(button.labelKey)} suggestion`}>
                     <button.icon className="h-3.5 w-3.5 mr-1.5" />
-                    <span className="text-sm font-medium">{button.label}</span>
+                    <span className="text-sm font-medium">{t(button.labelKey)}</span>
                   </Button>)}
             </div>
           </div>
@@ -1324,15 +1324,15 @@ export default function Index() {
           {/* Desktop: Wrapped layout */}
           <div className="hidden sm:block">
             <div className="flex flex-wrap gap-2 justify-center">
-              {suggestionButtons.map((suggestion, index) => <Button key={index} onClick={() => handleSuggestionClick(suggestion.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${suggestion.label} suggestion`}>
+              {suggestionButtons.map((suggestion, index) => <Button key={index} onClick={() => handleSuggestionClick(suggestion.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${t(suggestion.labelKey)} suggestion`}>
                   <suggestion.icon className="h-3.5 w-3.5 mr-1.5" />
-                  <span className="text-sm font-medium">{suggestion.label}</span>
+                  <span className="text-sm font-medium">{t(suggestion.labelKey)}</span>
                 </Button>)}
               
               {/* Additional buttons - desktop */}
-              {additionalButtons.map((button, index) => <Button key={index} onClick={() => handleSuggestionClick(button.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${button.label} suggestion`}>
+              {additionalButtons.map((button, index) => <Button key={index} onClick={() => handleSuggestionClick(button.action)} variant="ghost" size="sm" className="h-9 px-4 rounded-full border border-border/30 hover:border-border/60 hover:bg-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary" aria-label={`${t(button.labelKey)} suggestion`}>
                   <button.icon className="h-3.5 w-3.5 mr-1.5" />
-                  <span className="text-sm font-medium">{button.label}</span>
+                  <span className="text-sm font-medium">{t(button.labelKey)}</span>
                 </Button>)}
             </div>
           </div>
