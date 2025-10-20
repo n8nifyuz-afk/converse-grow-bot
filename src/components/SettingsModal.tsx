@@ -48,15 +48,6 @@ const themeOptions = [
   { value: 'system' as const, label: 'System', icon: Monitor },
 ];
 
-const accentColors = [
-  { value: 'blue' as const, label: 'Blue', color: '#3B82F6' },
-  { value: 'indigo' as const, label: 'Indigo', color: '#6366F1' },
-  { value: 'purple' as const, label: 'Purple', color: '#8B5CF6' },
-  { value: 'green' as const, label: 'Green', color: '#10B981' },
-  { value: 'orange' as const, label: 'Orange', color: '#F97316' },
-  { value: 'red' as const, label: 'Red', color: '#EF4444' },
-  { value: 'gray' as const, label: 'Gray', color: '#6B7280' },
-];
 
 export default function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [activeTab, setActiveTab] = React.useState('general');
@@ -81,6 +72,16 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     { value: 'light' as const, label: t('settings.light'), icon: Sun },
     { value: 'dark' as const, label: t('settings.dark'), icon: Moon },
     { value: 'system' as const, label: t('settings.system'), icon: Monitor },
+  ];
+
+  const accentColors = [
+    { value: 'blue' as const, label: t('accentColors.blue'), color: '#3B82F6' },
+    { value: 'indigo' as const, label: t('accentColors.indigo'), color: '#6366F1' },
+    { value: 'purple' as const, label: t('accentColors.purple'), color: '#8B5CF6' },
+    { value: 'green' as const, label: t('accentColors.green'), color: '#10B981' },
+    { value: 'orange' as const, label: t('accentColors.orange'), color: '#F97316' },
+    { value: 'red' as const, label: t('accentColors.red'), color: '#EF4444' },
+    { value: 'gray' as const, label: t('accentColors.gray'), color: '#6B7280' },
   ];
 
   const handleSetTheme = (newTheme: typeof theme) => {

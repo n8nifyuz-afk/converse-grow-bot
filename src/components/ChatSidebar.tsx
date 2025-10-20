@@ -14,6 +14,7 @@ import SettingsModal from './SettingsModal';
 import AuthModal from './AuthModal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import logoLight from '@/assets/chatl-logo-black.png';
 import logoDark from '@/assets/chatl-logo-white.png';
 interface Chat {
@@ -269,8 +270,8 @@ export default function ChatSidebar({
   const handleDeleteProject = async (projectId: string) => {
     setConfirmDialog({
       isOpen: true,
-      title: 'Delete Project',
-      description: 'Are you sure you want to delete this project? All chats in this project will also be permanently deleted.',
+      title: t('chat.deleteProject'),
+      description: t('chat.deleteProjectConfirm'),
       onConfirm: () => executeDeleteProject(projectId)
     });
   };
@@ -333,6 +334,7 @@ export default function ChatSidebar({
   const isMobile = useIsMobile();
   const { theme, actualTheme } = useTheme();
   const brandLogo = actualTheme === 'dark' ? logoDark : logoLight;
+  const { t } = useTranslation();
   
   return <>
       <Sidebar className="border-r border-sidebar-border bg-sidebar" collapsible={isMobile ? "offcanvas" : "icon"}>
@@ -363,15 +365,15 @@ export default function ChatSidebar({
           </div>
 
           {collapsed ? <div className="flex flex-col gap-2 items-center">
-              <Button onClick={handleNewChat} className="h-12 w-12 p-0 rounded-full bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost" title="New Chat">
+              <Button onClick={handleNewChat} className="h-12 w-12 p-0 rounded-full bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost" title={t('chat.newChat')}>
                 <Plus className="h-5 w-5 flex-shrink-0" />
               </Button>
               
               {user ? <ProjectModal onProjectCreated={handleProjectCreated}>
-                  <Button className="h-12 w-12 p-0 rounded-full bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost" title="New Project">
+                  <Button className="h-12 w-12 p-0 rounded-full bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost" title={t('chat.newProject')}>
                     <FolderPlus className="h-5 w-5 flex-shrink-0" />
                   </Button>
-                </ProjectModal> : <Button onClick={() => setShowAuthModal(true)} className="h-12 w-12 p-0 rounded-full bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost" title="New Project">
+                </ProjectModal> : <Button onClick={() => setShowAuthModal(true)} className="h-12 w-12 p-0 rounded-full bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost" title={t('chat.newProject')}>
                   <FolderPlus className="h-5 w-5 flex-shrink-0" />
                 </Button>}
             </div> : <div className="mt-1 space-y-2">
@@ -398,7 +400,7 @@ export default function ChatSidebar({
           {/* Projects */}
           {!collapsed && projects.length > 0 && <SidebarGroup>
               <SidebarGroupLabel className="px-3 text-xs text-sidebar-foreground/60 font-medium">
-                Projects
+                {t('chat.projects')}
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>

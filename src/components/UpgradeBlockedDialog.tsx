@@ -3,6 +3,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 import { Button } from './ui/button';
 import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface UpgradeBlockedDialogProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface UpgradeBlockedDialogProps {
 
 export function UpgradeBlockedDialog({ isOpen, onClose, currentPlan }: UpgradeBlockedDialogProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleManageSubscription = () => {
     onClose();
@@ -27,23 +29,23 @@ export function UpgradeBlockedDialog({ isOpen, onClose, currentPlan }: UpgradeBl
               <AlertCircle className="w-6 h-6 text-amber-500" />
             </div>
             <AlertDialogTitle className="text-foreground text-xl">
-              Active Subscription Detected
+              {t('upgradeBlockedDialog.title')}
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-muted-foreground space-y-3 pt-2">
             <p>
-              You currently have an active <strong className="text-foreground">{currentPlan}</strong> subscription.
+              {t('upgradeBlockedDialog.currentPlan')} <strong className="text-foreground">{currentPlan}</strong> {t('upgradeBlockedDialog.subscription')}
             </p>
             <p>
-              To upgrade to a different plan, you must first:
+              {t('upgradeBlockedDialog.toUpgrade')}
             </p>
             <ol className="list-decimal list-inside space-y-1 ml-2">
-              <li>Cancel your current subscription</li>
-              <li>Receive a prorated refund for unused time</li>
-              <li>Purchase your new subscription plan</li>
+              <li>{t('upgradeBlockedDialog.step1')}</li>
+              <li>{t('upgradeBlockedDialog.step2')}</li>
+              <li>{t('upgradeBlockedDialog.step3')}</li>
             </ol>
             <p className="text-sm">
-              Your access will continue until the end of your current billing period after cancellation.
+              {t('upgradeBlockedDialog.accessNote')}
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -53,13 +55,13 @@ export function UpgradeBlockedDialog({ isOpen, onClose, currentPlan }: UpgradeBl
             onClick={onClose}
             className="w-full sm:w-auto"
           >
-            Close
+            {t('upgradeBlockedDialog.close')}
           </Button>
           <Button
             onClick={handleManageSubscription}
             className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
           >
-            Manage Subscription
+            {t('upgradeBlockedDialog.manageSubscription')}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

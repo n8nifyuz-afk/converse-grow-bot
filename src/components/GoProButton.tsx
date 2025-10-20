@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PricingModal } from './PricingModal';
+import { useTranslation } from 'react-i18next';
 import rocketIcon from '@/assets/rocket-icon.png';
 
 export const GoProButton = () => {
   const { subscriptionStatus, loadingSubscription } = useAuth();
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const { t } = useTranslation();
 
   console.log('[GO-PRO-BUTTON] Render state:', {
     loadingSubscription,
@@ -32,7 +34,7 @@ export const GoProButton = () => {
       <button
         onClick={handleClick}
         data-pricing-trigger="true"
-        aria-label="Upgrade Now"
+        aria-label={t('upgradeButton.upgradeNow')}
         className="flex items-center gap-1 px-1.5 py-1 sm:gap-2 sm:px-4 sm:py-2 rounded-[20px] bg-transparent border-2 hover:-translate-y-0.5 transition-transform duration-150"
         style={{ borderColor: '#b0851e' }}
       >
@@ -57,7 +59,7 @@ export const GoProButton = () => {
             letterSpacing: "0.3px",
           }}
         >
-          Upgrade Now
+          {t('upgradeButton.upgradeNow')}
         </span>
       </button>
       
