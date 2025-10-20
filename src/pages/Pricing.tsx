@@ -25,11 +25,12 @@ const Pricing = () => {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TFjbArlYa9GMQr': 'Pro',        // Pro Daily
-    'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
-    'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
-    'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
-    'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
+    'prod_TGqk9k16XhvCIn': 'Pro',        // Pro Monthly
+    'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month
+    'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly
+    'prod_TGqs5r2udThT0t': 'Ultra Pro',  // Ultra Pro Monthly
+    'prod_TGquGexHO44m4T': 'Ultra Pro',  // Ultra Pro 3-Month
+    'prod_TGqwVIWObYLt6U': 'Ultra Pro',  // Ultra Pro Yearly
   };
 
   // Scroll to top on page load
@@ -84,7 +85,7 @@ const Pricing = () => {
     name: "Pro",
     emoji: "⭐",
     price: 19.99,
-    yearlyPrice: 15.99,
+    yearlyPrice: 59.99,
     icon: Star,
     description: "For professionals",
     popular: true,
@@ -116,7 +117,7 @@ const Pricing = () => {
     name: "Ultra Pro",
     emoji: "🚀",
     price: 39.99,
-    yearlyPrice: 31.99,
+    yearlyPrice: 119.99,
     icon: Crown,
     description: "For teams & power users",
     popular: false,
@@ -140,11 +141,14 @@ const Pricing = () => {
     buttonVariant: "outline" as const
   }];
   const getPrice = (plan: typeof plans[0]) => {
-    return isYearly ? plan.yearlyPrice : plan.price;
+    if (!isYearly) return plan.price;
+    // For yearly plans, show monthly cost
+    return plan.yearlyPrice > 0 ? (plan.yearlyPrice / 12).toFixed(2) : 0;
   };
   const getSavings = (plan: typeof plans[0]) => {
-    if (plan.price === 0) return 0;
-    return Math.round((plan.price - plan.yearlyPrice) / plan.price * 100);
+    if (plan.price === 0 || plan.yearlyPrice === 0) return 0;
+    const monthlyCostOfYearly = plan.yearlyPrice / 12;
+    return Math.round((plan.price - monthlyCostOfYearly) / plan.price * 100);
   };
 
   const handleSubscribe = async (plan: typeof plans[0]) => {
@@ -171,13 +175,12 @@ const Pricing = () => {
       // Map plan to price ID based on billing period
       const priceIds = {
         'Pro': {
-          daily: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
-          monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
-          yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
+          monthly: 'price_1SKJ30L8Zm4LqDn42Tj2Ixfo',
+          yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
         },
         'Ultra Pro': {
-          monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
-          yearly: 'price_1SH1MjL8Zm4LqDn40swOy4Ar'
+          monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',
+          yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'
         }
       };
       
@@ -285,14 +288,9 @@ const Pricing = () => {
             <button onClick={() => setIsYearly(!isYearly)} className={`relative w-14 h-7 sm:w-16 sm:h-8 rounded-full transition-colors duration-300 ${isYearly ? 'bg-primary' : 'bg-muted'}`}>
               <div className={`absolute top-1 left-1 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${isYearly ? 'translate-x-7 sm:translate-x-8' : 'translate-x-0'}`}></div>
             </button>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
-                Yearly
-              </span>
-              {isYearly && <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/30 animate-scale-in text-xs">
-                  Save up to 20%
-                </Badge>}
-            </div>
+            <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
+              Yearly
+            </span>
           </div>
         </div>
       </section>
