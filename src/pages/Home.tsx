@@ -213,10 +213,10 @@ const Home = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
-              Everything You Need
+              {t('features.heading')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Powerful features designed to enhance your AI experience
+              {t('features.subtitle')}
             </p>
           </div>
           
@@ -227,8 +227,8 @@ const Home = () => {
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Brain className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Multi-Model Access</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Switch between GPT-4, GPT-5, Claude, Gemini, and more – all in one place.</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{t('features.multiModelAccess')}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t('features.multiModelAccessDesc')}</p>
             </div>
             
             {/* Feature 2: AI Image Generation */}
@@ -236,8 +236,8 @@ const Home = () => {
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Image className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">AI Image Generation</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Create stunning visuals instantly with AI-powered tools.</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{t('features.aiImageGeneration')}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t('features.aiImageGenerationDesc')}</p>
             </div>
             
             {/* Feature 3: Learning & Study Support */}
@@ -245,8 +245,8 @@ const Home = () => {
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <BookOpen className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Learning & Study Support</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Summarize texts, explain concepts, and prepare for exams with AI assistance.</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{t('features.learningSupport')}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t('features.learningSupportDesc')}</p>
             </div>
             
             {/* Feature 4: Coding & Tech Help */}
@@ -254,8 +254,8 @@ const Home = () => {
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Code className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Coding & Tech Help</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Get instant coding support, debugging, and technical insights.</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{t('features.codingHelp')}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t('features.codingHelpDesc')}</p>
             </div>
             
             {/* Feature 5: Voice & Language Support */}
@@ -263,8 +263,8 @@ const Home = () => {
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Mic className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Voice & Language Support</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Chat hands-free with voice commands and over 50 languages.</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{t('features.voiceLanguageSupport')}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t('features.voiceLanguageSupportDesc')}</p>
             </div>
             
             {/* Feature 6: Ask Your Files */}
@@ -272,8 +272,8 @@ const Home = () => {
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <FileText className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Ask Your Files</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Upload PDFs or docs and extract key insights in seconds.</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{t('features.askYourFiles')}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t('features.askYourFilesDesc')}</p>
             </div>
           </div>
         </div>
@@ -284,10 +284,10 @@ const Home = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 id="pricing-heading" className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
-              Choose Your Plan. Unlock the Power of AI.
+              {t('pricing.heading')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start free with GPT-4-min and upgrade anytime for full access to GPT-5, Claude, Gemini, DeepSeek, Grok, and more.
+              {t('pricing.subtitle')}
             </p>
           </div>
           
@@ -295,9 +295,9 @@ const Home = () => {
             {/* Free Plan */}
             <div className="group p-8 rounded-lg bg-white dark:bg-card border-2 border-black/10 dark:border-border hover:border-primary/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 flex flex-col shadow-sm">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2 text-foreground">🆓 Free</h3>
-                <div className="text-4xl font-bold mb-2 text-foreground">€0 <span className="text-lg font-normal text-muted-foreground">/ month</span></div>
-                <p className="text-muted-foreground text-sm">Get started free, upgrade anytime.</p>
+                <h3 className="text-2xl font-bold mb-2 text-foreground">{t('pricing.freePlanTitle')}</h3>
+                <div className="text-4xl font-bold mb-2 text-foreground">€0 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
+                <p className="text-muted-foreground text-sm">{t('pricing.freeDescription')}</p>
               </div>
               
               <div className="space-y-3 mb-8 flex-1">
@@ -305,51 +305,51 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Access to GPT-4o Mini only</span>
+                  <span className="text-foreground text-sm">{t('pricing.accessToMini')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-muted-foreground text-sm">GPT-5, Claude, Gemini, DeepSeek, Grok</span>
+                  <span className="text-muted-foreground text-sm">{t('pricing.noAdvancedModels')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Voice mode</span>
+                  <span className="text-muted-foreground text-sm">{t('pricing.noVoiceMode')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Advanced file uploads</span>
+                  <span className="text-muted-foreground text-sm">{t('pricing.noAdvancedFileUploads')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Advanced search</span>
+                  <span className="text-muted-foreground text-sm">{t('pricing.noAdvancedSearch')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Premium features</span>
+                  <span className="text-muted-foreground text-sm">{t('pricing.noPremiumFeatures')}</span>
                 </div>
               </div>
               
               {!subscriptionStatus?.subscribed ? (
                 <Button size="lg" variant="outline" className="w-full border-2 border-muted-foreground/20 text-foreground hover:bg-muted/50 hover:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2" onClick={() => navigate('/')} aria-label="Get started with free plan">
-                  Get Started
+                  {t('pricing.getStarted')}
                 </Button>
               ) : subscriptionStatus.product_id === null || subscriptionStatus.product_id === 'free' ? (
                 <div className="w-full py-3 px-4 rounded-lg bg-primary/10 border-2 border-primary text-center">
-                  <span className="text-sm font-semibold text-primary">Your Current Plan</span>
+                  <span className="text-sm font-semibold text-primary">{t('pricing.yourCurrentPlan')}</span>
                 </div>
               ) : (
                 <Button size="lg" variant="outline" className="w-full border-2 border-muted-foreground/20 text-foreground hover:bg-muted/50 hover:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2" onClick={() => navigate('/')} aria-label="Get started with free plan">
-                  Get Started
+                  {t('pricing.getStarted')}
                 </Button>
               )}
             </div>
@@ -358,14 +358,14 @@ const Home = () => {
             <div className="group relative p-8 rounded-lg bg-white dark:bg-card border-2 border-primary hover:border-primary/70 transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 flex flex-col shadow-lg">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm font-medium">
-                  Most Popular
+                  {t('pricing.mostPopular')}
                 </Badge>
               </div>
               
               <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2 text-foreground">⭐ Pro</h3>
-                <div className="text-4xl font-bold mb-2 text-foreground">€19.99 <span className="text-lg font-normal text-muted-foreground">/ month</span></div>
-                <p className="text-muted-foreground text-sm">For professionals</p>
+                <h3 className="text-2xl font-bold mb-2 text-foreground">{t('pricing.proPlanTitle')}</h3>
+                <div className="text-4xl font-bold mb-2 text-foreground">€19.99 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
+                <p className="text-muted-foreground text-sm">{t('pricing.proDescription')}</p>
               </div>
               
               <div className="space-y-3 mb-8 flex-1">
@@ -373,57 +373,57 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Access to all AI models: GPT-4, GPT-5, Claude, Gemini, DeepSeek, Grok</span>
+                  <span className="text-foreground text-sm">{t('pricing.accessToAll')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Unlimited chats & model switching</span>
+                  <span className="text-foreground text-sm">{t('pricing.unlimitedChats')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Voice mode (text-to-speech)</span>
+                  <span className="text-foreground text-sm">{t('pricing.voiceMode')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">File uploads</span>
+                  <span className="text-foreground text-sm">{t('pricing.fileUploads')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Chat with Files</span>
+                  <span className="text-foreground text-sm">{t('pricing.chatWithFiles')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Image generation (500 / month)</span>
+                  <span className="text-foreground text-sm">{t('pricing.imageGeneration500')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Priority support</span>
+                  <span className="text-foreground text-sm">{t('pricing.prioritySupport')}</span>
                 </div>
               </div>
               
               {!subscriptionStatus?.subscribed ? (
                 <Button size="lg" className="w-full bg-black dark:bg-primary text-white dark:text-primary-foreground hover:bg-black/90 dark:hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2" onClick={() => navigate('/pricing')} aria-label="Subscribe to Pro plan">
-                  Subscribe Now
+                  {t('pricing.subscribeNow')}
                 </Button>
               ) : subscriptionStatus.product_id === 'prod_S8KF7kZKXw7gVx' ? (
                 <div className="w-full py-3 px-4 rounded-lg bg-primary/10 border-2 border-primary text-center">
-                  <span className="text-sm font-semibold text-primary">Your Current Plan</span>
+                  <span className="text-sm font-semibold text-primary">{t('pricing.yourCurrentPlan')}</span>
                 </div>
               ) : (
                 <Button size="lg" className="w-full bg-black dark:bg-primary text-white dark:text-primary-foreground hover:bg-black/90 dark:hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2" onClick={() => navigate('/pricing')} aria-label="Subscribe to Pro plan">
-                  Subscribe Now
+                  {t('pricing.subscribeNow')}
                 </Button>
               )}
             </div>
@@ -431,9 +431,9 @@ const Home = () => {
             {/* Ultra Pro Plan */}
             <div className="group p-8 rounded-lg bg-white dark:bg-card border-2 border-black/10 dark:border-border hover:border-primary/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 flex flex-col shadow-sm">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2 text-foreground">🚀 Ultra Pro</h3>
-                <div className="text-4xl font-bold mb-2 text-foreground">€39.99 <span className="text-lg font-normal text-muted-foreground">/ month</span></div>
-                <p className="text-muted-foreground text-sm">For teams & power users</p>
+                <h3 className="text-2xl font-bold mb-2 text-foreground">{t('pricing.ultraProPlanTitle')}</h3>
+                <div className="text-4xl font-bold mb-2 text-foreground">€39.99 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
+                <p className="text-muted-foreground text-sm">{t('pricing.ultraProDescription')}</p>
               </div>
               
               <div className="space-y-3 mb-8 flex-1">
@@ -441,45 +441,45 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Everything in Pro</span>
+                  <span className="text-foreground text-sm">{t('pricing.everythingInPro')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Extended file & message limits</span>
+                  <span className="text-foreground text-sm">{t('pricing.extendedLimits')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Image generation (2,000 / month)</span>
+                  <span className="text-foreground text-sm">{t('pricing.imageGeneration2000')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Team collaboration features</span>
+                  <span className="text-foreground text-sm">{t('pricing.teamCollaboration')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Early access to new models</span>
+                  <span className="text-foreground text-sm">{t('pricing.earlyAccess')}</span>
                 </div>
               </div>
               
               {!subscriptionStatus?.subscribed ? (
                 <Button size="lg" className="w-full bg-black dark:bg-primary text-white dark:text-primary-foreground hover:bg-black/90 dark:hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2" onClick={() => navigate('/pricing')} aria-label="Subscribe to Ultra Pro plan">
-                  Subscribe Now
+                  {t('pricing.subscribeNow')}
                 </Button>
               ) : subscriptionStatus.product_id === 'prod_S8KIXQjYiuBGNm' ? (
                 <div className="w-full py-3 px-4 rounded-lg bg-primary/10 border-2 border-primary text-center">
-                  <span className="text-sm font-semibold text-primary">Your Current Plan</span>
+                  <span className="text-sm font-semibold text-primary">{t('pricing.yourCurrentPlan')}</span>
                 </div>
               ) : (
                 <Button size="lg" className="w-full bg-black dark:bg-primary text-white dark:text-primary-foreground hover:bg-black/90 dark:hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2" onClick={() => navigate('/pricing')} aria-label="Subscribe to Ultra Pro plan">
-                  Subscribe Now
+                  {t('pricing.subscribeNow')}
                 </Button>
               )}
             </div>
@@ -492,14 +492,12 @@ const Home = () => {
         <div className="container max-w-4xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="animate-fade-in">
-              <Badge variant="outline" className="mb-6 text-primary border-primary/20">FAQ</Badge>
+              <Badge variant="outline" className="mb-6 text-primary border-primary/20">{t('faq.badge')}</Badge>
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Frequently<br />
-                Asked<br />
-                Questions
+                {t('faq.heading')}
               </h2>
               <p className="text-muted-foreground text-lg">
-                Everything you need to know about ChatLearn
+                {t('faq.subtitle')}
               </p>
             </div>
             
