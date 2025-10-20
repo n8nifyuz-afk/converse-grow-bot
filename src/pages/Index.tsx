@@ -175,7 +175,7 @@ const suggestionPrompts = suggestionsByCategory;
 
 export default function Index() {
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // Translation hook for i18n
   const {
     user,
     loading: authLoading,
