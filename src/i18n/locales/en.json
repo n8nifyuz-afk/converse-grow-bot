@@ -204,7 +204,36 @@
     "signOut": "Sign Out",
     "rename": "Rename",
     "delete": "Delete",
-    "addToProject": "Add to Project"
+    "addToProject": "Add to Project",
+    "loading": "Loading...",
+    "logIn": "Log in",
+    "signUp": "Sign up",
+    "there": "there",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "goodNight": "Good night",
+    "describeImage": "Describe an image...",
+    "askAnything": "ask me anything...",
+    "addPhotosFiles": "Add photos & files",
+    "generateImage": "Generate image",
+    "image": "Image",
+    "styles": "Styles",
+    "pro": "PRO",
+    "generateAnImage": "Generate an image",
+    "sendMessage": "Send message",
+    "stopRecording": "Stop recording",
+    "startVoiceRecording": "Start voice recording",
+    "cancelRecording": "Cancel recording",
+    "sendRecording": "Send recording",
+    "uploadFile": "Upload file",
+    "selectAIModel": "Select AI model",
+    "exitImageMode": "Exit image mode",
+    "selectImageStyle": "Select image style",
+    "createAnImage": "Create an image",
+    "uploadOrCreateContent": "Upload or create content",
+    "openSidebarMenu": "Open sidebar menu",
+    "usePrompt": "Use prompt"
   },
   "accentColors": {
     "blue": "Blue",
@@ -364,6 +393,141 @@
     "aiTools": "AI Tools",
     "pricingPlans": "Pricing & Plans",
     "faq": "Frequently Asked Questions"
+  },
+  "models": {
+    "gpt4oMini": {
+      "description": "Default model (fast + low cost)",
+      "descriptionLong": "Fast and cost-efficient model, perfect for most tasks."
+    },
+    "gpt4o": {
+      "description": "High Quality option",
+      "descriptionLong": "High-quality model for complex reasoning and accurate responses."
+    },
+    "gpt5": {
+      "description": "Most advanced AI model",
+      "descriptionLong": "Most advanced OpenAI model with superior capabilities and reasoning."
+    },
+    "claudeHaiku": {
+      "description": "NEW: Small model with big capabilities",
+      "descriptionLong": "NEW: Small model with big capabilities - great value"
+    },
+    "geminiFlash": {
+      "description": "Fast Google AI model",
+      "descriptionLong": "Fast Google AI model with multimodal capabilities."
+    },
+    "deepseek": {
+      "description": "Advanced reasoning model",
+      "descriptionLong": "Advanced reasoning model with strong performance."
+    },
+    "grok": {
+      "description": "Powerful AI from xAI",
+      "descriptionLong": "Powerful AI model from xAI with advanced capabilities."
+    },
+    "generateImage": {
+      "description": "Create images with AI",
+      "descriptionLong": "Create stunning AI-generated images from text descriptions."
+    }
+  },
+  "suggestions": {
+    "documentSummary": "Document Summary",
+    "emailResponse": "Email Response",
+    "improveWriting": "Improve Writing",
+    "knowledgeBoost": "Knowledge Boost",
+    "businessIdeas": "Business Ideas",
+    "textSummary": "Text Summary",
+    "calorieCheck": "Calorie Check"
+  },
+  "prompts": {
+    "documentSummary": {
+      "1": "Summarize this document",
+      "2": "Extract key points from document",
+      "3": "Provide document overview",
+      "4": "Analyze document content"
+    },
+    "emailResponse": {
+      "1": "Draft a professional email",
+      "2": "Reply to this email",
+      "3": "Write a formal response",
+      "4": "Compose an email reply"
+    },
+    "improveWriting": {
+      "1": "Refine this text",
+      "2": "Polish my writing",
+      "3": "Improve clarity and style",
+      "4": "Make this more professional"
+    },
+    "learningHelp": {
+      "1": "Explain this concept simply",
+      "2": "Create study materials",
+      "3": "Quiz me on this topic",
+      "4": "Provide examples"
+    },
+    "businessIdeas": {
+      "1": "Generate business ideas",
+      "2": "Brainstorm startup concepts",
+      "3": "Suggest business strategies",
+      "4": "Create business plans"
+    },
+    "textSummary": {
+      "1": "Summarize this text briefly",
+      "2": "Condense into main points",
+      "3": "Provide a short overview",
+      "4": "Extract key takeaways"
+    },
+    "calorieCheck": {
+      "1": "Estimate calories in this food",
+      "2": "Analyze nutritional content",
+      "3": "Check dietary information",
+      "4": "Calculate meal calories"
+    }
+  },
+  "imageStyles": {
+    "cyberpunk": {
+      "name": "Cyberpunk",
+      "prompt": "Create an image in a cyberpunk aesthetic: vivid neon accents, futuristic textures, glowing details, and high-contrast lighting."
+    },
+    "anime": {
+      "name": "Anime",
+      "prompt": "Create an image in an anime art style: clean lines, vibrant colors, expressive characters, and detailed backgrounds with a Japanese animation aesthetic."
+    },
+    "minimalist": {
+      "name": "Minimalist",
+      "prompt": "Create an image in a minimalist style: clean, simple composition with plenty of white space, limited color palette, and focus on essential elements only."
+    },
+    "watercolor": {
+      "name": "Watercolor",
+      "prompt": "Create an image in a watercolor painting style: soft, flowing colors that blend naturally, visible brush strokes, and delicate, artistic textures."
+    },
+    "vintage": {
+      "name": "Vintage",
+      "prompt": "Create an image with a vintage aesthetic: sepia tones, aged textures, classic composition, and nostalgic mood reminiscent of old photographs."
+    },
+    "photorealistic": {
+      "name": "Photorealistic",
+      "prompt": "Create a photorealistic image: highly detailed, accurate lighting, realistic textures, and lifelike appearance as if captured by a professional camera."
+    },
+    "abstract": {
+      "name": "Abstract",
+      "prompt": "Create an abstract image: non-representational forms, bold colors, geometric or fluid shapes, and expressive artistic interpretation."
+    },
+    "coloringBook": {
+      "name": "Coloring Book",
+      "prompt": "Create an image in a coloring book style: black line art on white background, clear outlines, simple shapes perfect for coloring."
+    },
+    "synthwave": {
+      "name": "Synthwave",
+      "prompt": "Create an image in a synthwave aesthetic: retro-futuristic 1980s vibe with neon grids, glowing sunset, vibrant magenta-and-cyan gradients, chrome highlights, and a nostalgic outrun atmosphere."
+    }
+  },
+  "errors": {
+    "cannotUploadInImageMode": "Cannot upload files in Generate Image mode",
+    "imageModeNoFiles": "Image generation mode doesn't support file attachments",
+    "voiceNotInImageMode": "Voice input not available in Generate Image mode",
+    "useTextForImage": "Please use text to describe the image you want to generate",
+    "microphoneAccess": "Unable to access microphone",
+    "failedToStartChat": "Failed to start chat. Please try again.",
+    "fileSizeLimitExceeded": "File size limit exceeded",
+    "fileSizeError": "exceeds the"
   },
   "faq": {
     "badge": "FAQ",
