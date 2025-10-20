@@ -265,9 +265,9 @@ export default function AuthModal({
       setAppleLoading(false);
     }
   };
-  const authContent = <div className="flex flex-col min-h-[400px] md:min-h-[550px]">
+  const authContent = <div className="flex flex-col min-h-[320px] md:min-h-[420px]">
           {/* Auth Form */}
-          <div className="w-full p-4 md:p-6 lg:p-8 flex flex-col">
+          <div className="w-full p-4 md:p-6 flex flex-col">
             {/* Powered By */}
             
 
@@ -418,7 +418,7 @@ export default function AuthModal({
       </Drawer>;
   }
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-[70vw] md:max-w-3xl lg:max-w-4xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[95vh] overflow-y-auto">
+      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-lg w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader className="sr-only">
           <DialogTitle>ChatLearn Authentication</DialogTitle>
           <DialogDescription>
