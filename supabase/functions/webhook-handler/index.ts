@@ -22,6 +22,14 @@ const webhookSchema = z.object({
   image_base64: z.string().optional().nullable(),
   image_name: z.string().optional().nullable(),
   image_type: z.string().optional().nullable(),
+  // Metadata fields
+  sessionId: z.string().optional().nullable(),
+  userIP: z.string().optional().nullable(),
+  countryCode: z.string().optional().nullable(),
+  isMobile: z.boolean().optional().nullable(),
+  referer: z.string().optional().nullable(),
+  urlParams: z.record(z.string()).optional().nullable(),
+  gclid: z.string().optional().nullable(),
   body: z.object({
     chatId: z.string().uuid().optional().nullable(),
     userId: z.string().uuid().optional().nullable(),
@@ -100,6 +108,19 @@ serve(async (req) => {
     const image_base64 = body.image_base64;
     const response_data = body.response_data || body.response || body.text || body.content;
     const model = body.model || body.body?.model || body.type; // Extract model from request
+    
+    // Extract metadata
+    const metadata = {
+      sessionId: body.sessionId,
+      userIP: body.userIP,
+      countryCode: body.countryCode,
+      isMobile: body.isMobile,
+      referer: body.referer,
+      urlParams: body.urlParams,
+      gclid: body.gclid,
+    };
+    
+    console.log('[WEBHOOK-HANDLER] Metadata received:', JSON.stringify(metadata));
 
     if (!chat_id) {
       console.error('[WEBHOOK-HANDLER] ERROR: Missing chat_id');

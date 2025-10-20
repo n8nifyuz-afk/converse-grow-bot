@@ -20,6 +20,7 @@ import { ImageProcessingIndicator } from '@/components/ImageProcessingIndicator'
 import { useUsageLimits } from '@/hooks/useUsageLimits';
 import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { MessageLimitWarning } from '@/components/MessageLimitWarning';
+import { getWebhookMetadata } from '@/utils/webhookMetadata';
 
 import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
@@ -1078,12 +1079,18 @@ export default function Chat() {
       // Call N8n webhook (N8n will call webhook-handler in background to create new message)
       console.log('[REGENERATE] Calling N8n webhook (N8n will call webhook-handler)');
       
+      // Get webhook metadata
+      const metadata = await getWebhookMetadata();
+      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          ...payload,
+          ...metadata
+        })
       });
       
       if (!webhookResponse.ok) {
@@ -1269,6 +1276,9 @@ export default function Chat() {
       // Image generation models are handled separately
       console.log('[AI-RESPONSE] Calling webhook with type: text, model:', selectedModel);
       
+      // Get webhook metadata
+      const metadata = await getWebhookMetadata();
+      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
@@ -1279,7 +1289,8 @@ export default function Chat() {
           message: userMessage,
           userId: user.id,
           chatId: originalChatId,
-          model: selectedModel
+          model: selectedModel,
+          ...metadata
         })
       });
       
@@ -1956,6 +1967,10 @@ export default function Chat() {
         
         // Send to N8n webhook for image generation
         console.log('[IMAGE-GEN] Calling N8n webhook with prompt:', userMessage);
+        
+        // Get webhook metadata
+        const metadata = await getWebhookMetadata();
+        
         const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
           method: 'POST',
           headers: {
@@ -1966,7 +1981,8 @@ export default function Chat() {
             message: userMessage,
             userId: user.id,
             chatId: chatId,
-            model: 'generate-image'
+            model: 'generate-image',
+            ...metadata
           })
         });
         
