@@ -39,24 +39,26 @@ const allFeatures: Feature[] = [
 
 const pricingOptions = {
   pro: {
-    daily: { price: 0.60, perDay: 0.60, period: 'day' },
     monthly: { price: 19.99, perDay: 0.67 },
+    '3month': { price: 39.99, perDay: 0.44, savings: 33 },
     yearly: { price: 15.99, perDay: 0.53, savings: 20 }
   },
   ultra: {
     monthly: { price: 39.99, perDay: 1.33 },
+    '3month': { price: 79.99, perDay: 0.89, savings: 33 },
     yearly: { price: 31.99, perDay: 1.07, savings: 20 }
   }
 };
 
 const priceIds = {
   pro: {
-    daily: 'price_1SJE8mL8Zm4LqDn4Qseyrms6',
     monthly: 'price_1SH1g3L8Zm4LqDn4WSyw1BzA',
+    '3month': 'price_1SKIqaL8Zm4LqDn4gRjZxG1F',
     yearly: 'price_1SITBGL8Zm4LqDn4fd4JLVDA'
   },
   ultra: {
     monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
+    '3month': 'price_1SKIteL8Zm4LqDn43F8k1Y5m',
     yearly: 'price_1SH1MjL8Zm4LqDn40swOy4Ar'
   }
 };
@@ -65,7 +67,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const { user, subscriptionStatus } = useAuth();
   const isMobile = useIsMobile();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
+  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | '3month' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -73,10 +75,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TFjbArlYa9GMQr': 'Pro',        // Pro Daily
     'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly
+    'prod_TGqXYMAmHmvKsG': 'Pro',        // Pro 3-Month
     'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly
     'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
+    'prod_TGqalnUwWUES52': 'Ultra Pro',  // Ultra Pro 3-Month
     'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
   };
 
@@ -147,7 +150,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   };
 
   const currentPrice = pricingOptions[selectedPlan][selectedPeriod];
-  const savings = selectedPeriod === 'yearly' ? pricingOptions[selectedPlan].yearly.savings : 0;
+  const savings = (selectedPeriod === 'yearly' || selectedPeriod === '3month') && pricingOptions[selectedPlan][selectedPeriod].savings 
+    ? pricingOptions[selectedPlan][selectedPeriod].savings 
+    : 0;
 
   const modalContent = (
     <div className="flex flex-col md:flex-row h-full">
@@ -253,33 +258,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Billing Period Options */}
               <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-3 flex-1 min-h-0">
-                {selectedPlan === 'pro' && (
-                  <button
-                    onClick={() => setSelectedPeriod('daily')}
-                    className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
-                      selectedPeriod === 'daily'
-                        ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
-                    }`}
-                  >
-                    {selectedPeriod === 'daily' && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
-                    )}
-                    <div className="flex justify-between items-center relative z-10">
-                      <div>
-                        <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Daily</div>
-                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                          Billed daily • Most flexible
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].daily.price}</div>
-                        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
-                      </div>
-                    </div>
-                  </button>
-                )}
-                
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
@@ -291,16 +269,44 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   {selectedPeriod === 'monthly' && (
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
                   )}
-                  <div className="flex justify-between items-center relative z-10">
-                    <div>
+                  <div className="flex justify-between items-start relative z-10">
+                    <div className="flex-1">
                       <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Monthly</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        Billed monthly • Flexible
+                        €{pricingOptions[selectedPlan].monthly.price}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.price}</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per month</div>
+                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
+                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setSelectedPeriod('3month')}
+                  className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left relative group overflow-hidden ${
+                    selectedPeriod === '3month'
+                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
+                  }`}
+                >
+                  <Badge className="absolute -top-1.5 sm:-top-2 right-2 sm:right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold border-0">
+                    Save {pricingOptions[selectedPlan]['3month'].savings}%
+                  </Badge>
+                  {selectedPeriod === '3month' && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
+                  )}
+                  <div className="flex justify-between items-start relative z-10">
+                    <div className="flex-1">
+                      <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">3 Months</div>
+                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+                        €{pricingOptions[selectedPlan]['3month'].price}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
+                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
                     </div>
                   </div>
                 </button>
@@ -319,16 +325,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   {selectedPeriod === 'yearly' && (
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
                   )}
-                  <div className="flex justify-between items-center relative z-10">
-                    <div>
+                  <div className="flex justify-between items-start relative z-10">
+                    <div className="flex-1">
                       <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Yearly</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        Billed annually • Best value
+                        €{pricingOptions[selectedPlan].yearly.price}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm sm:text-base md:text-lg text-zinc-400 dark:text-zinc-600 line-through mb-0.5">€{pricingOptions[selectedPlan].monthly.price}</div>
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.price}</div>
+                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per month</div>
                     </div>
                   </div>
