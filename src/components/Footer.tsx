@@ -61,7 +61,7 @@ const Footer = () => {
               >
                 What you can do
               </button>
-              <a href="/about" className="block text-muted-foreground hover:text-primary transition-colors">About</a>
+              <a href="/about" className="block text-muted-foreground hover:text-primary transition-colors">About Us</a>
             </div>
           </div>
           
