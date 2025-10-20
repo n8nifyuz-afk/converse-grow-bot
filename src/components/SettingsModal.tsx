@@ -581,39 +581,39 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
       case 'profile':
         if (!user) {
-          return (
-            <div className="space-y-6 md:space-y-8">
-              <div className="space-y-1.5 md:space-y-2">
-                <h2 className="text-xl md:text-2xl font-bold text-foreground">Profile</h2>
-                <p className="text-sm md:text-base text-muted-foreground">Sign in to manage your account information</p>
-              </div>
-              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-6 md:p-8 text-center">
-                  <div className="space-y-4">
-                    <div className="w-14 h-14 md:w-16 md:h-16 mx-auto bg-muted/50 rounded-full flex items-center justify-center">
-                      <User className="h-7 w-7 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                    <div className="space-y-1.5 md:space-y-2">
-                      <p className="font-medium text-foreground text-sm md:text-base">Sign in to access profile settings</p>
-                      <p className="text-xs md:text-sm text-muted-foreground">Manage your account information and preferences</p>
-                    </div>
-                    <Button 
-                      onClick={() => window.location.href = '/'}
-                      className="mt-2 md:mt-4 w-full sm:w-auto"
-                    >
-                      Sign In
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+        return (
+          <div className="space-y-6 md:space-y-8">
+            <div className="space-y-1.5 md:space-y-2">
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">{t('profile.title')}</h2>
+              <p className="text-sm md:text-base text-muted-foreground">{t('profile.signInToManage')}</p>
             </div>
-          );
+            <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
+              <CardContent className="p-6 md:p-8 text-center">
+                <div className="space-y-4">
+                  <div className="w-14 h-14 md:w-16 md:h-16 mx-auto bg-muted/50 rounded-full flex items-center justify-center">
+                    <User className="h-7 w-7 md:h-8 md:w-8 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <p className="font-medium text-foreground text-sm md:text-base">{t('profile.signInToAccess')}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">{t('profile.manageAccountPreferences')}</p>
+                  </div>
+                  <Button 
+                    onClick={() => window.location.href = '/'}
+                    className="mt-2 md:mt-4 w-full sm:w-auto"
+                  >
+                    {t('profile.signIn')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
         }
         return (
           <div className="space-y-6 md:space-y-8">
             <div className="space-y-1.5 md:space-y-2">
-              <h2 className="text-xl md:text-2xl font-bold text-foreground">Profile</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Manage your account information</p>
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">{t('profile.title')}</h2>
+              <p className="text-sm md:text-base text-muted-foreground">{t('profile.manageAccount')}</p>
             </div>
             
             <div className="space-y-4 md:space-y-6">
@@ -626,8 +626,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <Mail className="h-4 w-4 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm md:text-base">Email Address</p>
-                        <p className="text-xs md:text-sm text-muted-foreground">Your account email</p>
+                        <p className="font-semibold text-foreground text-sm md:text-base">{t('profile.emailAddress')}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{t('profile.yourAccountEmail')}</p>
                       </div>
                     </div>
                     <div className="ml-0 md:ml-11 mt-2">
@@ -648,8 +648,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <Shield className="h-4 w-4 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm md:text-base">Login Methods</p>
-                        <p className="text-xs md:text-sm text-muted-foreground">Connected authentication providers</p>
+                        <p className="font-semibold text-foreground text-sm md:text-base">{t('profile.loginMethods')}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{t('profile.connectedProviders')}</p>
                       </div>
                     </div>
                     
@@ -668,7 +668,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                             </div>
                             <div className="min-w-0">
                               <p className="font-medium text-foreground text-sm md:text-base">Google</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Sign in with your Google account</p>
+                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithGoogle')}</p>
                             </div>
                           </div>
                           <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
@@ -688,7 +688,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                             </div>
                             <div className="min-w-0">
                               <p className="font-medium text-foreground text-sm md:text-base">Apple</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Sign in with your Apple account</p>
+                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithApple')}</p>
                             </div>
                           </div>
                           <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
@@ -707,8 +707,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                               <Mail className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium text-foreground text-sm md:text-base">Email & Password</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Sign in with your email address</p>
+                              <p className="font-medium text-foreground text-sm md:text-base">{t('profile.emailAndPassword')}</p>
+                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithEmail')}</p>
                             </div>
                           </div>
                           <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
@@ -898,12 +898,12 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           return (
             <div className="space-y-4 md:space-y-6">
               <div className="space-y-1.5 md:space-y-2">
-                <h2 className="text-xl md:text-2xl font-semibold text-foreground">Security</h2>
-                <p className="text-sm md:text-base text-muted-foreground">Sign in to manage your account security</p>
+                <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('security.title')}</h2>
+                <p className="text-sm md:text-base text-muted-foreground">{t('security.signInToManage')}</p>
               </div>
               <div className="text-center py-6 md:py-8">
-                <p className="text-sm md:text-base text-muted-foreground mb-4">You need to be signed in to access security settings.</p>
-                <Button onClick={() => window.location.href = '/'} className="w-full sm:w-auto">Sign In</Button>
+                <p className="text-sm md:text-base text-muted-foreground mb-4">{t('security.needSignIn')}</p>
+                <Button onClick={() => window.location.href = '/'} className="w-full sm:w-auto">{t('security.signIn')}</Button>
               </div>
             </div>
           );
@@ -911,22 +911,22 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         return (
           <div className="space-y-4 md:space-y-6">
             <div className="space-y-1.5 md:space-y-2">
-              <h2 className="text-xl md:text-2xl font-semibold text-foreground">Security</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Manage your account security and sessions</p>
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('security.title')}</h2>
+              <p className="text-sm md:text-base text-muted-foreground">{t('security.manageAccountSecurity')}</p>
             </div>
             
             <div className="space-y-4 md:space-y-6">
               {/* Multi-Factor Authentication */}
               <div>
-                <p className="font-medium mb-2 md:mb-3 text-sm md:text-base">Multi-Factor Authentication</p>
+                <p className="font-medium mb-2 md:mb-3 text-sm md:text-base">{t('security.multiFactorAuth')}</p>
                 <div className="p-3 md:p-4 bg-muted/30 rounded-lg border shadow-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-medium text-sm md:text-base">Two-Factor Authentication</p>
-                      <p className="text-xs md:text-sm text-muted-foreground">Not available yet</p>
+                      <p className="font-medium text-sm md:text-base">{t('security.twoFactorAuth')}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">{t('security.notAvailableYet')}</p>
                     </div>
                     <Button variant="outline" disabled size="sm" className="w-full sm:w-auto">
-                      Enable
+                      {t('security.enable')}
                     </Button>
                   </div>
                 </div>
@@ -936,16 +936,16 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
               {/* Session Management */}
               <div>
-                <p className="font-medium mb-2 md:mb-3 text-sm md:text-base">Session Management</p>
+                <p className="font-medium mb-2 md:mb-3 text-sm md:text-base">{t('security.sessionManagement')}</p>
                 <div className="space-y-3">
                   <div className="p-3 md:p-4 bg-muted/30 rounded-lg border shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="font-medium text-sm md:text-base">Current Device</p>
-                        <p className="text-xs md:text-sm text-muted-foreground">You are currently signed in on this device</p>
+                        <p className="font-medium text-sm md:text-base">{t('security.currentDevice')}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{t('security.currentlySignedIn')}</p>
                       </div>
                       <Button variant="outline" onClick={handleLogoutThisDevice} size="sm" className="w-full sm:w-auto">
-                        Sign Out
+                        {t('security.signOut')}
                       </Button>
                     </div>
                   </div>
@@ -953,26 +953,26 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                   <div className="p-3 md:p-4 bg-muted/30 rounded-lg border shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="font-medium text-sm md:text-base">All Devices</p>
-                        <p className="text-xs md:text-sm text-muted-foreground">Sign out of all devices and sessions</p>
+                        <p className="font-medium text-sm md:text-base">{t('security.allDevices')}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{t('security.signOutAllDevices')}</p>
                       </div>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                            Sign Out Everywhere
+                            {t('security.signOutEverywhere')}
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-base md:text-lg">Sign out of all devices?</AlertDialogTitle>
+                            <AlertDialogTitle className="text-base md:text-lg">{t('security.signOutAllDevicesQuestion')}</AlertDialogTitle>
                             <AlertDialogDescription className="text-sm">
-                              This will sign you out of all devices and sessions. You'll need to sign in again on each device.
+                              {t('security.signOutAllDevicesDesc')}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                            <AlertDialogCancel className="w-full sm:w-auto">{t('security.cancel')}</AlertDialogCancel>
                             <AlertDialogAction onClick={handleLogoutAllDevices} className="w-full sm:w-auto">
-                              Sign Out Everywhere
+                              {t('security.signOutEverywhere')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -990,12 +990,12 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           return (
             <div className="space-y-4 md:space-y-6">
               <div className="space-y-1.5 md:space-y-2">
-                <h2 className="text-xl md:text-2xl font-semibold text-foreground">Data Control</h2>
-                <p className="text-sm md:text-base text-muted-foreground">Sign in to manage your data and privacy</p>
+                <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('dataControl.title')}</h2>
+                <p className="text-sm md:text-base text-muted-foreground">{t('dataControl.signInToManage')}</p>
               </div>
               <div className="text-center py-6 md:py-8">
-                <p className="text-sm md:text-base text-muted-foreground mb-4">You need to be signed in to access data control settings.</p>
-                <Button onClick={() => window.location.href = '/'} className="w-full sm:w-auto">Sign In</Button>
+                <p className="text-sm md:text-base text-muted-foreground mb-4">{t('dataControl.needSignIn')}</p>
+                <Button onClick={() => window.location.href = '/'} className="w-full sm:w-auto">{t('dataControl.signIn')}</Button>
               </div>
             </div>
           );
@@ -1003,8 +1003,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         return (
           <div className="space-y-4 md:space-y-6">
             <div className="space-y-1.5 md:space-y-2">
-              <h2 className="text-xl md:text-2xl font-semibold text-foreground">Data Control</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Manage your data and account</p>
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('dataControl.title')}</h2>
+              <p className="text-sm md:text-base text-muted-foreground">{t('dataControl.manageData')}</p>
             </div>
             
             <div className="space-y-4 md:space-y-6">
@@ -1013,8 +1013,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 <CardContent className="p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div className="min-w-0">
-                      <h3 className="font-semibold mb-1 text-sm md:text-base">Export Data</h3>
-                      <p className="text-xs md:text-sm text-muted-foreground">Download all your conversations and account data</p>
+                      <h3 className="font-semibold mb-1 text-sm md:text-base">{t('dataControl.exportData')}</h3>
+                      <p className="text-xs md:text-sm text-muted-foreground">{t('dataControl.downloadAllData')}</p>
                     </div>
                     <Button 
                       onClick={handleExportData}
@@ -1023,7 +1023,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       size="sm"
                       className="w-full sm:w-auto"
                     >
-                      {isExporting ? 'Exporting...' : 'Export'}
+                      {isExporting ? t('dataControl.exporting') : t('dataControl.export')}
                     </Button>
                   </div>
                 </CardContent>
@@ -1034,27 +1034,27 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 <CardContent className="p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div className="min-w-0">
-                      <h3 className="font-semibold mb-1 text-sm md:text-base">Delete All Data</h3>
-                      <p className="text-xs md:text-sm text-muted-foreground">Permanently delete all conversations, projects, and images</p>
+                      <h3 className="font-semibold mb-1 text-sm md:text-base">{t('dataControl.deleteAllData')}</h3>
+                      <p className="text-xs md:text-sm text-muted-foreground">{t('dataControl.deleteAllDataDesc')}</p>
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="destructive" size="sm" className="w-full sm:w-auto">
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete All
+                          {t('dataControl.deleteAll')}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                         <AlertDialogHeader>
-                          <AlertDialogTitle className="text-base md:text-lg">Delete all data?</AlertDialogTitle>
+                          <AlertDialogTitle className="text-base md:text-lg">{t('dataControl.deleteAllDataQuestion')}</AlertDialogTitle>
                           <AlertDialogDescription className="text-sm">
-                            This action cannot be undone. All your conversations, projects, and images will be permanently deleted.
+                            {t('dataControl.deleteAllDataWarning')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                          <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                          <AlertDialogCancel className="w-full sm:w-auto">{t('dataControl.cancel')}</AlertDialogCancel>
                           <AlertDialogAction onClick={handleDeleteAllChats} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto">
-                            Delete All Data
+                            {t('dataControl.deleteAllDataConfirm')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -1068,27 +1068,27 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 <CardContent className="p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div className="min-w-0">
-                      <h3 className="font-semibold mb-1 text-sm md:text-base">Delete Account</h3>
-                      <p className="text-xs md:text-sm text-muted-foreground">Permanently delete your account and all associated data</p>
+                      <h3 className="font-semibold mb-1 text-sm md:text-base">{t('dataControl.deleteAccount')}</h3>
+                      <p className="text-xs md:text-sm text-muted-foreground">{t('dataControl.deleteAccountDesc')}</p>
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="destructive" size="sm" className="w-full sm:w-auto">
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete Account
+                          {t('dataControl.deleteAccountButton')}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                         <AlertDialogHeader>
-                          <AlertDialogTitle className="text-base md:text-lg">Delete your account?</AlertDialogTitle>
+                          <AlertDialogTitle className="text-base md:text-lg">{t('dataControl.deleteAccountQuestion')}</AlertDialogTitle>
                           <AlertDialogDescription className="text-sm">
-                            This action cannot be undone. Your account and all associated data will be permanently deleted.
+                            {t('dataControl.deleteAccountWarning')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                          <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+                          <AlertDialogCancel className="w-full sm:w-auto">{t('dataControl.cancel')}</AlertDialogCancel>
                           <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto">
-                            Delete Account
+                            {t('dataControl.deleteAccountConfirm')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -1110,7 +1110,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="bottom" className="h-[92vh] md:h-[88vh] p-0 flex flex-col bg-background">
           <SheetHeader className="px-4 md:px-6 py-3 md:py-4 border-b border-border/40 flex-shrink-0 bg-gradient-to-r from-background to-background/95">
-            <SheetTitle className="text-lg md:text-xl font-semibold text-left text-foreground">Settings</SheetTitle>
+            <SheetTitle className="text-lg md:text-xl font-semibold text-left text-foreground">{t('settingsModal.title')}</SheetTitle>
           </SheetHeader>
           
           {/* Mobile Tab Navigation */}
@@ -1165,8 +1165,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           <div className="w-48 md:w-56 lg:w-64 bg-gradient-to-b from-muted/30 to-muted/10 border-r border-border/40 backdrop-blur-sm">
             <div className="px-3 md:px-4 lg:px-6 py-3 md:py-4 border-b border-border/40 bg-gradient-to-r from-background/50 to-background/30">
               <DialogHeader className="text-left">
-                <DialogTitle className="text-lg md:text-xl font-semibold text-foreground">Settings</DialogTitle>
-                <DialogDescription className="sr-only">Manage your application settings and preferences</DialogDescription>
+                <DialogTitle className="text-lg md:text-xl font-semibold text-foreground">{t('settingsModal.title')}</DialogTitle>
+                <DialogDescription className="sr-only">{t('settingsModal.managePreferences')}</DialogDescription>
               </DialogHeader>
             </div>
             <nav className="p-2 md:p-3 space-y-1">
