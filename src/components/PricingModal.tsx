@@ -230,17 +230,17 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-4 lg:p-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30">
-              <div className="mb-2 sm:mb-3 md:mb-3 flex-shrink-0">
-                <h2 className="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-bold mb-1 sm:mb-1.5 md:mb-1.5 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
+              <div className="mb-2 sm:mb-2.5 flex-shrink-0">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
                   Choose Your Plan
                 </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">Unlock unlimited access to all AI models</p>
+                <p className="text-zinc-600 dark:text-zinc-400 text-xs">Unlock unlimited access to all AI models</p>
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-2 sm:mb-3 md:mb-2 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10 md:h-11 bg-zinc-100 dark:bg-zinc-900 p-1 sm:p-1.5 border border-zinc-200 dark:border-zinc-800 rounded-lg sm:rounded-xl">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-2 sm:mb-2.5 flex-shrink-0">
+                <TabsList className="grid w-full grid-cols-2 h-8 sm:h-9 md:h-10 bg-zinc-100 dark:bg-zinc-900 p-0.5 sm:p-1 border border-zinc-200 dark:border-zinc-800 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
                     className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
@@ -259,81 +259,72 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-2 mb-3 flex-1 min-h-0 overflow-y-auto">
+              <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-2.5 flex-shrink-0">
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
-                  className={`w-full p-3 sm:p-4 rounded-lg border-2 transition-all duration-300 text-left group relative overflow-hidden ${
+                  className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
                     selectedPeriod === 'monthly'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md bg-white dark:bg-zinc-950'
+                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-lg'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
                   }`}
                 >
-                  {selectedPeriod === 'monthly' && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
-                  )}
-                  <div className="flex justify-between items-center relative z-10">
+                  <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-bold text-sm sm:text-base mb-0.5 text-zinc-900 dark:text-white">Monthly</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">Monthly</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan].monthly.price}/month
                       </div>
                     </div>
-                    <div className="text-right ml-4">
-                      <div className="font-bold text-xl sm:text-2xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">per day</div>
+                    <div className="text-right ml-3">
+                      <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">per day</div>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setSelectedPeriod('3month')}
-                  className={`w-full p-3 sm:p-4 rounded-lg border-2 transition-all duration-300 text-left relative group overflow-hidden ${
+                  className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
                     selectedPeriod === '3month'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md bg-white dark:bg-zinc-950'
+                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-lg'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
                   }`}
                 >
-                  {selectedPeriod === '3month' && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
-                  )}
-                  <div className="flex justify-between items-center relative z-10">
+                  <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-bold text-sm sm:text-base mb-0.5 text-zinc-900 dark:text-white">3 Months</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">3 Months</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan]['3month'].price} total
                       </div>
                     </div>
-                    <div className="text-right ml-4">
-                      <div className="font-bold text-xl sm:text-2xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">per day</div>
+                    <div className="text-right ml-3">
+                      <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">per day</div>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setSelectedPeriod('yearly')}
-                  className={`w-full p-3 sm:p-4 pt-5 sm:pt-6 rounded-lg border-2 transition-all duration-300 text-left relative group overflow-visible ${
+                  className={`w-full p-2.5 sm:p-3 pt-4 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
                     selectedPeriod === 'yearly'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md bg-white dark:bg-zinc-950'
+                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-lg'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
                   }`}
                 >
-                  <Badge className="absolute -top-2.5 right-3 sm:right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg px-3 py-1 text-xs font-bold border-0 whitespace-nowrap">
+                  <Badge className="absolute -top-2 right-2 sm:right-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-2 py-0.5 text-[10px] font-bold border-0">
                     Save {pricingOptions[selectedPlan].yearly.savings}%
                   </Badge>
-                  {selectedPeriod === 'yearly' && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
-                  )}
-                  <div className="flex justify-between items-center relative z-10">
+                  <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-bold text-sm sm:text-base mb-0.5 text-zinc-900 dark:text-white">Yearly</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">Yearly</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan].yearly.price} total
                       </div>
                     </div>
-                    <div className="text-right ml-4">
-                      <div className="font-bold text-xl sm:text-2xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">per day</div>
+                    <div className="text-right ml-3">
+                      <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">per day</div>
                     </div>
                   </div>
                 </button>
@@ -343,7 +334,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-10 sm:h-12 md:h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-xs sm:text-sm md:text-base shadow-2xl hover:shadow-blue-500/50 transition-all rounded-lg sm:rounded-xl border-0 flex-shrink-0 hover:scale-[1.02]"
+                className="w-full h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-sm shadow-lg hover:shadow-blue-500/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
               >
                 {isLoading ? (
                   <>
@@ -360,11 +351,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Button>
 
               {/* Footer */}
-              <div className="mt-2 sm:mt-3 md:mt-2 space-y-1.5 sm:space-y-2 flex-shrink-0">
+              <div className="space-y-1 flex-shrink-0">
                 {/* Payment Cards */}
-                <div className="flex items-center justify-center gap-2 sm:gap-3 py-1 sm:py-2">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-0.5">
                   {/* Visa */}
-                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
+                  <div className="w-9 h-6 sm:w-10 sm:h-7 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 750 471" fill="none">
                       <rect fill="#0E4595" x="0" y="0" width="750" height="471" rx="40" />
                       <polygon fill="#FFFFFF" points="278.1975 334.2275 311.5585 138.4655 364.9175 138.4655 331.5335 334.2275" />
@@ -374,7 +365,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     </svg>
                   </div>
                   {/* Mastercard */}
-                  <div className="w-12 h-8 sm:w-14 sm:h-10 flex items-center justify-center">
+                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 -11 70 70" fill="none">
                       <rect x="0.5" y="0.5" width="69" height="47" rx="5.5" fill="white" stroke="#D9D9D9"/>
                       <path fillRule="evenodd" clipRule="evenodd" d="M35.3945 34.7619C33.0114 36.8184 29.92 38.0599 26.5421 38.0599C19.0047 38.0599 12.8945 31.8788 12.8945 24.254C12.8945 16.6291 19.0047 10.448 26.5421 10.448C29.92 10.448 33.0114 11.6895 35.3945 13.7461C37.7777 11.6895 40.869 10.448 44.247 10.448C51.7843 10.448 57.8945 16.6291 57.8945 24.254C57.8945 31.8788 51.7843 38.0599 44.247 38.0599C40.869 38.0599 37.7777 36.8184 35.3945 34.7619Z" fill="#ED0006"/>
@@ -383,14 +374,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     </svg>
                   </div>
                   {/* Apple Pay */}
-                  <div className="w-12 h-8 sm:w-14 sm:h-10 flex items-center justify-center">
+                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 -9 58 58" fill="none">
                       <rect x="0.5" y="0.5" width="57" height="39" rx="3.5" fill="white" stroke="#F3F3F3"/>
                       <path fillRule="evenodd" clipRule="evenodd" d="M17.5771 14.9265C17.1553 15.4313 16.4803 15.8294 15.8053 15.7725C15.7209 15.09 16.0513 14.3649 16.4381 13.9171C16.8599 13.3981 17.5982 13.0284 18.1959 13C18.2662 13.7109 17.992 14.4076 17.5771 14.9265ZM18.1888 15.9076C17.5942 15.873 17.0516 16.0884 16.6133 16.2624C16.3313 16.3744 16.0924 16.4692 15.9107 16.4692C15.7068 16.4692 15.4581 16.3693 15.1789 16.2571C14.813 16.1102 14.3947 15.9422 13.956 15.9502C12.9506 15.9645 12.0154 16.5403 11.5021 17.4573C10.4474 19.2915 11.2279 22.0071 12.2474 23.5C12.7467 24.2393 13.3443 25.0498 14.1318 25.0213C14.4783 25.0081 14.7275 24.9012 14.9854 24.7905C15.2823 24.6631 15.5908 24.5308 16.0724 24.5308C16.5374 24.5308 16.8324 24.6597 17.1155 24.7834C17.3847 24.9011 17.6433 25.014 18.0271 25.0071C18.8428 24.9929 19.356 24.2678 19.8553 23.5284C20.394 22.7349 20.6307 21.9605 20.6667 21.843L20.6709 21.8294C20.67 21.8285 20.6634 21.8254 20.6516 21.82C20.4715 21.7366 19.095 21.0995 19.0818 19.391C19.0686 17.957 20.1736 17.2304 20.3476 17.116C20.3582 17.109 20.3653 17.1043 20.3685 17.1019C19.6654 16.0498 18.5685 15.936 18.1888 15.9076ZM23.8349 24.9289V13.846H27.9482C30.0717 13.846 31.5553 15.3246 31.5553 17.4858C31.5553 19.6469 30.0435 21.1398 27.892 21.1398H25.5365V24.9289H23.8349ZM25.5365 15.2962V19.6967H27.4912C28.9748 19.6967 29.8185 18.8934 29.8185 17.4929C29.8185 16.0924 28.9748 15.2962 27.4982 15.2962H25.5365ZM37.1732 23.5995C36.7232 24.4668 35.7318 25.0142 34.6631 25.0142C33.081 25.0142 31.9771 24.0616 31.9771 22.6256C31.9771 21.2038 33.0459 20.3863 35.0217 20.2654L37.1451 20.1374V19.5261C37.1451 18.6232 36.5615 18.1327 35.5209 18.1327C34.6631 18.1327 34.0373 18.5806 33.9107 19.263H32.3779C32.4271 17.827 33.7631 16.782 35.5701 16.782C37.5177 16.782 38.7834 17.8128 38.7834 19.4123V24.9289H37.2084V23.5995H37.1732ZM35.1201 23.6991C34.2131 23.6991 33.6365 23.2583 33.6365 22.5829C33.6365 21.8863 34.192 21.481 35.2537 21.4171L37.1451 21.2962V21.9218C37.1451 22.9597 36.2732 23.6991 35.1201 23.6991ZM44.0076 25.3626C43.3256 27.3033 42.5451 27.9431 40.8857 27.9431C40.7592 27.9431 40.3373 27.9289 40.2388 27.9005V26.5711C40.3443 26.5853 40.6045 26.5995 40.7381 26.5995C41.4904 26.5995 41.9123 26.2796 42.1724 25.4479L42.3271 24.9573L39.4443 16.8886H41.2232L43.2271 23.436H43.2623L45.2662 16.8886H46.9959L44.0076 25.3626Z" fill="#000000"/>
                     </svg>
                   </div>
                   {/* Revolut */}
-                  <div className="w-12 h-8 sm:w-14 sm:h-10 flex items-center justify-center">
+                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 294.2 65" fill="none">
                       <path fillRule="evenodd" clipRule="evenodd" fill="currentColor" d="M200.7,0h11.6v64.5h-11.6V0z M294.2,27.2v-10h-11.9v-13h-11.6v47.5c0,4.4,1.1,7.7,3.3,9.9
                         c2.2,2.2,5.5,3.3,10,3.3h10.2v-10h-7.5c-1.6,0-2.8-0.4-3.5-1.1c-0.6-0.6-1-2.3-1-4.1V27.2L294.2,27.2z M122.2,51.9l11.9-34.8h12.1
@@ -412,14 +403,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     </svg>
                   </div>
                   {/* Google Pay */}
-                  <div className="w-12 h-8 sm:w-14 sm:h-10 flex items-center justify-center">
+                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 356.44 141.39" fill="none">
                       <g fill="#5f6368"><path d="M168.58 20.77V56.5h22.04c5.25 0 9.59-1.76 13.02-5.29 3.53-3.52 5.29-7.72 5.29-12.58s-1.76-8.91-5.29-12.44c-3.44-3.62-7.78-5.43-13.02-5.43h-22.04zm0 48.32v41.45h-13.16V8.19h34.91c8.87 0 16.39 2.96 22.6 8.86 6.31 5.9 9.45 13.1 9.45 21.58s-3.14 15.92-9.45 21.72c-6.1 5.82-13.64 8.72-22.6 8.72h-21.75zM235.68 89.08c0 3.44 1.45 6.29 4.37 8.58 2.91 2.28 6.32 3.43 10.23 3.43 5.54 0 10.46-2.05 14.8-6.14 4.34-4.1 6.51-8.91 6.51-14.43-4.1-3.25-9.83-4.86-17.17-4.86-5.34 0-9.8 1.29-13.37 3.86s-5.37 5.75-5.37 9.56m17.03-50.88c9.73 0 17.41 2.59 23.04 7.79s8.43 12.31 8.43 21.36v43.17h-12.59v-9.72h-.57c-5.44 8-12.68 12-21.74 12-7.73 0-14.2-2.28-19.39-6.85-5.2-4.58-7.8-10.29-7.8-17.16 0-7.24 2.73-13 8.22-17.28 5.49-4.29 12.81-6.43 21.96-6.43 7.82 0 14.26 1.43 19.31 4.29v-3c0-4.57-1.81-8.45-5.43-11.64-3.63-3.2-7.86-4.79-12.73-4.79-7.35 0-13.16 3.09-17.45 9.29l-11.6-7.29c6.4-9.15 15.84-13.72 28.34-13.72M356.44 40.49l-43.93 100.9h-13.59l16.31-35.3-28.9-65.6h14.31l20.89 50.31h.28l20.32-50.31z"/></g><path d="M115.39 60.14c0-4.14-.35-8.14-1.01-11.96H58.86v22.65h31.79c-1.36 7.38-5.49 13.66-11.75 17.87v14.71h18.98c11.11-10.24 17.51-25.37 17.51-43.26" fill="#4285f4"/><path d="M58.86 117.61c15.89 0 29.26-5.21 39.02-14.2L78.9 88.7c-5.28 3.55-12.08 5.63-20.04 5.63-15.35 0-28.38-10.34-33.05-24.27H6.27v15.15c9.69 19.21 29.6 32.41 52.6 32.41" fill="#34a853"/><path d="M25.82 70.05c-1.19-3.55-1.85-7.34-1.85-11.25s.65-7.7 1.85-11.25V32.4H6.27C2.26 40.34 0 49.3 0 58.8s2.26 18.47 6.27 26.4z" fill="#fabb05"/><path d="M58.86 23.27c8.67 0 16.45 2.98 22.58 8.82s16.8-16.78 16.8-16.78C88.04 5.83 74.74 0 58.86 0 35.87 0 15.96 13.19 6.27 32.4l19.55 15.15c4.66-13.93 17.69-24.27 33.05-24.27" fill="#e94235"/>
                     </svg>
                   </div>
                 </div>
 
-                <p className="text-[10px] sm:text-xs text-center text-zinc-500 dark:text-zinc-500 leading-relaxed px-2 sm:px-0">
+                <p className="text-[9px] sm:text-[10px] text-center text-zinc-500 dark:text-zinc-500 leading-snug px-1">
                   By subscribing, you agree to our{' '}
                   <a href="/terms" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">Terms</a>,{' '}
                   <a href="/privacy" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">Privacy Policy</a>, and{' '}
