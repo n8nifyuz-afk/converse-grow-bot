@@ -19,24 +19,23 @@ interface PricingModalProps {
 
 interface Feature {
   name: string;
-  free: boolean | string;
   pro: boolean | string;
   ultra: boolean | string;
 }
 
 const allFeatures: Feature[] = [
-  { name: 'GPT-4, GPT-5, Gemini', free: false, pro: true, ultra: true },
-  { name: 'Claude, DeepSeek, Grok', free: false, pro: false, ultra: true },
-  { name: 'Unlimited Chats', free: false, pro: true, ultra: true },
-  { name: 'Voice Mode', free: false, pro: true, ultra: true },
-  { name: 'File Uploads', free: false, pro: true, ultra: true },
-  { name: 'Chat with Files', free: false, pro: true, ultra: true },
-  { name: 'Chat on WhatsApp (Coming Soon)', free: false, pro: true, ultra: true },
-  { name: 'Image Generation (500/month)', free: false, pro: true, ultra: false },
-  { name: 'Image Generation (2,000/month)', free: false, pro: false, ultra: true },
-  { name: 'Priority Support', free: false, pro: true, ultra: false },
-  { name: 'Team Collaboration', free: false, pro: false, ultra: true },
-  { name: 'Early Access to Models', free: false, pro: false, ultra: true },
+  { name: 'GPT-4, GPT-5, Gemini', pro: true, ultra: true },
+  { name: 'Claude, DeepSeek, Grok', pro: false, ultra: true },
+  { name: 'Unlimited Chats', pro: true, ultra: true },
+  { name: 'Voice Mode', pro: true, ultra: true },
+  { name: 'File Uploads', pro: true, ultra: true },
+  { name: 'Chat with Files', pro: true, ultra: true },
+  { name: 'Chat on WhatsApp (Coming Soon)', pro: true, ultra: true },
+  { name: 'Image Generation (500/month)', pro: true, ultra: false },
+  { name: 'Image Generation (2,000/month)', pro: false, ultra: true },
+  { name: 'Priority Support', pro: true, ultra: true },
+  { name: 'Team Collaboration', pro: false, ultra: true },
+  { name: 'Early Access to Models', pro: false, ultra: true },
 ];
 
 const pricingOptions = {
@@ -179,52 +178,47 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 {/* Header Row */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 pb-2 sm:pb-3 md:pb-4 border-b border-zinc-700/50 mb-1 sm:mb-2 flex-shrink-0">
                   <div className="text-xs sm:text-sm md:text-base font-bold text-zinc-400">Feature</div>
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-center text-zinc-400">Free</div>
                   <div className="text-xs sm:text-sm md:text-base font-bold text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    {selectedPlan === 'pro' ? '⭐ Pro' : '👑 Ultra'}
+                    ⭐ Pro
+                  </div>
+                  <div className="text-xs sm:text-sm md:text-base font-bold text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    👑 Ultra Pro
                   </div>
                 </div>
                 
                 {/* Feature Rows */}
                 <div className="flex-1 space-y-0">
-                  {allFeatures
-                    .filter((feature) => {
-                      const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
-                      return selectedValue !== false;
-                    })
-                    .map((feature, index) => {
-                      const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
-                      
-                      return (
-                        <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1 sm:py-1.5 md:py-2 px-1.5 sm:px-2 md:px-3 rounded-lg md:hover:bg-white/5 md:transition-all md:duration-200 backdrop-blur-sm border border-transparent md:hover:border-zinc-700/50">
-                          <div className="text-xs sm:text-sm md:text-base font-medium text-white flex items-center leading-tight">
-                            {feature.name}
-                          </div>
-                          <div className="flex justify-center items-center">
-                            {feature.free === false ? (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
-                              </div>
-                            ) : (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-green-400" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex justify-center items-center">
-                            {selectedValue === false ? (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
-                              </div>
-                            ) : (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center border border-blue-400/30">
-                                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
-                              </div>
-                            )}
-                          </div>
+                  {allFeatures.map((feature, index) => {
+                    return (
+                      <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1 sm:py-1.5 md:py-2 px-1.5 sm:px-2 md:px-3 rounded-lg md:hover:bg-white/5 md:transition-all md:duration-200 backdrop-blur-sm border border-transparent md:hover:border-zinc-700/50">
+                        <div className="text-xs sm:text-sm md:text-base font-medium text-white flex items-center leading-tight">
+                          {feature.name}
                         </div>
-                      );
-                    })}
+                        <div className="flex justify-center items-center">
+                          {feature.pro === false ? (
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                              <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
+                            </div>
+                          ) : (
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center border border-blue-400/30">
+                              <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex justify-center items-center">
+                          {feature.ultra === false ? (
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                              <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
+                            </div>
+                          ) : (
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center border border-purple-400/30">
+                              <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
