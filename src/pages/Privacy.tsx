@@ -3,13 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Lock, Eye, FileText, Globe, Scale, Trash2, Mail } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { useTranslation } from 'react-i18next';
 
 export default function Privacy() {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Privacy Policy - ChatLearn" 
-        description="Learn how ChatLearn collects, uses, and protects your personal data. GDPR compliant privacy policy."
+        title={`${t('privacy.title')} - ChatLearn`}
+        description={t('privacy.seoDesc')}
         canonical="https://chatl.ai/privacy"
       />
       
@@ -18,16 +21,16 @@ export default function Privacy() {
         <div className="container max-w-5xl mx-auto text-center">
           <Badge variant="outline" className="mb-4 sm:mb-6">
             <Shield className="h-3 w-3 mr-2" />
-            Legal Document
+            {t('privacy.legalDoc')}
           </Badge>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-            Privacy Policy
+            {t('privacy.title')}
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground mb-2">
-            Last Updated: October 3, 2025
+            {t('privacy.lastUpdated')}
           </p>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            ChatLearn is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and disclose your personal data.
+            {t('privacy.intro')}
           </p>
         </div>
       </section>
@@ -35,23 +38,23 @@ export default function Privacy() {
       {/* Quick Links Navigation */}
       <section className="py-8 px-4 bg-muted/20 border-b">
         <div className="container max-w-5xl mx-auto">
-          <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('privacy.quickLinks')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-            <a href="#definitions" className="text-primary hover:underline">Definitions and Key Terms</a>
-            <a href="#data-categories" className="text-primary hover:underline">Categories of Personal Data</a>
-            <a href="#how-we-use" className="text-primary hover:underline">How We Use Your Information</a>
-            <a href="#how-we-disclose" className="text-primary hover:underline">How We Disclose Information</a>
-            <a href="#international" className="text-primary hover:underline">International Transfers</a>
-            <a href="#retention" className="text-primary hover:underline">Data Retention</a>
-            <a href="#security" className="text-primary hover:underline">Security Measures</a>
-            <a href="#cookies" className="text-primary hover:underline">Cookies & Consent</a>
-            <a href="#payment" className="text-primary hover:underline">Payment Details</a>
-            <a href="#children" className="text-primary hover:underline">Children's Privacy</a>
-            <a href="#gdpr-rights" className="text-primary hover:underline">GDPR/EEA & UK Rights</a>
-            <a href="#california" className="text-primary hover:underline">California Privacy</a>
-            <a href="#delete" className="text-primary hover:underline">Delete Account Policy</a>
-            <a href="#changes" className="text-primary hover:underline">Policy Changes</a>
-            <a href="#contact" className="text-primary hover:underline">Contact Us</a>
+            <a href="#definitions" className="text-primary hover:underline">{t('privacy.definitions')}</a>
+            <a href="#data-categories" className="text-primary hover:underline">{t('privacy.dataCategories')}</a>
+            <a href="#how-we-use" className="text-primary hover:underline">{t('privacy.howWeUse')}</a>
+            <a href="#how-we-disclose" className="text-primary hover:underline">{t('privacy.howWeDisclose')}</a>
+            <a href="#international" className="text-primary hover:underline">{t('privacy.international')}</a>
+            <a href="#retention" className="text-primary hover:underline">{t('privacy.retention')}</a>
+            <a href="#security" className="text-primary hover:underline">{t('privacy.security')}</a>
+            <a href="#cookies" className="text-primary hover:underline">{t('privacy.cookies')}</a>
+            <a href="#payment" className="text-primary hover:underline">{t('privacy.payment')}</a>
+            <a href="#children" className="text-primary hover:underline">{t('privacy.children')}</a>
+            <a href="#gdpr-rights" className="text-primary hover:underline">{t('privacy.gdprRights')}</a>
+            <a href="#california" className="text-primary hover:underline">{t('privacy.california')}</a>
+            <a href="#delete" className="text-primary hover:underline">{t('privacy.delete')}</a>
+            <a href="#changes" className="text-primary hover:underline">{t('privacy.changes')}</a>
+            <a href="#contact" className="text-primary hover:underline">{t('privacy.contact')}</a>
           </div>
         </div>
       </section>

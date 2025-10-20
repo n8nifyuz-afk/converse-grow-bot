@@ -3,13 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, AlertCircle, Globe, FileText, Mail, DollarSign, Clock, XCircle } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { useTranslation } from 'react-i18next';
 
 const RefundPolicy = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Refund Policy - ChatLearn"
-        description="ChatLearn refund policy explaining conditions for refund requests, consumer rights, and our commitment to customer satisfaction."
+        title={`${t('refundPolicy.title')} - ChatLearn`}
+        description={t('refundPolicy.seoDesc')}
         canonical="https://chatl.ai/refund-policy"
       />
       
@@ -18,16 +21,16 @@ const RefundPolicy = () => {
         <div className="container max-w-5xl mx-auto text-center">
           <Badge variant="outline" className="mb-4 sm:mb-6">
             <DollarSign className="h-3 w-3 mr-2" />
-            Legal Document
+            {t('refundPolicy.legalDoc')}
           </Badge>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-            Refund Policy
+            {t('refundPolicy.title')}
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground mb-2">
-            Last Updated: October 3, 2025
+            {t('refundPolicy.lastUpdated')}
           </p>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            Thank you for choosing ChatLearn. This Refund Policy explains the conditions under which users may request a refund for payments made on our website.
+            {t('refundPolicy.intro')}
           </p>
         </div>
       </section>

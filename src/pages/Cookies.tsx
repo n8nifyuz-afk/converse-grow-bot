@@ -3,13 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Cookie, Shield, Eye, Settings, Bell, ExternalLink, Mail } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { useTranslation } from 'react-i18next';
 
 export default function Cookies() {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Cookie Policy - ChatLearn" 
-        description="Learn how ChatLearn uses cookies and similar technologies. Understand your choices and how to manage cookie preferences."
+        title={`${t('cookiePolicy.title')} - ChatLearn`}
+        description={t('cookiePolicy.seoDesc')}
         canonical="https://chatl.ai/cookie-policy"
       />
       
@@ -18,16 +21,16 @@ export default function Cookies() {
         <div className="container max-w-5xl mx-auto text-center">
           <Badge variant="outline" className="mb-4 sm:mb-6">
             <Cookie className="h-3 w-3 mr-2" />
-            Legal Document
+            {t('cookiePolicy.legalDoc')}
           </Badge>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-            Cookie Policy
+            {t('cookiePolicy.title')}
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground mb-2">
-            Last Updated: October 2025
+            {t('cookiePolicy.lastUpdated')}
           </p>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            This Cookie Policy explains how ChatLearn uses cookies and similar technologies on our website.
+            {t('cookiePolicy.intro')}
           </p>
         </div>
       </section>

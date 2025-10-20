@@ -2,13 +2,16 @@ import React from 'react';
 import SEO from '@/components/SEO';
 import { Card } from '@/components/ui/card';
 import { Shield, FileText, AlertCircle, Scale, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Terms() {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <SEO 
-        title="Terms & Conditions"
-        description="Terms and conditions for using ChatLearn AI platform. Learn about our service agreements, user rights, and platform policies."
+        title={t('terms.title')}
+        description={t('terms.seoDesc')}
       />
       
       {/* Hero Section */}
@@ -18,10 +21,10 @@ export default function Terms() {
             <FileText className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Terms & Conditions
+            {t('terms.title')}
           </h1>
           <p className="text-lg text-muted-foreground">
-            Last Updated: October 3, 2025
+            {t('terms.lastUpdated')}
           </p>
         </div>
       </div>
