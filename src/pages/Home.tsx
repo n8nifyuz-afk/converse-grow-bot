@@ -287,7 +287,7 @@ const Home = () => {
               Choose Your Plan. Unlock the Power of AI.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start free with GPT-4 and upgrade anytime for full access to GPT-5, Claude, Gemini, DeepSeek, Grok, and more.
+              Start free with GPT-4-min and upgrade anytime for full access to GPT-5, Claude, Gemini, DeepSeek, Grok, and more.
             </p>
           </div>
           
