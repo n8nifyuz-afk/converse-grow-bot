@@ -57,9 +57,9 @@ const priceIds = {
     yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
   },
   ultra: {
-    monthly: 'price_1SH1gHL8Zm4LqDn4wDQIGntf',
-    '3month': 'price_1SKIteL8Zm4LqDn43F8k1Y5m',
-    yearly: 'price_1SH1MjL8Zm4LqDn40swOy4Ar'
+    monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',
+    '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',
+    yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'
   }
 };
 
@@ -78,9 +78,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     'prod_TGqk9k16XhvCIn': 'Pro',        // Pro Monthly
     'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month
     'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly
-    'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly
-    'prod_TGqalnUwWUES52': 'Ultra Pro',  // Ultra Pro 3-Month
-    'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly
+    'prod_TGqs5r2udThT0t': 'Ultra Pro',  // Ultra Pro Monthly
+    'prod_TGquGexHO44m4T': 'Ultra Pro',  // Ultra Pro 3-Month
+    'prod_TGqwVIWObYLt6U': 'Ultra Pro',  // Ultra Pro Yearly
   };
 
   console.log('[PRICING-MODAL] Render state:', {
