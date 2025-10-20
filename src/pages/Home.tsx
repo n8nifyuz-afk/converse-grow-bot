@@ -373,7 +373,13 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.accessToAll')}</span>
+                  <span className="text-foreground text-sm">Access to GPT-4, GPT-5, Gemini</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-muted-foreground text-sm">Claude, DeepSeek, Grok (Ultra only)</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -398,6 +404,12 @@ const Home = () => {
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
                   <span className="text-foreground text-sm">{t('pricing.chatWithFiles')}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-foreground text-sm">Chat on WhatsApp (Coming Soon)</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -447,6 +459,12 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
+                  <span className="text-foreground text-sm">Access to Claude, DeepSeek, and Grok</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
+                  </div>
                   <span className="text-foreground text-sm">{t('pricing.extendedLimits')}</span>
                 </div>
                 <div className="flex items-start gap-3">
@@ -454,6 +472,12 @@ const Home = () => {
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
                   <span className="text-foreground text-sm">{t('pricing.imageGeneration2000')}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-foreground text-sm">Chat on WhatsApp (Coming Soon)</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">

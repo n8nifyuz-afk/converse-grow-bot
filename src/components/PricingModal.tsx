@@ -25,11 +25,13 @@ interface Feature {
 }
 
 const allFeatures: Feature[] = [
-  { name: 'All AI Models', free: false, pro: true, ultra: true },
+  { name: 'GPT-4, GPT-5, Gemini', free: false, pro: true, ultra: true },
+  { name: 'Claude, DeepSeek, Grok', free: false, pro: false, ultra: true },
   { name: 'Unlimited Chats', free: false, pro: true, ultra: true },
   { name: 'Voice Mode', free: false, pro: true, ultra: true },
   { name: 'File Uploads', free: false, pro: true, ultra: true },
   { name: 'Chat with Files', free: false, pro: true, ultra: true },
+  { name: 'Chat on WhatsApp (Coming Soon)', free: false, pro: true, ultra: true },
   { name: 'Image Generation (500/month)', free: false, pro: true, ultra: false },
   { name: 'Image Generation (2,000/month)', free: false, pro: false, ultra: true },
   { name: 'Priority Support', free: false, pro: true, ultra: false },

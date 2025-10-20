@@ -64,7 +64,10 @@ const Pricing = () => {
       text: "Access to GPT-4o Mini only",
       included: true
     }, {
-      text: "GPT-5, Claude, Gemini, DeepSeek, Grok",
+      text: "GPT-4, GPT-5, Gemini",
+      included: false
+    }, {
+      text: "Claude, DeepSeek, Grok (Ultra only)",
       included: false
     }, {
       text: "Voice mode",
@@ -90,8 +93,11 @@ const Pricing = () => {
     description: "For professionals",
     popular: true,
     features: [{
-      text: "Access to all AI models: GPT-4, GPT-5, Claude, Gemini, DeepSeek, Grok",
+      text: "Access to GPT-4, GPT-5, Gemini models",
       included: true
+    }, {
+      text: "Claude, DeepSeek, Grok (Upgrade to Ultra)",
+      included: false
     }, {
       text: "Unlimited chats & model switching",
       included: true
@@ -106,6 +112,9 @@ const Pricing = () => {
       included: true
     }, {
       text: "Image generation (500 / month)",
+      included: true
+    }, {
+      text: "Chat on WhatsApp (Coming Soon)",
       included: true
     }, {
       text: "Priority support",
@@ -125,10 +134,16 @@ const Pricing = () => {
       text: "Everything in Pro",
       included: true
     }, {
+      text: "Access to Claude, DeepSeek, Grok",
+      included: true
+    }, {
       text: "Extended file & message limits",
       included: true
     }, {
       text: "Image generation (2,000 / month)",
+      included: true
+    }, {
+      text: "Chat on WhatsApp (Coming Soon)",
       included: true
     }, {
       text: "Team collaboration features",
@@ -403,7 +418,7 @@ const Pricing = () => {
                   <tr className="hover:bg-muted/30 transition-colors">
                     <td className="py-4 px-6">Anthropic Claude</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
-                    <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
@@ -415,7 +430,13 @@ const Pricing = () => {
                   <tr className="hover:bg-muted/30 transition-colors">
                     <td className="py-4 px-6">DeepSeek</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
+                  </tr>
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="py-4 px-6">Grok</td>
+                    <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
@@ -436,6 +457,12 @@ const Pricing = () => {
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
                     <td className="py-4 px-6">Voice Mode</td>
+                    <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
+                  </tr>
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="py-4 px-6">Chat on WhatsApp (Coming Soon)</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>

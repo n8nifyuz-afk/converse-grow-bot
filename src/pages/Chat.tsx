@@ -57,7 +57,7 @@ const models = [{
   name: 'Claude Haiku 4.5',
   shortLabel: 'Haiku 4.5',
   description: "NEW: Small model with big capabilities",
-  type: 'pro'
+  type: 'ultra'
 }, {
   id: 'gemini-2.5-flash',
   name: 'Gemini 2.5 Flash',
@@ -69,13 +69,13 @@ const models = [{
   name: 'DeepSeek V2',
   shortLabel: 'DeepSeek V2',
   description: "Advanced reasoning model",
-  type: 'pro'
+  type: 'ultra'
 }, {
   id: 'grok-4',
   name: 'Grok 4',
   shortLabel: 'Grok 4',
   description: "Powerful AI from xAI",
-  type: 'pro'
+  type: 'ultra'
 }, {
   id: 'generate-image',
   name: 'Generate Image',
@@ -4259,9 +4259,14 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                         <SelectContent className="z-[100] bg-background border shadow-lg rounded-lg p-1 w-[calc(100vw-2rem)] max-w-[280px]">
                           {availableModelsList.map(model => {
                             const isPro = model.type === 'pro';
+                            const isUltra = model.type === 'ultra';
                             const isImageModel = model.id === 'generate-image';
                             // Only disable image generation when limit is reached, let pro models be clickable
                             const isDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
+                            
+                            // Check if user has Ultra subscription
+                            const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
+                            const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
                             
                             return (
                               <SelectItem 
@@ -4298,6 +4303,11 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                                     {isPro && !subscriptionStatus.subscribed && (
                                       <span className="absolute -top-1 -right-1 text-[7px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-0.5 py-0.5 rounded-full shadow-sm font-bold">
                                         PRO
+                                      </span>
+                                    )}
+                                    {isUltra && !hasUltra && (
+                                      <span className="absolute -top-1 -right-1 text-[7px] leading-none bg-gradient-to-r from-purple-600 to-pink-600 text-white px-0.5 py-0.5 rounded-full shadow-sm font-bold">
+                                        ULTRA
                                       </span>
                                     )}
                                   </div>

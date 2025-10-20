@@ -375,7 +375,7 @@ export default function PricingPlans() {
               <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-                  <span>Access to multiple AI models, including OpenAI GPT-5, Anthropic Claude, Google Gemini and DeepSeek</span>
+                  <span>Access to GPT-4, GPT-5, Gemini models</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
@@ -391,6 +391,10 @@ export default function PricingPlans() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                  <span>Chat on WhatsApp (Coming Soon)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
                   <span>Custom bots built for specific use cases</span>
                 </li>
                 <li className="flex items-center gap-2">
@@ -400,6 +404,10 @@ export default function PricingPlans() {
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
                   <span>Advanced web search capabilities</span>
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <X className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Claude, DeepSeek, Grok (Upgrade to Ultra)</span>
                 </li>
               </ul>
             </div>
@@ -446,11 +454,11 @@ export default function PricingPlans() {
               <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-                  <span>Access to multiple AI models, including OpenAI GPT-5, Anthropic Claude, Google Gemini and DeepSeek</span>
+                  <span>Access to all AI models, including Claude, DeepSeek, and Grok</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-                  <span>Unlimited chats with all models</span>
+                  <span>Everything in Pro plan</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
@@ -458,19 +466,15 @@ export default function PricingPlans() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-                  <span>Text-to-speech voice mode</span>
+                  <span>Chat on WhatsApp (Coming Soon)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-                  <span>Custom bots built for specific use cases</span>
+                  <span>Team collaboration features</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-                  <span>Unlimited file uploads</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-                  <span>Advanced web search capabilities</span>
+                  <span>Early access to new AI models</span>
                 </li>
               </ul>
             </div>
