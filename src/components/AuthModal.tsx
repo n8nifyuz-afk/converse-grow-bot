@@ -359,25 +359,25 @@ export default function AuthModal({
                      {showPassword && <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
                         {loading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                            {mode === 'signin' ? 'Signing in...' : 'Sending verification...'}
-                          </> : mode === 'signup' && signupCooldown > 0 ? `Wait ${signupCooldown}s` : 'Continue with Email'}
+                            {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
+                          </> : mode === 'signup' && signupCooldown > 0 ? `${t('authModal.wait')} ${signupCooldown}s` : t('authModal.continueWithEmail')}
                       </Button>}
                    </form>
 
                   <div className="mt-4 text-center space-x-2 text-sm">
                     {mode === 'signin' ? <>
-                        <span className="text-muted-foreground">Don't have an account?</span>
+                        <span className="text-muted-foreground">{t('authModal.dontHaveAccount')}</span>
                         <button onClick={() => setMode('signup')} className="text-primary hover:underline font-medium">
-                          Sign up
+                          {t('authModal.signUp')}
                         </button>
                         <span className="text-muted-foreground">|</span>
                         <button onClick={() => setMode('reset')} className="text-primary hover:underline">
-                          Forgot password?
+                          {t('authModal.forgotPassword')}
                         </button>
                       </> : <>
-                        <span className="text-muted-foreground">Already have an account?</span>
+                        <span className="text-muted-foreground">{t('authModal.alreadyHaveAccount')}</span>
                         <button onClick={() => setMode('signin')} className="text-primary hover:underline font-medium">
-                          Sign in
+                          {t('authModal.signIn')}
                         </button>
                       </>}
                   </div>

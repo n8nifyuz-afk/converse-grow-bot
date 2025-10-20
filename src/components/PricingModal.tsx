@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import AuthModal from '@/components/AuthModal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
+import { useTranslation } from 'react-i18next';
 
 interface PricingModalProps {
   open: boolean;
@@ -24,19 +25,19 @@ interface Feature {
   ultra: boolean | string;
 }
 
-const allFeatures: Feature[] = [
-  { name: 'GPT-4, GPT-5, Gemini', free: false, pro: true, ultra: true },
-  { name: 'Claude, DeepSeek, Grok', free: false, pro: false, ultra: true },
-  { name: 'Unlimited Chats', free: false, pro: true, ultra: true },
-  { name: 'Voice Mode', free: false, pro: true, ultra: true },
-  { name: 'File Uploads', free: false, pro: true, ultra: true },
-  { name: 'Chat with Files', free: false, pro: true, ultra: true },
-  { name: 'Chat on WhatsApp (Coming Soon)', free: false, pro: true, ultra: true },
-  { name: 'Image Generation (500/month)', free: false, pro: true, ultra: false },
-  { name: 'Image Generation (2,000/month)', free: false, pro: false, ultra: true },
-  { name: 'Priority Support', free: false, pro: true, ultra: false },
-  { name: 'Team Collaboration', free: false, pro: false, ultra: true },
-  { name: 'Early Access to Models', free: false, pro: false, ultra: true },
+const getFeatures = (t: (key: string) => string): Feature[] => [
+  { name: t('pricingModal.featureGPT'), free: false, pro: true, ultra: true },
+  { name: t('pricingModal.featureClaude'), free: false, pro: false, ultra: true },
+  { name: t('pricingModal.featureUnlimitedChats'), free: false, pro: true, ultra: true },
+  { name: t('pricingModal.featureVoiceMode'), free: false, pro: true, ultra: true },
+  { name: t('pricingModal.featureFileUploads'), free: false, pro: true, ultra: true },
+  { name: t('pricingModal.featureChatWithFiles'), free: false, pro: true, ultra: true },
+  { name: t('pricingModal.featureWhatsApp'), free: false, pro: true, ultra: true },
+  { name: t('pricingModal.featureImageGen500'), free: false, pro: true, ultra: false },
+  { name: t('pricingModal.featureImageGen2000'), free: false, pro: false, ultra: true },
+  { name: t('pricingModal.featurePrioritySupport'), free: false, pro: true, ultra: false },
+  { name: t('pricingModal.featureTeamCollaboration'), free: false, pro: false, ultra: true },
+  { name: t('pricingModal.featureEarlyAccess'), free: false, pro: false, ultra: true },
 ];
 
 const pricingOptions = {
@@ -68,12 +69,15 @@ const priceIds = {
 export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }) => {
   const { user, subscriptionStatus } = useAuth();
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | '3month' | 'yearly'>('yearly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  const allFeatures = getFeatures(t);
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
@@ -178,18 +182,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <div className="flex-1 flex flex-col min-h-0 relative z-10">
                 {/* Header Row */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 pb-2 sm:pb-3 md:pb-4 border-b border-zinc-700/50 mb-1 sm:mb-2 flex-shrink-0">
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-zinc-400">Feature</div>
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-center text-zinc-400">Free</div>
+                  <div className="text-xs sm:text-sm md:text-base font-bold text-zinc-400">{t('pricingModal.feature')}</div>
+                  <div className="text-xs sm:text-sm md:text-base font-bold text-center text-zinc-400">{t('pricingModal.free')}</div>
                   <div className="text-xs sm:text-sm md:text-base font-bold text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent flex items-center justify-center gap-1 sm:gap-2">
                     {selectedPlan === 'pro' ? (
                       <>
                         <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                        Pro
+                        {t('pricingModal.pro')}
                       </>
                     ) : (
                       <>
                         <Crown className="w-3 h-3 sm:w-4 sm:h-4" />
-                        Ultra
+                        {t('pricingModal.ultra')}
                       </>
                     )}
                   </div>
@@ -243,9 +247,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
               <div className="mb-2 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
-                  Choose Your Plan
+                  {t('pricingModal.chooseYourPlan')}
                 </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-xs">Unlock unlimited access to all AI models</p>
+                <p className="text-zinc-600 dark:text-zinc-400 text-xs">{t('pricingModal.unlimitedAccess')}</p>
               </div>
 
               {/* Plan Tabs */}
@@ -256,14 +260,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Pro
+                    {t('pricingModal.pro')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra" 
                     className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Ultra Pro
+                    {t('pricingModal.ultraPro')}
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -280,14 +284,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">Monthly</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.monthly')}</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                        €{pricingOptions[selectedPlan].monthly.price}/month
+                        €{pricingOptions[selectedPlan].monthly.price}/{t('pricingModal.perMonth').toLowerCase()}
                       </div>
                     </div>
                     <div className="text-right ml-3">
                       <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">per day</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
@@ -302,14 +306,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">3 Months</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.threeMonths')}</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                        €{pricingOptions[selectedPlan]['3month'].price} total
+                        €{pricingOptions[selectedPlan]['3month'].price} {t('pricingModal.total')}
                       </div>
                     </div>
                     <div className="text-right ml-3">
                       <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">per day</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
@@ -323,18 +327,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   }`}
                 >
                   <Badge className="absolute -top-2 right-2 sm:right-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-2 py-0.5 text-[10px] font-bold border-0">
-                    Save {pricingOptions[selectedPlan].yearly.savings}%
+                    {t('pricingModal.save')} {pricingOptions[selectedPlan].yearly.savings}%
                   </Badge>
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">Yearly</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.yearly')}</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                        €{pricingOptions[selectedPlan].yearly.price} total
+                        €{pricingOptions[selectedPlan].yearly.price} {t('pricingModal.total')}
                       </div>
                     </div>
                     <div className="text-right ml-3">
                       <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">per day</div>
+                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
@@ -349,12 +353,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Processing...
+                    {t('pricingModal.processing')}
                   </>
                 ) : (
                   <>
-                    <span className="hidden sm:inline">Subscribe to {selectedPlan === 'pro' ? 'Pro' : 'Ultra Pro'} Plan</span>
-                    <span className="sm:hidden">Subscribe</span>
+                    <span className="hidden sm:inline">{t('pricingModal.subscribeTo')} {selectedPlan === 'pro' ? t('pricingModal.pro') : t('pricingModal.ultraPro')} {t('pricingModal.plan')}</span>
+                    <span className="sm:hidden">{t('pricingModal.subscribe')}</span>
                     <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
                   </>
                 )}
@@ -421,10 +425,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 </div>
 
                 <p className="text-[9px] sm:text-[10px] text-center text-zinc-500 dark:text-zinc-500 leading-snug px-1">
-                  By subscribing, you agree to our{' '}
-                  <a href="/terms" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">Terms</a>,{' '}
-                  <a href="/privacy" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">Privacy Policy</a>, and{' '}
-                  <a href="/refund-policy" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">Refund Policy</a>
+                  {t('pricingModal.bySubscribing')}{' '}
+                  <a href="/terms" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">{t('pricingModal.terms')}</a>,{' '}
+                  <a href="/privacy" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">{t('pricingModal.privacyPolicy')}</a>, {t('pricingModal.and')}{' '}
+                  <a href="/refund-policy" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">{t('pricingModal.refundPolicy')}</a>
                 </p>
               </div>
             </div>
