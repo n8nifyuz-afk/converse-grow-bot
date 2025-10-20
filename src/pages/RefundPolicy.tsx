@@ -223,7 +223,7 @@ const RefundPolicy = () => {
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
                 To request a refund, please contact us at{' '}
-                <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a> and include:
+                <a href="mailto:billing@chatl.ai" className="text-primary hover:underline">billing@chatl.ai</a> and include:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                 <li>Your full name and email address used for the purchase</li>
