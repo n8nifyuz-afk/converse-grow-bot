@@ -40,13 +40,13 @@ const allFeatures: Feature[] = [
 const pricingOptions = {
   pro: {
     monthly: { price: 19.99, perDay: 0.67 },
-    '3month': { price: 39.99, perDay: 0.44, savings: 33 },
-    yearly: { price: 15.99, perDay: 0.53, savings: 20 }
+    '3month': { price: 39.99, perDay: 0.44 },
+    yearly: { price: 59.99, perDay: 0.16, savings: 75 }
   },
   ultra: {
     monthly: { price: 39.99, perDay: 1.33 },
-    '3month': { price: 79.99, perDay: 0.89, savings: 33 },
-    yearly: { price: 31.99, perDay: 1.07, savings: 20 }
+    '3month': { price: 79.99, perDay: 0.89 },
+    yearly: { price: 119.99, perDay: 0.33, savings: 75 }
   }
 };
 
@@ -150,7 +150,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   };
 
   const currentPrice = pricingOptions[selectedPlan][selectedPeriod];
-  const savings = (selectedPeriod === 'yearly' || selectedPeriod === '3month') && pricingOptions[selectedPlan][selectedPeriod].savings 
+  const savings = selectedPeriod === 'yearly' && 'savings' in pricingOptions[selectedPlan][selectedPeriod]
     ? pricingOptions[selectedPlan][selectedPeriod].savings 
     : 0;
 
@@ -291,9 +291,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
                   }`}
                 >
-                  <Badge className="absolute -top-1.5 sm:-top-2 right-2 sm:right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold border-0">
-                    Save {pricingOptions[selectedPlan]['3month'].savings}%
-                  </Badge>
                   {selectedPeriod === '3month' && (
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
                   )}
