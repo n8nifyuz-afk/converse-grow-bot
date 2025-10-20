@@ -406,7 +406,7 @@ export default function AuthModal({
         </div>;
   if (isMobile) {
     return <Drawer open={isOpen} onOpenChange={onClose}>
-        <DrawerContent className="max-h-[90vh] p-0 bg-background/95 backdrop-blur-sm">
+        <DrawerContent className="max-h-[90vh] p-0">
           <DrawerHeader className="sr-only">
             <DrawerTitle>ChatLearn Authentication</DrawerTitle>
             <DrawerDescription>
@@ -418,7 +418,7 @@ export default function AuthModal({
       </Drawer>;
   }
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-lg w-full p-0 bg-background/95 backdrop-blur-sm border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-lg w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader className="sr-only">
           <DialogTitle>ChatLearn Authentication</DialogTitle>
           <DialogDescription>
