@@ -79,19 +79,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
-  // Sync Google profile data on sign-in
-  const syncGoogleProfile = async (session: Session) => {
+  // Sync OAuth profile data (Google & Apple) on sign-in
+  const syncOAuthProfile = async (session: Session) => {
     try {
       const user = session.user;
       const metadata = user.user_metadata;
       const appMetadata = user.app_metadata;
       
-      // Check if this is a Google sign-in
+      // Detect provider
       const isGoogleSignIn = 
         metadata?.iss === 'https://accounts.google.com' ||
         appMetadata?.provider === 'google';
       
-      if (!isGoogleSignIn) return;
+      const isAppleSignIn = 
+        metadata?.iss === 'https://appleid.apple.com' ||
+        appMetadata?.provider === 'apple';
+      
+      // Only sync for OAuth providers
+      if (!isGoogleSignIn && !isAppleSignIn) return;
       
       // Get current profile
       const { data: currentProfile } = await supabase
@@ -100,29 +105,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle();
       
-      // Extract latest Google data
-      const latestName = metadata?.full_name || metadata?.name || currentProfile?.display_name;
+      // Extract latest OAuth data (works for both Google and Apple)
+      const latestName = metadata?.full_name || metadata?.name || metadata?.display_name || currentProfile?.display_name;
       const latestAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo;
       
       // Check if update is needed
       const needsUpdate = 
-        currentProfile?.display_name !== latestName ||
-        currentProfile?.avatar_url !== latestAvatar;
+        (latestName && currentProfile?.display_name !== latestName) ||
+        (latestAvatar && currentProfile?.avatar_url !== latestAvatar);
       
       if (needsUpdate && currentProfile) {
+        const updateData: any = {
+          updated_at: new Date().toISOString()
+        };
+        
+        if (latestName && currentProfile.display_name !== latestName) {
+          updateData.display_name = latestName;
+        }
+        
+        if (latestAvatar && currentProfile.avatar_url !== latestAvatar) {
+          updateData.avatar_url = latestAvatar;
+        }
+        
         await supabase
           .from('profiles')
-          .update({
-            display_name: latestName,
-            avatar_url: latestAvatar,
-            updated_at: new Date().toISOString()
-          })
+          .update(updateData)
           .eq('user_id', user.id);
         
-        console.log('✅ Updated Google profile data');
+        const provider = isGoogleSignIn ? 'Google' : 'Apple';
+        console.log(`✅ Updated ${provider} profile data:`, updateData);
       }
     } catch (error) {
-      console.error('Error syncing Google profile:', error);
+      console.error('Error syncing OAuth profile:', error);
     }
   };
 
@@ -156,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Defer profile sync and subscription check to avoid auth loop
           setTimeout(() => {
-            syncGoogleProfile(session);
+            syncOAuthProfile(session);
             checkSubscription();
           }, 500);
         } else if (event === 'SIGNED_OUT') {
