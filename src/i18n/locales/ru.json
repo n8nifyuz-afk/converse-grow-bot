@@ -87,7 +87,21 @@
     "image": "Изображение",
     "styles": "Стили",
     "pro": "ПРО",
-    "generateAnImage": "Сгенерировать изображение"
+    "generateAnImage": "Сгенерировать изображение",
+    "sendMessage": "Отправить сообщение",
+    "stopRecording": "Остановить запись",
+    "startVoiceRecording": "Начать голосовую запись",
+    "cancelRecording": "Отменить запись",
+    "sendRecording": "Отправить запись",
+    "uploadFile": "Загрузить файл",
+    "selectAIModel": "Выбрать модель ИИ",
+    "exitImageMode": "Выйти из режима изображения",
+    "selectImageStyle": "Выбрать стиль изображения",
+    "createAnImage": "Создать изображение",
+    "uploadOrCreateContent": "Загрузить или создать контент",
+    "openSidebarMenu": "Открыть боковое меню",
+    "usePrompt": "Использовать подсказку",
+    "suggestedPrompts": "Предлагаемые подсказки"
   },
   "accentColors": {
     "blue": "Синий",

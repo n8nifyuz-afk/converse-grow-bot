@@ -233,7 +233,8 @@
     "createAnImage": "Create an image",
     "uploadOrCreateContent": "Upload or create content",
     "openSidebarMenu": "Open sidebar menu",
-    "usePrompt": "Use prompt"
+    "usePrompt": "Use prompt",
+    "suggestedPrompts": "Suggested prompts"
   },
   "accentColors": {
     "blue": "Blue",

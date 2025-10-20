@@ -87,7 +87,21 @@
     "image": "صورة",
     "styles": "الأنماط",
     "pro": "برو",
-    "generateAnImage": "توليد صورة"
+    "generateAnImage": "توليد صورة",
+    "sendMessage": "إرسال رسالة",
+    "stopRecording": "إيقاف التسجيل",
+    "startVoiceRecording": "بدء التسجيل الصوتي",
+    "cancelRecording": "إلغاء التسجيل",
+    "sendRecording": "إرسال التسجيل",
+    "uploadFile": "رفع ملف",
+    "selectAIModel": "اختر نموذج الذكاء الاصطناعي",
+    "exitImageMode": "الخروج من وضع الصورة",
+    "selectImageStyle": "اختر نمط الصورة",
+    "createAnImage": "إنشاء صورة",
+    "uploadOrCreateContent": "رفع أو إنشاء محتوى",
+    "openSidebarMenu": "فتح قائمة الشريط الجانبي",
+    "usePrompt": "استخدام المطالبة",
+    "suggestedPrompts": "المطالبات المقترحة"
   },
   "accentColors": {
     "blue": "أزرق",

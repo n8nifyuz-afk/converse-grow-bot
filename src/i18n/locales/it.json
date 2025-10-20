@@ -100,7 +100,8 @@
     "createAnImage": "Crea un'immagine",
     "uploadOrCreateContent": "Carica o crea contenuto",
     "openSidebarMenu": "Apri menu laterale",
-    "usePrompt": "Usa prompt"
+    "usePrompt": "Usa prompt",
+    "suggestedPrompts": "Prompt suggeriti"
   },
   "accentColors": {
     "blue": "Blu",

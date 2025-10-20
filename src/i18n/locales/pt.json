@@ -87,7 +87,21 @@
     "image": "Imagem",
     "styles": "Estilos",
     "pro": "PRO",
-    "generateAnImage": "Gerar uma imagem"
+    "generateAnImage": "Gerar uma imagem",
+    "sendMessage": "Enviar mensagem",
+    "stopRecording": "Parar gravação",
+    "startVoiceRecording": "Iniciar gravação de voz",
+    "cancelRecording": "Cancelar gravação",
+    "sendRecording": "Enviar gravação",
+    "uploadFile": "Enviar arquivo",
+    "selectAIModel": "Selecionar modelo de IA",
+    "exitImageMode": "Sair do modo de imagem",
+    "selectImageStyle": "Selecionar estilo de imagem",
+    "createAnImage": "Criar uma imagem",
+    "uploadOrCreateContent": "Enviar ou criar conteúdo",
+    "openSidebarMenu": "Abrir menu lateral",
+    "usePrompt": "Usar prompt",
+    "suggestedPrompts": "Prompts sugeridos"
   },
   "accentColors": {
     "blue": "Azul",

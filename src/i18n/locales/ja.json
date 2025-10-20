@@ -87,7 +87,21 @@
     "image": "画像",
     "styles": "スタイル",
     "pro": "プロ",
-    "generateAnImage": "画像を生成"
+    "generateAnImage": "画像を生成",
+    "sendMessage": "メッセージを送信",
+    "stopRecording": "録音を停止",
+    "startVoiceRecording": "音声録音を開始",
+    "cancelRecording": "録音をキャンセル",
+    "sendRecording": "録音を送信",
+    "uploadFile": "ファイルをアップロード",
+    "selectAIModel": "AIモデルを選択",
+    "exitImageMode": "画像モードを終了",
+    "selectImageStyle": "画像スタイルを選択",
+    "createAnImage": "画像を作成",
+    "uploadOrCreateContent": "コンテンツをアップロードまたは作成",
+    "openSidebarMenu": "サイドバーメニューを開く",
+    "usePrompt": "プロンプトを使用",
+    "suggestedPrompts": "おすすめのプロンプト"
   },
   "accentColors": {
     "blue": "ブルー",

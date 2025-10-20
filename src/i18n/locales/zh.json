@@ -100,7 +100,8 @@
     "createAnImage": "创建图片",
     "uploadOrCreateContent": "上传或创建内容",
     "openSidebarMenu": "打开侧边栏菜单",
-    "usePrompt": "使用提示"
+    "usePrompt": "使用提示",
+    "suggestedPrompts": "建议的提示"
   },
   "accentColors": {
     "blue": "蓝色",

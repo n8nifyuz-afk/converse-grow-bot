@@ -87,7 +87,21 @@
     "image": "Bild",
     "styles": "Stile",
     "pro": "PRO",
-    "generateAnImage": "Ein Bild generieren"
+    "generateAnImage": "Ein Bild generieren",
+    "sendMessage": "Nachricht senden",
+    "stopRecording": "Aufnahme stoppen",
+    "startVoiceRecording": "Sprachaufnahme starten",
+    "cancelRecording": "Aufnahme abbrechen",
+    "sendRecording": "Aufnahme senden",
+    "uploadFile": "Datei hochladen",
+    "selectAIModel": "KI-Modell auswählen",
+    "exitImageMode": "Bildmodus verlassen",
+    "selectImageStyle": "Bildstil auswählen",
+    "createAnImage": "Ein Bild erstellen",
+    "uploadOrCreateContent": "Inhalt hochladen oder erstellen",
+    "openSidebarMenu": "Seitenleisten-Menü öffnen",
+    "usePrompt": "Prompt verwenden",
+    "suggestedPrompts": "Vorgeschlagene Prompts"
   },
   "accentColors": {
     "blue": "Blau",

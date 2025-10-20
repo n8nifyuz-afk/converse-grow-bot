@@ -1333,9 +1333,9 @@ export default function Index() {
 
       {/* Suggestion prompts */}
       {showSuggestions && suggestionPrompts[showSuggestions as keyof typeof suggestionPrompts] && <div className="w-full max-w-3xl mb-4 sm:mb-6">
-          <div className="space-y-4" role="list" aria-label="Suggested prompts">
+          <div className="space-y-4" role="list" aria-label={t('chat.suggestedPrompts')}>
             {suggestionPrompts[showSuggestions as keyof typeof suggestionPrompts].map((promptKey, index) => <div key={index} role="listitem">
-                <button onClick={() => handlePromptClick(promptKey)} className="w-full text-left p-3 rounded-lg hover:bg-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-accent/50 min-h-[44px] flex items-center" aria-label={`Use prompt: ${t(promptKey)}`}>
+                <button onClick={() => handlePromptClick(promptKey)} className="w-full text-left p-3 rounded-lg hover:bg-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-accent/50 min-h-[44px] flex items-center" aria-label={t('chat.usePrompt')}>
                   <span className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors">{t(promptKey)}</span>
                 </button>
                 {index < suggestionPrompts[showSuggestions as keyof typeof suggestionPrompts].length - 1 && <hr className="mt-4 border-border/50" />}
