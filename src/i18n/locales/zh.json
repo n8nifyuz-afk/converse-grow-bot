@@ -61,7 +61,17 @@
     "deleteProject": "删除项目",
     "deleteProjectConfirm": "您确定要删除此项目吗？此项目中的所有聊天也将被永久删除。",
     "upgradeToPro": "升级到专业版",
-    "currentPlan": "当前计划"
+    "currentPlan": "当前计划",
+    "helpYouToday": "今天我能帮您什么？",
+    "dropFilesHere": "在此处放置文件",
+    "guest": "访客",
+    "guestUser": "访客用户",
+    "settings": "设置",
+    "help": "帮助",
+    "signOut": "登出",
+    "rename": "重命名",
+    "delete": "删除",
+    "addToProject": "添加到项目"
   },
   "accentColors": {
     "blue": "蓝色",

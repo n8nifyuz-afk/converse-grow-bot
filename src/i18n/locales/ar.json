@@ -59,9 +59,19 @@
     "projects": "المشاريع",
     "recentChats": "المحادثات الأخيرة",
     "deleteProject": "حذف المشروع",
-    "deleteProjectConfirm": "هل أنت متأكد من رغبتك في حذف هذا المشروع؟ سيتم أيضًا حذف جميع المحادثات في هذا المشروع بشكل دائم.",
-    "upgradeToPro": "الترقية إلى برو",
-    "currentPlan": "الخطة الحالية"
+    "deleteProjectConfirm": "هل أنت متأكد من رغبتك في حذف هذا المشروع؟ سيتم أيضًا حذف جميع المحادثات في هذا المشروع نهائيًا.",
+    "upgradeToPro": "الترقية إلى Pro",
+    "currentPlan": "الخطة الحالية",
+    "helpYouToday": "كيف يمكنني مساعدتك اليوم؟",
+    "dropFilesHere": "أسقط الملفات هنا",
+    "guest": "ضيف",
+    "guestUser": "مستخدم ضيف",
+    "settings": "الإعدادات",
+    "help": "المساعدة",
+    "signOut": "تسجيل الخروج",
+    "rename": "إعادة تسمية",
+    "delete": "حذف",
+    "addToProject": "إضافة إلى المشروع"
   },
   "accentColors": {
     "blue": "أزرق",

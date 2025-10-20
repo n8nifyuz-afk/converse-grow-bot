@@ -60,8 +60,18 @@
     "recentChats": "最近のチャット",
     "deleteProject": "プロジェクトを削除",
     "deleteProjectConfirm": "このプロジェクトを削除してもよろしいですか？このプロジェクト内のすべてのチャットも完全に削除されます。",
-    "upgradeToPro": "プロにアップグレード",
-    "currentPlan": "現在のプラン"
+    "upgradeToPro": "Proにアップグレード",
+    "currentPlan": "現在のプラン",
+    "helpYouToday": "今日はどのようにお手伝いできますか？",
+    "dropFilesHere": "ここにファイルをドロップ",
+    "guest": "ゲスト",
+    "guestUser": "ゲストユーザー",
+    "settings": "設定",
+    "help": "ヘルプ",
+    "signOut": "サインアウト",
+    "rename": "名前変更",
+    "delete": "削除",
+    "addToProject": "プロジェクトに追加"
   },
   "accentColors": {
     "blue": "ブルー",

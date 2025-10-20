@@ -379,7 +379,7 @@ export default function ChatSidebar({
             </div> : <div className="mt-1 space-y-2">
               <Button onClick={handleNewChat} className="w-full justify-start gap-2 px-3 rounded-lg bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost">
                 <Plus className="h-4 w-4 flex-shrink-0" />
-                <span className="font-medium">New Chat</span>
+                <span className="font-medium">{t('chat.newChat')}</span>
               </Button>
 
 
@@ -387,11 +387,11 @@ export default function ChatSidebar({
               {user ? <ProjectModal onProjectCreated={handleProjectCreated}>
                   <Button className="w-full justify-start gap-2 px-3 rounded-lg bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost">
                     <FolderPlus className="h-4 w-4 flex-shrink-0" />
-                    <span className="font-medium">New Project</span>
+                    <span className="font-medium">{t('chat.newProject')}</span>
                   </Button>
                 </ProjectModal> : <Button onClick={() => setShowAuthModal(true)} className="w-full justify-start gap-2 px-3 rounded-lg bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost">
                   <FolderPlus className="h-4 w-4 flex-shrink-0" />
-                  <span className="font-medium">New Project</span>
+                  <span className="font-medium">{t('chat.newProject')}</span>
                 </Button>}
             </div>}
         </SidebarHeader>
@@ -439,19 +439,19 @@ export default function ChatSidebar({
                                  <MoreHorizontal className="h-3 w-3" />
                                </Button>
                              </DropdownMenuTrigger>
-                             <DropdownMenuContent>
-                               <DropdownMenuItem onClick={() => {
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => {
                           setEditingProjectId(project.id);
                           setEditingProjectTitle(project.title);
                         }}>
-                                 <Edit2 className="mr-2 h-3 w-3" />
-                                 Rename
-                               </DropdownMenuItem>
-                               <DropdownMenuItem onClick={() => handleDeleteProject(project.id)} className="text-destructive">
-                                 <Trash2 className="mr-2 h-3 w-3" />
-                                 Delete
-                               </DropdownMenuItem>
-                             </DropdownMenuContent>
+                                  <Edit2 className="mr-2 h-3 w-3" />
+                                  {t('chat.rename')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteProject(project.id)} className="text-destructive">
+                                  <Trash2 className="mr-2 h-3 w-3" />
+                                  {t('chat.delete')}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
                            </DropdownMenu>
                          </div>
                        </SidebarMenuItem>;
@@ -463,7 +463,7 @@ export default function ChatSidebar({
           {/* Unorganized Chats */}
           {!collapsed && unorganizedChats.length > 0 && <SidebarGroup>
               <SidebarGroupLabel className="px-3 text-xs text-sidebar-foreground/60 font-medium">
-                Recent Chats
+                {t('chat.recentChats')}
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -489,15 +489,15 @@ export default function ChatSidebar({
                           <DropdownMenuContent>
                             <DropdownMenuItem onClick={() => startEditing(chat.id, chat.title)}>
                               <Edit2 className="mr-2 h-3 w-3" />
-                              Rename
+                              {t('chat.rename')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setAddToProjectModalOpen(chat.id)}>
                               <FolderPlus className="mr-2 h-3 w-3" />
-                              Add to Project
+                              {t('chat.addToProject')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeleteChat(chat.id)} className="text-destructive">
                               <Trash2 className="mr-2 h-3 w-3" />
-                              Delete
+                              {t('chat.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -537,18 +537,18 @@ export default function ChatSidebar({
                    <DropdownMenuContent align="end" className="w-56">
                      <DropdownMenuItem onClick={() => setShowSettings(true)}>
                        <Settings className="mr-2 h-4 w-4" />
-                       Settings
+                       {t('chat.settings')}
                      </DropdownMenuItem>
                      <DropdownMenuItem onClick={() => navigate('/help-center')}>
                        <HelpCircle className="mr-2 h-4 w-4" />
-                       Help
+                       {t('chat.help')}
                      </DropdownMenuItem>
                      <DropdownMenuSeparator />
                      <DropdownMenuItem onClick={handleSignOut}>
                        <LogOut className="mr-2 h-4 w-4" />
-                       Sign Out
+                       {t('chat.signOut')}
                      </DropdownMenuItem>
-                  </DropdownMenuContent>
+                   </DropdownMenuContent>
                 </DropdownMenu> : <>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -559,8 +559,8 @@ export default function ChatSidebar({
                           </AvatarFallback>
                         </Avatar>
                         {!collapsed && <div className="flex-1 min-w-0">
-                            <p className="text-sm text-sidebar-foreground font-medium truncate">Guest</p>
-                            <p className="text-xs text-sidebar-foreground/60 truncate">Guest user</p>
+                            <p className="text-sm text-sidebar-foreground font-medium truncate">{t('chat.guest')}</p>
+                            <p className="text-xs text-sidebar-foreground/60 truncate">{t('chat.guestUser')}</p>
                           </div>}
                       </div>
                     </DropdownMenuTrigger>

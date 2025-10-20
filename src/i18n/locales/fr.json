@@ -61,7 +61,17 @@
     "deleteProject": "Supprimer le Projet",
     "deleteProjectConfirm": "Êtes-vous sûr de vouloir supprimer ce projet ? Toutes les discussions de ce projet seront également supprimées définitivement.",
     "upgradeToPro": "Passer à Pro",
-    "currentPlan": "Plan Actuel"
+    "currentPlan": "Plan Actuel",
+    "helpYouToday": "Comment puis-je vous aider aujourd'hui ?",
+    "dropFilesHere": "Déposez les fichiers ici",
+    "guest": "Invité",
+    "guestUser": "Utilisateur invité",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "signOut": "Se Déconnecter",
+    "rename": "Renommer",
+    "delete": "Supprimer",
+    "addToProject": "Ajouter au Projet"
   },
   "accentColors": {
     "blue": "Bleu",

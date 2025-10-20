@@ -54,14 +54,24 @@
     "back": "Назад"
   },
   "chat": {
-    "newChat": "Новый Чат",
-    "newProject": "Новый Проект",
+    "newChat": "Новый чат",
+    "newProject": "Новый проект",
     "projects": "Проекты",
-    "recentChats": "Недавние Чаты",
-    "deleteProject": "Удалить Проект",
+    "recentChats": "Недавние чаты",
+    "deleteProject": "Удалить проект",
     "deleteProjectConfirm": "Вы уверены, что хотите удалить этот проект? Все чаты в этом проекте также будут удалены навсегда.",
-    "upgradeToPro": "Обновить до Pro",
-    "currentPlan": "Текущий План"
+    "upgradeToPro": "Перейти на Pro",
+    "currentPlan": "Текущий план",
+    "helpYouToday": "Как я могу помочь вам сегодня?",
+    "dropFilesHere": "Перетащите файлы сюда",
+    "guest": "Гость",
+    "guestUser": "Гостевой пользователь",
+    "settings": "Настройки",
+    "help": "Помощь",
+    "signOut": "Выйти",
+    "rename": "Переименовать",
+    "delete": "Удалить",
+    "addToProject": "Добавить в проект"
   },
   "accentColors": {
     "blue": "Синий",

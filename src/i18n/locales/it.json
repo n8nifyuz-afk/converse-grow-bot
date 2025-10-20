@@ -61,7 +61,17 @@
     "deleteProject": "Elimina Progetto",
     "deleteProjectConfirm": "Sei sicuro di voler eliminare questo progetto? Anche tutte le chat in questo progetto verranno eliminate definitivamente.",
     "upgradeToPro": "Passa a Pro",
-    "currentPlan": "Piano Attuale"
+    "currentPlan": "Piano Attuale",
+    "helpYouToday": "Come posso aiutarti oggi?",
+    "dropFilesHere": "Rilascia i file qui",
+    "guest": "Ospite",
+    "guestUser": "Utente ospite",
+    "settings": "Impostazioni",
+    "help": "Aiuto",
+    "signOut": "Esci",
+    "rename": "Rinomina",
+    "delete": "Elimina",
+    "addToProject": "Aggiungi al Progetto"
   },
   "accentColors": {
     "blue": "Blu",

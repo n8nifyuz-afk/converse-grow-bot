@@ -61,7 +61,17 @@
     "deleteProject": "Excluir Projeto",
     "deleteProjectConfirm": "Tem certeza de que deseja excluir este projeto? Todas as conversas neste projeto também serão permanentemente excluídas.",
     "upgradeToPro": "Atualizar para Pro",
-    "currentPlan": "Plano Atual"
+    "currentPlan": "Plano Atual",
+    "helpYouToday": "Como posso ajudá-lo hoje?",
+    "dropFilesHere": "Solte os arquivos aqui",
+    "guest": "Convidado",
+    "guestUser": "Usuário convidado",
+    "settings": "Configurações",
+    "help": "Ajuda",
+    "signOut": "Sair",
+    "rename": "Renomear",
+    "delete": "Excluir",
+    "addToProject": "Adicionar ao Projeto"
   },
   "accentColors": {
     "blue": "Azul",

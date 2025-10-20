@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useMessageLimit } from '@/hooks/useMessageLimit';
@@ -174,6 +175,7 @@ const suggestionPrompts = suggestionsByCategory;
 
 export default function Index() {
   const location = useLocation();
+  const { t } = useTranslation();
   const {
     user,
     loading: authLoading,
@@ -984,10 +986,10 @@ export default function Index() {
       <div className="text-center mb-6 sm:mb-8">
         {user ? <>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{timeGreeting}, {displayName}</h1>
-            <p className="text-muted-foreground text-base sm:text-lg">How can I help you today?</p>
+            <p className="text-muted-foreground text-base sm:text-lg">{t('chat.helpYouToday')}</p>
           </> : <>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{timeGreeting}</h1>
-            <p className="text-muted-foreground text-base sm:text-lg">How can I help you today?</p>
+            <p className="text-muted-foreground text-base sm:text-lg">{t('chat.helpYouToday')}</p>
           </>}
       </div>
 
@@ -1018,7 +1020,7 @@ export default function Index() {
           {isDragOver && <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-50 rounded-xl border-2 border-dashed border-primary">
               <div className="text-center">
                 <Paperclip className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-base font-semibold text-primary">Drop files here</p>
+                <p className="text-base font-semibold text-primary">{t('chat.dropFilesHere')}</p>
               </div>
             </div>}
           
