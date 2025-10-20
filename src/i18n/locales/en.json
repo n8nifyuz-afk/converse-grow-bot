@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "aiTools": "AI Tools",
+    "whatYouCanDo": "What You Can Do",
+    "pricing": "Pricing",
+    "contact": "Contact Us",
+    "startNow": "Start Now"
+  },
+  "hero": {
+    "title": "Your AI Learning Companion",
+    "subtitle": "Chat with multiple AI models, generate images, and enhance your learning experience",
+    "getStarted": "Get Started Free"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "profile": "Profile",
+    "subscription": "Subscription",
+    "security": "Security",
+    "dataControl": "Data Control",
+    "theme": "Theme",
+    "language": "Language",
+    "selectLanguage": "Select your preferred language"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "pt": "Português",
+    "it": "Italiano",
+    "zh": "中文",
+    "ja": "日本語",
+    "ar": "العربية",
+    "ru": "Русский"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading..."
+  }
+}

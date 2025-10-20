@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "aiTools": "AIツール",
+    "whatYouCanDo": "できること",
+    "pricing": "料金",
+    "contact": "お問い合わせ",
+    "startNow": "今すぐ始める"
+  },
+  "hero": {
+    "title": "あなたのAI学習パートナー",
+    "subtitle": "複数のAIモデルとチャットし、画像を生成し、学習体験を向上させましょう",
+    "getStarted": "無料で始める"
+  },
+  "settings": {
+    "title": "設定",
+    "general": "一般",
+    "profile": "プロフィール",
+    "subscription": "サブスクリプション",
+    "security": "セキュリティ",
+    "dataControl": "データ管理",
+    "theme": "テーマ",
+    "language": "言語",
+    "selectLanguage": "お好みの言語を選択してください"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "pt": "Português",
+    "it": "Italiano",
+    "zh": "中文",
+    "ja": "日本語",
+    "ar": "العربية",
+    "ru": "Русский"
+  },
+  "auth": {
+    "login": "ログイン",
+    "signup": "新規登録",
+    "logout": "ログアウト",
+    "email": "メール",
+    "password": "パスワード"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "loading": "読み込み中..."
+  }
+}

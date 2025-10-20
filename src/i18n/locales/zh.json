@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "aiTools": "AI 工具",
+    "whatYouCanDo": "您可以做什么",
+    "pricing": "定价",
+    "contact": "联系我们",
+    "startNow": "立即开始"
+  },
+  "hero": {
+    "title": "您的 AI 学习伙伴",
+    "subtitle": "与多个 AI 模型聊天，生成图像，提升您的学习体验",
+    "getStarted": "免费开始"
+  },
+  "settings": {
+    "title": "设置",
+    "general": "常规",
+    "profile": "个人资料",
+    "subscription": "订阅",
+    "security": "安全",
+    "dataControl": "数据控制",
+    "theme": "主题",
+    "language": "语言",
+    "selectLanguage": "选择您的首选语言"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "pt": "Português",
+    "it": "Italiano",
+    "zh": "中文",
+    "ja": "日本語",
+    "ar": "العربية",
+    "ru": "Русский"
+  },
+  "auth": {
+    "login": "登录",
+    "signup": "注册",
+    "logout": "登出",
+    "email": "邮箱",
+    "password": "密码"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "loading": "加载中..."
+  }
+}

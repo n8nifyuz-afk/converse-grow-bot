@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "aiTools": "أدوات الذكاء الاصطناعي",
+    "whatYouCanDo": "ما يمكنك فعله",
+    "pricing": "التسعير",
+    "contact": "اتصل بنا",
+    "startNow": "ابدأ الآن"
+  },
+  "hero": {
+    "title": "رفيقك في التعلم بالذكاء الاصطناعي",
+    "subtitle": "تحدث مع نماذج ذكاء اصطناعي متعددة، وأنشئ الصور، وعزز تجربة التعلم الخاصة بك",
+    "getStarted": "ابدأ مجانًا"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "general": "عام",
+    "profile": "الملف الشخصي",
+    "subscription": "الاشتراك",
+    "security": "الأمان",
+    "dataControl": "التحكم في البيانات",
+    "theme": "المظهر",
+    "language": "اللغة",
+    "selectLanguage": "اختر لغتك المفضلة"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "pt": "Português",
+    "it": "Italiano",
+    "zh": "中文",
+    "ja": "日本語",
+    "ar": "العربية",
+    "ru": "Русский"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "signup": "التسجيل",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "loading": "جاري التحميل..."
+  }
+}

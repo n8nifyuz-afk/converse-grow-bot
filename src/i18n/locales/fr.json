@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "aiTools": "Outils IA",
+    "whatYouCanDo": "Ce Que Vous Pouvez Faire",
+    "pricing": "Tarifs",
+    "contact": "Contactez-nous",
+    "startNow": "Commencer Maintenant"
+  },
+  "hero": {
+    "title": "Votre Compagnon d'Apprentissage IA",
+    "subtitle": "Discutez avec plusieurs modèles d'IA, générez des images et améliorez votre expérience d'apprentissage",
+    "getStarted": "Commencer Gratuitement"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "general": "Général",
+    "profile": "Profil",
+    "subscription": "Abonnement",
+    "security": "Sécurité",
+    "dataControl": "Contrôle des Données",
+    "theme": "Thème",
+    "language": "Langue",
+    "selectLanguage": "Sélectionnez votre langue préférée"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "pt": "Português",
+    "it": "Italiano",
+    "zh": "中文",
+    "ja": "日本語",
+    "ar": "العربية",
+    "ru": "Русский"
+  },
+  "auth": {
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "logout": "Déconnexion",
+    "email": "Email",
+    "password": "Mot de passe"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "loading": "Chargement..."
+  }
+}

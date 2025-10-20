@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -24,7 +25,8 @@ import {
   Shield,
   Check,
   Crown,
-  ImageIcon
+  ImageIcon,
+  Languages
 } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -65,6 +67,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const { user, signOut, userProfile, subscriptionStatus, checkSubscription } = useAuth();
   const isMobile = useIsMobile();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
+  const { i18n, t } = useTranslation();
 
   const handleSetTheme = (newTheme: typeof theme) => {
     setTheme(newTheme);
@@ -72,6 +75,14 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
   const handleSetAccentColor = (color: typeof accentColor) => {
     setAccentColor(color);
+  };
+
+  const handleLanguageChange = async (newLanguage: string) => {
+    await i18n.changeLanguage(newLanguage);
+    toast({
+      title: "Language updated",
+      description: `Language changed to ${t(`languages.${newLanguage}`)}`,
+    });
   };
 
   const handleLogoutThisDevice = async () => {
@@ -466,6 +477,50 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                                 />
                               </div>
                               <span className="font-medium">{color.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Language Setting */}
+              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                    <div className="space-y-0.5 md:space-y-1">
+                      <p className="font-semibold text-foreground text-sm md:text-base">Language</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">Choose your preferred language</p>
+                    </div>
+                    <Select value={i18n.language} onValueChange={handleLanguageChange}>
+                      <SelectTrigger className="w-full sm:w-36 bg-background/80 border border-border/50 shadow-sm backdrop-blur-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background/95 border border-border/50 shadow-xl z-50 backdrop-blur-md">
+                        {[
+                          { code: 'en', name: 'English' },
+                          { code: 'es', name: 'Español' },
+                          { code: 'fr', name: 'Français' },
+                          { code: 'de', name: 'Deutsch' },
+                          { code: 'pt', name: 'Português' },
+                          { code: 'it', name: 'Italiano' },
+                          { code: 'zh', name: '中文' },
+                          { code: 'ja', name: '日本語' },
+                          { code: 'ar', name: 'العربية' },
+                          { code: 'ru', name: 'Русский' },
+                        ].map((lang) => (
+                          <SelectItem 
+                            key={lang.code} 
+                            value={lang.code}
+                            className="hover:bg-accent/60 focus:bg-accent/60 cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-1.5 rounded-md bg-primary/10">
+                                <Languages className="h-3.5 w-3.5 text-primary" />
+                              </div>
+                              <span className="font-medium">{lang.name}</span>
                             </div>
                           </SelectItem>
                         ))}

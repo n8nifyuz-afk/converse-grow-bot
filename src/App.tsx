@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { useLanguageDetection } from '@/hooks/useLanguageDetection';
 import MainLayout from '@/layouts/MainLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -30,15 +31,14 @@ import { SubscriptionCheckingOverlay } from '@/components/SubscriptionCheckingOv
 
 const queryClient = new QueryClient();
 
-function App() {
+function AppContent() {
+  useLanguageDetection();
+  
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-      <ThemeProvider>
-            <SubscriptionCheckingOverlay />
-            <Router>
-                <Routes>
+    <>
+      <SubscriptionCheckingOverlay />
+      <Router>
+        <Routes>
                   {/* Root route - shows Chat */}
                   <Route path="/" element={
                     <MainLayout>
@@ -142,6 +142,17 @@ function App() {
             </Router>
             <Toaster />
             <Sonner />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <AppContent />
           </ThemeProvider>
         </AuthProvider>
       </TooltipProvider>

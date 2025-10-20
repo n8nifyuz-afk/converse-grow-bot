@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "aiTools": "KI-Tools",
+    "whatYouCanDo": "Was Sie Tun Können",
+    "pricing": "Preise",
+    "contact": "Kontaktieren Sie Uns",
+    "startNow": "Jetzt Starten"
+  },
+  "hero": {
+    "title": "Ihr KI-Lernbegleiter",
+    "subtitle": "Chatten Sie mit mehreren KI-Modellen, generieren Sie Bilder und verbessern Sie Ihr Lernerlebnis",
+    "getStarted": "Kostenlos Starten"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "general": "Allgemein",
+    "profile": "Profil",
+    "subscription": "Abonnement",
+    "security": "Sicherheit",
+    "dataControl": "Datenkontrolle",
+    "theme": "Thema",
+    "language": "Sprache",
+    "selectLanguage": "Wählen Sie Ihre bevorzugte Sprache"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "pt": "Português",
+    "it": "Italiano",
+    "zh": "中文",
+    "ja": "日本語",
+    "ar": "العربية",
+    "ru": "Русский"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "logout": "Abmelden",
+    "email": "E-Mail",
+    "password": "Passwort"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "loading": "Lädt..."
+  }
+}
