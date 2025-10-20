@@ -6,6 +6,7 @@ import { Check, Sparkles, ChevronDown, Users, X, Star, Zap, Crown } from 'lucide
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AuthModal from '@/components/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,7 @@ const Pricing = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, subscriptionStatus, checkSubscription } = useAuth();
+  const { t } = useTranslation();
   const [isYearly, setIsYearly] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);

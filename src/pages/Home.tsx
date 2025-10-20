@@ -6,6 +6,7 @@ import { Brain, Image, FileText, PenTool, Star, Users, Award, Target, Mic, Globe
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import SEO from '@/components/SEO';
 import chatgptLogo from '@/assets/chatgpt-logo.png';
 import chatgptLogoLight from '@/assets/chatgpt-logo-light.png';
@@ -15,10 +16,9 @@ import deepseekLogo from '@/assets/deepseek-logo.png';
 import grokLogo from '@/assets/grok-logo.png';
 const Home = () => {
   const navigate = useNavigate();
-  const {
-    actualTheme
-  } = useTheme();
+  const { actualTheme } = useTheme();
   const { subscriptionStatus } = useAuth();
+  const { t } = useTranslation();
 
   // Choose the appropriate ChatGPT logo based on theme
   const chatgptLogoSrc = actualTheme === 'dark' ? chatgptLogo : chatgptLogoLight;
@@ -40,18 +40,18 @@ const Home = () => {
         <div className="container mx-auto max-w-4xl text-center">
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-foreground leading-tight">
-            One Platform.
+            {t('hero.onePlatform')}
             <br />
-            <span className="text-primary">All Your AI Models.</span>
+            <span className="text-primary">{t('hero.allAIModels')}</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-            Chat, create images, write, code, and learn with GPT-4, GPT-5, Claude, Gemini, and more – all from a single platform.
+            {t('hero.chatCreateWrite')}
           </p>
           
           <div className="flex justify-center">
             <Button size="lg" onClick={() => navigate('/')} className="w-full sm:w-auto text-lg px-8 py-4 h-auto bg-black text-white hover:bg-black/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200" aria-label="Start using ChatLearn now">
-              Start Now
+              {t('hero.startNow')}
             </Button>
           </div>
         </div>
@@ -62,10 +62,10 @@ const Home = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 id="models-heading" className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
-              Pick the Right AI for Every Task
+              {t('models.heading')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Explore the world's leading AI models and start with the one that fits your goal.
+              {t('models.subtitle')}
             </p>
           </div>
           
@@ -77,7 +77,7 @@ const Home = () => {
                   <img src={chatgptLogoSrc} alt="OpenAI ChatGPT logo" className="w-12 h-12 object-contain" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-foreground">OpenAI<br />GPT-4 / GPT-5</h3>
-                <p className="text-sm text-muted-foreground mb-4">Advanced reasoning, problem-solving, and coding power.</p>
+                <p className="text-sm text-muted-foreground mb-4">{t('models.gptDescription')}</p>
               </div>
               <Button variant="secondary" className="w-full mt-auto bg-black dark:bg-secondary text-white dark:text-secondary-foreground hover:bg-black/90 dark:hover:bg-secondary/90 whitespace-normal h-auto py-2" onClick={() => {
               if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -91,7 +91,7 @@ const Home = () => {
                 }
               });
             }} aria-label="Switch to GPT-4o and start a new chat">
-                Try with this model
+                {t('models.tryWithModel')}
               </Button>
             </div>
             
@@ -102,7 +102,7 @@ const Home = () => {
                   <img src={claudeLogo} alt="Anthropic Claude logo" className="w-12 h-12 object-contain" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-foreground">Anthropic<br />Claude</h3>
-                <p className="text-sm text-muted-foreground mb-4">Ideal for writing, analysis, and creative tasks.</p>
+                <p className="text-sm text-muted-foreground mb-4">{t('models.claudeDescription')}</p>
               </div>
               <Button variant="secondary" className="w-full mt-auto bg-black dark:bg-secondary text-white dark:text-secondary-foreground hover:bg-black/90 dark:hover:bg-secondary/90 whitespace-normal h-auto py-2" onClick={() => {
               if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -116,7 +116,7 @@ const Home = () => {
                 }
               });
             }} aria-label="Switch to Claude and start a new chat">
-                Try with this model
+                {t('models.tryWithModel')}
               </Button>
             </div>
             
@@ -127,7 +127,7 @@ const Home = () => {
                   <img src={geminiLogo} alt="Google Gemini logo" className="w-12 h-12 object-contain" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-foreground">Google<br />Gemini</h3>
-                <p className="text-sm text-muted-foreground mb-4">Multimodal AI for text, vision, and analysis.</p>
+                <p className="text-sm text-muted-foreground mb-4">{t('models.geminiDescription')}</p>
               </div>
               <Button variant="secondary" className="w-full mt-auto bg-black dark:bg-secondary text-white dark:text-secondary-foreground hover:bg-black/90 dark:hover:bg-secondary/90 whitespace-normal h-auto py-2" onClick={() => {
               if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -141,7 +141,7 @@ const Home = () => {
                 }
               });
             }} aria-label="Switch to Gemini and start a new chat">
-                Try with this model
+                {t('models.tryWithModel')}
               </Button>
             </div>
             
@@ -157,7 +157,7 @@ const Home = () => {
                   />
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-foreground">DeepSeek</h3>
-                <p className="text-sm text-muted-foreground mb-4">Specialized in technical tasks and data-heavy coding.</p>
+                <p className="text-sm text-muted-foreground mb-4">{t('models.deepseekDescription')}</p>
               </div>
               <Button variant="secondary" className="w-full mt-auto bg-black dark:bg-secondary text-white dark:text-secondary-foreground hover:bg-black/90 dark:hover:bg-secondary/90 whitespace-normal h-auto py-2" onClick={() => {
               if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -171,7 +171,7 @@ const Home = () => {
                 }
               });
             }} aria-label="Switch to DeepSeek and start a new chat">
-                Try with this model
+                {t('models.tryWithModel')}
               </Button>
             </div>
             
@@ -187,7 +187,7 @@ const Home = () => {
                   />
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-foreground">Grok</h3>
-                <p className="text-sm text-muted-foreground mb-4">Real-time knowledge and conversational AI.</p>
+                <p className="text-sm text-muted-foreground mb-4">{t('models.grokDescription')}</p>
               </div>
               <Button variant="secondary" className="w-full mt-auto bg-black dark:bg-secondary text-white dark:text-secondary-foreground hover:bg-black/90 dark:hover:bg-secondary/90 whitespace-normal h-auto py-2" onClick={() => {
               if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -201,7 +201,7 @@ const Home = () => {
                 }
               });
             }} aria-label="Switch to Grok and start a new chat">
-                Try with this model
+                {t('models.tryWithModel')}
               </Button>
             </div>
           </div>
