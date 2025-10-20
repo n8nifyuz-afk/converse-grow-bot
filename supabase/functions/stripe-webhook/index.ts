@@ -236,6 +236,23 @@ serve(async (req) => {
         const plan = planMapping.tier;
         logStep("Determined plan", { plan, productId });
 
+        // CRITICAL FIX: Validate current_period_end before date conversion
+        if (!highestTierSub.current_period_end || typeof highestTierSub.current_period_end !== 'number') {
+          logStep("ERROR: Invalid current_period_end", { 
+            currentPeriodEnd: highestTierSub.current_period_end,
+            subscriptionId: highestTierSub.id 
+          });
+          throw new Error("Subscription missing valid billing period end date");
+        }
+
+        const periodEndDate = new Date(highestTierSub.current_period_end * 1000);
+        if (isNaN(periodEndDate.getTime())) {
+          logStep("ERROR: Date conversion failed", { 
+            currentPeriodEnd: highestTierSub.current_period_end 
+          });
+          throw new Error("Invalid subscription period end date");
+        }
+
         // Upsert subscription
         const { error: upsertError } = await supabaseClient
           .from('user_subscriptions')
@@ -247,7 +264,7 @@ serve(async (req) => {
             plan: plan,
             plan_name: planMapping.name,
             status: 'active',
-            current_period_end: new Date(highestTierSub.current_period_end * 1000).toISOString(),
+            current_period_end: periodEndDate.toISOString(),
             updated_at: new Date().toISOString()
           }, {
             onConflict: 'user_id'
