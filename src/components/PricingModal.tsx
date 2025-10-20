@@ -257,81 +257,81 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4 md:mb-3 flex-1 min-h-0">
+              <div className="space-y-3 mb-4 flex-1 min-h-0">
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
-                  className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left group relative overflow-hidden ${
+                  className={`w-full p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 text-left group relative overflow-hidden ${
                     selectedPeriod === 'monthly'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md bg-white dark:bg-zinc-950'
                   }`}
                 >
                   {selectedPeriod === 'monthly' && (
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
                   )}
-                  <div className="flex justify-between items-start relative z-10">
+                  <div className="flex justify-between items-center relative z-10">
                     <div className="flex-1">
-                      <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Monthly</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        ${pricingOptions[selectedPlan].monthly.price}
+                      <div className="font-bold text-base sm:text-lg mb-1 text-zinc-900 dark:text-white">Monthly</div>
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                        ${pricingOptions[selectedPlan].monthly.price}/month
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].monthly.perDay}</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
+                    <div className="text-right ml-4">
+                      <div className="font-bold text-2xl sm:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].monthly.perDay}</div>
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">per day</div>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setSelectedPeriod('3month')}
-                  className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left relative group overflow-hidden ${
+                  className={`w-full p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 text-left relative group overflow-hidden ${
                     selectedPeriod === '3month'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md bg-white dark:bg-zinc-950'
                   }`}
                 >
                   {selectedPeriod === '3month' && (
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
                   )}
-                  <div className="flex justify-between items-start relative z-10">
+                  <div className="flex justify-between items-center relative z-10">
                     <div className="flex-1">
-                      <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">3 Months</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        ${pricingOptions[selectedPlan]['3month'].price}
+                      <div className="font-bold text-base sm:text-lg mb-1 text-zinc-900 dark:text-white">3 Months</div>
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                        ${pricingOptions[selectedPlan]['3month'].price} total
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan]['3month'].perDay}</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
+                    <div className="text-right ml-4">
+                      <div className="font-bold text-2xl sm:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan]['3month'].perDay}</div>
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">per day</div>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setSelectedPeriod('yearly')}
-                  className={`w-full p-3 sm:p-4 md:p-4 rounded-lg sm:rounded-xl border transition-all duration-300 text-left relative group overflow-hidden ${
+                  className={`w-full p-4 sm:p-5 pt-6 sm:pt-7 rounded-xl border-2 transition-all duration-300 text-left relative group overflow-visible ${
                     selectedPeriod === 'yearly'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-xl scale-[1.02]'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-lg bg-white dark:bg-zinc-950'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md bg-white dark:bg-zinc-950'
                   }`}
                 >
-                  <Badge className="absolute -top-1.5 sm:-top-2 right-2 sm:right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold border-0">
+                  <Badge className="absolute -top-2.5 right-3 sm:right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg px-3 py-1 text-xs font-bold border-0 whitespace-nowrap">
                     Save {pricingOptions[selectedPlan].yearly.savings}%
                   </Badge>
                   {selectedPeriod === 'yearly' && (
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 dark:from-blue-400/5 dark:to-purple-400/5"></div>
                   )}
-                  <div className="flex justify-between items-start relative z-10">
+                  <div className="flex justify-between items-center relative z-10">
                     <div className="flex-1">
-                      <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Yearly</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        ${pricingOptions[selectedPlan].yearly.price}
+                      <div className="font-bold text-base sm:text-lg mb-1 text-zinc-900 dark:text-white">Yearly</div>
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                        ${pricingOptions[selectedPlan].yearly.price} total
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].yearly.perDay}</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
+                    <div className="text-right ml-4">
+                      <div className="font-bold text-2xl sm:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].yearly.perDay}</div>
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">per day</div>
                     </div>
                   </div>
                 </button>
