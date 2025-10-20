@@ -11,6 +11,16 @@
     "subtitle": "Discutez avec plusieurs modèles d'IA, générez des images et améliorez votre expérience d'apprentissage",
     "getStarted": "Commencer Gratuitement"
   },
+  "models": {
+    "heading": "Choisissez la bonne IA pour chaque tâche",
+    "subtitle": "Explorez les modèles d'IA les plus avancés au monde et commencez avec celui qui correspond à votre objectif.",
+    "tryWithModel": "Essayer avec ce modèle",
+    "gptDescription": "Raisonnement avancé, résolution de problèmes et puissance de codage.",
+    "claudeDescription": "Écriture créative, codage, explications détaillées.",
+    "geminiDescription": "Le modèle d'IA le plus performant de Google pour diverses tâches.",
+    "deepseekDescription": "LLM chinois axé sur la compréhension approfondie et les réponses complètes.",
+    "grokDescription": "L'IA rebelle de X avec accès web en temps réel et insights perspicaces."
+  },
   "settings": {
     "title": "Paramètres",
     "general": "Général",

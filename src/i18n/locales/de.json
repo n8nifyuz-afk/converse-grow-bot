@@ -11,6 +11,16 @@
     "subtitle": "Chatten Sie mit mehreren KI-Modellen, generieren Sie Bilder und verbessern Sie Ihr Lernerlebnis",
     "getStarted": "Kostenlos Starten"
   },
+  "models": {
+    "heading": "Wählen Sie die richtige KI für jede Aufgabe",
+    "subtitle": "Erkunden Sie die weltweit führenden KI-Modelle und beginnen Sie mit dem, das zu Ihrem Ziel passt.",
+    "tryWithModel": "Mit diesem Modell ausprobieren",
+    "gptDescription": "Fortgeschrittenes Denken, Problemlösung und Programmierkraft.",
+    "claudeDescription": "Kreatives Schreiben, Programmieren, detaillierte Erklärungen.",
+    "geminiDescription": "Googles leistungsfähigstes KI-Modell für verschiedene Aufgaben.",
+    "deepseekDescription": "Chinesisches LLM mit Fokus auf tiefes Verständnis und umfassende Antworten.",
+    "grokDescription": "Xs rebellische KI mit Echtzeit-Webzugriff und scharfen Einblicken."
+  },
   "settings": {
     "title": "Einstellungen",
     "general": "Allgemein",

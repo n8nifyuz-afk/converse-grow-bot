@@ -11,6 +11,16 @@
     "subtitle": "複数のAIモデルとチャットし、画像を生成し、学習体験を向上させましょう",
     "getStarted": "無料で始める"
   },
+  "models": {
+    "heading": "各タスクに適したAIを選択",
+    "subtitle": "世界をリードするAIモデルを探索し、目標に合ったものから始めましょう。",
+    "tryWithModel": "このモデルで試す",
+    "gptDescription": "高度な推論、問題解決、コーディング能力。",
+    "claudeDescription": "クリエイティブライティング、コーディング、詳細な説明。",
+    "geminiDescription": "Googleの最も有能なAIモデルで、多様なタスクに対応。",
+    "deepseekDescription": "深い理解と包括的な回答に焦点を当てた中国のLLM。",
+    "grokDescription": "リアルタイムWebアクセスと鋭い洞察力を持つXの反抗的なAI。"
+  },
   "settings": {
     "title": "設定",
     "general": "一般",

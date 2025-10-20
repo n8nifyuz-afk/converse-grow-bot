@@ -11,6 +11,16 @@
     "subtitle": "Converse com vários modelos de IA, gere imagens e melhore sua experiência de aprendizado",
     "getStarted": "Começar Gratuitamente"
   },
+  "models": {
+    "heading": "Escolha a IA certa para cada tarefa",
+    "subtitle": "Explore os principais modelos de IA do mundo e comece com aquele que se adapta ao seu objetivo.",
+    "tryWithModel": "Experimentar com este modelo",
+    "gptDescription": "Raciocínio avançado, resolução de problemas e poder de programação.",
+    "claudeDescription": "Escrita criativa, programação, explicações detalhadas.",
+    "geminiDescription": "O modelo de IA mais capaz do Google para diversas tarefas.",
+    "deepseekDescription": "LLM chinês focado em compreensão profunda e respostas abrangentes.",
+    "grokDescription": "IA rebelde do X com acesso à web em tempo real e insights afiados."
+  },
   "settings": {
     "title": "Configurações",
     "general": "Geral",

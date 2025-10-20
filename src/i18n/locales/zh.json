@@ -11,6 +11,16 @@
     "subtitle": "与多个 AI 模型聊天，生成图像，提升您的学习体验",
     "getStarted": "免费开始"
   },
+  "models": {
+    "heading": "为每项任务选择合适的 AI",
+    "subtitle": "探索世界领先的 AI 模型，从最适合您目标的模型开始。",
+    "tryWithModel": "使用此模型试用",
+    "gptDescription": "高级推理、解决问题和编程能力。",
+    "claudeDescription": "创意写作、编程、详细解释。",
+    "geminiDescription": "Google 最强大的 AI 模型，适用于各种任务。",
+    "deepseekDescription": "中国 LLM，专注于深度理解和全面回答。",
+    "grokDescription": "X 的叛逆 AI，具有实时网络访问和敏锐洞察力。"
+  },
   "settings": {
     "title": "设置",
     "general": "常规",
