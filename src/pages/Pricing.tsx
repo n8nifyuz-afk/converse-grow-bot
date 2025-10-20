@@ -25,7 +25,7 @@ const Pricing = () => {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TGqk9k16XhvCIn': 'Pro',        // Pro Monthly
+    'prod_TGsOnuDkIh9hVG': 'Pro',        // Pro Monthly
     'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month
     'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly
     'prod_TGqs5r2udThT0t': 'Ultra Pro',  // Ultra Pro Monthly
@@ -173,7 +173,7 @@ const Pricing = () => {
       // Map plan to price ID based on billing period
       const priceIds = {
         'Pro': {
-          monthly: 'price_1SKJ30L8Zm4LqDn42Tj2Ixfo',
+          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',
           yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
         },
         'Ultra Pro': {
@@ -314,7 +314,7 @@ const Pricing = () => {
                     <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">{plan.emoji} {plan.name}</h3>
                     <div className="flex items-baseline gap-1 sm:gap-2 mb-1 sm:mb-2">
                       <span className="text-2xl sm:text-3xl md:text-4xl font-bold">
-                        ${currentPrice}
+                        €{currentPrice}
                       </span>
                       <span className="text-muted-foreground text-sm sm:text-base md:text-lg">
                         / {isYearly ? 'year' : 'month'}

@@ -150,7 +150,7 @@ export default function PricingPlans() {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TGqk9k16XhvCIn': 'Pro',        // Pro Monthly
+    'prod_TGsOnuDkIh9hVG': 'Pro',        // Pro Monthly
     'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month
     'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly
     'prod_TGqs5r2udThT0t': 'Ultra Pro',  // Ultra Pro Monthly
@@ -168,7 +168,7 @@ export default function PricingPlans() {
       // Price IDs based on billing period
       const priceIds = {
         'pro': {
-          monthly: 'price_1SKJ30L8Zm4LqDn42Tj2Ixfo',
+          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',
           yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
         },
         'ultra_pro': {
@@ -278,7 +278,7 @@ export default function PricingPlans() {
               <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
             <CardTitle className="text-xl sm:text-2xl">Free</CardTitle>
-            <div className="text-2xl sm:text-3xl font-bold mt-3 sm:mt-4">$0</div>
+            <div className="text-2xl sm:text-3xl font-bold mt-3 sm:mt-4">€0</div>
             <CardDescription className="mt-2 text-xs sm:text-sm">
               Start free, upgrade anytime.
             </CardDescription>
