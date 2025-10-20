@@ -87,24 +87,15 @@ const emojiCategories = {
   'activities': ['🎨', '🎪', '🎭', '🎬', '🎤', '🎸', '🏃', '🚴', '🏊', '✈️']
 };
 
-const suggestionsByCategory = {
-  'document-summary': ['Summarize this document', 'Extract key points from document', 'Provide document overview', 'Analyze document content'],
-  'email-response': ['Draft a professional email', 'Reply to this email', 'Write a formal response', 'Compose an email reply'],
-  'improve-writing': ['Refine this text', 'Polish my writing', 'Improve clarity and style', 'Make this more professional'],
-  'learning-help': ['Explain this concept simply', 'Create study materials', 'Quiz me on this topic', 'Provide examples'],
-  'business-ideas': ['Generate business ideas', 'Brainstorm startup concepts', 'Suggest business strategies', 'Create business plans'],
-  'text-summary': ['Summarize this text briefly', 'Condense into main points', 'Provide a short overview', 'Extract key takeaways'],
-  'calorie-check': ['Estimate calories in this food', 'Analyze nutritional content', 'Check dietary information', 'Calculate meal calories'],
-  'code-review': ['Review this code for bugs', 'Optimize this function', 'Explain this algorithm', 'Suggest improvements'],
-  'content-writing': ['Write a blog post about...', 'Create social media content', 'Draft an email', 'Write product descriptions'],
-  'math-solving': ['Solve this equation', 'Explain this math concept', 'Calculate percentages', 'Help with statistics'],
-  'language-help': ['Translate this text', 'Check grammar and spelling', 'Improve writing style', 'Explain language rules'],
-  'creative-writing': ['Write a short story', 'Create a poem', 'Develop character ideas', 'Brainstorm plot concepts'],
-  'data-analysis': ['Analyze this dataset', 'Create data visualizations', 'Explain trends', 'Generate insights'],
-  'brainstorming': ['Generate ideas for...', 'Creative solutions to...', 'Marketing strategies', 'Product features'],
-  'research-help': ['Research this topic', 'Find credible sources', 'Summarize findings', 'Compare different views'],
-  'productivity': ['Create a schedule', 'Organize tasks', 'Set priorities', 'Time management tips'],
-  'problem-solving': ['Help solve this problem', 'Break down complex issues', 'Find root causes', 'Generate solutions']
+// Suggestion prompts mapped by category - keys for translation
+const suggestionPromptKeys = {
+  'document-summary': ['prompts.documentSummary.1', 'prompts.documentSummary.2', 'prompts.documentSummary.3', 'prompts.documentSummary.4'],
+  'email-response': ['prompts.emailResponse.1', 'prompts.emailResponse.2', 'prompts.emailResponse.3', 'prompts.emailResponse.4'],
+  'improve-writing': ['prompts.improveWriting.1', 'prompts.improveWriting.2', 'prompts.improveWriting.3', 'prompts.improveWriting.4'],
+  'learning-help': ['prompts.learningHelp.1', 'prompts.learningHelp.2', 'prompts.learningHelp.3', 'prompts.learningHelp.4'],
+  'business-ideas': ['prompts.businessIdeas.1', 'prompts.businessIdeas.2', 'prompts.businessIdeas.3', 'prompts.businessIdeas.4'],
+  'text-summary': ['prompts.textSummary.1', 'prompts.textSummary.2', 'prompts.textSummary.3', 'prompts.textSummary.4'],
+  'calorie-check': ['prompts.calorieCheck.1', 'prompts.calorieCheck.2', 'prompts.calorieCheck.3', 'prompts.calorieCheck.4']
 };
 const availableModels = [{
   id: 'gpt-4o-mini',
@@ -170,8 +161,8 @@ const suggestionButtons = [
 
 const additionalButtons: typeof suggestionButtons = [];
 
-// Rename suggestionsByCategory to suggestionPrompts for consistency
-const suggestionPrompts = suggestionsByCategory;
+// Use the prompt keys for translation
+const suggestionPrompts = suggestionPromptKeys;
 
 export default function Index() {
   const location = useLocation();
@@ -735,8 +726,10 @@ export default function Index() {
     setShowSuggestions(action);
     textareaRef.current?.focus();
   };
-  const handlePromptClick = (prompt: string) => {
-    setMessage(prompt);
+  const handlePromptClick = (promptKey: string) => {
+    // Translate the prompt key to get the actual prompt text
+    const promptText = t(promptKey);
+    setMessage(promptText);
     setShowSuggestions(null);
     setShowMoreButtons(false);
     textareaRef.current?.focus();
@@ -1341,9 +1334,9 @@ export default function Index() {
       {/* Suggestion prompts */}
       {showSuggestions && suggestionPrompts[showSuggestions as keyof typeof suggestionPrompts] && <div className="w-full max-w-3xl mb-4 sm:mb-6">
           <div className="space-y-4" role="list" aria-label="Suggested prompts">
-            {suggestionPrompts[showSuggestions as keyof typeof suggestionPrompts].map((prompt, index) => <div key={index} role="listitem">
-                <button onClick={() => handlePromptClick(prompt)} className="w-full text-left p-3 rounded-lg hover:bg-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-accent/50 min-h-[44px] flex items-center" aria-label={`Use prompt: ${prompt}`}>
-                  <span className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors">{prompt}</span>
+            {suggestionPrompts[showSuggestions as keyof typeof suggestionPrompts].map((promptKey, index) => <div key={index} role="listitem">
+                <button onClick={() => handlePromptClick(promptKey)} className="w-full text-left p-3 rounded-lg hover:bg-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-accent/50 min-h-[44px] flex items-center" aria-label={`Use prompt: ${t(promptKey)}`}>
+                  <span className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors">{t(promptKey)}</span>
                 </button>
                 {index < suggestionPrompts[showSuggestions as keyof typeof suggestionPrompts].length - 1 && <hr className="mt-4 border-border/50" />}
               </div>)}
