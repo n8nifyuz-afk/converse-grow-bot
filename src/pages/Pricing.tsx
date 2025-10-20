@@ -141,9 +141,7 @@ const Pricing = () => {
     buttonVariant: "outline" as const
   }];
   const getPrice = (plan: typeof plans[0]) => {
-    if (!isYearly) return plan.price;
-    // For yearly plans, show monthly cost
-    return plan.yearlyPrice > 0 ? (plan.yearlyPrice / 12).toFixed(2) : 0;
+    return isYearly ? plan.yearlyPrice : plan.price;
   };
   const getSavings = (plan: typeof plans[0]) => {
     if (plan.price === 0 || plan.yearlyPrice === 0) return 0;
@@ -316,10 +314,10 @@ const Pricing = () => {
                     <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">{plan.emoji} {plan.name}</h3>
                     <div className="flex items-baseline gap-1 sm:gap-2 mb-1 sm:mb-2">
                       <span className="text-2xl sm:text-3xl md:text-4xl font-bold">
-                        €{currentPrice}
+                        ${currentPrice}
                       </span>
                       <span className="text-muted-foreground text-sm sm:text-base md:text-lg">
-                        / month
+                        / {isYearly ? 'year' : 'month'}
                       </span>
                     </div>
                     

@@ -296,7 +296,7 @@ const Home = () => {
             <div className="group p-8 rounded-lg bg-white dark:bg-card border-2 border-black/10 dark:border-border hover:border-primary/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 flex flex-col shadow-sm">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2 text-foreground">{t('pricing.freePlanTitle')}</h3>
-                <div className="text-4xl font-bold mb-2 text-foreground">€0 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
+                <div className="text-4xl font-bold mb-2 text-foreground">$0 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
                 <p className="text-muted-foreground text-sm">{t('pricing.freeDescription')}</p>
               </div>
               
@@ -364,7 +364,7 @@ const Home = () => {
               
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2 text-foreground">{t('pricing.proPlanTitle')}</h3>
-                <div className="text-4xl font-bold mb-2 text-foreground">€19.99 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
+                <div className="text-4xl font-bold mb-2 text-foreground">$19.99 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
                 <p className="text-muted-foreground text-sm">{t('pricing.proDescription')}</p>
               </div>
               
@@ -432,7 +432,7 @@ const Home = () => {
             <div className="group p-8 rounded-lg bg-white dark:bg-card border-2 border-black/10 dark:border-border hover:border-primary/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 flex flex-col shadow-sm">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2 text-foreground">{t('pricing.ultraProPlanTitle')}</h3>
-                <div className="text-4xl font-bold mb-2 text-foreground">€39.99 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
+                <div className="text-4xl font-bold mb-2 text-foreground">$39.99 <span className="text-lg font-normal text-muted-foreground">{t('pricing.perMonth')}</span></div>
                 <p className="text-muted-foreground text-sm">{t('pricing.ultraProDescription')}</p>
               </div>
               

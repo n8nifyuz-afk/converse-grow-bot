@@ -273,11 +273,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     <div className="flex-1">
                       <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Monthly</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        €{pricingOptions[selectedPlan].monthly.price}
+                        ${pricingOptions[selectedPlan].monthly.price}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
+                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].monthly.perDay}</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
                     </div>
                   </div>
@@ -298,11 +298,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     <div className="flex-1">
                       <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">3 Months</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        €{pricingOptions[selectedPlan]['3month'].price}
+                        ${pricingOptions[selectedPlan]['3month'].price}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
+                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan]['3month'].perDay}</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
                     </div>
                   </div>
@@ -326,12 +326,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     <div className="flex-1">
                       <div className="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 text-zinc-900 dark:text-white">Yearly</div>
                       <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-                        €{pricingOptions[selectedPlan].yearly.price}
+                        ${pricingOptions[selectedPlan].yearly.price}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
-                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per month</div>
+                      <div className="font-bold text-xl sm:text-2xl md:text-3xl text-zinc-900 dark:text-white">${pricingOptions[selectedPlan].yearly.perDay}</div>
+                      <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 sm:mt-1">per day</div>
                     </div>
                   </div>
                 </button>
