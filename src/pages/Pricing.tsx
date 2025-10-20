@@ -277,18 +277,18 @@ const Pricing = () => {
         
         <div className="container max-w-6xl mx-auto text-center relative z-10">
           <Badge variant="secondary" className="mb-4 sm:mb-6 md:mb-8 bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/20 text-primary animate-fade-in text-xs sm:text-sm">
-            Flexible Pricing
+            {t('pricingPage.flexiblePricing')}
           </Badge>
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 animate-fade-in leading-tight">
-            Choose Your <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">AI Journey</span>
+            {t('pricingPage.chooseYourJourney').split(' ').slice(0, 2).join(' ')} <br className="hidden sm:block" />
+            <span className="bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">{t('pricingPage.chooseYourJourney').split(' ').slice(2).join(' ')}</span>
           </h1>
           
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-3xl mx-auto animate-fade-in px-2 sm:px-0" style={{
           animationDelay: '0.1s'
         }}>
-            Start free and scale with powerful AI models that grow with your needs.
+            {t('pricingPage.startFreeScale')}
           </p>
 
           {/* Billing Toggle */}
@@ -296,13 +296,13 @@ const Pricing = () => {
           animationDelay: '0.2s'
         }}>
             <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
-              Monthly
+              {t('pricingPage.monthly')}
             </span>
             <button onClick={() => setIsYearly(!isYearly)} className={`relative w-14 h-7 sm:w-16 sm:h-8 rounded-full transition-colors duration-300 ${isYearly ? 'bg-primary' : 'bg-muted'}`}>
               <div className={`absolute top-1 left-1 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${isYearly ? 'translate-x-7 sm:translate-x-8' : 'translate-x-0'}`}></div>
             </button>
             <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
-              Yearly
+              {t('pricingPage.yearly')}
             </span>
           </div>
         </div>
@@ -321,7 +321,7 @@ const Pricing = () => {
             }}>
                   {plan.popular && <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2">
                       <Badge className="bg-gradient-to-r from-primary to-purple-600 text-white px-3 sm:px-4 md:px-6 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold">
-                        Most Popular
+                        {t('pricingPage.mostPopular')}
                       </Badge>
                     </div>}
                   
@@ -332,7 +332,7 @@ const Pricing = () => {
                         €{currentPrice}
                       </span>
                       <span className="text-muted-foreground text-sm sm:text-base md:text-lg">
-                        / {isYearly ? 'year' : 'month'}
+                        / {isYearly ? t('pricingPage.year') : t('pricingPage.month')}
                       </span>
                     </div>
                     
@@ -368,49 +368,49 @@ const Pricing = () => {
           {/* Comparison Table */}
           <div className="bg-gradient-to-br from-card to-muted/20 rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 md:p-8 lg:p-10 mb-12 sm:mb-16 md:mb-20 animate-fade-in">
             <div className="text-center mb-6 sm:mb-8 md:mb-12">
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-4">Compare Plans</h3>
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">Choose the perfect plan for your AI journey</p>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-4">{t('pricingPage.comparePlans')}</h3>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">{t('pricingPage.compareSubtitle')}</p>
             </div>
             
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full min-w-[600px] sm:min-w-0">
                 <thead>
                   <tr className="border-b-2 border-primary/20">
-                    <th className="text-left py-3 sm:py-4 md:py-6 px-3 sm:px-4 md:px-6 font-semibold text-sm sm:text-base md:text-lg">Features</th>
+                    <th className="text-left py-3 sm:py-4 md:py-6 px-3 sm:px-4 md:px-6 font-semibold text-sm sm:text-base md:text-lg">{t('pricingPage.features')}</th>
                     <th className="text-center py-3 sm:py-4 md:py-6 px-2 sm:px-3 md:px-6">
                       <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
                         <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="font-bold text-sm sm:text-base md:text-lg">Free</span>
+                        <span className="font-bold text-sm sm:text-base md:text-lg">{t('pricingPage.free')}</span>
                       </div>
                     </th>
                     <th className="text-center py-3 sm:py-4 md:py-6 px-2 sm:px-3 md:px-6">
                       <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
                         <Star className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                        <span className="font-bold text-sm sm:text-base md:text-lg">Pro</span>
+                        <span className="font-bold text-sm sm:text-base md:text-lg">{t('pricingPage.pro')}</span>
                         <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/30 text-[10px] sm:text-xs">
-                          Popular
+                          {t('pricingPage.popular')}
                         </Badge>
                       </div>
                     </th>
                     <th className="text-center py-3 sm:py-4 md:py-6 px-2 sm:px-3 md:px-6">
                       <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
                         <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="font-bold text-sm sm:text-base md:text-lg">Ultra Pro</span>
+                        <span className="font-bold text-sm sm:text-base md:text-lg">{t('pricingPage.ultraPro')}</span>
                       </div>
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 font-medium text-primary text-xs sm:text-sm md:text-base">AI Models</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 font-medium text-primary text-xs sm:text-sm md:text-base">{t('pricingPage.aiModels')}</td>
                     <td className="py-5 px-6"></td>
                     <td className="py-5 px-6"></td>
                     <td className="py-5 px-6"></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">OpenAI GPT-4o</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">OpenAI GPT-4o</td>
                     <td className="py-4 px-6 text-center">
-                      <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/30">Mini</Badge>
+                      <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/30">{t('pricingPage.mini')}</Badge>
                     </td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
@@ -440,13 +440,13 @@ const Pricing = () => {
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-5 px-6 font-medium text-primary">Features</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 font-medium text-primary text-xs sm:text-sm md:text-base">{t('pricingPage.features')}</td>
                     <td className="py-5 px-6"></td>
                     <td className="py-5 px-6"></td>
                     <td className="py-5 px-6"></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">Image Generation</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.imageGeneration')}</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center">
                       <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/30">500/mo</Badge>
@@ -456,27 +456,27 @@ const Pricing = () => {
                     </td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">Voice Mode</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.voiceMode')}</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">Chat on WhatsApp (Coming Soon)</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.whatsappComingSoon')}</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">Chat with Files</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.chatWithFiles')}</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center">
-                      <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/30">Extended</Badge>
+                      <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/30">{t('pricingPage.extended')}</Badge>
                     </td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">Web Search</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.webSearch')}</td>
                     <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center"><X className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mx-auto" /></td>
                     <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mx-auto" /></td>
@@ -488,23 +488,23 @@ const Pricing = () => {
 
           {/* FAQ Section */}
           <div className="text-center mb-10 sm:mb-12 md:mb-16 animate-fade-in">
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 px-2 sm:px-0">Frequently Asked Questions</h3>
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 px-2 sm:px-0">{t('pricingPage.faqTitle')}</h3>
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
               <div className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors">
-                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Can I change plans anytime?</h4>
-                <p className="text-muted-foreground text-xs sm:text-sm">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
+                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">{t('pricingPage.faqChangePlans')}</h4>
+                <p className="text-muted-foreground text-xs sm:text-sm">{t('pricingPage.faqChangePlansAnswer')}</p>
               </div>
               <div className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors">
-                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Is there a free trial?</h4>
-                <p className="text-muted-foreground text-xs sm:text-sm">Our Free plan gives you access to GPT-4.1 Mini with no time limit. Upgrade when ready for more features.</p>
+                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">{t('pricingPage.faqFreeTrial')}</h4>
+                <p className="text-muted-foreground text-xs sm:text-sm">{t('pricingPage.faqFreeTrialAnswer')}</p>
               </div>
               <div className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors">
-                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">What payment methods do you accept?</h4>
-                <p className="text-muted-foreground text-xs sm:text-sm">We accept all major credit cards, PayPal, and other secure payment methods.</p>
+                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">{t('pricingPage.faqPaymentMethods')}</h4>
+                <p className="text-muted-foreground text-xs sm:text-sm">{t('pricingPage.faqPaymentMethodsAnswer')}</p>
               </div>
               <div className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors">
-                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">How does billing work?</h4>
-                <p className="text-muted-foreground text-xs sm:text-sm">You'll be charged monthly or yearly based on your chosen plan. No hidden fees or surprises.</p>
+                <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">{t('pricingPage.faqBilling')}</h4>
+                <p className="text-muted-foreground text-xs sm:text-sm">{t('pricingPage.faqBillingAnswer')}</p>
               </div>
             </div>
           </div>

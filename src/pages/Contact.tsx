@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,22 +10,23 @@ import SEO from '@/components/SEO';
 
 const Contact = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Contact Us"
-        description="Get in touch with ChatLearn support team. We're here to help with any questions about our AI platform and services."
+        title={t('contactPage.title')}
+        description={t('contactPage.seoDescription')}
       />
       
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-muted/20 to-background">
         <div className="container mx-auto max-w-4xl text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 leading-tight">
-            Let's <span className="text-primary">connect</span>
+            {t('contactPage.letsConnect').split(' ')[0]} <span className="text-primary">{t('contactPage.letsConnect').split(' ')[1]}</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Our team is always happy to help just reach out and we'll get back to you shortly.
+            {t('contactPage.teamHappy')}
           </p>
         </div>
       </section>
@@ -38,53 +40,53 @@ const Contact = () => {
               <div className="p-8 rounded-xl bg-card border border-border hover:border-primary/50 transition-all duration-200 shadow-sm hover:shadow-md">
                 <h2 className="text-2xl font-semibold text-foreground mb-6 flex items-center gap-3">
                   <MessageSquare className="h-6 w-6 text-primary" />
-                  Send us a message
+                  {t('contactPage.sendMessage')}
                 </h2>
                 
                 <form className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name" className="text-foreground font-medium">Name</Label>
+                      <Label htmlFor="name" className="text-foreground font-medium">{t('contactPage.name')}</Label>
                       <Input 
                         id="name" 
                         type="text" 
-                        placeholder="Your name" 
+                        placeholder={t('contactPage.namePlaceholder')}
                         className="mt-2 border-muted-foreground/20 focus:border-primary"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
+                      <Label htmlFor="email" className="text-foreground font-medium">{t('contactPage.email')}</Label>
                       <Input 
                         id="email" 
                         type="email" 
-                        placeholder="your@email.com"
+                        placeholder={t('contactPage.emailPlaceholder')}
                         className="mt-2 border-muted-foreground/20 focus:border-primary"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <Label htmlFor="subject" className="text-foreground font-medium">Subject</Label>
+                    <Label htmlFor="subject" className="text-foreground font-medium">{t('contactPage.subject')}</Label>
                     <Input 
                       id="subject" 
                       type="text" 
-                      placeholder="How can we help?"
+                      placeholder={t('contactPage.subjectPlaceholder')}
                       className="mt-2 border-muted-foreground/20 focus:border-primary"
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="message" className="text-foreground font-medium">Message</Label>
+                    <Label htmlFor="message" className="text-foreground font-medium">{t('contactPage.message')}</Label>
                     <Textarea 
                       id="message" 
                       rows={6} 
-                      placeholder="Tell us more about your question or feedback..."
+                      placeholder={t('contactPage.messagePlaceholder')}
                       className="mt-2 border-muted-foreground/20 focus:border-primary resize-none"
                     />
                   </div>
                   
                   <Button type="submit" size="lg" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                    Send Message
+                    {t('contactPage.sendMessageButton')}
                   </Button>
                 </form>
               </div>
@@ -95,7 +97,7 @@ const Contact = () => {
               <div className="p-8 rounded-xl bg-card border border-border hover:border-primary/50 transition-all duration-200 shadow-sm hover:shadow-md">
                 <h2 className="text-2xl font-semibold text-foreground mb-6 flex items-center gap-3">
                   <Phone className="h-6 w-6 text-primary" />
-                  Contact Information
+                  {t('contactPage.contactInformation')}
                 </h2>
                 
                 <div className="space-y-6">
@@ -104,8 +106,8 @@ const Contact = () => {
                       <Mail className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground mb-1">General Support</h3>
-                      <p className="text-muted-foreground mb-2">For product or technical assistance</p>
+                      <h3 className="font-semibold text-foreground mb-1">{t('contactPage.generalSupport')}</h3>
+                      <p className="text-muted-foreground mb-2">{t('contactPage.generalSupportDesc')}</p>
                       <a href="mailto:support@chatl.ai" className="text-sm font-medium text-primary hover:underline">support@chatl.ai</a>
                     </div>
                   </div>
@@ -115,8 +117,8 @@ const Contact = () => {
                       <Phone className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground mb-1">Billing Support</h3>
-                      <p className="text-muted-foreground mb-2">For payment or subscription inquiries</p>
+                      <h3 className="font-semibold text-foreground mb-1">{t('contactPage.billingSupport')}</h3>
+                      <p className="text-muted-foreground mb-2">{t('contactPage.billingSupportDesc')}</p>
                       <a href="mailto:billing@chatl.ai" className="text-sm font-medium text-primary hover:underline">billing@chatl.ai</a>
                     </div>
                   </div>
@@ -126,11 +128,10 @@ const Contact = () => {
               <div className="p-6 rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
                 <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-primary" />
-                  Quick Response Promise
+                  {t('contactPage.quickResponse')}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  We typically respond to all inquiries within 24 hours. For urgent matters, 
-                  please use our live chat feature for immediate assistance.
+                  {t('contactPage.quickResponseDesc')}
                 </p>
               </div>
             </div>

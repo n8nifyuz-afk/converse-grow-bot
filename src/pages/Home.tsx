@@ -373,13 +373,13 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Access to GPT-4, GPT-5, Gemini</span>
+                  <span className="text-foreground text-sm">{t('homePage.accessGPT')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Claude, DeepSeek, Grok (Ultra only)</span>
+                  <span className="text-muted-foreground text-sm">{t('homePage.claudeUltraOnly')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -409,7 +409,7 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Chat on WhatsApp (Coming Soon)</span>
+                  <span className="text-foreground text-sm">{t('pricingPage.whatsappComingSoon')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -459,7 +459,7 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Access to Claude, DeepSeek, and Grok</span>
+                  <span className="text-foreground text-sm">{t('homePage.accessClaude')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -477,7 +477,7 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Chat on WhatsApp (Coming Soon)</span>
+                  <span className="text-foreground text-sm">{t('pricingPage.whatsappComingSoon')}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -531,73 +531,73 @@ const Home = () => {
               <Accordion type="single" collapsible className="space-y-4">
                 <AccordionItem value="item-1" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    What can I do with this AI?
+                    {t('faq.question1')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    You can chat, create images, write texts, learn new things, and even get coding help — all in one place.
+                    {t('faq.answer1')}
                   </AccordionContent>
                 </AccordionItem>
                 
                 <AccordionItem value="item-2" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    Is it easy to use?
+                    {t('faq.question2')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    Yes. Just start typing or speaking — no setup needed.
+                    {t('faq.answer2')}
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-3" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    Can it help me study or learn?
+                    {t('faq.question3')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    Absolutely. The AI can explain topics, summarize notes, and answer your questions like a study buddy.
+                    {t('faq.answer3')}
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-4" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    Can I create images with it?
+                    {t('faq.question4')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    Yes. You can generate unique images instantly from your ideas.
+                    {t('faq.answer4')}
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-5" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    Does it work in different languages?
+                    {t('faq.question5')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    Yes. You can chat naturally in 50+ languages.
+                    {t('faq.answer5')}
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-6" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    Can it help with writing?
+                    {t('faq.question6')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    Yes. From short messages to full articles, the AI helps you write faster and better.
+                    {t('faq.answer6')}
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-7" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    Can I talk to it with my voice?
+                    {t('faq.question7')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    Yes. You can use voice commands for hands-free conversations.
+                    {t('faq.answer7')}
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-8" className="border rounded-xl px-6 hover:border-primary/30 transition-colors">
                   <AccordionTrigger className="text-left hover:no-underline text-lg font-semibold">
-                    Is it good for fun too?
+                    {t('faq.question8')}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                    Definitely. Chat casually, ask for jokes, or just have fun conversations.
+                    {t('faq.answer8')}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
