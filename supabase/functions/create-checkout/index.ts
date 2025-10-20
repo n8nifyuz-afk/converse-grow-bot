@@ -71,8 +71,8 @@ serve(async (req) => {
       logStep("No existing customer, will create during checkout");
     }
 
-    // Use custom checkout domain for Stripe flows
-    const checkoutDomain = "https://checkout.chatl.ai";
+    // Redirect to main site after payment
+    const mainSite = "https://www.chatl.ai";
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -84,8 +84,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${checkoutDomain}/?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${checkoutDomain}`,
+      success_url: `${mainSite}/?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${mainSite}`,
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
