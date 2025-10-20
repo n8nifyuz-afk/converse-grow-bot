@@ -14,11 +14,12 @@ const logStep = (step: string, details?: any) => {
 
 // LIVE Product IDs
 const productToPlanMap: { [key: string]: string } = {
-  'prod_TFjbArlYa9GMQr': 'Pro',        // Pro Daily (LIVE)
-  'prod_TDSbUWLqR3bz7k': 'Pro',        // Pro Monthly (LIVE)
-  'prod_TEx5Xda5BPBuHv': 'Pro',        // Pro Yearly (LIVE)
-  'prod_TDSbGJB9U4Xt7b': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
-  'prod_TDSHzExQNjyvJD': 'Ultra Pro',  // Ultra Pro Yearly (LIVE)
+  'prod_TGqk9k16XhvCIn': 'Pro',        // Pro Monthly (LIVE)
+  'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month (LIVE)
+  'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly (LIVE)
+  'prod_TGqs5r2udThT0t': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
+  'prod_TGquGexHO44m4T': 'Ultra Pro',  // Ultra Pro 3-Month (LIVE)
+  'prod_TGqwVIWObYLt6U': 'Ultra Pro',  // Ultra Pro Yearly (LIVE)
 };
 
 serve(async (req) => {
