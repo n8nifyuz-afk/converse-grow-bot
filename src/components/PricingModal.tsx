@@ -170,23 +170,23 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             )}
             
             {/* Left Panel - Features Comparison */}
-            <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-700 dark:border-zinc-800 flex-col relative">
+            <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 md:p-3 lg:p-6 border-r border-zinc-700 dark:border-zinc-800 flex-col relative">
               {/* Decorative gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/10 pointer-events-none"></div>
               
               {/* Comparison Table */}
-              <div className="flex-1 flex flex-col min-h-0 relative z-10">
+              <div className="flex-1 flex flex-col relative z-10">
                 {/* Header Row */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 pb-2 sm:pb-3 md:pb-4 border-b border-zinc-700/50 mb-1 sm:mb-2 flex-shrink-0">
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-zinc-400">Feature</div>
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-center text-zinc-400">Free</div>
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <div className="grid grid-cols-3 gap-2 md:gap-3 lg:gap-4 pb-1.5 md:pb-2 lg:pb-3 border-b border-zinc-700/50 mb-1 flex-shrink-0">
+                  <div className="text-xs md:text-sm font-bold text-zinc-400">Feature</div>
+                  <div className="text-xs md:text-sm font-bold text-center text-zinc-400">Free</div>
+                  <div className="text-xs md:text-sm font-bold text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                     {selectedPlan === 'pro' ? '⭐ Pro' : '👑 Ultra'}
                   </div>
                 </div>
                 
                 {/* Feature Rows */}
-                <div className="flex-1 space-y-0">
+                <div className="flex-1 space-y-0 overflow-y-auto">
                   {allFeatures
                     .filter((feature) => {
                       const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
@@ -196,29 +196,29 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
                       
                       return (
-                        <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1 sm:py-1.5 md:py-2 px-1.5 sm:px-2 md:px-3 rounded-lg md:hover:bg-white/5 md:transition-all md:duration-200 backdrop-blur-sm border border-transparent md:hover:border-zinc-700/50">
-                          <div className="text-xs sm:text-sm md:text-base font-medium text-white flex items-center leading-tight">
+                        <div key={index} className="grid grid-cols-3 gap-2 md:gap-3 lg:gap-4 py-0.5 md:py-1 lg:py-1.5 px-1 md:px-2 lg:px-3 rounded-lg md:hover:bg-white/5 md:transition-all md:duration-200 backdrop-blur-sm border border-transparent md:hover:border-zinc-700/50">
+                          <div className="text-xs md:text-sm font-medium text-white flex items-center leading-tight">
                             {feature.name}
                           </div>
                           <div className="flex justify-center items-center">
                             {feature.free === false ? (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
+                              <div className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                                <X className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 text-zinc-600" />
                               </div>
                             ) : (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-green-400" />
+                              <div className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 text-green-400" />
                               </div>
                             )}
                           </div>
                           <div className="flex justify-center items-center">
                             {selectedValue === false ? (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
+                              <div className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                                <X className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 text-zinc-600" />
                               </div>
                             ) : (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center border border-blue-400/30">
-                                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
+                              <div className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center border border-blue-400/30">
+                                <Check className="w-2.5 h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 text-white" />
                               </div>
                             )}
                           </div>
