@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import logoLight from '@/assets/chatl-logo-black.png';
 import logoDark from '@/assets/chatl-logo-white.png';
 
@@ -14,6 +15,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme, actualTheme } = useTheme();
   const { user, userProfile } = useAuth();
+  const { t } = useTranslation();
 
   // Choose the correct logo based on theme
   const currentLogo = actualTheme === 'dark' ? logoDark : logoLight;
@@ -51,25 +53,25 @@ const Header = () => {
               onClick={() => handleScrollToSection('ai-models-section')}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
-              AI Tools
+              {t('nav.aiTools')}
             </button>
             <button 
               onClick={() => handleScrollToSection('features-section')}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
-              What You Can Do
+              {t('nav.whatYouCanDo')}
             </button>
             <Link 
               to="/pricing" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
-              Pricing
+              {t('nav.pricing')}
             </Link>
             <Link 
               to="/contact" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
-              Contact Us
+              {t('nav.contact')}
             </Link>
           </nav>
 
@@ -99,7 +101,7 @@ const Header = () => {
                 document.head.appendChild(link);
               }}
             >
-              Start Now
+              {t('nav.startNow')}
             </Button>
 
             {/* Mobile menu */}
@@ -112,7 +114,7 @@ const Header = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-lg font-semibold">Menu</h2>
+                  <h2 className="text-lg font-semibold">{t('nav.menu')}</h2>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -132,27 +134,27 @@ const Header = () => {
                     onClick={() => handleScrollToSection('ai-models-section')}
                     className="text-lg font-medium hover:text-primary transition-colors text-left"
                   >
-                    AI Tools
+                    {t('nav.aiTools')}
                   </button>
                   <button 
                     onClick={() => handleScrollToSection('features-section')}
                     className="text-lg font-medium hover:text-primary transition-colors text-left"
                   >
-                    What You Can Do
+                    {t('nav.whatYouCanDo')}
                   </button>
                   <Link 
                     to="/pricing" 
                     className="text-lg font-medium hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    Pricing
+                    {t('nav.pricing')}
                   </Link>
                   <Link 
                     to="/contact" 
                     className="text-lg font-medium hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    Contact Us
+                    {t('nav.contact')}
                   </Link>
                 </nav>
               </SheetContent>

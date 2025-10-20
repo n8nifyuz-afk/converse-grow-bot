@@ -6,7 +6,19 @@
     "contact": "Contáctanos",
     "startNow": "Comenzar Ahora",
     "about": "Acerca de",
-    "home": "Inicio"
+    "home": "Inicio",
+    "menu": "Menú"
+  },
+  "footer": {
+    "tagline": "Tu puerta de entrada a los modelos de IA más avanzados del mundo, unificados en una plataforma inteligente.",
+    "product": "Producto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "aboutUs": "Acerca de Nosotros",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "cookiePolicy": "Política de Cookies",
+    "refundPolicy": "Política de Reembolso"
   },
   "hero": {
     "title": "Tu Compañero de Aprendizaje IA",

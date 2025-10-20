@@ -6,7 +6,19 @@
     "contact": "Contact Us",
     "startNow": "Start Now",
     "about": "About",
-    "home": "Home"
+    "home": "Home",
+    "menu": "Menu"
+  },
+  "footer": {
+    "tagline": "Your gateway to the world's most advanced AI models, unified in one intelligent platform.",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "aboutUs": "About Us",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "cookiePolicy": "Cookie Policy",
+    "refundPolicy": "Refund Policy"
   },
   "hero": {
     "title": "Your AI Learning Companion",
