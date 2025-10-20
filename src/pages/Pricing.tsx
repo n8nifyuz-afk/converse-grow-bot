@@ -321,10 +321,6 @@ const Pricing = () => {
                       </span>
                     </div>
                     
-                    {isYearly && savings > 0 && <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/30 mb-1 sm:mb-2 text-xs">
-                        Save {savings}%
-                      </Badge>}
-                    
                     <p className="text-muted-foreground text-xs sm:text-sm md:text-base">{plan.description}</p>
                   </div>
                   
