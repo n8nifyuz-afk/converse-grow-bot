@@ -114,8 +114,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     }
     
     toast({
-      title: "Language updated",
-      description: `Language changed to ${newLanguage === 'en' ? 'English' : newLanguage === 'es' ? 'Español' : newLanguage === 'fr' ? 'Français' : newLanguage === 'de' ? 'Deutsch' : newLanguage === 'pt' ? 'Português' : newLanguage === 'it' ? 'Italiano' : newLanguage === 'zh' ? '中文' : newLanguage === 'ja' ? '日本語' : newLanguage === 'ar' ? 'العربية' : 'Русский'}`,
+      title: t('toast.languageUpdated'),
+      description: `${t('toast.languageChangedTo')} ${newLanguage === 'en' ? 'English' : newLanguage === 'es' ? 'Español' : newLanguage === 'fr' ? 'Français' : newLanguage === 'de' ? 'Deutsch' : newLanguage === 'pt' ? 'Português' : newLanguage === 'it' ? 'Italiano' : newLanguage === 'zh' ? '中文' : newLanguage === 'ja' ? '日本語' : newLanguage === 'ar' ? 'العربية' : 'Русский'}`,
     });
   };
 
@@ -125,8 +125,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
+        title: t('toast.error'),
+        description: t('toast.failedLogout'),
         variant: "destructive",
       });
     }
@@ -148,8 +148,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to log out from all devices. Please try again.",
+        title: t('toast.error'),
+        description: t('toast.failedLogoutAllDevices'),
         variant: "destructive",
       });
     }
@@ -160,8 +160,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     
     setIsExporting(true);
     toast({
-      title: "Export started",
-      description: "Your data export has started. Please wait…",
+      title: t('toast.exportStarted'),
+      description: t('toast.exportStartedDesc'),
     });
 
     try {
@@ -296,14 +296,14 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       URL.revokeObjectURL(url);
 
       toast({
-        title: "Export completed",
-        description: "Your data has been successfully exported and downloaded.",
+        title: t('toast.exportCompleted'),
+        description: t('toast.exportCompletedDesc'),
       });
     } catch (error) {
       console.error('Export error:', error);
       toast({
-        title: "Export failed",
-        description: "There was an error exporting your data. Please try again.",
+        title: t('toast.exportFailed'),
+        description: t('toast.exportFailedDesc'),
         variant: "destructive",
       });
     } finally {
@@ -340,8 +340,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       }
 
       toast({
-        title: "All data deleted",
-        description: "All your chats, projects, and images have been permanently deleted.",
+        title: t('toast.allDataDeleted'),
+        description: t('toast.allDataDeletedDesc'),
       });
 
       // Close settings modal and redirect to home page
@@ -350,8 +350,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     } catch (error: any) {
       console.error('Delete all chats error:', error);
       toast({
-        title: "Error deleting data",
-        description: "Unable to delete all data. Please try again.",
+        title: t('toast.errorDeletingData'),
+        description: t('toast.unableToDeleteData'),
         variant: "destructive",
       });
     }
@@ -379,8 +379,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       }
       
       toast({
-        title: "Account deleted",
-        description: "Your account has been permanently deleted.",
+        title: t('toast.accountDeleted'),
+        description: t('toast.accountDeletedDesc'),
       });
       
       // Sign out and close modal
@@ -389,8 +389,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     } catch (error: any) {
       console.error('Delete account error:', error);
       toast({
-        title: "Error deleting account",
-        description: error.message || "Unable to delete account. Please try again.",
+        title: t('toast.errorDeletingAccount'),
+        description: error.message || t('toast.unableToDeleteAccount'),
         variant: "destructive",
       });
     }
@@ -419,7 +419,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       console.error('Customer portal error:', error);
       
       // Extract the error message from the response
-      let errorMessage = "Failed to open customer portal. Please try again.";
+      let errorMessage = t('toast.failedOpenPortal');
       if (error?.message) {
         errorMessage = error.message;
       } else if (typeof error === 'object' && error.error) {
@@ -427,7 +427,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       }
       
       toast({
-        title: "Stripe Configuration Required",
+        title: t('toast.stripeConfigRequired'),
         description: errorMessage,
         variant: "destructive",
         duration: 10000, // Show longer for important configuration message
@@ -729,12 +729,12 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           return (
             <div className="space-y-4 md:space-y-6">
               <div className="space-y-1.5 md:space-y-2">
-                <h2 className="text-xl md:text-2xl font-semibold text-foreground">Subscription</h2>
-                <p className="text-sm md:text-base text-muted-foreground">Sign in to manage your subscription</p>
+                <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('settings.subscription')}</h2>
+                <p className="text-sm md:text-base text-muted-foreground">{t('subscription.signInToManageSubscription')}</p>
               </div>
               <div className="text-center py-6 md:py-8">
-                <p className="text-sm md:text-base text-muted-foreground mb-4">You need to be signed in to access subscription settings.</p>
-                <Button onClick={() => window.location.href = '/'} className="w-full sm:w-auto">Sign In</Button>
+                <p className="text-sm md:text-base text-muted-foreground mb-4">{t('subscription.needSignIn')}</p>
+                <Button onClick={() => window.location.href = '/'} className="w-full sm:w-auto">{t('subscription.signIn')}</Button>
               </div>
             </div>
           );
@@ -742,8 +742,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         return (
           <div className="space-y-4 md:space-y-6">
             <div className="space-y-1.5 md:space-y-2">
-              <h2 className="text-xl md:text-2xl font-semibold text-foreground">Subscription</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Manage your subscription and billing</p>
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('settings.subscription')}</h2>
+              <p className="text-sm md:text-base text-muted-foreground">{t('settings.manageSubscriptionAndBilling')}</p>
             </div>
             
             <div className="space-y-4 md:space-y-6">
@@ -755,22 +755,22 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       <Crown className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold mb-1 text-sm md:text-base">Current Plan</h3>
+                      <h3 className="font-semibold mb-1 text-sm md:text-base">{t('subscription.currentPlan')}</h3>
                       <p className="text-lg md:text-xl font-bold text-primary mb-2">
                         {subscriptionStatus.subscribed 
-                          ? (subscriptionStatus.product_id === 'prod_TDSeCiQ2JEFnWB' ? 'Pro Plan' 
-                              : subscriptionStatus.product_id === 'prod_TDSfAtaWP5KbhM' ? 'Ultra Pro Plan' 
-                              : 'Pro Plan')
-                          : 'Free Plan'}
+                          ? (subscriptionStatus.product_id === 'prod_TDSeCiQ2JEFnWB' ? t('subscription.proPlan')
+                              : subscriptionStatus.product_id === 'prod_TDSfAtaWP5KbhM' ? t('subscription.ultraProPlan')
+                              : t('subscription.proPlan'))
+                          : t('subscription.freePlan')}
                       </p>
                       {subscriptionStatus.subscription_end && (
                         <p className="text-xs md:text-sm text-muted-foreground">
-                          Renews on {new Date(subscriptionStatus.subscription_end).toLocaleDateString()}
+                          {t('subscription.renewsOn')} {new Date(subscriptionStatus.subscription_end).toLocaleDateString()}
                         </p>
                       )}
                       {!subscriptionStatus.subscribed && (
                         <p className="text-xs md:text-sm text-muted-foreground">
-                          Upgrade to unlock all premium features
+                          {t('subscription.upgradeToUnlock')}
                         </p>
                       )}
                     </div>
@@ -788,8 +788,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           <ImageIcon className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-sm md:text-base">Usage Limits</h3>
-                          <p className="text-xs md:text-sm text-muted-foreground">Your monthly usage allocation</p>
+                          <h3 className="font-semibold text-sm md:text-base">{t('subscription.usageLimits')}</h3>
+                          <p className="text-xs md:text-sm text-muted-foreground">{t('subscription.monthlyUsage')}</p>
                         </div>
                       </div>
                       
@@ -797,24 +797,24 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         {/* Image Generations */}
                         <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                           <div>
-                            <p className="font-medium text-sm">Image Generations</p>
+                            <p className="font-medium text-sm">{t('subscription.imageGenerations')}</p>
                             <p className="text-xs text-muted-foreground">
-                              Resets on {usageLimits.resetDate ? new Date(usageLimits.resetDate).toLocaleDateString() : 'N/A'}
+                              {t('subscription.resetsOn')} {usageLimits.resetDate ? new Date(usageLimits.resetDate).toLocaleDateString() : 'N/A'}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-primary">
                               {usageLimits.remaining} / {usageLimits.limit}
                             </p>
-                            <p className="text-xs text-muted-foreground">remaining</p>
+                            <p className="text-xs text-muted-foreground">{t('subscription.remaining')}</p>
                           </div>
                         </div>
                         
                         {/* Upgrade suggestion for Pro users */}
                         {subscriptionStatus.product_id === 'prod_TDSeCiQ2JEFnWB' && usageLimits.remaining < 100 && (
                           <div className="p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-primary/20 rounded-lg">
-                            <p className="text-sm font-medium text-foreground mb-1">Running low on generations?</p>
-                            <p className="text-xs text-muted-foreground mb-2">Upgrade to Ultra Pro for 2,000 generations/month (4× more!)</p>
+                            <p className="text-sm font-medium text-foreground mb-1">{t('subscription.runningLow')}</p>
+                            <p className="text-xs text-muted-foreground mb-2">{t('subscription.upgradeUltraProDesc')}</p>
                             <Button 
                               size="sm" 
                               className="w-full"
@@ -823,7 +823,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                                 window.location.href = '/pricing';
                               }}
                             >
-                              Upgrade to Ultra Pro
+                              {t('subscription.upgradeToUltraPro')}
                             </Button>
                           </div>
                         )}
@@ -839,9 +839,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                   <CardContent className="p-4 md:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                       <div className="min-w-0">
-                        <h3 className="font-semibold mb-1 text-sm md:text-base">Manage Subscription</h3>
+                        <h3 className="font-semibold mb-1 text-sm md:text-base">{t('subscription.manageSubscription')}</h3>
                         <p className="text-xs md:text-sm text-muted-foreground">
-                          Update payment method, view invoices, or cancel subscription
+                          {t('subscription.updatePayment')}
                         </p>
                       </div>
                       <Button 
@@ -851,7 +851,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         size="sm"
                         className="w-full sm:w-auto"
                       >
-                        {isLoadingPortal ? 'Loading...' : 'Manage'}
+                        {isLoadingPortal ? t('subscription.loading') : t('subscription.manage')}
                       </Button>
                     </div>
                   </CardContent>
@@ -864,9 +864,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                   <CardContent className="p-4 md:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                       <div className="min-w-0">
-                        <h3 className="font-semibold mb-1 text-sm md:text-base">Upgrade to Pro</h3>
+                        <h3 className="font-semibold mb-1 text-sm md:text-base">{t('subscription.upgradeToPro')}</h3>
                         <p className="text-xs md:text-sm text-muted-foreground">
-                          Access all premium AI models and advanced features
+                          {t('subscription.accessPremium')}
                         </p>
                       </div>
                       <Button 
@@ -883,7 +883,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         size="sm"
                         className="w-full sm:w-auto"
                       >
-                        View Plans
+                        {t('subscription.viewPlans')}
                       </Button>
                     </div>
                   </CardContent>
