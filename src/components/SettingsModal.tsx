@@ -69,6 +69,20 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
   const { i18n, t } = useTranslation();
 
+  const sidebarItems = [
+    { id: 'general', label: t('settings.general'), icon: Settings },
+    { id: 'profile', label: t('settings.profile'), icon: User },
+    { id: 'subscription', label: t('settings.subscription'), icon: Crown },
+    { id: 'security', label: t('settings.security'), icon: Shield },
+    { id: 'data', label: t('settings.dataControl'), icon: CreditCard },
+  ];
+
+  const themeOptions = [
+    { value: 'light' as const, label: t('settings.light'), icon: Sun },
+    { value: 'dark' as const, label: t('settings.dark'), icon: Moon },
+    { value: 'system' as const, label: t('settings.system'), icon: Monitor },
+  ];
+
   const handleSetTheme = (newTheme: typeof theme) => {
     setTheme(newTheme);
   };
@@ -428,8 +442,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         return (
           <div className="space-y-6 md:space-y-8">
             <div className="space-y-1.5 md:space-y-2">
-              <h2 className="text-xl md:text-2xl font-bold text-foreground">General</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Customize your experience and preferences</p>
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">{t('settings.general')}</h2>
+              <p className="text-sm md:text-base text-muted-foreground">{t('settings.customizeExperience')}</p>
             </div>
             
             <div className="space-y-5">
@@ -442,9 +456,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <div className="p-2 rounded-lg bg-primary/10">
                           <Monitor className="h-4 w-4 text-primary" />
                         </div>
-                        <p className="font-semibold text-foreground">Theme</p>
+                        <p className="font-semibold text-foreground">{t('settings.theme')}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground ml-10">Choose your preferred appearance</p>
+                      <p className="text-sm text-muted-foreground ml-10">{t('settings.themeDescription')}</p>
                     </div>
                     <Select value={theme} onValueChange={handleSetTheme}>
                       <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
@@ -481,9 +495,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <div className="p-2 rounded-lg bg-primary/10">
                           <div className="h-4 w-4 rounded-full bg-gradient-to-br from-primary to-primary/60" />
                         </div>
-                        <p className="font-semibold text-foreground">Accent Color</p>
+                        <p className="font-semibold text-foreground">{t('settings.accentColor')}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground ml-10">Personalize your interface colors</p>
+                      <p className="text-sm text-muted-foreground ml-10">{t('settings.accentColorDescription')}</p>
                     </div>
                     <Select value={accentColor} onValueChange={handleSetAccentColor}>
                       <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
@@ -520,10 +534,10 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <div className="p-2 rounded-lg bg-primary/10">
                           <Languages className="h-4 w-4 text-primary" />
                         </div>
-                        <p className="font-semibold text-foreground">Language</p>
+                        <p className="font-semibold text-foreground">{t('settings.language')}</p>
                       </div>
                       <p className="text-sm text-muted-foreground ml-10">
-                        {user ? 'Your language preference is saved across devices' : 'Auto-detected from your location'}
+                        {user ? t('settings.languageSavedDescription') : t('settings.languageAutoDescription')}
                       </p>
                     </div>
                     <Select value={i18n.language} onValueChange={handleLanguageChange}>

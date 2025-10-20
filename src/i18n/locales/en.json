@@ -19,8 +19,17 @@
     "security": "Security",
     "dataControl": "Data Control",
     "theme": "Theme",
+    "themeDescription": "Choose your preferred appearance",
+    "accentColor": "Accent Color",
+    "accentColorDescription": "Personalize your interface colors",
     "language": "Language",
-    "selectLanguage": "Select your preferred language"
+    "languageDescription": "Choose your preferred language",
+    "languageSavedDescription": "Your language preference is saved across devices",
+    "languageAutoDescription": "Auto-detected from your location",
+    "customizeExperience": "Customize your experience and preferences",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "languages": {
     "en": "English",
