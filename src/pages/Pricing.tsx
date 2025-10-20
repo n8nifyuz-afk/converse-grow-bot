@@ -363,39 +363,24 @@ const Pricing = () => {
                   <tr className="border-b-2 border-primary/20">
                     <th className="text-left py-3 sm:py-4 md:py-6 px-3 sm:px-4 md:px-6 font-semibold text-sm sm:text-base md:text-lg">Features</th>
                     <th className="text-center py-3 sm:py-4 md:py-6 px-2 sm:px-3 md:px-6">
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-                          <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
-                          <span className="font-bold text-sm sm:text-base md:text-lg">Free</span>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => navigate('/chat')} className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3">
-                          Get started
-                        </Button>
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                        <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="font-bold text-sm sm:text-base md:text-lg">Free</span>
                       </div>
                     </th>
                     <th className="text-center py-3 sm:py-4 md:py-6 px-2 sm:px-3 md:px-6">
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-                          <Star className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                          <span className="font-bold text-sm sm:text-base md:text-lg">Pro</span>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/30 text-[10px] sm:text-xs">
-                            Popular
-                          </Badge>
-                        </div>
-                        <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600 text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3" onClick={() => handleSubscribe(plans[1])}>
-                          Subscribe
-                        </Button>
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                        <Star className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                        <span className="font-bold text-sm sm:text-base md:text-lg">Pro</span>
+                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/30 text-[10px] sm:text-xs">
+                          Popular
+                        </Badge>
                       </div>
                     </th>
                     <th className="text-center py-3 sm:py-4 md:py-6 px-2 sm:px-3 md:px-6">
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
-                          <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
-                          <span className="font-bold text-sm sm:text-base md:text-lg">Ultra Pro</span>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => handleSubscribe(plans[2])} className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3">
-                          Subscribe
-                        </Button>
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                        <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="font-bold text-sm sm:text-base md:text-lg">Ultra Pro</span>
                       </div>
                     </th>
                   </tr>
