@@ -230,36 +230,38 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-4 lg:p-8 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30">
-              <div className="mb-3 sm:mb-4 md:mb-4 flex-shrink-0">
-                <h2 className="text-xl sm:text-2xl md:text-2xl lg:text-4xl font-bold mb-1.5 sm:mb-2 md:mb-2 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
-                  Choose Your Plan
-                </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm md:text-sm">Unlock unlimited access to all AI models</p>
-              </div>
+            <div className="w-full md:w-5/12 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 overflow-hidden">
+              {/* Scrollable Content Area */}
+              <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-4 lg:p-6">
+                <div className="mb-4 sm:mb-5 flex-shrink-0">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1.5 sm:mb-2 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
+                    Choose Your Plan
+                  </h2>
+                  <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">Unlock unlimited access to all AI models</p>
+                </div>
 
-              {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-3 sm:mb-4 md:mb-3 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10 md:h-12 bg-zinc-100 dark:bg-zinc-900 p-1 sm:p-1.5 border border-zinc-200 dark:border-zinc-800 rounded-lg sm:rounded-xl">
-                  <TabsTrigger 
-                    value="pro" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
-                  >
-                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Pro
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="ultra" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
-                  >
-                    <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Ultra Pro
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                {/* Plan Tabs */}
+                <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-4 flex-shrink-0">
+                  <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10 md:h-11 bg-zinc-100 dark:bg-zinc-900 p-1 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                    <TabsTrigger 
+                      value="pro" 
+                      className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md transition-all"
+                    >
+                      <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                      Pro
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="ultra" 
+                      className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md transition-all"
+                    >
+                      <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                      Ultra Pro
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
 
-              {/* Billing Period Options */}
-              <div className="space-y-3 mb-4 flex-1 min-h-0">
+                {/* Billing Period Options */}
+                <div className="space-y-2.5 sm:space-y-3 mb-4">
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 text-left group relative overflow-hidden ${
@@ -338,31 +340,32 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 </button>
               </div>
+              </div>
 
-              {/* Continue Button */}
-              <Button 
-                onClick={handleSubscribe}
-                disabled={isLoading}
-                className="w-full h-10 sm:h-12 md:h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-xs sm:text-sm md:text-base shadow-2xl hover:shadow-blue-500/50 transition-all rounded-lg sm:rounded-xl border-0 flex-shrink-0 hover:scale-[1.02]"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <span className="hidden sm:inline">Subscribe to {selectedPlan === 'pro' ? 'Pro' : 'Ultra Pro'} Plan</span>
-                    <span className="sm:hidden">Subscribe</span>
-                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
-                  </>
-                )}
-              </Button>
+              {/* Fixed Bottom Section */}
+              <div className="p-3 sm:p-4 md:p-4 lg:p-6 pt-0 bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 border-t border-zinc-200 dark:border-zinc-800">
+                {/* Continue Button */}
+                <Button 
+                  onClick={handleSubscribe}
+                  disabled={isLoading}
+                  className="w-full h-11 sm:h-12 md:h-13 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-sm sm:text-base shadow-2xl hover:shadow-blue-500/50 transition-all rounded-xl border-0 hover:scale-[1.02] mb-3"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline">Subscribe to {selectedPlan === 'pro' ? 'Pro' : 'Ultra Pro'} Plan</span>
+                      <span className="sm:hidden">Subscribe</span>
+                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
+                    </>
+                  )}
+                </Button>
 
-              {/* Footer */}
-              <div className="mt-3 sm:mt-4 md:mt-3 space-y-2 sm:space-y-3 flex-shrink-0">
                 {/* Payment Cards */}
-                <div className="flex items-center justify-center gap-2 sm:gap-3 py-1 sm:py-2">
+                <div className="flex items-center justify-center gap-2 sm:gap-2.5 mb-2">
                   {/* Visa */}
                   <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 750 471" fill="none">
