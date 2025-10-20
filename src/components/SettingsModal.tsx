@@ -79,9 +79,28 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
   const handleLanguageChange = async (newLanguage: string) => {
     await i18n.changeLanguage(newLanguage);
+    
+    // Save to localStorage for non-logged-in users
+    localStorage.setItem('i18nextLng', newLanguage);
+    
+    // Save to Supabase user metadata for logged-in users
+    if (user) {
+      try {
+        const { error } = await supabase.auth.updateUser({
+          data: { language: newLanguage }
+        });
+        
+        if (error) {
+          console.error('Failed to save language preference:', error);
+        }
+      } catch (error) {
+        console.error('Error saving language preference:', error);
+      }
+    }
+    
     toast({
       title: "Language updated",
-      description: `Language changed to ${t(`languages.${newLanguage}`)}`,
+      description: `Language changed to ${newLanguage === 'en' ? 'English' : newLanguage === 'es' ? 'Español' : newLanguage === 'fr' ? 'Français' : newLanguage === 'de' ? 'Deutsch' : newLanguage === 'pt' ? 'Português' : newLanguage === 'it' ? 'Italiano' : newLanguage === 'zh' ? '中文' : newLanguage === 'ja' ? '日本語' : newLanguage === 'ar' ? 'العربية' : 'Русский'}`,
     });
   };
 
@@ -413,32 +432,35 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               <p className="text-sm md:text-base text-muted-foreground">Customize your experience and preferences</p>
             </div>
             
-            <div className="space-y-4 md:space-y-6">
+            <div className="space-y-5">
               {/* Theme Setting */}
-              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-4 md:p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                    <div className="space-y-0.5 md:space-y-1">
-                      <p className="font-semibold text-foreground text-sm md:text-base">Theme</p>
-                      <p className="text-xs md:text-sm text-muted-foreground">Choose your preferred appearance</p>
+              <Card className="border-none shadow-md hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-card via-card to-card/80">
+                <CardContent className="p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Monitor className="h-4 w-4 text-primary" />
+                        </div>
+                        <p className="font-semibold text-foreground">Theme</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-10">Choose your preferred appearance</p>
                     </div>
                     <Select value={theme} onValueChange={handleSetTheme}>
-                      <SelectTrigger className="w-full sm:w-36 bg-background/80 border border-border/50 shadow-sm backdrop-blur-sm">
+                      <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-background/95 border border-border/50 shadow-xl z-50 backdrop-blur-md">
+                      <SelectContent className="bg-background border-2 border-border shadow-xl">
                         {themeOptions.map((option) => {
                           const Icon = option.icon;
                           return (
                             <SelectItem 
                               key={option.value} 
                               value={option.value}
-                              className="hover:bg-accent/60 focus:bg-accent/60 cursor-pointer"
+                              className="hover:bg-accent focus:bg-accent cursor-pointer py-3"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="p-1.5 rounded-md bg-primary/10">
-                                  <Icon className="h-3.5 w-3.5 text-primary" />
-                                </div>
+                                <Icon className="h-4 w-4 text-primary" />
                                 <span className="font-medium">{option.label}</span>
                               </div>
                             </SelectItem>
@@ -451,31 +473,34 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               </Card>
 
               {/* Accent Color Setting */}
-              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-4 md:p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                    <div className="space-y-0.5 md:space-y-1">
-                      <p className="font-semibold text-foreground text-sm md:text-base">Accent color</p>
-                      <p className="text-xs md:text-sm text-muted-foreground">Personalize your interface colors</p>
+              <Card className="border-none shadow-md hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-card via-card to-card/80">
+                <CardContent className="p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <div className="h-4 w-4 rounded-full bg-gradient-to-br from-primary to-primary/60" />
+                        </div>
+                        <p className="font-semibold text-foreground">Accent Color</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-10">Personalize your interface colors</p>
                     </div>
                     <Select value={accentColor} onValueChange={handleSetAccentColor}>
-                      <SelectTrigger className="w-full sm:w-36 bg-background/80 border border-border/50 shadow-sm backdrop-blur-sm">
+                      <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-background/95 border border-border/50 shadow-xl z-50 backdrop-blur-md">
+                      <SelectContent className="bg-background border-2 border-border shadow-xl">
                         {accentColors.map((color) => (
                           <SelectItem 
                             key={color.value} 
                             value={color.value}
-                            className="hover:bg-accent/60 focus:bg-accent/60 cursor-pointer"
+                            className="hover:bg-accent focus:bg-accent cursor-pointer py-3"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-1 rounded-full border border-border/30">
-                                <div 
-                                  className="w-4 h-4 rounded-full shadow-sm" 
-                                  style={{ backgroundColor: color.color }}
-                                />
-                              </div>
+                              <div 
+                                className="w-5 h-5 rounded-full shadow-md border-2 border-background" 
+                                style={{ backgroundColor: color.color }}
+                              />
                               <span className="font-medium">{color.label}</span>
                             </div>
                           </SelectItem>
@@ -487,39 +512,44 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               </Card>
 
               {/* Language Setting */}
-              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-4 md:p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                    <div className="space-y-0.5 md:space-y-1">
-                      <p className="font-semibold text-foreground text-sm md:text-base">Language</p>
-                      <p className="text-xs md:text-sm text-muted-foreground">Choose your preferred language</p>
+              <Card className="border-none shadow-md hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-card via-card to-card/80">
+                <CardContent className="p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Languages className="h-4 w-4 text-primary" />
+                        </div>
+                        <p className="font-semibold text-foreground">Language</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-10">
+                        {user ? 'Your language preference is saved across devices' : 'Auto-detected from your location'}
+                      </p>
                     </div>
                     <Select value={i18n.language} onValueChange={handleLanguageChange}>
-                      <SelectTrigger className="w-full sm:w-36 bg-background/80 border border-border/50 shadow-sm backdrop-blur-sm">
+                      <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-background/95 border border-border/50 shadow-xl z-50 backdrop-blur-md">
+                      <SelectContent className="bg-background border-2 border-border shadow-xl max-h-[300px]">
                         {[
-                          { code: 'en', name: 'English' },
-                          { code: 'es', name: 'Español' },
-                          { code: 'fr', name: 'Français' },
-                          { code: 'de', name: 'Deutsch' },
-                          { code: 'pt', name: 'Português' },
-                          { code: 'it', name: 'Italiano' },
-                          { code: 'zh', name: '中文' },
-                          { code: 'ja', name: '日本語' },
-                          { code: 'ar', name: 'العربية' },
-                          { code: 'ru', name: 'Русский' },
+                          { code: 'en', name: 'English', flag: '🇬🇧' },
+                          { code: 'es', name: 'Español', flag: '🇪🇸' },
+                          { code: 'fr', name: 'Français', flag: '🇫🇷' },
+                          { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+                          { code: 'pt', name: 'Português', flag: '🇵🇹' },
+                          { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+                          { code: 'zh', name: '中文', flag: '🇨🇳' },
+                          { code: 'ja', name: '日本語', flag: '🇯🇵' },
+                          { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+                          { code: 'ru', name: 'Русский', flag: '🇷🇺' },
                         ].map((lang) => (
                           <SelectItem 
                             key={lang.code} 
                             value={lang.code}
-                            className="hover:bg-accent/60 focus:bg-accent/60 cursor-pointer"
+                            className="hover:bg-accent focus:bg-accent cursor-pointer py-3"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-1.5 rounded-md bg-primary/10">
-                                <Languages className="h-3.5 w-3.5 text-primary" />
-                              </div>
+                              <span className="text-lg">{lang.flag}</span>
                               <span className="font-medium">{lang.name}</span>
                             </div>
                           </SelectItem>
