@@ -188,12 +188,12 @@ const Pricing = () => {
       // Map plan to price ID based on billing period
       const priceIds = {
         'Pro': {
-          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',
-          yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
+          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq', // €19.99
+          yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'   // €59.99
         },
         'Ultra Pro': {
-          monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',
-          yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'
+          monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8', // €39.99
+          yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'   // €119.99
         }
       };
       

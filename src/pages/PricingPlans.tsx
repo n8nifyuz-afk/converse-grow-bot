@@ -145,7 +145,7 @@ const faqData = [
 export default function PricingPlans() {
   const { user, subscriptionStatus } = useAuth();
   const navigate = useNavigate();
-  const [billingPeriod, setBillingPeriod] = useState<'daily' | 'monthly' | 'yearly'>('monthly');
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Product ID to plan name mapping
@@ -168,12 +168,12 @@ export default function PricingPlans() {
       // Price IDs based on billing period
       const priceIds = {
         'pro': {
-          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',
-          yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
+          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq', // €19.99
+          yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'   // €59.99
         },
         'ultra_pro': {
-          monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',
-          yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'
+          monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8', // €39.99
+          yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'   // €119.99
         }
       };
       
@@ -213,13 +213,12 @@ export default function PricingPlans() {
   const getPricing = (plan: 'pro' | 'ultra_pro') => {
     const prices = {
       pro: {
-        daily: { price: 0.60, period: 'day', note: 'billed daily' },
         monthly: { price: 19.99, period: 'month' },
-        yearly: { price: 15.99, period: 'month', note: 'billed annually', savings: 20 }
+        yearly: { price: 4.99, period: 'month', note: 'billed annually at €59.99', savings: 75 }
       },
       ultra_pro: {
         monthly: { price: 39.99, period: 'month' },
-        yearly: { price: 31.99, period: 'month', note: 'billed annually', savings: 20 }
+        yearly: { price: 9.99, period: 'month', note: 'billed annually at €119.99', savings: 75 }
       }
     };
     
@@ -243,14 +242,6 @@ export default function PricingPlans() {
         {/* Billing Period Selector */}
         <div className="inline-flex bg-muted rounded-lg p-1 mb-6 sm:mb-8 w-full max-w-md sm:w-auto">
           <Button
-            variant={billingPeriod === 'daily' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setBillingPeriod('daily')}
-            className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
-          >
-            Daily
-          </Button>
-          <Button
             variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setBillingPeriod('monthly')}
@@ -264,7 +255,7 @@ export default function PricingPlans() {
             onClick={() => setBillingPeriod('yearly')}
             className="rounded-md flex-1 sm:flex-none text-xs sm:text-sm"
           >
-            Yearly <Badge variant="secondary" className="ml-1 text-[10px]">Save 20%</Badge>
+            Yearly <Badge variant="secondary" className="ml-1 text-[10px]">Save 75%</Badge>
           </Button>
         </div>
       </div>

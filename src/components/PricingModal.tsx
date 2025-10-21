@@ -42,27 +42,27 @@ const getFeatures = (t: (key: string) => string): Feature[] => [
 
 const pricingOptions = {
   pro: {
-    monthly: { price: 19.99, perDay: 0.67 },
-    '3month': { price: 39.99, perDay: 0.44 },
-    yearly: { price: 59.99, perDay: 0.16, savings: 75 }
+    monthly: { price: 19.99, perDay: 0.67 },     // €19.99/month
+    '3month': { price: 39.99, perDay: 0.44 },    // €39.99 for 3 months
+    yearly: { price: 59.99, perDay: 0.16, savings: 75 } // €59.99/year (save 75%)
   },
   ultra: {
-    monthly: { price: 39.99, perDay: 1.33 },
-    '3month': { price: 79.99, perDay: 0.89 },
-    yearly: { price: 119.99, perDay: 0.33, savings: 75 }
+    monthly: { price: 39.99, perDay: 1.33 },     // €39.99/month
+    '3month': { price: 79.99, perDay: 0.89 },    // €79.99 for 3 months
+    yearly: { price: 119.99, perDay: 0.33, savings: 75 } // €119.99/year (save 75%)
   }
 };
 
 const priceIds = {
   pro: {
-    monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',
-    '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',
-    yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'
+    monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',   // €19.99/month
+    '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',  // €39.99 for 3 months
+    yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'     // €59.99/year
   },
   ultra: {
-    monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',
-    '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',
-    yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'
+    monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',   // €39.99/month
+    '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',  // €79.99 for 3 months
+    yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'     // €119.99/year
   }
 };
 
