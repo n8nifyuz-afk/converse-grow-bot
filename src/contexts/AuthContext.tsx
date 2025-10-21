@@ -635,50 +635,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Track payment complete if user just upgraded
         if (!previousSubscribed && newStatus.subscribed) {
-          console.log('🎉 User upgraded! Fetching plan details for GTM tracking...');
+          // Check if we've already tracked this subscription to prevent duplicates
+          const trackedKey = `payment_tracked_${user.id}_${newStatus.product_id}`;
+          const alreadyTracked = localStorage.getItem(trackedKey);
           
-          // Fetch full subscription details for tracking
-          const { data: subDetails, error: subError } = await supabase
-            .from('user_subscriptions')
-            .select('plan, plan_name, product_id')
-            .eq('user_id', user.id)
-            .single();
-          
-          if (!subError && subDetails) {
-            // Map plan to planType
-            const planType = subDetails.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+          if (!alreadyTracked) {
+            console.log('🎉 User upgraded! Fetching plan details for GTM tracking...');
             
-            // Fetch price details from Stripe product
-            try {
-              const { data: productData } = await supabase.functions.invoke('check-subscription', {
-                headers: {
-                  Authorization: `Bearer ${currentSession.access_token}`,
-                },
-              });
+            // Fetch full subscription details for tracking
+            const { data: subDetails, error: subError } = await supabase
+              .from('user_subscriptions')
+              .select('plan, plan_name, product_id')
+              .eq('user_id', user.id)
+              .single();
+            
+            if (!subError && subDetails) {
+              // Map plan to planType
+              const planType = subDetails.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
               
-              // Default values if we can't get exact details
-              let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
-              let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default prices
-              
-              // Try to determine duration from product_id naming
-              if (subDetails.product_id) {
-                const productIdLower = subDetails.product_id.toLowerCase();
-                if (productIdLower.includes('year') || productIdLower.includes('annual')) {
-                  planDuration = 'yearly';
-                  planPrice = planType === 'Ultra' ? 119.99 : 59.99;
-                } else if (productIdLower.includes('quarter') || productIdLower.includes('3month')) {
-                  planDuration = '3_months';
-                  planPrice = planType === 'Ultra' ? 99.99 : 49.99;
+              // Fetch price details from Stripe product
+              try {
+                const { data: productData } = await supabase.functions.invoke('check-subscription', {
+                  headers: {
+                    Authorization: `Bearer ${currentSession.access_token}`,
+                  },
+                });
+                
+                // Default values if we can't get exact details
+                let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
+                let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default prices
+                
+                // Try to determine duration from product_id naming
+                if (subDetails.product_id) {
+                  const productIdLower = subDetails.product_id.toLowerCase();
+                  if (productIdLower.includes('year') || productIdLower.includes('annual')) {
+                    planDuration = 'yearly';
+                    planPrice = planType === 'Ultra' ? 119.99 : 59.99;
+                  } else if (productIdLower.includes('quarter') || productIdLower.includes('3month')) {
+                    planDuration = '3_months';
+                    planPrice = planType === 'Ultra' ? 99.99 : 49.99;
+                  }
                 }
+                
+                console.log('📊 Tracking payment:', { planType, planDuration, planPrice });
+                trackPaymentComplete(planType, planDuration, planPrice);
+                
+                // Mark as tracked in localStorage to prevent duplicates
+                localStorage.setItem(trackedKey, 'true');
+              } catch (trackError) {
+                console.error('Error tracking payment:', trackError);
+                // Still track with default values
+                trackPaymentComplete(planType, 'monthly', planType === 'Ultra' ? 39.99 : 19.99);
+                localStorage.setItem(trackedKey, 'true');
               }
-              
-              console.log('📊 Tracking payment:', { planType, planDuration, planPrice });
-              trackPaymentComplete(planType, planDuration, planPrice);
-            } catch (trackError) {
-              console.error('Error tracking payment:', trackError);
-              // Still track with default values
-              trackPaymentComplete(planType, 'monthly', planType === 'Ultra' ? 39.99 : 19.99);
             }
+          } else {
+            console.log('⏭️ Payment already tracked for this subscription, skipping');
           }
         }
         
