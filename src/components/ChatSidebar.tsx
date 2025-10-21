@@ -15,6 +15,7 @@ import AuthModal from './AuthModal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { trackChatStart } from '@/utils/gtmTracking';
 import logoLight from '@/assets/chatl-logo-black.png';
 import logoDark from '@/assets/chatl-logo-white.png';
 interface Chat {
@@ -173,6 +174,7 @@ export default function ChatSidebar({
       return;
     }
     try {
+      console.log('[SIDEBAR] Creating new chat...');
       const {
         data: newChat,
         error
@@ -184,6 +186,11 @@ export default function ChatSidebar({
         console.error('Error creating chat:', error);
         return;
       }
+
+      console.log('[SIDEBAR] Chat created:', newChat.id);
+      // Track chat start event
+      console.log('[SIDEBAR] 🎯 Tracking chat_start for new chat');
+      trackChatStart();
 
       // Refresh the sidebar immediately
       fetchChats();
