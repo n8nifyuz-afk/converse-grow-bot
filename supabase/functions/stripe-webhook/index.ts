@@ -236,19 +236,35 @@ serve(async (req) => {
         const plan = planMapping.tier;
         logStep("Determined plan", { plan, productId });
 
-        // CRITICAL FIX: Validate current_period_end before date conversion
-        if (!highestTierSub.current_period_end || typeof highestTierSub.current_period_end !== 'number') {
-          logStep("ERROR: Invalid current_period_end", { 
-            currentPeriodEnd: highestTierSub.current_period_end,
+        // CRITICAL FIX: If current_period_end is missing, fetch full subscription from Stripe
+        let periodEndTimestamp = highestTierSub.current_period_end;
+        
+        if (!periodEndTimestamp || typeof periodEndTimestamp !== 'number') {
+          logStep("Missing current_period_end, fetching full subscription", { 
             subscriptionId: highestTierSub.id 
           });
-          throw new Error("Subscription missing valid billing period end date");
+          
+          try {
+            const fullSubscription = await stripe.subscriptions.retrieve(highestTierSub.id);
+            periodEndTimestamp = fullSubscription.current_period_end;
+            
+            if (!periodEndTimestamp) {
+              logStep("ERROR: Still no current_period_end after fetch", { 
+                subscriptionId: highestTierSub.id,
+                status: fullSubscription.status
+              });
+              throw new Error("Subscription missing billing period end date");
+            }
+          } catch (fetchError) {
+            logStep("ERROR: Failed to fetch full subscription", { error: fetchError });
+            throw new Error("Unable to retrieve subscription details");
+          }
         }
 
-        const periodEndDate = new Date(highestTierSub.current_period_end * 1000);
+        const periodEndDate = new Date(periodEndTimestamp * 1000);
         if (isNaN(periodEndDate.getTime())) {
           logStep("ERROR: Date conversion failed", { 
-            currentPeriodEnd: highestTierSub.current_period_end 
+            currentPeriodEnd: periodEndTimestamp 
           });
           throw new Error("Invalid subscription period end date");
         }
