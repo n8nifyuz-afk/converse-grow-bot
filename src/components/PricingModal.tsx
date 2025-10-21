@@ -394,6 +394,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Footer */}
               <div className="space-y-1 flex-shrink-0">
+                {/* Pay Safe & Secure */}
+                <div className="flex items-center justify-center gap-1.5 py-1">
+                  <Shield className="w-4 h-4 text-emerald-500" />
+                  <span className="text-xs sm:text-sm font-medium text-emerald-500">Pay safe & secure</span>
+                </div>
+                
                 {/* Payment Cards */}
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-0.5">
                   {/* Visa */}
