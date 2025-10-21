@@ -138,7 +138,7 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${mainSite}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${mainSite}`,
-      payment_method_types: ['card', 'apple_pay', 'google_pay', 'revolut_pay'],
+      payment_method_types: ['card', 'revolut_pay'],
       payment_method_options: {
         card: {
           request_three_d_secure: 'any',
