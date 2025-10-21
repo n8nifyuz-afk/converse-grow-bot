@@ -38,43 +38,43 @@ export default function Terms() {
                 <Shield className="w-6 h-6 text-primary mt-1" />
               </div>
               <div>
-                <h2 className="text-2xl font-semibold mb-4 text-foreground">Who We Are</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.whoWeAre')}</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  ChatLearn ("we," "us," or "our") is an advanced AI platform that unifies access to multiple world-class Large Language Models (LLMs) and text-to-image systems under one secure interface and membership.
+                  {t('terms.whoWeAreDesc')}
                 </p>
               </div>
             </div>
           </Card>
 
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
-            <h2 className="text-2xl font-semibold mb-6 text-foreground">Our current integrations include (subject to change):</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-foreground">{t('terms.currentIntegrations')}</h2>
             
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-primary flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  Language Models
+                  {t('terms.languageModels')}
                 </h3>
                 <ul className="space-y-3 pl-4">
                   <li className="flex items-start gap-2 text-muted-foreground">
                     <span className="text-primary mt-1">•</span>
-                    <span>GPT-5, GPT-4o, GPT-4o mini by OpenAI</span>
+                    <span>{t('terms.gpt5')}</span>
                   </li>
                   <li className="flex items-start gap-2 text-muted-foreground">
                     <span className="text-primary mt-1">•</span>
-                    <span>Claude Sonnet 4 by Anthropic</span>
+                    <span>{t('terms.claude')}</span>
                   </li>
                   <li className="flex items-start gap-2 text-muted-foreground">
                     <span className="text-primary mt-1">•</span>
-                    <span>Gemini 2.5 Flash by Google DeepMind</span>
+                    <span>{t('terms.gemini')}</span>
                   </li>
                   <li className="flex items-start gap-2 text-muted-foreground">
                     <span className="text-primary mt-1">•</span>
-                    <span>Grok 4 by xAI</span>
+                    <span>{t('terms.grok')}</span>
                   </li>
                   <li className="flex items-start gap-2 text-muted-foreground">
                     <span className="text-primary mt-1">•</span>
-                    <span>DeepSeek V2 by DeepSeek</span>
+                    <span>{t('terms.deepseek')}</span>
                   </li>
                 </ul>
               </div>
@@ -82,12 +82,12 @@ export default function Terms() {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-primary flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  Image Model
+                  {t('terms.imageModel')}
                 </h3>
                 <ul className="space-y-3 pl-4">
                   <li className="flex items-start gap-2 text-muted-foreground">
                     <span className="text-primary mt-1">•</span>
-                    <span>DALL-E 3 by OpenAI</span>
+                    <span>{t('terms.dalle')}</span>
                   </li>
                 </ul>
               </div>
@@ -98,26 +98,14 @@ export default function Terms() {
             <div className="flex items-start gap-4">
               <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-500 mt-1 flex-shrink-0" />
               <div>
-                <h2 className="text-2xl font-semibold mb-4 text-foreground">Disclaimer</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.disclaimer')}</h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p>
-                    ChatLearn is an independent platform and is not affiliated with, sponsored by, or endorsed by any of the AI model providers integrated into the Service.
-                  </p>
-                  <p>
-                    This includes, but is not limited to: OpenAI, Anthropic, Google DeepMind, xAI, DeepSeek, and Stability AI.
-                  </p>
-                  <p>
-                    All trademarks, brand names, and model names such as GPT-5, Claude Sonnet 4, Gemini 2.5 Flash, Grok 4, DeepSeek V2, and DALL-E 3 are the property of their respective owners.
-                  </p>
-                  <p>
-                    ChatLearn accesses these technologies exclusively through official APIs and legitimate service agreements, ensuring compliant and secure usage.
-                  </p>
-                  <p>
-                    We do not claim ownership, partnership, or operational control over any third-party models or providers.
-                  </p>
-                  <p className="font-medium text-foreground">
-                    Our mission is to provide users with a unified, reliable interface to access multiple AI systems efficiently and securely.
-                  </p>
+                  <p>{t('terms.disclaimerP1')}</p>
+                  <p>{t('terms.disclaimerP2')}</p>
+                  <p>{t('terms.disclaimerP3')}</p>
+                  <p>{t('terms.disclaimerP4')}</p>
+                  <p>{t('terms.disclaimerP5')}</p>
+                  <p className="font-medium text-foreground">{t('terms.disclaimerP6')}</p>
                 </div>
               </div>
             </div>
@@ -126,121 +114,101 @@ export default function Terms() {
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
             <h2 className="text-2xl font-semibold mb-4 text-foreground flex items-center gap-2">
               <Scale className="w-6 h-6 text-primary" />
-              General Terms
+              {t('terms.general')}
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                By using ChatLearn ("the App," "the Platform," or "the Service"), you agree to these Terms of Use ("Terms") and our Privacy Policy.
-              </p>
-              <p>
-                If you do not agree, you must not use the Service.
-              </p>
-              <p>
-                Continued use of ChatLearn constitutes acceptance of these Terms and any updates made to them.
-              </p>
-              <p>
-                ChatLearn shall not be liable for any direct or indirect damages, including data loss, revenue loss, or service interruptions.
-              </p>
-              <p>
-                We reserve the right to modify pricing, plans, or usage policies at any time.
-              </p>
+              <p>{t('terms.generalP1')}</p>
+              <p>{t('terms.generalP2')}</p>
+              <p>{t('terms.generalP3')}</p>
+              <p>{t('terms.generalP4')}</p>
+              <p>{t('terms.generalP5')}</p>
             </div>
           </Card>
 
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">License</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.license')}</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                ChatLearn grants you a revocable, non-exclusive, non-transferable, limited license to use the Service strictly in accordance with these Terms.
-              </p>
-              <p>
-                All rights not expressly granted are reserved by ChatLearn and its licensors.
-              </p>
+              <p>{t('terms.licenseP1')}</p>
+              <p>{t('terms.licenseP2')}</p>
             </div>
           </Card>
 
           <Card className="p-8 mb-6 border-red-500/20 bg-red-500/5">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Restrictions</h2>
-            <p className="mb-4 text-muted-foreground">You agree not to, and will not permit others to:</p>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.restrictions')}</h2>
+            <p className="mb-4 text-muted-foreground">{t('terms.restrictionsIntro')}</p>
             <ul className="space-y-3 pl-4">
               <li className="flex items-start gap-2 text-muted-foreground">
                 <span className="text-red-500 mt-1">✕</span>
-                <span>License, sell, rent, or distribute the Service;</span>
+                <span>{t('terms.restriction1')}</span>
               </li>
               <li className="flex items-start gap-2 text-muted-foreground">
                 <span className="text-red-500 mt-1">✕</span>
-                <span>Copy, modify, or create derivative works of the platform;</span>
+                <span>{t('terms.restriction2')}</span>
               </li>
               <li className="flex items-start gap-2 text-muted-foreground">
                 <span className="text-red-500 mt-1">✕</span>
-                <span>Reverse-engineer or attempt to extract model data or API code;</span>
+                <span>{t('terms.restriction3')}</span>
               </li>
               <li className="flex items-start gap-2 text-muted-foreground">
                 <span className="text-red-500 mt-1">✕</span>
-                <span>Remove copyright or trademark notices;</span>
+                <span>{t('terms.restriction4')}</span>
               </li>
               <li className="flex items-start gap-2 text-muted-foreground">
                 <span className="text-red-500 mt-1">✕</span>
-                <span>Circumvent security or usage controls;</span>
+                <span>{t('terms.restriction5')}</span>
               </li>
               <li className="flex items-start gap-2 text-muted-foreground">
                 <span className="text-red-500 mt-1">✕</span>
-                <span>Use ChatLearn to create competing AI services;</span>
+                <span>{t('terms.restriction6')}</span>
               </li>
               <li className="flex items-start gap-2 text-muted-foreground">
                 <span className="text-red-500 mt-1">✕</span>
-                <span>Use outputs for unlawful, harmful, or deceptive purposes.</span>
+                <span>{t('terms.restriction7')}</span>
               </li>
             </ul>
             <p className="mt-6 text-red-600 dark:text-red-400 font-medium">
-              Violation of these restrictions may result in immediate account termination.
+              {t('terms.restrictionsWarning')}
             </p>
           </Card>
 
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Your Suggestions</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.suggestions')}</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Any feedback, comments, or ideas ("Suggestions") you provide shall be the exclusive property of ChatLearn, which may use them freely without credit or compensation.
+              {t('terms.suggestionsDesc')}
             </p>
           </Card>
 
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Third-Party Services and Model Availability</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.thirdParty')}</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                ChatLearn integrates external AI models and APIs, including OpenAI, Anthropic, Google DeepMind, xAI, DeepSeek, and Stability AI.
-              </p>
-              <p>
-                While we strive to maintain consistent access to all integrations, their continued availability depends on third-party providers.
-              </p>
+              <p>{t('terms.thirdPartyP1')}</p>
+              <p>{t('terms.thirdPartyP2')}</p>
               
-              <h3 className="text-xl font-semibold mt-6 mb-3 text-foreground">Model Availability</h3>
-              <p className="mb-4">You acknowledge and agree that:</p>
+              <h3 className="text-xl font-semibold mt-6 mb-3 text-foreground">{t('terms.modelAvailability')}</h3>
+              <p className="mb-4">{t('terms.modelAvailabilityIntro')}</p>
               <ul className="space-y-3 pl-4">
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>The list of supported models may change at any time.</span>
+                  <span>{t('terms.modelPoint1')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>ChatLearn may add, suspend, or remove any model, feature, or integration temporarily or permanently at its sole discretion.</span>
+                  <span>{t('terms.modelPoint2')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>These changes may result from API cost changes, provider limitations, compliance obligations, or technical considerations.</span>
+                  <span>{t('terms.modelPoint3')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>Such changes do not entitle users to refunds, compensation, or claims, as long as the core Service remains functional.</span>
+                  <span>{t('terms.modelPoint4')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-1">•</span>
-                  <span>Replacement or updated models with equivalent or enhanced capabilities may be introduced without notice.</span>
+                  <span>{t('terms.modelPoint5')}</span>
                 </li>
               </ul>
-              <p className="mt-4">
-                We will make reasonable efforts to inform users about significant model changes.
-              </p>
+              <p className="mt-4">{t('terms.modelEfforts')}</p>
             </div>
           </Card>
 
@@ -248,86 +216,66 @@ export default function Terms() {
             <div className="flex items-start gap-4">
               <Lock className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
               <div>
-                <h2 className="text-2xl font-semibold mb-4 text-foreground">Cookies and Privacy</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.cookiesPrivacy')}</h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p>
-                    We use cookies and analytics tools to operate, secure, and improve our platform.
-                  </p>
-                  <p>
-                    You can manage or disable cookies at any time through your browser or consent manager.
-                  </p>
-                  <p>
-                    Please see our Privacy Policy for full details.
-                  </p>
+                  <p>{t('terms.cookiesP1')}</p>
+                  <p>{t('terms.cookiesP2')}</p>
+                  <p>{t('terms.cookiesP3')}</p>
                 </div>
               </div>
             </div>
           </Card>
 
           <Card className="p-8 mb-6 bg-primary/5 border-primary/20">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Subscription Terms</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.subscription')}</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                Certain features of ChatLearn are available through a paid subscription plan.
-              </p>
-              <p>
-                Subscriptions renew automatically unless canceled before the renewal date.
-              </p>
-              <p className="font-medium text-foreground">
-                Payments are non-refundable except as required by law.
-              </p>
+              <p>{t('terms.subscriptionP1')}</p>
+              <p>{t('terms.subscriptionP2')}</p>
+              <p className="font-medium text-foreground">{t('terms.subscriptionP3')}</p>
             </div>
           </Card>
 
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Free Trial</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.freeTrial')}</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                ChatLearn may offer a limited free trial (e.g., up to 3 messages) per user for evaluation purposes.
-              </p>
-              <p>
-                The free trial is subject to fair-use and anti-abuse measures (including device, IP, and account checks). We may modify, suspend, or end the free trial at any time. Once the free quota is exhausted, continued use requires an active paid plan.
-              </p>
+              <p>{t('terms.freeTrialP1')}</p>
+              <p>{t('terms.freeTrialP2')}</p>
             </div>
           </Card>
 
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Fair Use and Additional Charges</h2>
-            <p className="mb-4 text-muted-foreground">
-              ChatLearn operates under a fair use policy to maintain platform stability and ensure equitable access for all users.
-            </p>
-            <p className="mb-4 text-muted-foreground">Users acknowledge and agree that:</p>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.fairUse')}</h2>
+            <p className="mb-4 text-muted-foreground">{t('terms.fairUseIntro')}</p>
+            <p className="mb-4 text-muted-foreground">{t('terms.fairUseAcknowledge')}</p>
             <ol className="list-decimal pl-6 space-y-2 text-muted-foreground">
-              <li>Each subscription plan includes specific resource limits (such as message volume, token count, or image generations).</li>
-              <li>ChatLearn continuously monitors system usage to detect excessive or disproportionate activity.</li>
-              <li>If your usage significantly exceeds your plan's fair-use limits, ChatLearn may:
+              <li>{t('terms.fairUse1')}</li>
+              <li>{t('terms.fairUse2')}</li>
+              <li>{t('terms.fairUse3')}
                 <ul className="list-disc pl-6 mt-2 space-y-1">
-                  <li>(a) temporarily restrict or throttle your access;</li>
-                  <li>(b) offer an upgrade to a higher-capacity plan; or</li>
-                  <li>(c) apply additional charges based on excess usage.</li>
+                  <li>{t('terms.fairUse3a')}</li>
+                  <li>{t('terms.fairUse3b')}</li>
+                  <li>{t('terms.fairUse3c')}</li>
                 </ul>
               </li>
-              <li>Any additional charges will be communicated transparently via email, invoice, or within your account dashboard prior to billing.</li>
-              <li>Continued or repeated overuse without resolution may result in suspension or termination of your account.</li>
-              <li>Usage metrics and thresholds are determined internally by ChatLearn and may evolve over time as system capacity or model costs change.</li>
-              <li>These measures are in place to maintain a stable and cost-efficient experience for all users.</li>
+              <li>{t('terms.fairUse4')}</li>
+              <li>{t('terms.fairUse5')}</li>
+              <li>{t('terms.fairUse6')}</li>
+              <li>{t('terms.fairUse7')}</li>
             </ol>
           </Card>
 
           <Card className="p-8 mb-6 bg-primary/5 border-primary/20">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Company Information</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.companyInfo')}</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
+              <p>{t('terms.companyInfoP1')}</p>
               <p>
-                The ChatLearn platform is operated by TASOLAR, a company registered in the Republic of Cyprus.
+                <strong className="text-foreground">{t('terms.companyOffice')}</strong> {t('terms.companyAddress')}
               </p>
               <p>
-                <strong className="text-foreground">Registered Office:</strong> Dimostheni Severi & Katsoni 2, Avenue Court, 1082 Nicosia, Cyprus
+                <strong className="text-foreground">{t('terms.companyEmail')}</strong> <a href={`mailto:${t('terms.companyEmailValue')}`} className="text-primary hover:underline">{t('terms.companyEmailValue')}</a>
               </p>
               <p>
-                <strong className="text-foreground">Email:</strong> <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a>
-              </p>
-              <p>
-                <strong className="text-foreground">Website:</strong> <a href="https://chatl.ai" className="text-primary hover:underline">https://chatl.ai</a>
+                <strong className="text-foreground">{t('terms.companyWebsite')}</strong> <a href={t('terms.companyWebsiteValue')} className="text-primary hover:underline">{t('terms.companyWebsiteValue')}</a>
               </p>
             </div>
           </Card>
