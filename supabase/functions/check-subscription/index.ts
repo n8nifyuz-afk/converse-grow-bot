@@ -12,14 +12,27 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
-// LIVE Product IDs
-const productToPlanMap: { [key: string]: string } = {
-  'prod_TGqk9k16XhvCIn': 'Pro',        // Pro Monthly (LIVE)
-  'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month (LIVE)
-  'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly (LIVE)
-  'prod_TGqs5r2udThT0t': 'Ultra Pro',  // Ultra Pro Monthly (LIVE)
-  'prod_TGquGexHO44m4T': 'Ultra Pro',  // Ultra Pro 3-Month (LIVE)
-  'prod_TGqwVIWObYLt6U': 'Ultra Pro',  // Ultra Pro Yearly (LIVE)
+// Helper function to fetch product mappings from database
+const getProductMappings = async (supabaseClient: any): Promise<{ [key: string]: { planName: string, planTier: string } }> => {
+  const { data: products, error } = await supabaseClient
+    .from('stripe_products')
+    .select('stripe_product_id, plan_name, plan_tier');
+  
+  if (error) {
+    logStep("ERROR fetching product mappings", { error: error.message });
+    return {};
+  }
+  
+  const mappings: { [key: string]: { planName: string, planTier: string } } = {};
+  for (const product of products || []) {
+    mappings[product.stripe_product_id] = {
+      planName: product.plan_name,
+      planTier: product.plan_tier
+    };
+  }
+  
+  logStep("Loaded product mappings from database", { count: Object.keys(mappings).length });
+  return mappings;
 };
 
 serve(async (req) => {
@@ -59,6 +72,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Fetch product mappings from database
+    const productToPlanMap = await getProductMappings(supabaseClient);
+    
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
@@ -120,15 +136,10 @@ serve(async (req) => {
           continue; // Skip unknown products entirely
         }
         
-        // Determine tier - match with your live product IDs above
-        let subTier = 'free';
-        const planName = productToPlanMap[subProductId];
-        
-        if (planName === 'Pro') {
-          subTier = 'pro';
-        } else if (planName === 'Ultra Pro') {
-          subTier = 'ultra_pro';
-        }
+        // Determine tier from database mapping
+        const productMapping = productToPlanMap[subProductId];
+        let subTier = productMapping.planTier || 'free';
+        const planName = productMapping.planName;
         
         logStep("Evaluating subscription", { 
           subscriptionId: sub.id, 
@@ -197,7 +208,8 @@ serve(async (req) => {
       }
       
       productId = subscription.items.data[0].price.product as string;
-      const planName = productToPlanMap[productId];
+      const productMapping = productToPlanMap[productId];
+      const planName = productMapping?.planName;
       
       // CRITICAL: Reject if no valid plan found (should never happen after filtering above)
       if (!planName) {

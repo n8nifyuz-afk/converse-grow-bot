@@ -56,3 +56,8 @@ verify_jwt = false
 [functions.cleanup-usage-limits]
 verify_jwt = false
 
+# One-time sync function to populate missing subscriptions
+[functions.sync-subscriptions]
+verify_jwt = false
+
+
