@@ -1882,22 +1882,12 @@ export default function Chat() {
       scrollToBottom();
     }
     
-    // Track first message for GTM
-    const userMessages = messages.filter(m => m.role === 'user');
-    const isFirstMessage = userMessages.length === 0;
-    console.log('[SEND] Checking if first message:', {
-      isFirstMessage,
-      totalMessages: messages.length,
-      userMessagesCount: userMessages.length,
-      messages: messages.map(m => ({ role: m.role, id: m.id }))
+    // Note: chat_start tracking happens when chat is created (Index.tsx, ChatSidebar.tsx)
+    // We don't track here to avoid duplicates when coming from homepage
+    console.log('[SEND] First message check:', {
+      isFirstMessage: messages.filter(m => m.role === 'user').length === 0,
+      totalMessages: messages.length
     });
-    
-    if (isFirstMessage) {
-      console.log('[SEND] 🎯 This is the FIRST message - tracking chat_start');
-      trackChatStart();
-    } else {
-      console.log('[SEND] Not first message - skipping tracking');
-    }
     
     // Clear input and files immediately
     setInput('');
