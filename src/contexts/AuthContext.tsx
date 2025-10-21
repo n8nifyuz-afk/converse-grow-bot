@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { trackPaymentComplete } from '@/utils/gtmTracking';
+import { trackPaymentComplete, trackRegistrationComplete } from '@/utils/gtmTracking';
 
 interface AuthContextType {
   user: User | null;
@@ -161,6 +161,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_IN' && session) {
           setSession(session);
           setUser(session.user);
+          
+          // Check if this is a new user signup (OAuth or email)
+          // User created within last 5 seconds = new signup
+          const userCreatedAt = new Date(session.user.created_at).getTime();
+          const now = Date.now();
+          const isNewSignup = (now - userCreatedAt) < 5000;
+          
+          if (isNewSignup) {
+            console.log('[AUTH] 🎯 New user detected - tracking registration_complete');
+            trackRegistrationComplete();
+          }
           
           // Defer profile sync and subscription check to avoid auth loop
           setTimeout(() => {
