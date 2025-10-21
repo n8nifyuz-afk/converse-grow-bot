@@ -390,5 +390,31 @@
   "settingsModal": {
     "title": "设置",
     "managePreferences": "管理您的应用程序设置和偏好"
+  },
+  "subscription": {
+    "freePlan": "免费计划",
+    "proPlan": "专业版计划",
+    "ultraProPlan": "超级专业版计划",
+    "currentPlan": "当前计划",
+    "renewsOn": "续订日期",
+    "upgradeToUnlock": "升级以解锁所有高级功能",
+    "usageLimits": "使用限制",
+    "monthlyUsage": "您的每月使用配额",
+    "imageGenerations": "图像生成",
+    "resetsOn": "重置日期",
+    "remaining": "剩余",
+    "runningLow": "生成次数不足？",
+    "upgradeUltraProDesc": "升级到超级专业版，每月2,000次生成（多4倍！）",
+    "upgradeToUltraPro": "升级到超级专业版",
+    "manageSubscription": "管理订阅",
+    "updatePayment": "更新付款方式、查看发票或取消订阅",
+    "loading": "加载中...",
+    "manage": "管理",
+    "upgradeToPro": "升级到专业版",
+    "accessPremium": "访问所有高级AI模型和高级功能",
+    "viewPlans": "查看计划",
+    "signInToManageSubscription": "登录以管理您的订阅",
+    "needSignIn": "您需要登录才能访问订阅设置。",
+    "signIn": "登录"
   }
 }

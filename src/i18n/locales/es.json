@@ -475,5 +475,31 @@
   "settingsModal": {
     "title": "Configuración",
     "managePreferences": "Gestiona la configuración y preferencias de tu aplicación"
+  },
+  "subscription": {
+    "freePlan": "Plan Gratuito",
+    "proPlan": "Plan Pro",
+    "ultraProPlan": "Plan Ultra Pro",
+    "currentPlan": "Plan Actual",
+    "renewsOn": "Se renueva el",
+    "upgradeToUnlock": "Actualiza para desbloquear todas las funciones premium",
+    "usageLimits": "Límites de Uso",
+    "monthlyUsage": "Tu asignación de uso mensual",
+    "imageGenerations": "Generación de Imágenes",
+    "resetsOn": "Se reinicia el",
+    "remaining": "restantes",
+    "runningLow": "¿Quedándote sin generaciones?",
+    "upgradeUltraProDesc": "Actualiza a Ultra Pro para 2,000 generaciones/mes (¡4× más!)",
+    "upgradeToUltraPro": "Actualizar a Ultra Pro",
+    "manageSubscription": "Gestionar Suscripción",
+    "updatePayment": "Actualizar método de pago, ver facturas o cancelar suscripción",
+    "loading": "Cargando...",
+    "manage": "Gestionar",
+    "upgradeToPro": "Actualizar a Pro",
+    "accessPremium": "Accede a todos los modelos de IA premium y funciones avanzadas",
+    "viewPlans": "Ver Planes",
+    "signInToManageSubscription": "Inicia sesión para gestionar tu suscripción",
+    "needSignIn": "Necesitas iniciar sesión para acceder a la configuración de suscripción.",
+    "signIn": "Iniciar Sesión"
   }
 }

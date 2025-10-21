@@ -390,5 +390,31 @@
   "settingsModal": {
     "title": "Настройки",
     "managePreferences": "Управление настройками и предпочтениями вашего приложения"
+  },
+  "subscription": {
+    "freePlan": "Бесплатный План",
+    "proPlan": "План Pro",
+    "ultraProPlan": "План Ultra Pro",
+    "currentPlan": "Текущий План",
+    "renewsOn": "Продлевается",
+    "upgradeToUnlock": "Обновите, чтобы разблокировать все премиум-функции",
+    "usageLimits": "Лимиты Использования",
+    "monthlyUsage": "Ваш месячный лимит использования",
+    "imageGenerations": "Генерации Изображений",
+    "resetsOn": "Сбрасывается",
+    "remaining": "осталось",
+    "runningLow": "Заканчиваются генерации?",
+    "upgradeUltraProDesc": "Обновитесь до Ultra Pro для 2 000 генераций/месяц (в 4 раза больше!)",
+    "upgradeToUltraPro": "Обновить до Ultra Pro",
+    "manageSubscription": "Управление Подпиской",
+    "updatePayment": "Обновить способ оплаты, просмотреть счета или отменить подписку",
+    "loading": "Загрузка...",
+    "manage": "Управлять",
+    "upgradeToPro": "Обновить до Pro",
+    "accessPremium": "Доступ ко всем премиум моделям ИИ и расширенным функциям",
+    "viewPlans": "Просмотреть Планы",
+    "signInToManageSubscription": "Войдите, чтобы управлять вашей подпиской",
+    "needSignIn": "Вам нужно войти в систему для доступа к настройкам подписки.",
+    "signIn": "Войти"
   }
 }

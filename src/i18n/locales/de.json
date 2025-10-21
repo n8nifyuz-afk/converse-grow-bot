@@ -390,5 +390,31 @@
   "settingsModal": {
     "title": "Einstellungen",
     "managePreferences": "Verwalten Sie Ihre Anwendungseinstellungen und -präferenzen"
+  },
+  "subscription": {
+    "freePlan": "Kostenloser Plan",
+    "proPlan": "Pro Plan",
+    "ultraProPlan": "Ultra Pro Plan",
+    "currentPlan": "Aktueller Plan",
+    "renewsOn": "Verlängert sich am",
+    "upgradeToUnlock": "Upgraden Sie, um alle Premium-Funktionen freizuschalten",
+    "usageLimits": "Nutzungsgrenzen",
+    "monthlyUsage": "Ihre monatliche Nutzungszuteilung",
+    "imageGenerations": "Bildgenerierungen",
+    "resetsOn": "Setzt zurück am",
+    "remaining": "verbleibend",
+    "runningLow": "Gehen Ihnen die Generierungen aus?",
+    "upgradeUltraProDesc": "Upgraden Sie auf Ultra Pro für 2.000 Generierungen/Monat (4× mehr!)",
+    "upgradeToUltraPro": "Auf Ultra Pro upgraden",
+    "manageSubscription": "Abonnement Verwalten",
+    "updatePayment": "Zahlungsmethode aktualisieren, Rechnungen ansehen oder Abonnement kündigen",
+    "loading": "Lädt...",
+    "manage": "Verwalten",
+    "upgradeToPro": "Auf Pro upgraden",
+    "accessPremium": "Zugriff auf alle Premium-KI-Modelle und erweiterte Funktionen",
+    "viewPlans": "Pläne Ansehen",
+    "signInToManageSubscription": "Melden Sie sich an, um Ihr Abonnement zu verwalten",
+    "needSignIn": "Sie müssen angemeldet sein, um auf die Abonnementeinstellungen zuzugreifen.",
+    "signIn": "Anmelden"
   }
 }

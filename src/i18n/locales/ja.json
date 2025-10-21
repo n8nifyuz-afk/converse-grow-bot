@@ -390,5 +390,31 @@
   "settingsModal": {
     "title": "設定",
     "managePreferences": "アプリケーションの設定と環境設定を管理"
+  },
+  "subscription": {
+    "freePlan": "無料プラン",
+    "proPlan": "プロプラン",
+    "ultraProPlan": "ウルトラプロプラン",
+    "currentPlan": "現在のプラン",
+    "renewsOn": "更新日",
+    "upgradeToUnlock": "アップグレードしてすべてのプレミアム機能をアンロック",
+    "usageLimits": "使用制限",
+    "monthlyUsage": "月間使用割り当て",
+    "imageGenerations": "画像生成",
+    "resetsOn": "リセット日",
+    "remaining": "残り",
+    "runningLow": "生成回数が少なくなってきましたか？",
+    "upgradeUltraProDesc": "ウルトラプロにアップグレードして月2,000回生成（4倍！）",
+    "upgradeToUltraPro": "ウルトラプロにアップグレード",
+    "manageSubscription": "サブスクリプション管理",
+    "updatePayment": "支払い方法の更新、請求書の表示、またはサブスクリプションのキャンセル",
+    "loading": "読み込み中...",
+    "manage": "管理",
+    "upgradeToPro": "プロにアップグレード",
+    "accessPremium": "すべてのプレミアムAIモデルと高度な機能にアクセス",
+    "viewPlans": "プランを表示",
+    "signInToManageSubscription": "サブスクリプションを管理するにはサインインしてください",
+    "needSignIn": "サブスクリプション設定にアクセスするにはサインインする必要があります。",
+    "signIn": "サインイン"
   }
 }

@@ -390,5 +390,31 @@
   "settingsModal": {
     "title": "الإعدادات",
     "managePreferences": "إدارة إعدادات وتفضيلات التطبيق الخاص بك"
+  },
+  "subscription": {
+    "freePlan": "الخطة المجانية",
+    "proPlan": "خطة برو",
+    "ultraProPlan": "خطة ألترا برو",
+    "currentPlan": "الخطة الحالية",
+    "renewsOn": "يتجدد في",
+    "upgradeToUnlock": "قم بالترقية لفتح جميع الميزات المميزة",
+    "usageLimits": "حدود الاستخدام",
+    "monthlyUsage": "حصة الاستخدام الشهرية",
+    "imageGenerations": "توليد الصور",
+    "resetsOn": "يتم إعادة التعيين في",
+    "remaining": "متبقي",
+    "runningLow": "نفدت عمليات التوليد؟",
+    "upgradeUltraProDesc": "قم بالترقية إلى ألترا برو للحصول على 2,000 عملية توليد/شهر (أكثر 4 مرات!)",
+    "upgradeToUltraPro": "الترقية إلى ألترا برو",
+    "manageSubscription": "إدارة الاشتراك",
+    "updatePayment": "تحديث طريقة الدفع أو عرض الفواتير أو إلغاء الاشتراك",
+    "loading": "جاري التحميل...",
+    "manage": "إدارة",
+    "upgradeToPro": "الترقية إلى برو",
+    "accessPremium": "الوصول إلى جميع نماذج الذكاء الاصطناعي المميزة والميزات المتقدمة",
+    "viewPlans": "عرض الخطط",
+    "signInToManageSubscription": "قم بتسجيل الدخول لإدارة اشتراكك",
+    "needSignIn": "تحتاج إلى تسجيل الدخول للوصول إلى إعدادات الاشتراك.",
+    "signIn": "تسجيل الدخول"
   }
 }
