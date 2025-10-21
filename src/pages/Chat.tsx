@@ -3545,9 +3545,14 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                 {availableModelsList.map(model => {
                   const modelData = availableModels.find(m => m.id === model.id);
                   const isPro = model.type === 'pro';
+                  const isUltra = model.type === 'ultra';
                   const isImageModel = model.id === 'generate-image';
                   // Only disable image generation when limit is reached, let pro models be clickable
                   const isDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
+                  
+                  // Check if user has Ultra subscription
+                  const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
+                  const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
                   
                   return (
                     <SelectItem
@@ -3569,6 +3574,11 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                           {isPro && !subscriptionStatus.subscribed && (
                             <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
                               PRO
+                            </span>
+                          )}
+                          {isUltra && !hasUltra && (
+                            <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-purple-600 to-pink-600 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
+                              ULTRA
                             </span>
                           )}
                         </div>

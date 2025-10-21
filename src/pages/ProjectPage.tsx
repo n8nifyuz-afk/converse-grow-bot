@@ -1116,6 +1116,10 @@ export default function ProjectPage() {
                   {models.map(model => {
                     const modelData = availableModels.find(m => m.id === model.id);
                     const isSelected = selectedModel === model.id;
+                    // Check if user has Ultra subscription
+                    const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
+                    const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+                    
                     return (
                       <DropdownMenuItem 
                         key={model.id}
@@ -1132,6 +1136,11 @@ export default function ProjectPage() {
                             {model.type === 'pro' && (
                               <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
                                 PRO
+                              </span>
+                            )}
+                            {model.type === 'ultra' && !hasUltra && (
+                              <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-purple-600 to-pink-600 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
+                                ULTRA
                               </span>
                             )}
                           </div>
@@ -1431,6 +1440,10 @@ export default function ProjectPage() {
                            <SelectContent className="z-[100] bg-background/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-2xl p-2 w-[calc(100vw-2rem)] max-w-[320px]">
                             {availableModelsList.map(model => {
                               const modelData = availableModels.find(m => m.id === model.id);
+                              // Check if user has Ultra subscription
+                              const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
+                              const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+                              
                               return <SelectItem key={model.id} value={model.id} className="rounded-xl px-3 py-3 hover:bg-accent/60 focus-visible:bg-accent/60 transition-all duration-200 cursor-pointer">
                                 <div className="flex items-center w-full gap-3">
                                   <div className="relative flex-shrink-0">
@@ -1440,6 +1453,11 @@ export default function ProjectPage() {
                                     {model.type === 'pro' && (
                                       <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
                                         PRO
+                                      </span>
+                                    )}
+                                    {model.type === 'ultra' && !hasUltra && (
+                                      <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-purple-600 to-pink-600 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
+                                        ULTRA
                                       </span>
                                     )}
                                   </div>
