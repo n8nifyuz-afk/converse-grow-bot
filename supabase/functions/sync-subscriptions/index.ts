@@ -17,14 +17,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
-
   try {
-    logStep("Starting subscription sync");
+    logStep("Starting manual sync");
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
@@ -126,9 +127,67 @@ serve(async (req) => {
         // Check if current_period_end exists, if not fetch full subscription
         let periodEndTimestamp = highestTierSub.current_period_end;
         
-        if (!periodEndTimestamp) {
-          const fullSubscription = await stripe.subscriptions.retrieve(highestTierSub.id);
-          periodEndTimestamp = fullSubscription.current_period_end;
+        logStep("Initial subscription check", {
+          userId: profile.user_id,
+          subscriptionId: highestTierSub.id,
+          hasPeriodEnd: !!periodEndTimestamp,
+          periodEndValue: periodEndTimestamp,
+          periodEndType: typeof periodEndTimestamp
+        });
+        
+        if (!periodEndTimestamp || typeof periodEndTimestamp !== 'number') {
+          try {
+            logStep("Fetching full subscription from Stripe", { subscriptionId: highestTierSub.id });
+            const fullSubscription = await stripe.subscriptions.retrieve(highestTierSub.id);
+            periodEndTimestamp = fullSubscription.current_period_end;
+            
+            logStep("Full subscription retrieved", {
+              hasPeriodEnd: !!periodEndTimestamp,
+              periodEndValue: periodEndTimestamp,
+              subscriptionStatus: fullSubscription.status,
+              subscriptionCreated: fullSubscription.created
+            });
+            
+            // CRITICAL FALLBACK: If still no period end, calculate it from created date
+            if (!periodEndTimestamp) {
+              logStep("No period_end found, calculating from subscription details", {
+                subscriptionId: highestTierSub.id,
+                created: fullSubscription.created,
+                status: fullSubscription.status
+              });
+              
+              // Get billing interval from price
+              const interval = fullSubscription.items.data[0]?.price?.recurring?.interval || 'month';
+              const intervalCount = fullSubscription.items.data[0]?.price?.recurring?.interval_count || 1;
+              
+              // Calculate period end based on creation date
+              const createdDate = new Date(fullSubscription.created * 1000);
+              const periodEnd = new Date(createdDate);
+              
+              if (interval === 'year') {
+                periodEnd.setFullYear(periodEnd.getFullYear() + intervalCount);
+              } else if (interval === 'month') {
+                periodEnd.setMonth(periodEnd.getMonth() + intervalCount);
+              } else if (interval === 'week') {
+                periodEnd.setDate(periodEnd.getDate() + (7 * intervalCount));
+              } else { // day
+                periodEnd.setDate(periodEnd.getDate() + intervalCount);
+              }
+              
+              periodEndTimestamp = Math.floor(periodEnd.getTime() / 1000);
+              logStep("Calculated period_end", { 
+                periodEnd: periodEnd.toISOString(),
+                interval,
+                intervalCount,
+                calculatedTimestamp: periodEndTimestamp
+              });
+            }
+          } catch (fetchError) {
+            logStep("ERROR fetching full subscription", { 
+              error: fetchError instanceof Error ? fetchError.message : String(fetchError),
+              stack: fetchError instanceof Error ? fetchError.stack : undefined
+            });
+          }
         }
 
         if (!periodEndTimestamp) {
@@ -164,13 +223,46 @@ serve(async (req) => {
             error: upsertError.message 
           });
           errorCount++;
-        } else {
-          logStep("Synced subscription", { 
-            userId: profile.user_id, 
-            plan: planMapping.tier 
-          });
-          syncedCount++;
+          continue;
         }
+
+        // CRITICAL: Also initialize usage_limits for this user
+        const imageLimitValue = planMapping.tier === 'ultra_pro' ? 2000 : 
+                                planMapping.tier === 'pro' ? 500 : 0;
+        
+        if (imageLimitValue > 0) {
+          const { error: limitsError } = await supabaseClient
+            .from('usage_limits')
+            .upsert({
+              user_id: profile.user_id,
+              period_start: new Date().toISOString(),
+              period_end: periodEndDate.toISOString(),
+              image_generations_used: 0,
+              image_generations_limit: imageLimitValue,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id'
+            });
+
+          if (limitsError) {
+            logStep("Error initializing usage limits", { 
+              userId: profile.user_id, 
+              error: limitsError.message 
+            });
+          } else {
+            logStep("Initialized usage limits", { 
+              userId: profile.user_id, 
+              limit: imageLimitValue 
+            });
+          }
+        }
+
+        logStep("Synced subscription and limits", { 
+          userId: profile.user_id, 
+          plan: planMapping.tier,
+          imageLimit: imageLimitValue
+        });
+        syncedCount++;
 
       } catch (profileError) {
         logStep("Error processing profile", { 

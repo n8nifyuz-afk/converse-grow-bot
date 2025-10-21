@@ -248,16 +248,30 @@ serve(async (req) => {
             const fullSubscription = await stripe.subscriptions.retrieve(highestTierSub.id);
             periodEndTimestamp = fullSubscription.current_period_end;
             
+            // FALLBACK: Calculate from subscription creation date
             if (!periodEndTimestamp) {
-              logStep("ERROR: Still no current_period_end after fetch", { 
-                subscriptionId: highestTierSub.id,
+              logStep("Calculating period_end from subscription details", {
+                created: fullSubscription.created,
                 status: fullSubscription.status
               });
-              throw new Error("Subscription missing billing period end date");
+              
+              const interval = fullSubscription.items.data[0]?.price?.recurring?.interval || 'month';
+              const intervalCount = fullSubscription.items.data[0]?.price?.recurring?.interval_count || 1;
+              const createdDate = new Date(fullSubscription.created * 1000);
+              const periodEnd = new Date(createdDate);
+              
+              if (interval === 'year') {
+                periodEnd.setFullYear(periodEnd.getFullYear() + intervalCount);
+              } else if (interval === 'month') {
+                periodEnd.setMonth(periodEnd.getMonth() + intervalCount);
+              }
+              
+              periodEndTimestamp = Math.floor(periodEnd.getTime() / 1000);
+              logStep("Calculated period_end", { periodEnd: periodEnd.toISOString() });
             }
           } catch (fetchError) {
-            logStep("ERROR: Failed to fetch full subscription", { error: fetchError });
-            throw new Error("Unable to retrieve subscription details");
+            logStep("ERROR: Failed to determine period end", { error: fetchError });
+            throw new Error("Unable to determine subscription billing period");
           }
         }
 
