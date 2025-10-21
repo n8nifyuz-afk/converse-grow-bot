@@ -144,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const { error } = await resend.emails.send({
-      from: "ChatL <welcome@chatl.ai>",
+      from: "welcome@chatl.ai",
       to: [user.email],
       subject: "Welcome to ChatL - Start Your AI Journey! 🚀",
       html: htmlContent,
