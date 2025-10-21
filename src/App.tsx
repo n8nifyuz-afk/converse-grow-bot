@@ -27,6 +27,7 @@ import RefundPolicy from '@/pages/RefundPolicy';
 import CancelSubscription from '@/pages/CancelSubscription';
 import Admin from '@/pages/Admin';
 import Features from '@/pages/Features';
+import AITools from '@/pages/AITools';
 import { SubscriptionCheckingOverlay } from '@/components/SubscriptionCheckingOverlay';
 
 const queryClient = new QueryClient();
@@ -68,6 +69,11 @@ function App() {
                   <Route path="/features" element={
                     <PublicLayout>
                       <Features />
+                    </PublicLayout>
+                  } />
+                  <Route path="/ai-tools" element={
+                    <PublicLayout>
+                      <AITools />
                     </PublicLayout>
                   } />
                   <Route path="/pricing" element={

@@ -49,12 +49,13 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <button 
-              onClick={() => handleScrollToSection('ai-models-section')}
+            <Link 
+              to="/ai-tools" 
+              onClick={() => window.scrollTo(0, 0)}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
               {t('nav.aiTools')}
-            </button>
+            </Link>
             <Link 
               to="/features" 
               onClick={() => window.scrollTo(0, 0)}
@@ -131,12 +132,16 @@ const Header = () => {
                   </Button>
                 </div>
                 <nav className="flex flex-col space-y-4">
-                  <button 
-                    onClick={() => handleScrollToSection('ai-models-section')}
-                    className="text-lg font-medium hover:text-primary transition-colors text-left"
+                  <Link 
+                    to="/ai-tools" 
+                    className="text-lg font-medium hover:text-primary transition-colors"
+                    onClick={() => {
+                      setIsOpen(false);
+                      window.scrollTo(0, 0);
+                    }}
                   >
                     {t('nav.aiTools')}
-                  </button>
+                  </Link>
                   <Link 
                     to="/features" 
                     className="text-lg font-medium hover:text-primary transition-colors"
