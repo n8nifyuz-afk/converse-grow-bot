@@ -6,6 +6,17 @@
     "contact": "联系我们",
     "startNow": "立即开始"
   },
+  "footer": {
+    "tagline": "您通往世界最先进AI模型的门户，统一在一个智能平台上。",
+    "product": "产品",
+    "company": "公司",
+    "legal": "法律",
+    "aboutUs": "关于我们",
+    "privacyPolicy": "隐私政策",
+    "termsOfService": "服务条款",
+    "cookiePolicy": "Cookie政策",
+    "refundPolicy": "退款政策"
+  },
   "hero": {
     "title": "您的 AI 学习伙伴",
     "subtitle": "与多个 AI 模型聊天，生成图像，提升您的学习体验",

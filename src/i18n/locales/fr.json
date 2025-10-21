@@ -6,6 +6,17 @@
     "contact": "Contactez-nous",
     "startNow": "Commencer Maintenant"
   },
+  "footer": {
+    "tagline": "Votre passerelle vers les modèles d'IA les plus avancés au monde, unifiés dans une plateforme intelligente.",
+    "product": "Produit",
+    "company": "Entreprise",
+    "legal": "Légal",
+    "aboutUs": "À Propos",
+    "privacyPolicy": "Politique de Confidentialité",
+    "termsOfService": "Conditions d'Utilisation",
+    "cookiePolicy": "Politique des Cookies",
+    "refundPolicy": "Politique de Remboursement"
+  },
   "hero": {
     "title": "Votre Compagnon d'Apprentissage IA",
     "subtitle": "Discutez avec plusieurs modèles d'IA, générez des images et améliorez votre expérience d'apprentissage",

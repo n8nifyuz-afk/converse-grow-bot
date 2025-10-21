@@ -6,6 +6,17 @@
     "contact": "お問い合わせ",
     "startNow": "今すぐ始める"
   },
+  "footer": {
+    "tagline": "世界最先端のAIモデルへのゲートウェイ、1つのインテリジェントなプラットフォームに統合。",
+    "product": "製品",
+    "company": "会社",
+    "legal": "法的情報",
+    "aboutUs": "私たちについて",
+    "privacyPolicy": "プライバシーポリシー",
+    "termsOfService": "利用規約",
+    "cookiePolicy": "Cookieポリシー",
+    "refundPolicy": "返金ポリシー"
+  },
   "hero": {
     "title": "あなたのAI学習パートナー",
     "subtitle": "複数のAIモデルとチャットし、画像を生成し、学習体験を向上させましょう",

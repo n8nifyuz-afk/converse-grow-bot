@@ -6,6 +6,17 @@
     "contact": "Kontaktieren Sie Uns",
     "startNow": "Jetzt Starten"
   },
+  "footer": {
+    "tagline": "Ihr Zugang zu den fortschrittlichsten KI-Modellen der Welt, vereint auf einer intelligenten Plattform.",
+    "product": "Produkt",
+    "company": "Unternehmen",
+    "legal": "Rechtliches",
+    "aboutUs": "Über Uns",
+    "privacyPolicy": "Datenschutzerklärung",
+    "termsOfService": "Nutzungsbedingungen",
+    "cookiePolicy": "Cookie-Richtlinie",
+    "refundPolicy": "Rückerstattungsrichtlinie"
+  },
   "hero": {
     "title": "Ihr KI-Lernbegleiter",
     "subtitle": "Chatten Sie mit mehreren KI-Modellen, generieren Sie Bilder und verbessern Sie Ihr Lernerlebnis",

@@ -6,6 +6,17 @@
     "contact": "Fale Conosco",
     "startNow": "Começar Agora"
   },
+  "footer": {
+    "tagline": "Sua porta de entrada para os modelos de IA mais avançados do mundo, unificados em uma plataforma inteligente.",
+    "product": "Produto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "aboutUs": "Sobre Nós",
+    "privacyPolicy": "Política de Privacidade",
+    "termsOfService": "Termos de Serviço",
+    "cookiePolicy": "Política de Cookies",
+    "refundPolicy": "Política de Reembolso"
+  },
   "hero": {
     "title": "Seu Companheiro de Aprendizado IA",
     "subtitle": "Converse com vários modelos de IA, gere imagens e melhore sua experiência de aprendizado",

@@ -6,6 +6,17 @@
     "contact": "Contattaci",
     "startNow": "Inizia Ora"
   },
+  "footer": {
+    "tagline": "Il tuo accesso ai modelli di IA più avanzati al mondo, unificati in un'unica piattaforma intelligente.",
+    "product": "Prodotto",
+    "company": "Azienda",
+    "legal": "Legale",
+    "aboutUs": "Chi Siamo",
+    "privacyPolicy": "Informativa sulla Privacy",
+    "termsOfService": "Termini di Servizio",
+    "cookiePolicy": "Politica sui Cookie",
+    "refundPolicy": "Politica di Rimborso"
+  },
   "hero": {
     "title": "Il Tuo Compagno di Apprendimento IA",
     "subtitle": "Chatta con più modelli di IA, genera immagini e migliora la tua esperienza di apprendimento",
