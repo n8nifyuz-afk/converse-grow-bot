@@ -26,6 +26,7 @@ import HelpCenter from '@/pages/HelpCenter';
 import RefundPolicy from '@/pages/RefundPolicy';
 import CancelSubscription from '@/pages/CancelSubscription';
 import Admin from '@/pages/Admin';
+import Features from '@/pages/Features';
 import { SubscriptionCheckingOverlay } from '@/components/SubscriptionCheckingOverlay';
 
 const queryClient = new QueryClient();
@@ -64,6 +65,11 @@ function App() {
                   } />
                   
                   {/* Public pages with header/footer */}
+                  <Route path="/features" element={
+                    <PublicLayout>
+                      <Features />
+                    </PublicLayout>
+                  } />
                   <Route path="/pricing" element={
                     <PublicLayout>
                       <Pricing />

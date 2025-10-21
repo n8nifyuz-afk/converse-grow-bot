@@ -55,12 +55,12 @@ const Header = () => {
             >
               {t('nav.aiTools')}
             </button>
-            <button 
-              onClick={() => handleScrollToSection('features-section')}
+            <Link 
+              to="/features" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
               {t('nav.whatYouCanDo')}
-            </button>
+            </Link>
             <Link 
               to="/pricing" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
@@ -136,12 +136,13 @@ const Header = () => {
                   >
                     {t('nav.aiTools')}
                   </button>
-                  <button 
-                    onClick={() => handleScrollToSection('features-section')}
-                    className="text-lg font-medium hover:text-primary transition-colors text-left"
+                  <Link 
+                    to="/features" 
+                    className="text-lg font-medium hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
                   >
                     {t('nav.whatYouCanDo')}
-                  </button>
+                  </Link>
                   <Link 
                     to="/pricing" 
                     className="text-lg font-medium hover:text-primary transition-colors"
