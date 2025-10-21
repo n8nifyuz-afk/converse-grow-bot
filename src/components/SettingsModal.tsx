@@ -502,7 +502,20 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     </div>
                     <Select value={accentColor} onValueChange={handleSetAccentColor}>
                       <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
-                        <SelectValue />
+                        <SelectValue>
+                          {(() => {
+                            const currentColor = accentColors.find(color => color.value === accentColor);
+                            return currentColor ? (
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-4 h-4 rounded-full shadow-sm border border-background" 
+                                  style={{ backgroundColor: currentColor.color }}
+                                />
+                                <span>{currentColor.label}</span>
+                              </div>
+                            ) : null;
+                          })()}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-background border-2 border-border shadow-xl">
                         {accentColors.map((color) => (
