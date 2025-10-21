@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { supabase } from '@/integrations/supabase/client';
+import { trackChatStart } from '@/utils/gtmTracking';
 import { Plus, Paperclip, Mic, MicOff, Edit2, Trash2, FolderOpen, Lightbulb, Target, Briefcase, Rocket, Palette, FileText, Code, Zap, Trophy, Heart, Star, Flame, Gem, Sparkles, MoreHorizontal, FileImage, File as FileIcon, X, Image as ImageIcon2, ImageIcon as ImageIcon, Check, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SendHorizontalIcon } from '@/components/ui/send-horizontal-icon';
@@ -465,6 +466,9 @@ export default function ProjectPage() {
         model_id: selectedModel
       }).select().single();
       if (error) throw error;
+      
+      // Track chat start event
+      trackChatStart();
 
       // Upload files for display in chat - use correct bucket based on file type
       const uploadedFiles = [];

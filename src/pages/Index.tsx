@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { supabase } from '@/integrations/supabase/client';
+import { trackChatStart } from '@/utils/gtmTracking';
 import { Paperclip, Mic, MicOff, ImageIcon, Globe, Edit3, BookOpen, Search, FileText, Plus, ChevronLeft, ChevronRight, X, Palette, BarChart3, Lightbulb, Settings, Zap, Menu, ChevronDown, ChevronUp, Mail, Pen, Briefcase, Apple } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { SendHorizontalIcon } from '@/components/ui/send-horizontal-icon';
@@ -620,6 +621,9 @@ export default function Index() {
       if (chatError) throw chatError;
 
       console.log('[INDEX] Chat created:', chatData.id);
+      
+      // Track chat start event
+      trackChatStart();
 
       // Store the message and files for Chat page to process
       const messageText = message;
@@ -669,6 +673,9 @@ export default function Index() {
         model_id: modelToUse || selectedModel
       }]).select().single();
       if (chatError) throw chatError;
+      
+      // Track chat start event
+      trackChatStart();
       
       const {
         data: insertedMessage,
