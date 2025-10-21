@@ -76,9 +76,9 @@
   "pricing": {
     "heading": "选择您的计划。释放 AI 的力量。",
     "subtitle": "免费开始使用 GPT-4-mini，随时升级以完全访问 GPT-5、Claude、Gemini、DeepSeek、Grok 等。",
-    "freePlanTitle": "🆓 免费",
-    "proPlanTitle": "⭐ 专业版",
-    "ultraProPlanTitle": "🚀 超级专业版",
+    "freePlanTitle": "免费",
+    "proPlanTitle": "专业版",
+    "ultraProPlanTitle": "超级专业版",
     "perMonth": "/ 月",
     "freeDescription": "免费开始，随时升级。",
     "proDescription": "适合专业人士",

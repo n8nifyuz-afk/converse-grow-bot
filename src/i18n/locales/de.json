@@ -76,9 +76,9 @@
   "pricing": {
     "heading": "Wählen Sie Ihren Plan. Entfesseln Sie die Kraft der KI.",
     "subtitle": "Starten Sie kostenlos mit GPT-4-mini und upgraden Sie jederzeit für vollen Zugriff auf GPT-5, Claude, Gemini, DeepSeek, Grok und mehr.",
-    "freePlanTitle": "🆓 Kostenlos",
-    "proPlanTitle": "⭐ Pro",
-    "ultraProPlanTitle": "🚀 Ultra Pro",
+    "freePlanTitle": "Kostenlos",
+    "proPlanTitle": "Pro",
+    "ultraProPlanTitle": "Ultra Pro",
     "perMonth": "/ Monat",
     "freeDescription": "Kostenlos starten, jederzeit upgraden.",
     "proDescription": "Für Profis",

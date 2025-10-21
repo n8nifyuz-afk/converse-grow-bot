@@ -76,9 +76,9 @@
   "pricing": {
     "heading": "プランを選択。AIの力を解き放つ。",
     "subtitle": "GPT-4-miniで無料で始め、いつでもアップグレードしてGPT-5、Claude、Gemini、DeepSeek、Grokなどに完全アクセス。",
-    "freePlanTitle": "🆓 無料",
-    "proPlanTitle": "⭐ プロ",
-    "ultraProPlanTitle": "🚀 ウルトラプロ",
+    "freePlanTitle": "無料",
+    "proPlanTitle": "プロ",
+    "ultraProPlanTitle": "ウルトラプロ",
     "perMonth": "/ 月",
     "freeDescription": "無料で始め、いつでもアップグレード。",
     "proDescription": "プロフェッショナル向け",

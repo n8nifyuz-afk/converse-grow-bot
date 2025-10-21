@@ -79,9 +79,9 @@
   "pricing": {
     "heading": "Choose Your Plan. Unlock the Power of AI.",
     "subtitle": "Start free with GPT-4-min and upgrade anytime for full access to GPT-5, Claude, Gemini, DeepSeek, Grok, and more.",
-    "freePlanTitle": "🆓 Free",
-    "proPlanTitle": "⭐ Pro",
-    "ultraProPlanTitle": "🚀 Ultra Pro",
+    "freePlanTitle": "Free",
+    "proPlanTitle": "Pro",
+    "ultraProPlanTitle": "Ultra Pro",
     "perMonth": "/ month",
     "freeDescription": "Get started free, upgrade anytime.",
     "proDescription": "For professionals",
