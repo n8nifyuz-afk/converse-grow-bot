@@ -162,19 +162,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(session);
           setUser(session.user);
           
-          // Check if this is a new user signup (OAuth or email)
-          // User created within last 5 seconds = new signup
-          const userCreatedAt = new Date(session.user.created_at).getTime();
-          const now = Date.now();
-          const isNewSignup = (now - userCreatedAt) < 5000;
-          
-          if (isNewSignup) {
-            console.log('[AUTH] 🎯 New user detected - tracking registration_complete');
-            trackRegistrationComplete();
-          }
-          
-          // Defer profile sync and subscription check to avoid auth loop
-          setTimeout(() => {
+          // Check if this is a new signup by verifying if profile exists
+          // This works for all auth methods (email, Google, Apple, etc.)
+          setTimeout(async () => {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('user_id', session.user.id)
+              .single();
+            
+            // If profile was just created (trigger created it), it's a new signup
+            if (profile) {
+              const profileCreated = new Date(session.user.created_at).getTime();
+              const now = Date.now();
+              // Profile created within last 10 seconds = new signup
+              if ((now - profileCreated) < 10000) {
+                console.log('[AUTH] 🎯 New user signup detected - tracking registration_complete');
+                trackRegistrationComplete();
+              }
+            }
+            
             syncOAuthProfile(session);
             checkSubscription();
           }, 500);
