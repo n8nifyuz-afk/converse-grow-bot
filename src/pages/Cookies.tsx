@@ -43,11 +43,10 @@ export default function Cookies() {
           <Card>
             <CardContent className="pt-6 space-y-4">
               <p className="leading-relaxed text-muted-foreground">
-                By continuing to browse or use the Site, you consent to the use of cookies as described in this policy.
+                {t('cookiePolicy.consentText')}
               </p>
               <p className="text-sm text-muted-foreground">
-                If you do not agree, you can manage or disable cookies through your browser settings or via the cookie banner 
-                displayed when you first visit our Site.
+                {t('cookiePolicy.disagreeText')}
               </p>
             </CardContent>
           </Card>
@@ -57,31 +56,29 @@ export default function Cookies() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Cookie className="h-5 w-5 text-primary" />
-                What Are Cookies
+                {t('cookiePolicy.whatAreCookies')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Cookies are small text files stored on your device when you visit a website. They are used to make websites 
-                function properly, improve performance, remember preferences, and help us understand how visitors interact with the site.
+                {t('cookiePolicy.whatAreCookiesDesc')}
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="p-4 bg-muted/50 rounded-lg border">
-                  <p className="font-semibold mb-2">Session Cookies</p>
+                  <p className="font-semibold mb-2">{t('cookiePolicy.sessionCookies')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Deleted when you close your browser
+                    {t('cookiePolicy.sessionCookiesDesc')}
                   </p>
                 </div>
                 <div className="p-4 bg-muted/50 rounded-lg border">
-                  <p className="font-semibold mb-2">Persistent Cookies</p>
+                  <p className="font-semibold mb-2">{t('cookiePolicy.persistentCookies')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Remain stored for a defined period
+                    {t('cookiePolicy.persistentCookiesDesc')}
                   </p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground pt-2">
-                Cookies set directly by ChatLearn are known as <strong>"first-party cookies,"</strong> while those set by 
-                external tools like Google Analytics are <strong>"third-party cookies."</strong>
+                {t('cookiePolicy.cookieTypesNote')}
               </p>
             </CardContent>
           </Card>
@@ -91,79 +88,63 @@ export default function Cookies() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5 text-primary" />
-                How We Use Cookies
+                {t('cookiePolicy.howWeUse')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-6">
-                We use cookies to provide a secure, optimized, and personalized experience on our Site.
+                {t('cookiePolicy.howWeUseDesc')}
               </p>
 
               <div className="space-y-6">
-                {/* Essential Cookies */}
                 <div className="p-4 sm:p-6 border rounded-lg bg-red-500/5 border-red-500/20">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Shield className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">Essential Cookies</h3>
-                      <Badge variant="destructive" className="text-xs mb-3">Required</Badge>
-                      <p className="text-sm text-muted-foreground">
-                        These are required for the basic operation of the website, such as security, login, and navigation. 
-                        Without them, the site cannot function properly.
-                      </p>
+                      <h3 className="font-semibold text-lg mb-1">{t('cookiePolicy.essentialCookies')}</h3>
+                      <Badge variant="destructive" className="text-xs mb-3">{t('cookiePolicy.essentialRequired')}</Badge>
+                      <p className="text-sm text-muted-foreground">{t('cookiePolicy.essentialDesc')}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Analytics Cookies */}
                 <div className="p-4 sm:p-6 border rounded-lg bg-blue-500/5 border-blue-500/20">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Eye className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">Analytics Cookies</h3>
-                      <Badge variant="secondary" className="text-xs mb-3">Optional</Badge>
-                      <p className="text-sm text-muted-foreground">
-                        We use Google Analytics (GA4) to collect anonymous information about how visitors use the site — such as 
-                        pages viewed, session duration, and user behavior. This helps us improve performance and user experience.
-                      </p>
+                      <h3 className="font-semibold text-lg mb-1">{t('cookiePolicy.analyticsCookies')}</h3>
+                      <Badge variant="secondary" className="text-xs mb-3">{t('cookiePolicy.analyticsOptional')}</Badge>
+                      <p className="text-sm text-muted-foreground">{t('cookiePolicy.analyticsDesc')}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Functional Cookies */}
                 <div className="p-4 sm:p-6 border rounded-lg bg-green-500/5 border-green-500/20">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Settings className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">Functional Cookies</h3>
-                      <Badge variant="secondary" className="text-xs mb-3">Optional</Badge>
-                      <p className="text-sm text-muted-foreground">
-                        These cookies remember your preferences (like language or theme) to provide a smoother, customized 
-                        browsing experience.
-                      </p>
+                      <h3 className="font-semibold text-lg mb-1">{t('cookiePolicy.functionalCookies')}</h3>
+                      <Badge variant="secondary" className="text-xs mb-3">{t('cookiePolicy.functionalOptional')}</Badge>
+                      <p className="text-sm text-muted-foreground">{t('cookiePolicy.functionalDesc')}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Marketing Cookies */}
                 <div className="p-4 sm:p-6 border rounded-lg bg-purple-500/5 border-purple-500/20">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Bell className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">Marketing Cookies</h3>
-                      <Badge variant="secondary" className="text-xs mb-3">Optional</Badge>
-                      <p className="text-sm text-muted-foreground">
-                        If Meta Pixel or similar tracking tools are active, these cookies help deliver relevant ads and measure 
-                        campaign effectiveness. They track general interactions and conversions anonymously.
-                      </p>
+                      <h3 className="font-semibold text-lg mb-1">{t('cookiePolicy.marketingCookies')}</h3>
+                      <Badge variant="secondary" className="text-xs mb-3">{t('cookiePolicy.marketingOptional')}</Badge>
+                      <p className="text-sm text-muted-foreground">{t('cookiePolicy.marketingDesc')}</p>
                     </div>
                   </div>
                 </div>
