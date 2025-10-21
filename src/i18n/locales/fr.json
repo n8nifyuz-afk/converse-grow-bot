@@ -25,6 +25,22 @@
     "deepseekDescription": "LLM chinois axé sur la compréhension approfondie et les réponses complètes.",
     "grokDescription": "L'IA rebelle de X avec accès web en temps réel et insights perspicaces."
   },
+  "features": {
+    "heading": "Tout ce dont Vous Avez Besoin",
+    "subtitle": "Des fonctionnalités puissantes conçues pour améliorer votre expérience IA",
+    "multiModelAccess": "Accès Multi-Modèles",
+    "multiModelAccessDesc": "Basculez entre GPT-4, GPT-5, Claude, Gemini et plus encore - tout en un seul endroit.",
+    "aiImageGeneration": "Génération d'Images IA",
+    "aiImageGenerationDesc": "Créez instantanément des visuels époustouflants avec des outils alimentés par l'IA.",
+    "learningSupport": "Support d'Apprentissage et d'Étude",
+    "learningSupportDesc": "Résumez des textes, expliquez des concepts et préparez-vous aux examens avec l'assistance IA.",
+    "codingHelp": "Aide au Codage et à la Technologie",
+    "codingHelpDesc": "Obtenez une assistance de codage instantanée, du débogage et des insights techniques.",
+    "voiceLanguageSupport": "Support Vocal et Linguistique",
+    "voiceLanguageSupportDesc": "Discutez mains libres avec des commandes vocales et plus de 50 langues.",
+    "askYourFiles": "Interrogez Vos Fichiers",
+    "askYourFilesDesc": "Téléchargez des PDFs ou des documents et extrayez les points clés en quelques secondes."
+  },
   "settings": {
     "title": "Paramètres",
     "selectLanguage": "Sélectionner la langue",

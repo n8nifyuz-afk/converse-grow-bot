@@ -25,6 +25,22 @@
     "deepseekDescription": "深い理解と包括的な回答に焦点を当てた中国のLLM。",
     "grokDescription": "リアルタイムWebアクセスと鋭い洞察力を持つXの反抗的なAI。"
   },
+  "features": {
+    "heading": "必要なものすべて",
+    "subtitle": "AI体験を向上させるために設計された強力な機能",
+    "multiModelAccess": "マルチモデルアクセス",
+    "multiModelAccessDesc": "GPT-4、GPT-5、Claude、Geminiなどを切り替え - すべて1か所で。",
+    "aiImageGeneration": "AI画像生成",
+    "aiImageGenerationDesc": "AI搭載ツールで瞬時に素晴らしいビジュアルを作成。",
+    "learningSupport": "学習とスタディサポート",
+    "learningSupportDesc": "テキストを要約し、概念を説明し、AIアシスタンスで試験の準備をします。",
+    "codingHelp": "コーディングとテクノロジーヘルプ",
+    "codingHelpDesc": "即座にコーディングサポート、デバッグ、技術的洞察を取得。",
+    "voiceLanguageSupport": "音声と言語サポート",
+    "voiceLanguageSupportDesc": "音声コマンドと50以上の言語でハンズフリーでチャット。",
+    "askYourFiles": "ファイルに質問",
+    "askYourFilesDesc": "PDFやドキュメントをアップロードし、数秒で重要な洞察を抽出。"
+  },
   "settings": {
     "title": "設定",
     "selectLanguage": "言語を選択",

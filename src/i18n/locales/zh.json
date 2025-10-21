@@ -25,6 +25,22 @@
     "deepseekDescription": "中国 LLM，专注于深度理解和全面回答。",
     "grokDescription": "X 的叛逆 AI，具有实时网络访问和敏锐洞察力。"
   },
+  "features": {
+    "heading": "您需要的一切",
+    "subtitle": "旨在增强您的 AI 体验的强大功能",
+    "multiModelAccess": "多模型访问",
+    "multiModelAccessDesc": "在 GPT-4、GPT-5、Claude、Gemini 等之间切换 - 一切尽在一处。",
+    "aiImageGeneration": "AI 图像生成",
+    "aiImageGenerationDesc": "使用 AI 驱动的工具即刻创建令人惊叹的视觉效果。",
+    "learningSupport": "学习和学习支持",
+    "learningSupportDesc": "借助 AI 帮助总结文本、解释概念并准备考试。",
+    "codingHelp": "编程和技术帮助",
+    "codingHelpDesc": "获得即时编程支持、调试和技术见解。",
+    "voiceLanguageSupport": "语音和语言支持",
+    "voiceLanguageSupportDesc": "通过语音命令和超过 50 种语言免提聊天。",
+    "askYourFiles": "询问您的文件",
+    "askYourFilesDesc": "上传 PDF 或文档，几秒钟内提取关键见解。"
+  },
   "settings": {
     "title": "设置",
     "selectLanguage": "选择语言",

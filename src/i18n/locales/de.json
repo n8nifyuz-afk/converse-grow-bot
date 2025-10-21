@@ -25,6 +25,22 @@
     "deepseekDescription": "Chinesisches LLM mit Fokus auf tiefes Verständnis und umfassende Antworten.",
     "grokDescription": "Xs rebellische KI mit Echtzeit-Webzugriff und scharfen Einblicken."
   },
+  "features": {
+    "heading": "Alles was Sie Brauchen",
+    "subtitle": "Leistungsstarke Funktionen zur Verbesserung Ihrer KI-Erfahrung",
+    "multiModelAccess": "Multi-Modell-Zugriff",
+    "multiModelAccessDesc": "Wechseln Sie zwischen GPT-4, GPT-5, Claude, Gemini und mehr - alles an einem Ort.",
+    "aiImageGeneration": "KI-Bildgenerierung",
+    "aiImageGenerationDesc": "Erstellen Sie sofort atemberaubende Visuals mit KI-gestützten Tools.",
+    "learningSupport": "Lern- und Studienunterstützung",
+    "learningSupportDesc": "Fassen Sie Texte zusammen, erklären Sie Konzepte und bereiten Sie sich mit KI-Unterstützung auf Prüfungen vor.",
+    "codingHelp": "Programmier- und Technologiehilfe",
+    "codingHelpDesc": "Erhalten Sie sofortige Codierungsunterstützung, Fehlersuche und technische Einblicke.",
+    "voiceLanguageSupport": "Sprach- und Sprachunterstützung",
+    "voiceLanguageSupportDesc": "Chatten Sie freihändig mit Sprachbefehlen und über 50 Sprachen.",
+    "askYourFiles": "Fragen Sie Ihre Dateien",
+    "askYourFilesDesc": "Laden Sie PDFs oder Dokumente hoch und extrahieren Sie wichtige Erkenntnisse in Sekunden."
+  },
   "settings": {
     "title": "Einstellungen",
     "selectLanguage": "Sprache auswählen",
