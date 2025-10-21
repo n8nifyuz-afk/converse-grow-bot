@@ -15,7 +15,7 @@ const Features = () => {
       />
 
       {/* Features Section */}
-      <section id="features-section" className="py-20 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
+      <section id="features-section" className="pt-20 pb-8 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h1 id="features-heading" className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
