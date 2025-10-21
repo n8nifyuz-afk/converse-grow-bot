@@ -36,6 +36,15 @@
     "deepseekDescription": "LLM cinese focalizzato sulla comprensione profonda e risposte complete.",
     "grokDescription": "L'IA ribelle di X con accesso web in tempo reale e intuizioni acute."
   },
+  "accentColors": {
+    "blue": "Blu",
+    "indigo": "Indaco",
+    "purple": "Viola",
+    "green": "Verde",
+    "orange": "Arancione",
+    "red": "Rosso",
+    "gray": "Grigio"
+  },
   "features": {
     "heading": "Tutto ciò di cui Hai Bisogno",
     "subtitle": "Funzionalità potenti progettate per migliorare la tua esperienza IA",

@@ -36,6 +36,15 @@
     "deepseekDescription": "LLM chinois axé sur la compréhension approfondie et les réponses complètes.",
     "grokDescription": "L'IA rebelle de X avec accès web en temps réel et insights perspicaces."
   },
+  "accentColors": {
+    "blue": "Bleu",
+    "indigo": "Indigo",
+    "purple": "Violet",
+    "green": "Vert",
+    "orange": "Orange",
+    "red": "Rouge",
+    "gray": "Gris"
+  },
   "features": {
     "heading": "Tout ce dont Vous Avez Besoin",
     "subtitle": "Des fonctionnalités puissantes conçues pour améliorer votre expérience IA",

@@ -36,6 +36,15 @@
     "deepseekDescription": "深い理解と包括的な回答に焦点を当てた中国のLLM。",
     "grokDescription": "リアルタイムWebアクセスと鋭い洞察力を持つXの反抗的なAI。"
   },
+  "accentColors": {
+    "blue": "青",
+    "indigo": "インディゴ",
+    "purple": "紫",
+    "green": "緑",
+    "orange": "オレンジ",
+    "red": "赤",
+    "gray": "グレー"
+  },
   "features": {
     "heading": "必要なものすべて",
     "subtitle": "AI体験を向上させるために設計された強力な機能",

@@ -36,6 +36,15 @@
     "deepseekDescription": "中国 LLM，专注于深度理解和全面回答。",
     "grokDescription": "X 的叛逆 AI，具有实时网络访问和敏锐洞察力。"
   },
+  "accentColors": {
+    "blue": "蓝色",
+    "indigo": "靛蓝",
+    "purple": "紫色",
+    "green": "绿色",
+    "orange": "橙色",
+    "red": "红色",
+    "gray": "灰色"
+  },
   "features": {
     "heading": "您需要的一切",
     "subtitle": "旨在增强您的 AI 体验的强大功能",

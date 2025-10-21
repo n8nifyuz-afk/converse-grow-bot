@@ -36,6 +36,15 @@
     "deepseekDescription": "Chinesisches LLM mit Fokus auf tiefes Verständnis und umfassende Antworten.",
     "grokDescription": "Xs rebellische KI mit Echtzeit-Webzugriff und scharfen Einblicken."
   },
+  "accentColors": {
+    "blue": "Blau",
+    "indigo": "Indigo",
+    "purple": "Lila",
+    "green": "Grün",
+    "orange": "Orange",
+    "red": "Rot",
+    "gray": "Grau"
+  },
   "features": {
     "heading": "Alles was Sie Brauchen",
     "subtitle": "Leistungsstarke Funktionen zur Verbesserung Ihrer KI-Erfahrung",

@@ -39,6 +39,15 @@
     "deepseekDescription": "Chinese LLM focused on deep understanding and comprehensive responses.",
     "grokDescription": "X's rebellious AI with real-time web access and sharp insights."
   },
+  "accentColors": {
+    "blue": "Blue",
+    "indigo": "Indigo",
+    "purple": "Purple",
+    "green": "Green",
+    "orange": "Orange",
+    "red": "Red",
+    "gray": "Gray"
+  },
   "features": {
     "heading": "Everything You Need",
     "subtitle": "Powerful features designed to enhance your AI experience",
@@ -350,15 +359,6 @@
     "signInToManageSubscription": "Sign in to manage your subscription",
     "needSignIn": "You need to be signed in to access subscription settings.",
     "signIn": "Sign In"
-  },
-  "profile": {
-    "blue": "Blue",
-    "indigo": "Indigo",
-    "purple": "Purple",
-    "green": "Green",
-    "orange": "Orange",
-    "red": "Red",
-    "gray": "Gray"
   },
   "authModal": {
     "title": "Log In and Get Smart",
