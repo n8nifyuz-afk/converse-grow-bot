@@ -34,12 +34,10 @@ const loadCachedSubscription = () => {
   try {
     const cached = sessionStorage.getItem(SUBSCRIPTION_CACHE_KEY);
     if (cached) {
-      const parsed = JSON.parse(cached);
-      console.log('📦 Loaded cached subscription:', parsed);
-      return parsed;
+      return JSON.parse(cached);
     }
   } catch (error) {
-    console.error('Error loading cached subscription:', error);
+    // Silent error handling
   }
   return null;
 };
@@ -47,18 +45,16 @@ const loadCachedSubscription = () => {
 const saveCachedSubscription = (status: any) => {
   try {
     sessionStorage.setItem(SUBSCRIPTION_CACHE_KEY, JSON.stringify(status));
-    console.log('💾 Saved subscription to cache:', status);
   } catch (error) {
-    console.error('Error saving subscription to cache:', error);
+    // Silent error handling
   }
 };
 
 const clearCachedSubscription = () => {
   try {
     sessionStorage.removeItem(SUBSCRIPTION_CACHE_KEY);
-    console.log('🗑️ Cleared subscription cache');
   } catch (error) {
-    console.error('Error clearing subscription cache:', error);
+    // Silent error handling
   }
 };
 
@@ -131,12 +127,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .from('profiles')
           .update(updateData)
           .eq('user_id', user.id);
-        
-        const provider = isGoogleSignIn ? 'Google' : 'Apple';
-        console.log(`✅ Updated ${provider} profile data:`, updateData);
       }
     } catch (error) {
-      console.error('Error syncing OAuth profile:', error);
+      // Silent error handling
     }
   };
 
@@ -242,7 +235,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            console.log('🔔 Webhook updated subscription, refreshing from Stripe');
             // Refresh from Stripe when webhook updates database
             setTimeout(() => checkSubscription(), 1000);
           }
@@ -258,24 +250,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const comingFromStripe = document.referrer.includes('stripe.com') || document.referrer.includes('checkout.stripe.com');
       
       if (isReturningFromStripe || comingFromStripe) {
-        console.log('🔄 Detected return from Stripe (success or failure), verifying with retries...', {
-          hasSessionId: !!sessionId,
-          hasSuccessParam: urlParams.has('success'),
-          comingFromStripe
-        });
-        
         // Clean URL immediately to avoid confusion
         const cleanUrl = () => {
           if (sessionId || urlParams.has('success')) {
             window.history.replaceState({}, document.title, window.location.pathname);
-            console.log('🧹 Cleaned URL parameters');
           }
         };
         
         // Function to check subscription with retries after Stripe checkout
         const checkWithRetries = async (attempt = 1, maxAttempts = 4) => {
-          console.log(`🔍 Stripe verification attempt ${attempt}/${maxAttempts}`);
-          
           const delay = attempt === 1 ? 3000 : 2000;
           await new Promise(resolve => setTimeout(resolve, delay));
           
@@ -284,24 +267,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await checkSubscription();
             
             if (subscriptionStatus.subscribed) {
-              console.log('✅ Subscription confirmed!');
               cleanUrl();
             } else if (attempt < maxAttempts) {
-              console.log(`⏳ Retrying in ${delay}ms...`);
               checkWithRetries(attempt + 1, maxAttempts);
             } else {
-              console.log('⚠️ Max attempts reached - cleaning URL anyway');
               cleanUrl();
               // Force one final refresh to ensure UI is up to date
               await checkSubscription();
             }
           } catch (error) {
-            console.error('❌ Subscription check failed:', error);
             if (attempt < maxAttempts) {
-              console.log(`⏳ Retrying in ${delay}ms after error...`);
               checkWithRetries(attempt + 1, maxAttempts);
             } else {
-              console.log('⚠️ Max attempts reached after errors - cleaning URL');
               cleanUrl();
             }
           }
@@ -330,8 +307,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const handleVisibilityChange = () => {
       if (!document.hidden && user) {
-        console.log('👁️ Page became visible, checking subscription status...');
-        
         // Debounce to prevent multiple rapid checks
         if (debounceTimeout) {
           clearTimeout(debounceTimeout);
@@ -370,8 +345,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
       
       if (profile?.signup_method === 'google' || profile?.signup_method === 'apple') {
-        console.log(`🔐 OAuth account detected (${profile.signup_method}), sending password setup email...`);
-        
         // Use production domain to avoid security warnings
         const redirectUrl = 'https://www.chatl.ai/reset-password';
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
@@ -379,7 +352,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         
         if (resetError) {
-          console.error('❌ Failed to send password setup email:', resetError);
           return {
             error: {
               message: `This email is already registered via ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. Please use "Continue with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}" to sign in.`,
@@ -388,7 +360,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
         }
         
-        console.log('✅ Password setup email sent');
         return {
           error: {
             message: `This account exists with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. We've sent you an email to add a password so you can sign in with email too.`,
@@ -397,7 +368,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       }
     } catch (checkError) {
-      console.error('❌ Error checking signup method:', checkError);
       // Continue with signup if check fails
     }
     
@@ -418,21 +388,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     
-    console.log('📧 Sign up response:', { 
-      hasError: !!error, 
-      errorMessage: error?.message,
-      hasUser: !!data?.user,
-      hasSession: !!data?.session,
-      userEmail: data?.user?.email,
-      emailConfirmedAt: data?.user?.email_confirmed_at,
-      identitiesLength: data?.user?.identities?.length
-    });
-    
     // Check if user already exists and has confirmed their email
     if (data?.user && !data?.session && !error) {
       // If email is already confirmed OR user has no identities, they're an existing user
       if (data.user.email_confirmed_at || (data.user.identities && data.user.identities.length === 0)) {
-        console.log('⚠️ User already exists with confirmed email');
         return { 
           error: { 
             message: 'User already registered',
@@ -443,11 +402,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // New user who needs to verify email
       return { error: null };
-    }
-    
-    if (error) {
-      // Don't log sensitive error details
-      console.error('Sign up failed');
     }
     
     return { error };
@@ -554,12 +508,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       redirectTo: redirectUrl
     });
     
-    if (error) {
-      console.error('❌ Password reset error:', error);
-    } else {
-      console.log('✅ Password reset email sent successfully');
-    }
-    
     return { error };
   };
 
@@ -570,7 +518,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                           (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type === 'reload';
     
     if (isPageRefresh && !user) {
-      console.log('[AUTH-CONTEXT] Page refresh detected for non-authenticated user - skipping pricing modal');
       return;
     }
     
@@ -578,19 +525,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const modalShownKey = 'pricing_modal_shown_session';
     const wasShown = sessionStorage.getItem(modalShownKey);
     
-    console.log('[AUTH-CONTEXT] Pricing modal check:', {
-      subscribed: status.subscribed,
-      wasShown: !!wasShown,
-      isPageRefresh,
-      hasUser: !!user,
-      willShow: !wasShown && !status.subscribed
-    });
-    
     // Only show if:
     // 1. Not already shown this session
     // 2. User is not subscribed (free user or no subscription)
     if (!wasShown && !status.subscribed) {
-      console.log('[AUTH-CONTEXT] Showing pricing modal for free user');
       setShowPricingModal(true);
       sessionStorage.setItem(modalShownKey, 'true');
     }

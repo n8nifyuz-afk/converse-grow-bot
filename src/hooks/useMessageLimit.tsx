@@ -28,12 +28,6 @@ export const useMessageLimit = () => {
   useEffect(() => {
     const fetchMessageCount = async () => {
       try {
-        console.log('[MESSAGE-LIMIT] Fetching message count...', { 
-          user: user?.id, 
-          sessionId,
-          hasSubscription 
-        });
-
         if (user) {
           // Authenticated user - get persistent usage count
           const { data: usage, error } = await supabase
@@ -42,11 +36,8 @@ export const useMessageLimit = () => {
             .eq('user_id', user.id)
             .maybeSingle();
 
-          if (error) {
-            console.error('[MESSAGE-LIMIT] Error fetching user message usage:', error);
-          } else {
+          if (!error) {
             const count = usage?.message_count || 0;
-            console.log('[MESSAGE-LIMIT] User message count:', count);
             setMessageCount(count);
           }
         } else if (sessionId) {
@@ -57,16 +48,13 @@ export const useMessageLimit = () => {
             .eq('session_id', sessionId)
             .maybeSingle();
 
-          if (error) {
-            console.error('[MESSAGE-LIMIT] Error fetching anonymous message usage:', error);
-          } else {
+          if (!error) {
             const count = usage?.message_count || 0;
-            console.log('[MESSAGE-LIMIT] Anonymous message count:', count);
             setMessageCount(count);
           }
         }
       } catch (error) {
-        console.error('[MESSAGE-LIMIT] Error in fetchMessageCount:', error);
+        // Silent error handling
       } finally {
         setLoading(false);
       }
@@ -77,17 +65,12 @@ export const useMessageLimit = () => {
 
   const canSendMessage = () => {
     if (hasSubscription) {
-      console.log('[MESSAGE-LIMIT] Has subscription - can send');
       return true;
     }
-    const can = messageCount < FREE_MESSAGE_LIMIT;
-    console.log('[MESSAGE-LIMIT] Can send message:', can, `(${messageCount}/${FREE_MESSAGE_LIMIT})`);
-    return can;
+    return messageCount < FREE_MESSAGE_LIMIT;
   };
 
   const incrementMessageCount = async () => {
-    console.log('[MESSAGE-LIMIT] Incrementing message count:', messageCount, '->', messageCount + 1);
-    
     try {
       // Call the database function to increment
       const { data, error } = await supabase.rpc('increment_user_message_count', {
@@ -96,15 +79,12 @@ export const useMessageLimit = () => {
       });
 
       if (error) {
-        console.error('[MESSAGE-LIMIT] Error incrementing count:', error);
         // Still update local state as fallback
         setMessageCount(prev => prev + 1);
       } else {
-        console.log('[MESSAGE-LIMIT] Server returned count:', data);
         setMessageCount(data || messageCount + 1);
       }
     } catch (error) {
-      console.error('[MESSAGE-LIMIT] Exception incrementing count:', error);
       // Fallback to local increment
       setMessageCount(prev => prev + 1);
     }
@@ -112,12 +92,9 @@ export const useMessageLimit = () => {
 
   const isAtLimit = () => {
     if (hasSubscription) {
-      console.log('[MESSAGE-LIMIT] Has subscription - not at limit');
       return false;
     }
-    const atLimit = messageCount >= FREE_MESSAGE_LIMIT;
-    console.log('[MESSAGE-LIMIT] At limit check:', atLimit, `(${messageCount}/${FREE_MESSAGE_LIMIT})`);
-    return atLimit;
+    return messageCount >= FREE_MESSAGE_LIMIT;
   };
 
   return {

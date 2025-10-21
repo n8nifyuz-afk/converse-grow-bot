@@ -32,7 +32,6 @@ export function useUsageLimits() {
       });
 
       if (error) {
-        console.error('Error checking usage limits:', error);
         return;
       }
 
@@ -46,7 +45,7 @@ export function useUsageLimits() {
         });
       }
     } catch (error) {
-      console.error('Error in checkLimits:', error);
+      // Silent error handling
     } finally {
       setLoading(false);
     }
@@ -61,7 +60,6 @@ export function useUsageLimits() {
       });
 
       if (error) {
-        console.error('Error incrementing usage:', error);
         return false;
       }
 
@@ -69,7 +67,6 @@ export function useUsageLimits() {
       await checkLimits();
       return data === true;
     } catch (error) {
-      console.error('Error in incrementUsage:', error);
       return false;
     }
   };
@@ -81,7 +78,6 @@ export function useUsageLimits() {
   // Listen for custom event to refresh limits after image generation
   useEffect(() => {
     const handleRefreshLimits = () => {
-      console.log('Refreshing usage limits after image generation');
       checkLimits();
     };
 

@@ -9,30 +9,15 @@ export const GoProButton = () => {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const { t } = useTranslation();
 
-  console.log('[GO-PRO-BUTTON] Render state:', {
-    loadingSubscription,
-    subscribed: subscriptionStatus.subscribed,
-    willShow: !loadingSubscription && !subscriptionStatus.subscribed
-  });
-
   // Hide button while loading or if user has any subscription
   if (loadingSubscription || subscriptionStatus.subscribed) {
-    console.log('[GO-PRO-BUTTON] Hiding button:', {
-      loadingSubscription,
-      subscribed: subscriptionStatus.subscribed
-    });
     return null;
   }
-
-  const handleClick = () => {
-    console.log('[GO-PRO-BUTTON] Button clicked, showing modal');
-    setShowPricingModal(true);
-  };
 
   return (
     <>
       <button
-        onClick={handleClick}
+        onClick={() => setShowPricingModal(true)}
         data-pricing-trigger="true"
         aria-label={t('upgradeButton.upgradeNow')}
         className="flex items-center gap-1 px-1.5 py-1 sm:gap-2 sm:px-4 sm:py-2 rounded-[20px] bg-transparent border-2 hover:-translate-y-0.5 transition-transform duration-150"
