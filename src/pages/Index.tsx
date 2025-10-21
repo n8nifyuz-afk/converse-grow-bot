@@ -51,7 +51,7 @@ const models = [{
   name: 'Claude Haiku 4.5',
   shortLabel: 'Haiku 4.5',
   description: "NEW: Small model with big capabilities",
-  type: 'pro'
+  type: 'ultra'
 }, {
   id: 'gemini-2.5-flash',
   name: 'Gemini 2.5 Flash',
@@ -63,13 +63,13 @@ const models = [{
   name: 'DeepSeek V2',
   shortLabel: 'DeepSeek V2',
   description: "Advanced reasoning model",
-  type: 'pro'
+  type: 'ultra'
 }, {
   id: 'grok-4',
   name: 'Grok 4',
   shortLabel: 'Grok 4',
   description: "Powerful AI from xAI",
-  type: 'pro'
+  type: 'ultra'
 }, {
   id: 'generate-image',
   name: 'Generate Image',
