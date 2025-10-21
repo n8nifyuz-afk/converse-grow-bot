@@ -3,7 +3,11 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
+const rawHookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
+// Strip "v1," prefix if present (Supabase format)
+const hookSecret = rawHookSecret?.startsWith("v1,") 
+  ? rawHookSecret.substring(3) 
+  : rawHookSecret;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
