@@ -3984,15 +3984,22 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
               {(loading || isGeneratingResponse) && !regeneratingMessageId && (!chatId || !currentImagePrompts.get(chatId)) && <div className="flex justify-start">
                   <div className="flex flex-col items-start max-w-[80%]">
                     <div className="bg-muted text-foreground rounded-3xl rounded-bl-lg px-5 py-3.5 shadow-sm">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{
-                    animationDelay: '0.15s'
-                  }}></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{
-                    animationDelay: '0.3s'
-                  }}></div>
-                      </div>
+                      {selectedModel === 'generate-image' ? (
+                        <div className="flex items-center gap-3">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                          <span className="text-sm font-medium">Generating image...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{
+                      animationDelay: '0.15s'
+                    }}></div>
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{
+                      animationDelay: '0.3s'
+                    }}></div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>}
