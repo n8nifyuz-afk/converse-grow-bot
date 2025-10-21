@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -19,7 +19,7 @@ export function useUsageLimits() {
   });
   const [loading, setLoading] = useState(true);
 
-  const checkLimits = async () => {
+  const checkLimits = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -50,7 +50,7 @@ export function useUsageLimits() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const incrementUsage = async (): Promise<boolean> => {
     if (!user) return false;
@@ -90,7 +90,7 @@ export function useUsageLimits() {
     return () => {
       window.removeEventListener('refresh-usage-limits', handleRefreshLimits);
     };
-  }, [user?.id]);
+  }, [checkLimits]);
 
   return {
     usageLimits,
