@@ -38,7 +38,7 @@ const models = [{
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
   shortLabel: 'GPT-4o mini',
-  description: "Default model (fast + low cost)",
+  description: "Default model",
   type: 'free'
 }, {
   id: 'gpt-4o',
@@ -3575,7 +3575,11 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm text-foreground truncate">
                             {model.name}
-                            {isDisabled && <span className="ml-2 text-xs text-muted-foreground">(Limit reached)</span>}
+                            {isImageModel && !limitsLoading && (
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                ({usageLimits.remaining}/{usageLimits.limit})
+                              </span>
+                            )}
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5 truncate">{model.description}</div>
                         </div>
@@ -4314,7 +4318,11 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                                   <div className="min-w-0 flex-1">
                                     <div className="font-medium text-sm truncate">
                                       {model.name}
-                                      {isDisabled && <span className="ml-1 text-xs text-muted-foreground">(Limit reached)</span>}
+                                      {isImageModel && !limitsLoading && (
+                                        <span className="ml-1 text-xs text-muted-foreground">
+                                          ({usageLimits.remaining}/{usageLimits.limit})
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="text-xs text-muted-foreground truncate">{model.description}</div>
                                   </div>

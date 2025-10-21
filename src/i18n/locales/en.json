@@ -512,7 +512,7 @@
   },
   "modelDescriptions": {
     "gpt4oMini": {
-      "description": "Default model (fast + low cost)",
+      "description": "Default model",
       "descriptionLong": "Fast and cost-efficient model, perfect for most tasks."
     },
     "gpt4o": {

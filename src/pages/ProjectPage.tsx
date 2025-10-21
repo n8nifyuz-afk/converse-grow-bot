@@ -63,7 +63,7 @@ const models = [{
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
   shortLabel: 'GPT-4o mini',
-  description: "Default model (fast + low cost)",
+  description: "Default model",
   type: 'free'
 }, {
   id: 'gpt-4o',
