@@ -1,28 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, webhook-id, webhook-timestamp, webhook-signature",
 };
-
-interface WebhookPayload {
-  type: string;
-  table: string;
-  record: {
-    id: string;
-    email: string;
-    raw_user_meta_data?: {
-      full_name?: string;
-      name?: string;
-      display_name?: string;
-    };
-  };
-  schema: string;
-  old_record: null | any;
-}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -30,19 +16,38 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const payload: WebhookPayload = await req.json();
-    console.log("Received webhook payload:", payload);
-
-    // Only process INSERT events for auth.users table
-    if (payload.type !== "INSERT" || payload.table !== "users") {
-      console.log("Skipping non-INSERT event or non-users table");
-      return new Response(JSON.stringify({ message: "Event ignored" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Verify webhook signature
+    const payload = await req.text();
+    const headers = Object.fromEntries(req.headers);
+    const wh = new Webhook(hookSecret);
+    
+    let verifiedPayload;
+    try {
+      verifiedPayload = wh.verify(payload, headers);
+    } catch (error) {
+      console.error("Webhook verification failed:", error);
+      return new Response(
+        JSON.stringify({ error: "Invalid webhook signature" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
-    const user = payload.record;
+    const { user } = verifiedPayload as {
+      user: {
+        id: string;
+        email: string;
+        raw_user_meta_data?: {
+          full_name?: string;
+          name?: string;
+          display_name?: string;
+        };
+      };
+    };
+
+    console.log("Verified webhook payload for user:", user.email);
     const userName = user.raw_user_meta_data?.full_name || 
                      user.raw_user_meta_data?.name || 
                      user.raw_user_meta_data?.display_name || 
