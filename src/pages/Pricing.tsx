@@ -64,22 +64,16 @@ const Pricing = () => {
       text: t('pricingPage.accessToMiniOnly'),
       included: true
     }, {
-      text: t('pricingPage.advancedModelsNotIncluded'),
+      text: 'Advanced models not included',
       included: false
     }, {
-      text: t('pricingPage.claudeNotIncluded'),
+      text: 'Claude not included',
       included: false
     }, {
-      text: t('pricingPage.voiceModeNotIncluded'),
+      text: 'Voice mode not included',
       included: false
     }, {
-      text: t('pricingPage.fileUploadsNotIncluded'),
-      included: false
-    }, {
-      text: t('pricingPage.advancedSearchNotIncluded'),
-      included: false
-    }, {
-      text: t('pricingPage.premiumFeaturesNotIncluded'),
+      text: 'File uploads not included',
       included: false
     }],
     buttonText: t('pricingPage.getStarted'),
@@ -93,31 +87,31 @@ const Pricing = () => {
     description: t('pricingPage.proDesc'),
     popular: true,
     features: [{
-      text: t('pricingPage.accessToGPT'),
+      text: 'OpenAI GPT-5 / GPT-4o',
       included: true
     }, {
-      text: t('pricingPage.claudeUpgradeNeeded'),
+      text: 'Google Gemini',
+      included: true
+    }, {
+      text: 'Claude (Ultra only)',
       included: false
     }, {
-      text: t('pricingPage.unlimitedChatsSwitch'),
+      text: 'DeepSeek V3 (Ultra only)',
+      included: false
+    }, {
+      text: 'Grok (Ultra only)',
+      included: false
+    }, {
+      text: 'Voice Mode',
       included: true
     }, {
-      text: t('pricingPage.voiceModeIncluded'),
+      text: 'Ask PDF / Docs AI',
       included: true
     }, {
-      text: t('pricingPage.fileUploadsIncluded'),
+      text: 'Priority Support',
       included: true
     }, {
-      text: t('pricingPage.chatWithFiles'),
-      included: true
-    }, {
-      text: t('pricingPage.imageGen500'),
-      included: true
-    }, {
-      text: t('pricingPage.whatsappComingSoon'),
-      included: true
-    }, {
-      text: t('pricingPage.prioritySupport'),
+      text: 'WhatsApp Chat (Coming soon)',
       included: true
     }],
     buttonText: t('pricingPage.subscribeNow'),
@@ -131,26 +125,32 @@ const Pricing = () => {
     description: t('pricingPage.ultraProDesc'),
     popular: false,
     features: [{
-      text: t('pricingPage.everythingInPro'),
+      text: 'OpenAI GPT-5 / GPT-4o',
       included: true
     }, {
-      text: t('pricingPage.accessToClaude'),
+      text: 'Google Gemini',
       included: true
     }, {
-      text: t('pricingPage.extendedLimits'),
+      text: 'Anthropic Claude 3.5',
       included: true
     }, {
-      text: t('pricingPage.imageGen2000'),
+      text: 'DeepSeek V3',
       included: true
     }, {
-      text: t('pricingPage.whatsappComingSoon'),
+      text: 'Grok (X AI - Live Web)',
       included: true
     }, {
-      text: t('pricingPage.teamCollaboration'),
+      text: 'Voice Mode',
       included: true
     }, {
-      text: t('pricingPage.earlyAccess'),
+      text: 'Ask PDF / Docs AI',
       included: true
+    }, {
+      text: 'High-priority Support',
+      included: true
+    }, {
+      text: 'WhatsApp Chat (Coming soon)',
+      included: false
     }],
     buttonText: t('pricingPage.subscribeNow'),
     buttonVariant: "outline" as const
@@ -416,7 +416,7 @@ const Pricing = () => {
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">Anthropic Claude</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">Anthropic Claude 3.5</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
@@ -428,13 +428,13 @@ const Pricing = () => {
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">DeepSeek</td>
+                    <td className="py-4 px-6">DeepSeek V3</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-4 px-6">Grok</td>
+                    <td className="py-4 px-6">Grok (X AI - Live Web)</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
@@ -446,14 +446,10 @@ const Pricing = () => {
                     <td className="py-5 px-6"></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.imageGeneration')}</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">Ask PDF / Docs AI</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
-                    <td className="py-4 px-6 text-center">
-                      <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/30">500/mo</Badge>
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 border-purple-500/30">2K/mo</Badge>
-                    </td>
+                    <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.voiceMode')}</td>
@@ -462,24 +458,22 @@ const Pricing = () => {
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.whatsappComingSoon')}</td>
-                    <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
-                    <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
-                    <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
-                  </tr>
-                  <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.chatWithFiles')}</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">Priority Support</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center">
-                      <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/30">{t('pricingPage.extended')}</Badge>
+                      <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/30">High</Badge>
                     </td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.webSearch')}</td>
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center"><X className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground mx-auto" /></td>
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mx-auto" /></td>
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mx-auto" /></td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">{t('pricingPage.whatsappComingSoon')}</td>
+                    <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
+                    <td className="py-4 px-6 text-center">
+                      <Badge variant="secondary" className="bg-gray-500/10 text-gray-600 border-gray-500/30">Soon</Badge>
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      <Badge variant="secondary" className="bg-gray-500/10 text-gray-600 border-gray-500/30">Soon</Badge>
+                    </td>
                   </tr>
                 </tbody>
               </table>

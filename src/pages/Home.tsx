@@ -373,31 +373,31 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('homePage.accessGPT')}</span>
+                  <span className="text-foreground text-sm">OpenAI GPT-5 / GPT-4o</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-foreground text-sm">Google Gemini</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-muted-foreground text-sm">{t('homePage.claudeUltraOnly')}</span>
+                  <span className="text-muted-foreground text-sm">Anthropic Claude (Ultra only)</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.unlimitedChats')}</span>
+                  <span className="text-foreground text-sm">Voice Mode</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.voiceMode')}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
-                  </div>
-                  <span className="text-foreground text-sm">{t('pricing.fileUploads')}</span>
+                  <span className="text-foreground text-sm">Ask PDF / Docs AI</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -415,13 +415,13 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.imageGeneration500')}</span>
+                  <span className="text-foreground text-sm">Priority Support</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.prioritySupport')}</span>
+                  <span className="text-foreground text-sm">WhatsApp Chat (Coming soon)</span>
                 </div>
               </div>
               
@@ -453,43 +453,55 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.everythingInPro')}</span>
+                  <span className="text-foreground text-sm">OpenAI GPT-5 / GPT-4o</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('homePage.accessClaude')}</span>
+                  <span className="text-foreground text-sm">Google Gemini</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.extendedLimits')}</span>
+                  <span className="text-foreground text-sm">Anthropic Claude 3.5</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.imageGeneration2000')}</span>
+                  <span className="text-foreground text-sm">DeepSeek V3</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricingPage.whatsappComingSoon')}</span>
+                  <span className="text-foreground text-sm">Grok (X AI - Live Web)</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.teamCollaboration')}</span>
+                  <span className="text-foreground text-sm">Voice Mode</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">{t('pricing.earlyAccess')}</span>
+                  <span className="text-foreground text-sm">Ask PDF / Docs AI</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-foreground text-sm">High-priority Support</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs text-muted-foreground">Soon</span>
+                  </div>
+                  <span className="text-muted-foreground text-sm">WhatsApp Chat (Coming soon)</span>
                 </div>
               </div>
               
