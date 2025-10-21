@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { trackPaymentComplete } from '@/utils/gtmTracking';
 
 interface AuthContextType {
   user: User | null;
@@ -622,6 +623,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearCachedSubscription();
         checkAndShowPricingModal(resetStatus);
       } else if (data) {
+        const previousSubscribed = subscriptionStatus.subscribed;
         const newStatus = {
           subscribed: data.subscribed || false,
           product_id: data.product_id || null,
@@ -630,6 +632,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         console.log('✅ Subscription status updated from Stripe:', newStatus);
         setSubscriptionStatus(newStatus);
+        
+        // Track payment complete if user just upgraded
+        if (!previousSubscribed && newStatus.subscribed) {
+          console.log('🎉 User upgraded! Fetching plan details for GTM tracking...');
+          
+          // Fetch full subscription details for tracking
+          const { data: subDetails, error: subError } = await supabase
+            .from('user_subscriptions')
+            .select('plan, plan_name, product_id')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (!subError && subDetails) {
+            // Map plan to planType
+            const planType = subDetails.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+            
+            // Fetch price details from Stripe product
+            try {
+              const { data: productData } = await supabase.functions.invoke('check-subscription', {
+                headers: {
+                  Authorization: `Bearer ${currentSession.access_token}`,
+                },
+              });
+              
+              // Default values if we can't get exact details
+              let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
+              let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default prices
+              
+              // Try to determine duration from product_id naming
+              if (subDetails.product_id) {
+                const productIdLower = subDetails.product_id.toLowerCase();
+                if (productIdLower.includes('year') || productIdLower.includes('annual')) {
+                  planDuration = 'yearly';
+                  planPrice = planType === 'Ultra' ? 119.99 : 59.99;
+                } else if (productIdLower.includes('quarter') || productIdLower.includes('3month')) {
+                  planDuration = '3_months';
+                  planPrice = planType === 'Ultra' ? 99.99 : 49.99;
+                }
+              }
+              
+              console.log('📊 Tracking payment:', { planType, planDuration, planPrice });
+              trackPaymentComplete(planType, planDuration, planPrice);
+            } catch (trackError) {
+              console.error('Error tracking payment:', trackError);
+              // Still track with default values
+              trackPaymentComplete(planType, 'monthly', planType === 'Ultra' ? 39.99 : 19.99);
+            }
+          }
+        }
         
         // Save to sessionStorage for instant load on next page load
         saveCachedSubscription(newStatus);

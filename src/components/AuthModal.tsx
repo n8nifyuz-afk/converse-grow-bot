@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslation } from 'react-i18next';
+import { trackRegistrationComplete } from '@/utils/gtmTracking';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -132,6 +133,10 @@ export default function AuthModal({
       if (!error) {
         setLastSignupAttempt(now);
         setSignupCooldown(60);
+        
+        // Track registration complete in GTM
+        trackRegistrationComplete();
+        
         toast({
           title: "Check your email",
           description: "We've sent you a confirmation link to complete your sign up. Please check your inbox.",

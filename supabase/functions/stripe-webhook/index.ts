@@ -307,6 +307,28 @@ serve(async (req) => {
 
         logStep("Subscription updated successfully", { userId: user.id, plan });
 
+        // Track payment complete for GTM
+        // Get price and interval details from subscription
+        const priceData = highestTierSub.items.data[0].price;
+        const planType = planMapping.tier === 'pro' ? 'Pro' : planMapping.tier === 'ultra_pro' ? 'Ultra' : 'Free';
+        const interval = priceData.recurring?.interval;
+        const intervalCount = priceData.recurring?.interval_count || 1;
+        let planDuration = 'monthly';
+        if (interval === 'year') {
+          planDuration = 'yearly';
+        } else if (interval === 'month' && intervalCount === 3) {
+          planDuration = '3_months';
+        }
+        const planPrice = priceData.unit_amount ? (priceData.unit_amount / 100) : 0;
+
+        // Log payment tracking data
+        logStep("Payment tracking data", {
+          planType,
+          planDuration,
+          planPrice,
+          currency: priceData.currency
+        });
+
         // CRITICAL FIX: Don't delete usage_limits on renewal/activation
         // Let check_and_reset_usage_limits handle natural expiry and reset
         // This prevents race conditions with other functions and cron jobs
@@ -366,6 +388,43 @@ serve(async (req) => {
           .eq('user_id', user.id);
 
         if (error) throw error;
+        
+        // Track payment success for GTM
+        const { data: subscription } = await supabaseClient
+          .from('user_subscriptions')
+          .select('plan, plan_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (subscription) {
+          // Map plan to planType
+          const planType = subscription.plan === 'pro' ? 'Pro' : subscription.plan === 'ultra_pro' ? 'Ultra' : 'Free';
+          
+          // Get price details from invoice
+          const planPrice = invoice.amount_paid ? (invoice.amount_paid / 100) : 0;
+          const currency = invoice.currency;
+          
+          // Determine duration from invoice (check if it's monthly, 3-month, or yearly)
+          let planDuration = 'monthly';
+          if (invoice.lines.data.length > 0) {
+            const line = invoice.lines.data[0];
+            if (line.period && line.period.end && line.period.start) {
+              const periodMonths = Math.round((line.period.end - line.period.start) / (30 * 24 * 60 * 60));
+              if (periodMonths >= 11) {
+                planDuration = 'yearly';
+              } else if (periodMonths >= 2) {
+                planDuration = '3_months';
+              }
+            }
+          }
+          
+          logStep("Payment success tracking data", {
+            planType,
+            planDuration,
+            planPrice,
+            currency
+          });
+        }
         
         // CRITICAL FIX: Check updated_at to prevent double reset
         // Use .maybeSingle() instead of .single() to avoid errors when no records exist

@@ -21,6 +21,7 @@ import { useUsageLimits } from '@/hooks/useUsageLimits';
 import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 import { getWebhookMetadata } from '@/utils/webhookMetadata';
+import { trackChatStart } from '@/utils/gtmTracking';
 
 import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
@@ -1879,6 +1880,12 @@ export default function Chat() {
       console.log('[SEND] Temp message:', { id: tempUserMessage.id, attachments: tempUserMessage.file_attachments?.length });
       setMessages(prev => [...prev, tempUserMessage]);
       scrollToBottom();
+    }
+    
+    // Track first message for GTM
+    const isFirstMessage = messages.filter(m => m.role === 'user').length === 0;
+    if (isFirstMessage) {
+      trackChatStart();
     }
     
     // Clear input and files immediately
