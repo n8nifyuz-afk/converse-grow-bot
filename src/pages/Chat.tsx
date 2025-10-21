@@ -3548,11 +3548,15 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   const isUltra = model.type === 'ultra';
                   const isImageModel = model.id === 'generate-image';
                   // Only disable image generation when limit is reached, let pro models be clickable
-                  const isDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
+                  const imageDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
                   
                   // Check if user has Ultra subscription
                   const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
                   const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+                  
+                  // Disable pro/ultra models for users without appropriate subscription
+                  const subscriptionDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
+                  const isDisabled = imageDisabled || subscriptionDisabled;
                   
                   return (
                     <SelectItem
@@ -4276,11 +4280,15 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                             const isUltra = model.type === 'ultra';
                             const isImageModel = model.id === 'generate-image';
                             // Only disable image generation when limit is reached, let pro models be clickable
-                            const isDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
+                            const imageDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
                             
                             // Check if user has Ultra subscription
                             const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
                             const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+                            
+                            // Disable pro/ultra models for users without appropriate subscription
+                            const subscriptionDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
+                            const isDisabled = imageDisabled || subscriptionDisabled;
                             
                             return (
                               <SelectItem 

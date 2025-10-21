@@ -864,7 +864,17 @@ export default function Index() {
               const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
               const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
               
-              return <SelectItem key={model.id} value={model.id} className="rounded-xl px-3 py-3 hover:bg-accent/60 focus-visible:bg-accent/60 transition-all duration-200 cursor-pointer">
+              // Disable pro/ultra models for free users
+              const isPro = model.type === 'pro';
+              const isUltra = model.type === 'ultra';
+              const isDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
+              
+              return <SelectItem 
+                key={model.id} 
+                value={model.id}
+                disabled={isDisabled}
+                className={`rounded-xl px-3 py-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/60 focus-visible:bg-accent/60 cursor-pointer'} transition-all duration-200`}
+              >
                       <div className="flex items-center w-full gap-3">
                         <div className="relative flex-shrink-0">
                           <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/20 backdrop-blur-sm rounded-xl flex items-center justify-center p-1.5">
@@ -1170,7 +1180,17 @@ export default function Index() {
                       const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
                       const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
                       
-                      return <SelectItem key={model.id} value={model.id} className="rounded-xl px-3 py-3 hover:bg-accent/60 focus-visible:bg-accent/60 transition-all duration-200 cursor-pointer">
+                      // Disable pro/ultra models for free users
+                      const isPro = model.type === 'pro';
+                      const isUltra = model.type === 'ultra';
+                      const isDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
+                      
+                      return <SelectItem 
+                        key={model.id} 
+                        value={model.id}
+                        disabled={isDisabled}
+                        className={`rounded-xl px-3 py-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/60 focus-visible:bg-accent/60 cursor-pointer'} transition-all duration-200`}
+                      >
                             <div className="flex items-center w-full gap-3">
                               <div className="relative flex-shrink-0">
                                 <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/20 backdrop-blur-sm rounded-xl flex items-center justify-center p-1.5">
