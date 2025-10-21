@@ -53,106 +53,106 @@ const Pricing = () => {
     console.log('[PRICING] Subscription status updated:', subscriptionStatus);
   }, [subscriptionStatus]);
   const plans = [{
-    name: "Free",
+    name: t('pricingPage.free'),
     emoji: "🆓",
     price: 0,
     yearlyPrice: 0,
     icon: Zap,
-    description: "Get started free, upgrade anytime.",
+    description: t('pricingPage.freeDesc'),
     popular: false,
     features: [{
-      text: "Access to GPT-4o Mini only",
+      text: t('pricingPage.accessToMiniOnly'),
       included: true
     }, {
-      text: "GPT-4, GPT-5, Gemini",
+      text: t('pricingPage.advancedModelsNotIncluded'),
       included: false
     }, {
-      text: "Claude, DeepSeek, Grok (Ultra only)",
+      text: t('pricingPage.claudeNotIncluded'),
       included: false
     }, {
-      text: "Voice mode",
+      text: t('pricingPage.voiceModeNotIncluded'),
       included: false
     }, {
-      text: "Advanced file uploads",
+      text: t('pricingPage.fileUploadsNotIncluded'),
       included: false
     }, {
-      text: "Advanced search",
+      text: t('pricingPage.advancedSearchNotIncluded'),
       included: false
     }, {
-      text: "Premium features",
+      text: t('pricingPage.premiumFeaturesNotIncluded'),
       included: false
     }],
-    buttonText: "Get Started",
+    buttonText: t('pricingPage.getStarted'),
     buttonVariant: "outline" as const
   }, {
-    name: "Pro",
+    name: t('pricingPage.pro'),
     emoji: "⭐",
     price: 19.99,
     yearlyPrice: 59.99,
     icon: Star,
-    description: "For professionals",
+    description: t('pricingPage.proDesc'),
     popular: true,
     features: [{
-      text: "Access to GPT-4, GPT-5, Gemini models",
+      text: t('pricingPage.accessToGPT'),
       included: true
     }, {
-      text: "Claude, DeepSeek, Grok (Upgrade to Ultra)",
+      text: t('pricingPage.claudeUpgradeNeeded'),
       included: false
     }, {
-      text: "Unlimited chats & model switching",
+      text: t('pricingPage.unlimitedChatsSwitch'),
       included: true
     }, {
-      text: "Voice mode (text-to-speech)",
+      text: t('pricingPage.voiceModeIncluded'),
       included: true
     }, {
-      text: "File uploads",
+      text: t('pricingPage.fileUploadsIncluded'),
       included: true
     }, {
-      text: "Chat with Files",
+      text: t('pricingPage.chatWithFiles'),
       included: true
     }, {
-      text: "Image generation (500 / month)",
+      text: t('pricingPage.imageGen500'),
       included: true
     }, {
-      text: "Chat on WhatsApp (Coming Soon)",
+      text: t('pricingPage.whatsappComingSoon'),
       included: true
     }, {
-      text: "Priority support",
+      text: t('pricingPage.prioritySupport'),
       included: true
     }],
-    buttonText: "Subscribe Now",
+    buttonText: t('pricingPage.subscribeNow'),
     buttonVariant: "default" as const
   }, {
-    name: "Ultra Pro",
+    name: t('pricingPage.ultraPro'),
     emoji: "🚀",
     price: 39.99,
     yearlyPrice: 119.99,
     icon: Crown,
-    description: "For teams & power users",
+    description: t('pricingPage.ultraProDesc'),
     popular: false,
     features: [{
-      text: "Everything in Pro",
+      text: t('pricingPage.everythingInPro'),
       included: true
     }, {
-      text: "Access to Claude, DeepSeek, Grok",
+      text: t('pricingPage.accessToClaude'),
       included: true
     }, {
-      text: "Extended file & message limits",
+      text: t('pricingPage.extendedLimits'),
       included: true
     }, {
-      text: "Image generation (2,000 / month)",
+      text: t('pricingPage.imageGen2000'),
       included: true
     }, {
-      text: "Chat on WhatsApp (Coming Soon)",
+      text: t('pricingPage.whatsappComingSoon'),
       included: true
     }, {
-      text: "Team collaboration features",
+      text: t('pricingPage.teamCollaboration'),
       included: true
     }, {
-      text: "Early access to new models",
+      text: t('pricingPage.earlyAccess'),
       included: true
     }],
-    buttonText: "Subscribe Now",
+    buttonText: t('pricingPage.subscribeNow'),
     buttonVariant: "outline" as const
   }];
   const getPrice = (plan: typeof plans[0]) => {
