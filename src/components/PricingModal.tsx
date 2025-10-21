@@ -146,13 +146,24 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   });
 
   const handleSubscribe = async () => {
+    console.log('[PRICING-MODAL] Subscribe button clicked', {
+      user: !!user,
+      selectedPlan,
+      selectedPeriod,
+      subscriptionStatus
+    });
+
     if (!user) {
+      console.log('[PRICING-MODAL] No user - showing auth modal');
       setShowAuthModal(true);
       return;
     }
 
     // Check if user already has an active subscription
     if (subscriptionStatus.subscribed && subscriptionStatus.product_id) {
+      console.log('[PRICING-MODAL] User has active subscription - blocking', {
+        productId: subscriptionStatus.product_id
+      });
       const currentPlanName = productToPlanMap[subscriptionStatus.product_id] || 'Unknown';
       setBlockedPlanName(currentPlanName);
       setShowUpgradeBlockedDialog(true);
@@ -162,12 +173,25 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     setIsLoading(true);
     try {
       const priceId = priceIds[selectedPlan][selectedPeriod];
+      console.log('[PRICING-MODAL] Calling create-checkout edge function', {
+        priceId,
+        selectedPlan,
+        selectedPeriod
+      });
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId }
       });
 
+      console.log('[PRICING-MODAL] Edge function response', {
+        hasData: !!data,
+        hasError: !!error,
+        data,
+        error
+      });
+
       if (error) {
+        console.error('[PRICING-MODAL] Edge function error', error);
         // Check if error is about active subscription
         const errorMessage = error.message || '';
         if (errorMessage.includes('active subscription')) {
@@ -181,11 +205,21 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
       }
 
       if (data?.url) {
+        console.log('[PRICING-MODAL] Redirecting to Stripe checkout', { url: data.url });
         // Redirect to Stripe checkout in the same window
         window.location.href = data.url;
+      } else {
+        console.error('[PRICING-MODAL] No URL in response', { data });
+        throw new Error('No checkout URL received from server');
       }
     } catch (error: any) {
-      console.error('Subscription error:', error);
+      console.error('[PRICING-MODAL] Subscription error caught', {
+        error,
+        message: error?.message,
+        name: error?.name,
+        context: error?.context
+      });
+      
       const errorMessage = error?.message || 'Failed to start subscription process';
       
       if (errorMessage.includes('active subscription')) {
@@ -195,7 +229,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
       } else if (errorMessage.includes('authentication')) {
         toast.error('Please sign in to continue');
       } else {
-        toast.error(errorMessage);
+        toast.error('Subscription Error', {
+          description: errorMessage
+        });
       }
     } finally {
       setIsLoading(false);
