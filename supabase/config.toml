@@ -60,4 +60,8 @@ verify_jwt = false
 [functions.sync-subscriptions]
 verify_jwt = false
 
+# Welcome email function (called by auth webhook)
+[functions.send-welcome-email]
+verify_jwt = false
+
 
