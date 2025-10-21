@@ -50,6 +50,8 @@ serve(async (req) => {
     
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
+    let customerCurrency = "eur"; // Default to EUR
+    
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       logStep("Existing customer found", { customerId });
@@ -66,6 +68,40 @@ serve(async (req) => {
           subscriptionCount: activeSubscriptions.data.length 
         });
         throw new Error("You already have an active subscription. Please cancel your current plan before upgrading. Refunds are calculated on a prorated daily basis.");
+      }
+      
+      // Detect customer's existing currency from past invoices or subscriptions
+      const invoices = await stripe.invoices.list({
+        customer: customerId,
+        limit: 1,
+      });
+      
+      if (invoices.data.length > 0) {
+        customerCurrency = invoices.data[0].currency;
+        logStep("Detected customer currency from invoices", { currency: customerCurrency });
+      } else {
+        // Check from past subscriptions (including canceled ones)
+        const pastSubscriptions = await stripe.subscriptions.list({
+          customer: customerId,
+          limit: 1,
+        });
+        
+        if (pastSubscriptions.data.length > 0) {
+          customerCurrency = pastSubscriptions.data[0].currency;
+          logStep("Detected customer currency from subscriptions", { currency: customerCurrency });
+        }
+      }
+      
+      // If customer has USD currency but we're trying to charge EUR, we need to create a new customer
+      const priceDetails = await stripe.prices.retrieve(priceId);
+      if (customerCurrency.toLowerCase() !== priceDetails.currency.toLowerCase()) {
+        logStep("Currency mismatch detected, creating new customer", { 
+          existingCurrency: customerCurrency, 
+          newCurrency: priceDetails.currency 
+        });
+        
+        // Don't use the existing customer - let Stripe create a new one
+        customerId = undefined;
       }
     } else {
       logStep("No existing customer, will create during checkout");
