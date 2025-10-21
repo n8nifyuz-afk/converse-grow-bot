@@ -57,6 +57,7 @@ const Header = () => {
             </button>
             <Link 
               to="/features" 
+              onClick={() => window.scrollTo(0, 0)}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm px-2 py-1"
             >
               {t('nav.whatYouCanDo')}
@@ -139,7 +140,10 @@ const Header = () => {
                   <Link 
                     to="/features" 
                     className="text-lg font-medium hover:text-primary transition-colors"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      setIsOpen(false);
+                      window.scrollTo(0, 0);
+                    }}
                   >
                     {t('nav.whatYouCanDo')}
                   </Link>
