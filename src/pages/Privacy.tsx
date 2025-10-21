@@ -67,8 +67,7 @@ export default function Privacy() {
           <Card>
             <CardContent className="pt-6">
               <p className="leading-relaxed text-muted-foreground">
-                By accessing or using the Service, you acknowledge that you have read and understood this Privacy Policy. 
-                Where required by applicable law, we will obtain your explicit consent before collecting or processing your personal data.
+                {t('privacy.acknowledgement')}
               </p>
             </CardContent>
           </Card>
@@ -78,7 +77,7 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Definitions and Key Terms
+                {t('privacy.definitionsTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -132,12 +131,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" />
-                About Our AI Integrations (Transparency)
+                {t('privacy.aiIntegrationsTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                ChatLearn provides a unified interface to multiple AI models. Current integrations may include (subject to change):
+                {t('privacy.aiIntegrationsDesc')}
               </p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li>OpenAI (GPT-5, GPT-4o, GPT-4o mini, DALL·E 3)</li>
@@ -147,11 +146,9 @@ export default function Privacy() {
                 <li>DeepSeek V2</li>
               </ul>
               <div className="p-4 bg-muted/50 rounded-lg border">
-                <p className="text-sm font-semibold mb-2">Disclaimer</p>
+                <p className="text-sm font-semibold mb-2">{t('privacy.aiDisclaimer')}</p>
                 <p className="text-sm text-muted-foreground">
-                  ChatLearn is not affiliated with, sponsored, or endorsed by these providers. 
-                  We access their technologies only via official APIs under lawful agreements. 
-                  Prompts and inputs you submit may be sent to these providers only as needed to generate outputs, following this Policy.
+                  {t('privacy.aiDisclaimerText')}
                 </p>
               </div>
             </CardContent>
@@ -167,7 +164,7 @@ export default function Privacy() {
             </CardHeader>
             <CardContent className="space-y-6">
               <p className="text-muted-foreground">
-                We process personal data under GDPR lawful bases (performance of contract, legal obligation, legitimate interests, consent).
+                {t('privacy.dataCategoriesDesc')}
               </p>
 
               {/* 1. Personal & Contact Information */}
@@ -227,11 +224,11 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                How We Use Your Information
+                {t('privacy.howWeUseTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">We use your data to:</p>
+              <p className="text-muted-foreground">{t('privacy.howWeUseDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground mt-3">
                 <li>Provide and maintain the Service</li>
                 <li>Process your AI requests and generate outputs</li>
@@ -250,12 +247,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" />
-                How We Disclose Your Information
+                {t('privacy.howWeDiscloseTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                We share data only as needed to operate the Service or comply with law:
+                {t('privacy.howWeDiscloseDesc')}
               </p>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                 <li><strong>AI Model Providers:</strong> OpenAI, Anthropic, Google DeepMind, xAI, DeepSeek (for content generation).</li>
@@ -267,7 +264,7 @@ export default function Privacy() {
                 <li><strong>Business Transfers:</strong> In case of merger, acquisition, or reorganization, subject to this Policy.</li>
               </ul>
               <p className="text-sm text-muted-foreground pt-2">
-                All partners are bound by confidentiality and GDPR-compliant processing agreements.
+                {t('privacy.howWeDiscloseNote')}
               </p>
             </CardContent>
           </Card>
@@ -277,13 +274,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" />
-                International Transfers
+                {t('privacy.internationalTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We are based in Cyprus (EU), but some providers may process data outside the EEA/UK. 
-                When we transfer data, we rely on adequacy decisions or Standard Contractual Clauses (SCCs) with additional safeguards.
+                {t('privacy.internationalDesc')}
               </p>
             </CardContent>
           </Card>
@@ -293,12 +289,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Data Retention
+                {t('privacy.retentionTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                We retain personal data only as long as necessary for the stated purposes or legal obligations.
+                {t('privacy.retentionDesc')}
               </p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li><strong>Account data:</strong> retained while active.</li>
@@ -306,7 +302,7 @@ export default function Privacy() {
                 <li><strong>Billing:</strong> retained per tax laws.</li>
               </ul>
               <p className="text-sm text-muted-foreground">
-                When you delete your account, related data is deleted or anonymized within a reasonable timeframe, except where retention is required by law.
+                {t('privacy.retentionNote')}
               </p>
             </CardContent>
           </Card>
@@ -316,13 +312,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-primary" />
-                Security Measures
+                {t('privacy.securityTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We use encryption (TLS), access controls, network monitoring, and backups to protect your data. 
-                While no system is 100% secure, we continuously improve our safeguards to mitigate risks.
+                {t('privacy.securityDesc')}
               </p>
             </CardContent>
           </Card>
@@ -332,18 +327,17 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Cookies & Consent Management
+                {t('privacy.cookiesTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">We use:</p>
+              <p className="text-muted-foreground">{t('privacy.cookiesDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li><strong>Strictly Necessary Cookies</strong> (login, security, performance).</li>
                 <li><strong>Optional Cookies</strong> (analytics, marketing) only with your consent.</li>
               </ul>
               <p className="text-sm text-muted-foreground">
-                You can manage or withdraw cookie consent anytime via our on-site banner or your browser settings. 
-                Disabling certain cookies may affect functionality. For more details, see our{' '}
+                {t('privacy.cookiesNote')}{' '}
                 <a href="/cookie-policy" className="text-primary hover:underline">Cookie Policy</a>.
               </p>
             </CardContent>
@@ -354,13 +348,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-primary" />
-                Payment Details
+                {t('privacy.paymentTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                All payments are processed securely through Stripe. We do not collect or store full card data on our servers. 
-                To manage or remove payment info, use your billing page or contact Stripe.
+                {t('privacy.paymentDesc')}
               </p>
             </CardContent>
           </Card>
@@ -370,14 +363,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                Children's Privacy
+                {t('privacy.childrenTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                The Service is not directed to individuals under 16. We do not knowingly collect data from minors. 
-                If you believe a child provided information, contact{' '}
-                <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a> and we will delete it.
+                {t('privacy.childrenDesc')}
               </p>
             </CardContent>
           </Card>
@@ -387,11 +378,11 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Scale className="h-5 w-5 text-primary" />
-                Rights of Data Subjects (GDPR/EEA & UK)
+                {t('privacy.gdprRightsTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">You may have the right to:</p>
+              <p className="text-muted-foreground">{t('privacy.gdprRightsDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li>Access your data</li>
                 <li>Rectify inaccuracies</li>
@@ -401,9 +392,7 @@ export default function Privacy() {
                 <li>Withdraw consent at any time</li>
               </ul>
               <p className="text-sm text-muted-foreground">
-                To exercise these rights, email{' '}
-                <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a>. 
-                You may also complain to the Office of the Commissioner for Personal Data Protection, Cyprus.
+                {t('privacy.gdprRightsNote')}
               </p>
             </CardContent>
           </Card>
@@ -413,20 +402,18 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Scale className="h-5 w-5 text-primary" />
-                California Privacy (CCPA/CPRA)
+                {t('privacy.californiaTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">California residents have rights to:</p>
+              <p className="text-muted-foreground">{t('privacy.californiaDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li>Know what data we collect and how it's used</li>
                 <li>Request deletion or correction</li>
                 <li>Opt-out of sale/sharing (we do not sell data)</li>
               </ul>
               <p className="text-sm text-muted-foreground">
-                To exercise these rights, contact{' '}
-                <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a>. 
-                We will not discriminate against you for doing so.
+                {t('privacy.californiaNote')}
               </p>
             </CardContent>
           </Card>
@@ -436,19 +423,18 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trash2 className="h-5 w-5 text-primary" />
-                Delete Account Policy
+                {t('privacy.deleteTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="font-semibold">How to delete your account:</p>
+              <p className="font-semibold">{t('privacy.deleteSubtitle')}</p>
               <ol className="list-decimal pl-6 space-y-1 text-muted-foreground">
                 <li>Log in → Account Settings → Delete Account</li>
                 <li>Confirm the deletion request</li>
                 <li>Upon confirmation, your account and related personal data will be deleted or anonymized, except where required by law</li>
               </ol>
               <p className="text-sm text-muted-foreground">
-                Backups may retain minimal encrypted data for a limited period for disaster-recovery only. 
-                Deletion is permanent and ends all active subscriptions. Refunds follow our Refund Policy.
+                {t('privacy.deleteNote')}
               </p>
             </CardContent>
           </Card>
@@ -458,13 +444,12 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Changes to This Privacy Policy
+                {t('privacy.changesTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We may update this Policy to reflect service or legal changes. We will notify users of significant updates where required by law. 
-                Continued use after changes take effect means acceptance.
+                {t('privacy.changesDesc')}
               </p>
             </CardContent>
           </Card>
@@ -474,7 +459,7 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary" />
-                Contact Us
+                {t('privacy.contactTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
