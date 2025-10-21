@@ -493,7 +493,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     </svg>
                   </div>
                   {/* American Express */}
-                  <div className="w-14 h-7 sm:w-16 sm:h-8 flex items-center justify-center">
+                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 1000 997.517" xmlns="http://www.w3.org/2000/svg">
                       <path d="m 106.12803,352.5839 -50.435161,117.2641 32.835892,0 9.305914,-23.4816 54.099665,0 9.2577,23.4816 33.55915,0 -50.38695,-117.2641 -38.23621,0 z m 18.66004,27.2909 16.49028,41.0329 -33.02877,0 16.53849,-41.0329 z" fill="#016fd0"/>
                       <path d="m 198.22282,469.8283 0,-117.2642 46.66163,0.1733 27.13999,75.6045 26.4901,-75.7778 46.28848,0 0,117.2642 -29.31604,0 0,-86.4052 -31.07562,86.4052 -25.71023,0 -31.16227,-86.4052 0,86.4052 z" fill="#016fd0"/>
