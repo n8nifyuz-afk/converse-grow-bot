@@ -1132,16 +1132,10 @@ export default function ProjectPage() {
                     const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
                     const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
                     
-                    // Disable pro/ultra models for free users
-                    const isPro = model.type === 'pro';
-                    const isUltra = model.type === 'ultra';
-                    const isDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
-                    
                     return (
                       <DropdownMenuItem 
                         key={model.id}
-                        disabled={isDisabled}
-                        className={`rounded-xl px-2 py-2 md:px-3 md:py-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/60 focus:bg-accent/60 cursor-pointer'} transition-all duration-200 ${isSelected ? 'bg-accent/40' : ''}`}
+                        className={`rounded-xl px-2 py-2 md:px-3 md:py-3 hover:bg-accent/60 focus:bg-accent/60 cursor-pointer transition-all duration-200 ${isSelected ? 'bg-accent/40' : ''}`}
                         onClick={() => {
                           handleModelSelect(model.id);
                         }}

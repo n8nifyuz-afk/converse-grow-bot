@@ -3566,23 +3566,19 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   const isPro = model.type === 'pro';
                   const isUltra = model.type === 'ultra';
                   const isImageModel = model.id === 'generate-image';
-                  // Only disable image generation when limit is reached, let pro models be clickable
+                  // Only disable image generation when limit is reached
                   const imageDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
                   
                   // Check if user has Ultra subscription
                   const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
                   const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
                   
-                  // Disable pro/ultra models for users without appropriate subscription
-                  const subscriptionDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
-                  const isDisabled = imageDisabled || subscriptionDisabled;
-                  
                   return (
                     <SelectItem
                       key={model.id} 
                       value={model.id} 
-                      disabled={isDisabled}
-                      className={`rounded-xl px-3 py-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/60 focus-visible:bg-accent/60 cursor-pointer'} transition-all duration-200`}
+                      disabled={imageDisabled}
+                      className={`rounded-xl px-3 py-3 ${imageDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/60 focus-visible:bg-accent/60 cursor-pointer'} transition-all duration-200`}
                     >
                       <div className="flex items-center w-full gap-3">
                         <div className="relative flex-shrink-0">
@@ -4298,23 +4294,19 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                             const isPro = model.type === 'pro';
                             const isUltra = model.type === 'ultra';
                             const isImageModel = model.id === 'generate-image';
-                            // Only disable image generation when limit is reached, let pro models be clickable
+                            // Only disable image generation when limit is reached
                             const imageDisabled = isImageModel && !limitsLoading && !usageLimits.canGenerate;
                             
                             // Check if user has Ultra subscription
                             const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
                             const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
                             
-                            // Disable pro/ultra models for users without appropriate subscription
-                            const subscriptionDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
-                            const isDisabled = imageDisabled || subscriptionDisabled;
-                            
                             return (
                               <SelectItem 
                                 key={model.id} 
                                 value={model.id} 
-                                disabled={isDisabled}
-                                className={`px-2 py-1.5 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={imageDisabled}
+                                className={`px-2 py-1.5 rounded-md ${imageDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                               >
                                 <div className="flex items-center w-full gap-2">
                                   <div className="relative flex-shrink-0">
