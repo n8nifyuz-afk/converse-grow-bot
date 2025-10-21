@@ -166,7 +166,7 @@ const Pricing = () => {
 
   const handleSubscribe = async (plan: typeof plans[0]) => {
     if (plan.price === 0) {
-      navigate('/chat');
+      navigate('/pricing');
       return;
     }
     
