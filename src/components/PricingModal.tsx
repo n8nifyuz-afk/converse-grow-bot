@@ -20,25 +20,72 @@ interface PricingModalProps {
 
 interface Feature {
   name: string;
-  free: boolean | string;
-  pro: boolean | string;
-  ultra: boolean | string;
+  included: boolean;
+  description: string;
+  proOnly?: boolean;
+  ultraOnly?: boolean;
 }
 
-const getFeatures = (t: (key: string) => string): Feature[] => [
-  { name: t('pricingModal.featureGPT'), free: false, pro: true, ultra: true },
-  { name: t('pricingModal.featureClaude'), free: false, pro: false, ultra: true },
-  { name: t('pricingModal.featureUnlimitedChats'), free: false, pro: true, ultra: true },
-  { name: t('pricingModal.featureVoiceMode'), free: false, pro: true, ultra: true },
-  { name: t('pricingModal.featureFileUploads'), free: false, pro: true, ultra: true },
-  { name: t('pricingModal.featureChatWithFiles'), free: false, pro: true, ultra: true },
-  { name: t('pricingModal.featureWhatsApp'), free: false, pro: true, ultra: true },
-  { name: t('pricingModal.featureImageGen500'), free: false, pro: true, ultra: false },
-  { name: t('pricingModal.featureImageGen2000'), free: false, pro: false, ultra: true },
-  { name: t('pricingModal.featurePrioritySupport'), free: false, pro: true, ultra: false },
-  { name: t('pricingModal.featureTeamCollaboration'), free: false, pro: false, ultra: true },
-  { name: t('pricingModal.featureEarlyAccess'), free: false, pro: false, ultra: true },
-];
+const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature[] => {
+  const baseFeatures: Feature[] = [
+    { 
+      name: 'OpenAI – GPT-5 / GPT-4o', 
+      included: true, 
+      description: 'Most advanced reasoning and creative models',
+      proOnly: false
+    },
+    { 
+      name: 'Google – Gemini', 
+      included: true, 
+      description: 'Fast, multilingual model for everyday use',
+      proOnly: false
+    },
+    { 
+      name: 'Anthropic – Claude 3.5', 
+      included: plan === 'ultra', 
+      description: plan === 'ultra' ? 'Advanced reasoning with extended thinking' : 'Available only in Ultra',
+      ultraOnly: true
+    },
+    { 
+      name: 'DeepSeek V3', 
+      included: plan === 'ultra', 
+      description: 'Available only in Ultra',
+      ultraOnly: true
+    },
+    { 
+      name: 'Grok (X AI – Live Web)', 
+      included: plan === 'ultra', 
+      description: 'Available only in Ultra',
+      ultraOnly: true
+    },
+    { 
+      name: 'Ask PDF / Docs AI', 
+      included: true, 
+      description: 'Upload and chat with PDFs, Docs, and text files',
+      proOnly: false
+    },
+    { 
+      name: 'Voice Mode', 
+      included: true, 
+      description: 'Talk to your AI naturally using voice',
+      proOnly: false
+    },
+    { 
+      name: 'Priority Support', 
+      included: true, 
+      description: plan === 'ultra' ? 'Premium priority support' : 'Standard priority support',
+      proOnly: false
+    },
+    { 
+      name: 'Chat on WhatsApp', 
+      included: true, 
+      description: 'Mobile AI chat integration (coming soon)',
+      proOnly: false
+    },
+  ];
+
+  return baseFeatures;
+};
 
 const pricingOptions = {
   pro: {
@@ -77,7 +124,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [blockedPlanName, setBlockedPlanName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const allFeatures = getFeatures(t);
+  const allFeatures = getFeatures(t, selectedPlan);
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
@@ -181,64 +228,35 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               {/* Comparison Table */}
               <div className="flex-1 flex flex-col min-h-0 relative z-10">
                 {/* Header Row */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 pb-2 sm:pb-3 md:pb-4 border-b border-zinc-700/50 mb-1 sm:mb-2 flex-shrink-0">
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-zinc-400">{t('pricingModal.feature')}</div>
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-center text-zinc-400">{t('pricingModal.free')}</div>
-                  <div className="text-xs sm:text-sm md:text-base font-bold text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent flex items-center justify-center gap-1 sm:gap-2">
-                    {selectedPlan === 'pro' ? (
-                      <>
-                        <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                        {t('pricingModal.pro')}
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="w-3 h-3 sm:w-4 sm:h-4" />
-                        {t('pricingModal.ultra')}
-                      </>
-                    )}
-                  </div>
+                <div className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 pb-3 md:pb-4 border-b border-zinc-700/50 mb-2 flex-shrink-0">
+                  <div className="text-sm md:text-base font-bold text-zinc-300">Model / Feature</div>
+                  <div className="text-sm md:text-base font-bold text-center text-zinc-300">Included</div>
+                  <div className="text-sm md:text-base font-bold text-zinc-300">Description / Notes</div>
                 </div>
                 
                 {/* Feature Rows */}
-                <div className="flex-1 space-y-0">
-                  {allFeatures
-                    .filter((feature) => {
-                      const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
-                      return selectedValue !== false;
-                    })
-                    .map((feature, index) => {
-                      const selectedValue = selectedPlan === 'pro' ? feature.pro : feature.ultra;
-                      
-                      return (
-                        <div key={index} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 py-1 sm:py-1.5 md:py-2 px-1.5 sm:px-2 md:px-3 rounded-lg md:hover:bg-white/5 md:transition-all md:duration-200 backdrop-blur-sm border border-transparent md:hover:border-zinc-700/50">
-                          <div className="text-xs sm:text-sm md:text-base font-medium text-white flex items-center leading-tight">
-                            {feature.name}
+                <div className="flex-1 space-y-0 overflow-y-auto">
+                  {allFeatures.map((feature, index) => (
+                    <div key={index} className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 py-2 md:py-2.5 px-2 md:px-3 rounded-lg hover:bg-white/5 transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-zinc-700/50">
+                      <div className="text-xs md:text-sm font-medium text-white flex items-center leading-tight">
+                        {feature.name}
+                      </div>
+                      <div className="flex justify-center items-center">
+                        {feature.included ? (
+                          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                            <Check className="w-3 h-3 md:w-4 md:h-4 text-green-400" />
                           </div>
-                          <div className="flex justify-center items-center">
-                            {feature.free === false ? (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
-                              </div>
-                            ) : (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-green-400" />
-                              </div>
-                            )}
+                        ) : (
+                          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                            <X className="w-3 h-3 md:w-4 md:h-4 text-zinc-600" />
                           </div>
-                          <div className="flex justify-center items-center">
-                            {selectedValue === false ? (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center">
-                                <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-zinc-600" />
-                              </div>
-                            ) : (
-                              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center border border-blue-400/30">
-                                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        )}
+                      </div>
+                      <div className="text-xs md:text-sm text-zinc-400 flex items-center leading-tight">
+                        {feature.description}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
