@@ -577,6 +577,16 @@ export default function Index() {
     setTempTranscript('');
   };
   const handleStartChat = async () => {
+    console.log('[INDEX] ✅ handleStartChat CALLED', {
+      hasMessage: !!message.trim(),
+      messageLength: message.trim().length,
+      hasFiles: selectedFiles.length > 0,
+      filesCount: selectedFiles.length,
+      loading,
+      user: !!user,
+      canSendMessage
+    });
+    
     // Allow sending if there's a message OR files
     if ((!message.trim() && selectedFiles.length === 0) || loading) {
       console.log('[INDEX] Validation failed:', {
@@ -587,6 +597,7 @@ export default function Index() {
       return;
     }
     if (!user) {
+      console.log('[INDEX] No user - showing auth modal');
       setPendingMessage(message);
       localStorage.setItem('pendingChatMessage', message);
       localStorage.setItem('pendingChatModel', selectedModel);
@@ -598,6 +609,7 @@ export default function Index() {
       setShowLimitWarning(true);
       return;
     }
+    console.log('[INDEX] All validations passed, creating chat...');
     setLoading(true);
     try {
       const titleText = message.slice(0, 50) || (selectedFiles.length > 0 ? `File: ${selectedFiles[0].name}` : 'New Chat');
@@ -623,7 +635,9 @@ export default function Index() {
       console.log('[INDEX] Chat created:', chatData.id);
       
       // Track chat start event
+      console.log('[INDEX] 🎯 About to call trackChatStart...');
       trackChatStart();
+      console.log('[INDEX] 🎯 trackChatStart called');
 
       // Store the message and files for Chat page to process
       const messageText = message;
