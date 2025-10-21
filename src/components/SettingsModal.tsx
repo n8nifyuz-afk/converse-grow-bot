@@ -543,7 +543,29 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     </div>
                     <Select value={i18n.language.split('-')[0]} onValueChange={handleLanguageChange}>
                       <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
-                        <SelectValue placeholder={t('settings.selectLanguage')} />
+                        <SelectValue>
+                          {(() => {
+                            const languages = [
+                              { code: 'en', name: 'English', flag: '🇬🇧' },
+                              { code: 'es', name: 'Español', flag: '🇪🇸' },
+                              { code: 'fr', name: 'Français', flag: '🇫🇷' },
+                              { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+                              { code: 'pt', name: 'Português', flag: '🇵🇹' },
+                              { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+                              { code: 'zh', name: '中文', flag: '🇨🇳' },
+                              { code: 'ja', name: '日本語', flag: '🇯🇵' },
+                              { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+                              { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+                            ];
+                            const currentLang = languages.find(lang => lang.code === i18n.language.split('-')[0]);
+                            return currentLang ? (
+                              <div className="flex items-center gap-2">
+                                <span>{currentLang.flag}</span>
+                                <span>{currentLang.name}</span>
+                              </div>
+                            ) : t('settings.selectLanguage');
+                          })()}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-background border-2 border-border shadow-xl max-h-[300px]">
                         {[
