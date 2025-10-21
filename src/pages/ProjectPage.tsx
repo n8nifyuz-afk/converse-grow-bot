@@ -16,6 +16,7 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import ProjectEditModal from '@/components/ProjectEditModal';
 import AuthModal from '@/components/AuthModal';
 import { PricingModal } from '@/components/PricingModal';
+import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 
 import { toast } from 'sonner';
@@ -269,6 +270,7 @@ export default function ProjectPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showLimitWarning, setShowLimitWarning] = useState(false);
   
   // Show all models - access control happens on selection
@@ -381,16 +383,26 @@ export default function ProjectPage() {
   const handleModelSelect = (modelId: string) => {
     const selectedModelInfo = models.find(m => m.id === modelId);
     
-    // Check if user is trying to select a PRO model
-    if (selectedModelInfo?.type === 'pro') {
-      // If not authenticated, show auth modal
-      if (!user) {
-        setShowAuthModal(true);
-        return;
-      }
-      // If not subscribed, show pricing modal (only for free users)
-      if (!loadingSubscription && !subscriptionStatus.subscribed) {
-        setShowPricingModal(true);
+    // If not authenticated, show auth modal for any premium model
+    if (!user && (selectedModelInfo?.type === 'pro' || selectedModelInfo?.type === 'ultra')) {
+      setShowAuthModal(true);
+      return;
+    }
+    
+    // If not subscribed, show pricing modal for any premium model
+    if (!loadingSubscription && !subscriptionStatus.subscribed && (selectedModelInfo?.type === 'pro' || selectedModelInfo?.type === 'ultra')) {
+      setShowPricingModal(true);
+      return;
+    }
+    
+    // If Pro user tries to select Ultra model, show upgrade dialog
+    if (subscriptionStatus.subscribed && selectedModelInfo?.type === 'ultra') {
+      const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
+      const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+      
+      if (!hasUltra) {
+        // User has Pro subscription, trying to use Ultra model
+        setShowUpgradeDialog(true);
         return;
       }
     }
@@ -1580,6 +1592,12 @@ export default function ProjectPage() {
       <PricingModal 
         open={showPricingModal}
         onOpenChange={setShowPricingModal}
+      />
+      
+      <UpgradeBlockedDialog
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        currentPlan="Pro"
       />
       
       <AuthModal 

@@ -18,6 +18,7 @@ import GoogleOneTab from '@/components/GoogleOneTab';
 import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
 import { PricingModal } from '@/components/PricingModal';
+import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 import { toast } from 'sonner';
 import chatgptLogo from '@/assets/chatgpt-logo.png';
 import chatgptLogoLight from '@/assets/chatgpt-logo-light.png';
@@ -258,6 +259,7 @@ export default function Index() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [pendingMessage, setPendingMessage] = useState('');
   const [selectedModel, setSelectedModel] = useState(() => {
     // Use model from navigation state if available, otherwise default to gpt-4o-mini
@@ -737,16 +739,26 @@ export default function Index() {
   const handleModelSelect = (modelId: string) => {
     const selectedModelInfo = models.find(m => m.id === modelId);
     
-    // Check if user is trying to select a PRO model
-    if (selectedModelInfo?.type === 'pro') {
-      // If not authenticated, show auth modal
-      if (!user) {
-        setShowAuthModal(true);
-        return;
-      }
-      // If not subscribed, show pricing modal (only for free users)
-      if (!loadingSubscription && !subscriptionStatus.subscribed) {
-        setShowPricingModal(true);
+    // If not authenticated, show auth modal for any premium model
+    if (!user && (selectedModelInfo?.type === 'pro' || selectedModelInfo?.type === 'ultra')) {
+      setShowAuthModal(true);
+      return;
+    }
+    
+    // If not subscribed, show pricing modal for any premium model
+    if (!loadingSubscription && !subscriptionStatus.subscribed && (selectedModelInfo?.type === 'pro' || selectedModelInfo?.type === 'ultra')) {
+      setShowPricingModal(true);
+      return;
+    }
+    
+    // If Pro user tries to select Ultra model, show upgrade dialog
+    if (subscriptionStatus.subscribed && selectedModelInfo?.type === 'ultra') {
+      const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
+      const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+      
+      if (!hasUltra) {
+        // User has Pro subscription, trying to use Ultra model
+        setShowUpgradeDialog(true);
         return;
       }
     }
@@ -1468,6 +1480,13 @@ export default function Index() {
       <PricingModal 
         open={showPricingModal} 
         onOpenChange={setShowPricingModal} 
+      />
+      
+      {/* Upgrade Blocked Dialog */}
+      <UpgradeBlockedDialog
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        currentPlan="Pro"
       />
       </div>
     </div>;

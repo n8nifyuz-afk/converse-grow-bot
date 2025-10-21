@@ -25,6 +25,7 @@ import { getWebhookMetadata } from '@/utils/webhookMetadata';
 import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
 import { PricingModal } from '@/components/PricingModal';
+import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 import chatgptLogo from '@/assets/chatgpt-logo.png';
 import chatgptLogoLight from '@/assets/chatgpt-logo-light.png';
 import claudeLogo from '@/assets/claude-logo.png';
@@ -254,6 +255,7 @@ export default function Chat() {
   const [imageToEdit, setImageToEdit] = useState<File | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [messageRatings, setMessageRatings] = useState<{[key: string]: 'like' | 'dislike'}>({});
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -1697,14 +1699,31 @@ export default function Chat() {
   const handleModelChange = (modelId: string) => {
     console.log('[MODEL-CHANGE] User manually selected model:', modelId);
     
-    // Check if this is a pro model
+    // Check if this is a pro or ultra model
     const selectedModelInfo = models.find(m => m.id === modelId);
-    const isProModel = selectedModelInfo?.type === 'pro';
     
-    // If it's a pro model and user doesn't have a subscription, show pricing modal (only for free users)
-    if (isProModel && !loadingSubscription && !subscriptionStatus.subscribed) {
+    // If not authenticated, show auth modal for any premium model
+    if (!user && (selectedModelInfo?.type === 'pro' || selectedModelInfo?.type === 'ultra')) {
+      setShowAuthModal(true);
+      return;
+    }
+    
+    // If not subscribed, show pricing modal for any premium model
+    if (!loadingSubscription && !subscriptionStatus.subscribed && (selectedModelInfo?.type === 'pro' || selectedModelInfo?.type === 'ultra')) {
       setShowPricingModal(true);
       return;
+    }
+    
+    // If Pro user tries to select Ultra model, show upgrade dialog
+    if (subscriptionStatus.subscribed && selectedModelInfo?.type === 'ultra') {
+      const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
+      const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+      
+      if (!hasUltra) {
+        // User has Pro subscription, trying to use Ultra model
+        setShowUpgradeDialog(true);
+        return;
+      }
     }
     
     setSelectedModel(modelId);
@@ -4489,6 +4508,13 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       <PricingModal 
         open={showPricingModal} 
         onOpenChange={setShowPricingModal} 
+      />
+      
+      {/* Upgrade Blocked Dialog */}
+      <UpgradeBlockedDialog
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        currentPlan="Pro"
       />
     </div>
   );
