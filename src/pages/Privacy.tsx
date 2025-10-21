@@ -83,44 +83,44 @@ export default function Privacy() {
             <CardContent className="space-y-3">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="font-semibold">Cookie</p>
-                  <p className="text-sm text-muted-foreground">Small text file stored on your device by your browser. Used for essential operations, analytics, and preferences.</p>
+                  <p className="font-semibold">{t('privacy.defCookie')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defCookieDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Company / we / us / our</p>
-                  <p className="text-sm text-muted-foreground">Refers to the ChatLearn platform operated by TASOLAR (Cyprus).</p>
+                  <p className="font-semibold">{t('privacy.defCompany')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defCompanyDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Country / Jurisdiction</p>
-                  <p className="text-sm text-muted-foreground">Republic of Cyprus (EU).</p>
+                  <p className="font-semibold">{t('privacy.defCountry')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defCountryDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Customer</p>
-                  <p className="text-sm text-muted-foreground">An individual or organization subscribing to or using the Service.</p>
+                  <p className="font-semibold">{t('privacy.defCustomer')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defCustomerDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Device</p>
-                  <p className="text-sm text-muted-foreground">Any internet-connected device (e.g., phone, tablet, computer).</p>
+                  <p className="font-semibold">{t('privacy.defDevice')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defDeviceDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">IP Address</p>
-                  <p className="text-sm text-muted-foreground">Numeric label assigned to a device connected to the Internet (may approximate location).</p>
+                  <p className="font-semibold">{t('privacy.defIPAddress')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defIPAddressDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Personal Data</p>
-                  <p className="text-sm text-muted-foreground">Any information relating to an identified or identifiable natural person.</p>
+                  <p className="font-semibold">{t('privacy.defPersonalData')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defPersonalDataDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Service</p>
-                  <p className="text-sm text-muted-foreground">The functionality and products provided by ChatLearn via https://chatl.ai.</p>
+                  <p className="font-semibold">{t('privacy.defService')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defServiceDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Third-Party Service Providers</p>
-                  <p className="text-sm text-muted-foreground">External parties assisting us (e.g., hosting, analytics, payments, model API providers).</p>
+                  <p className="font-semibold">{t('privacy.defThirdParty')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defThirdPartyDesc')}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">You / User / Data Subject</p>
-                  <p className="text-sm text-muted-foreground">The individual accessing or using the Service.</p>
+                  <p className="font-semibold">{t('privacy.defUser')}</p>
+                  <p className="text-sm text-muted-foreground">{t('privacy.defUserDesc')}</p>
                 </div>
               </div>
             </CardContent>
@@ -159,7 +159,7 @@ export default function Privacy() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5 text-primary" />
-                Categories of Personal Data and Processing
+                {t('privacy.dataCategoriesTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -169,51 +169,51 @@ export default function Privacy() {
 
               {/* 1. Personal & Contact Information */}
               <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold mb-3">1. Personal & Contact Information</h3>
+                <h3 className="font-semibold mb-3">1. {t('privacy.dataCategory1')}</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Data:</span> Name, email, login identity (Google/Apple SSO), account identifiers.</p>
-                  <p><span className="font-medium">Purpose:</span> Account management, authentication, support.</p>
-                  <p><span className="font-medium">Legal basis:</span> Performance of a contract.</p>
+                  <p><span className="font-medium">{t('privacy.dataLabel')}</span> {t('privacy.dataCategory1Data')}</p>
+                  <p><span className="font-medium">{t('privacy.purposeLabel')}</span> {t('privacy.dataCategory1Purpose')}</p>
+                  <p><span className="font-medium">{t('privacy.legalBasisLabel')}</span> {t('privacy.dataCategory1Legal')}</p>
                 </div>
               </div>
 
               {/* 2. Technical & Security Data */}
               <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold mb-3">2. Technical & Security Data</h3>
+                <h3 className="font-semibold mb-3">2. {t('privacy.dataCategory2')}</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Data:</span> IP address, device info, browser/OS, timestamps, referral URLs, diagnostic logs.</p>
-                  <p><span className="font-medium">Purpose:</span> Security, fraud prevention, analytics.</p>
-                  <p><span className="font-medium">Legal basis:</span> Legitimate interests.</p>
+                  <p><span className="font-medium">{t('privacy.dataLabel')}</span> {t('privacy.dataCategory2Data')}</p>
+                  <p><span className="font-medium">{t('privacy.purposeLabel')}</span> {t('privacy.dataCategory2Purpose')}</p>
+                  <p><span className="font-medium">{t('privacy.legalBasisLabel')}</span> {t('privacy.dataCategory2Legal')}</p>
                 </div>
               </div>
 
               {/* 3. Usage & Log Data */}
               <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold mb-3">3. Usage & Log Data</h3>
+                <h3 className="font-semibold mb-3">3. {t('privacy.dataCategory3')}</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Data:</span> Session metadata, feature usage, crash/error data, model usage metrics.</p>
-                  <p><span className="font-medium">Purpose:</span> Service improvement, abuse prevention.</p>
-                  <p><span className="font-medium">Legal basis:</span> Legitimate interests.</p>
+                  <p><span className="font-medium">{t('privacy.dataLabel')}</span> {t('privacy.dataCategory3Data')}</p>
+                  <p><span className="font-medium">{t('privacy.purposeLabel')}</span> {t('privacy.dataCategory3Purpose')}</p>
+                  <p><span className="font-medium">{t('privacy.legalBasisLabel')}</span> {t('privacy.dataCategory3Legal')}</p>
                 </div>
               </div>
 
               {/* 4. Transaction & Subscription Data */}
               <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold mb-3">4. Transaction & Subscription Data</h3>
+                <h3 className="font-semibold mb-3">4. {t('privacy.dataCategory4')}</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Data:</span> Plan tier, purchase history, invoice data, subscription status.</p>
-                  <p><span className="font-medium">Purpose:</span> Billing, receipts, VAT compliance, customer support.</p>
-                  <p><span className="font-medium">Legal basis:</span> Performance of a contract; legal obligation.</p>
+                  <p><span className="font-medium">{t('privacy.dataLabel')}</span> {t('privacy.dataCategory4Data')}</p>
+                  <p><span className="font-medium">{t('privacy.purposeLabel')}</span> {t('privacy.dataCategory4Purpose')}</p>
+                  <p><span className="font-medium">{t('privacy.legalBasisLabel')}</span> {t('privacy.dataCategory4Legal')}</p>
                 </div>
               </div>
 
               {/* 5. Marketing & Analytics Data */}
               <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold mb-3">5. Marketing & Analytics Data</h3>
+                <h3 className="font-semibold mb-3">5. {t('privacy.dataCategory5')}</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Data:</span> Cookies, UTM parameters, engagement data, consent preferences.</p>
-                  <p><span className="font-medium">Purpose:</span> Measure performance, personalize communications.</p>
-                  <p><span className="font-medium">Legal basis:</span> Legitimate interests; consent (for non-essential cookies).</p>
+                  <p><span className="font-medium">{t('privacy.dataLabel')}</span> {t('privacy.dataCategory5Data')}</p>
+                  <p><span className="font-medium">{t('privacy.purposeLabel')}</span> {t('privacy.dataCategory5Purpose')}</p>
+                  <p><span className="font-medium">{t('privacy.legalBasisLabel')}</span> {t('privacy.dataCategory5Legal')}</p>
                 </div>
               </div>
             </CardContent>
@@ -230,14 +230,14 @@ export default function Privacy() {
             <CardContent>
               <p className="text-muted-foreground">{t('privacy.howWeUseDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground mt-3">
-                <li>Provide and maintain the Service</li>
-                <li>Process your AI requests and generate outputs</li>
-                <li>Manage your account and authentication</li>
-                <li>Process payments and subscriptions</li>
-                <li>Improve service quality and performance</li>
-                <li>Prevent fraud and ensure security</li>
-                <li>Comply with legal obligations</li>
-                <li>Communicate with you about updates and support</li>
+                <li>{t('privacy.useItem1')}</li>
+                <li>{t('privacy.useItem2')}</li>
+                <li>{t('privacy.useItem3')}</li>
+                <li>{t('privacy.useItem4')}</li>
+                <li>{t('privacy.useItem5')}</li>
+                <li>{t('privacy.useItem6')}</li>
+                <li>{t('privacy.useItem7')}</li>
+                <li>{t('privacy.useItem8')}</li>
               </ul>
             </CardContent>
           </Card>
@@ -255,13 +255,13 @@ export default function Privacy() {
                 {t('privacy.howWeDiscloseDesc')}
               </p>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li><strong>AI Model Providers:</strong> OpenAI, Anthropic, Google DeepMind, xAI, DeepSeek (for content generation).</li>
-                <li><strong>Infrastructure & Security:</strong> Cloud hosting, CDN, DDoS protection, logging.</li>
-                <li><strong>Payments:</strong> Stripe (billing, invoices, VAT). We do not store card data.</li>
-                <li><strong>Analytics (optional):</strong> Privacy-aware tools such as GA4 or other consented cookies.</li>
-                <li><strong>Professional Advisors:</strong> Legal, audit, compliance.</li>
-                <li><strong>Authorities:</strong> If required by law or to protect rights and safety.</li>
-                <li><strong>Business Transfers:</strong> In case of merger, acquisition, or reorganization, subject to this Policy.</li>
+                <li><strong>{t('privacy.discloseAI')}</strong> {t('privacy.discloseAIDesc')}</li>
+                <li><strong>{t('privacy.discloseInfra')}</strong> {t('privacy.discloseInfraDesc')}</li>
+                <li><strong>{t('privacy.disclosePayments')}</strong> {t('privacy.disclosePaymentsDesc')}</li>
+                <li><strong>{t('privacy.discloseAnalytics')}</strong> {t('privacy.discloseAnalyticsDesc')}</li>
+                <li><strong>{t('privacy.discloseAdvisors')}</strong> {t('privacy.discloseAdvisorsDesc')}</li>
+                <li><strong>{t('privacy.discloseAuthorities')}</strong> {t('privacy.discloseAuthoritiesDesc')}</li>
+                <li><strong>{t('privacy.discloseTransfers')}</strong> {t('privacy.discloseTransfersDesc')}</li>
               </ul>
               <p className="text-sm text-muted-foreground pt-2">
                 {t('privacy.howWeDiscloseNote')}
@@ -297,9 +297,9 @@ export default function Privacy() {
                 {t('privacy.retentionDesc')}
               </p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                <li><strong>Account data:</strong> retained while active.</li>
-                <li><strong>Logs:</strong> short-term retention, then anonymized.</li>
-                <li><strong>Billing:</strong> retained per tax laws.</li>
+                <li><strong>{t('privacy.retentionAccount')}</strong> {t('privacy.retentionAccountDesc')}</li>
+                <li><strong>{t('privacy.retentionLogs')}</strong> {t('privacy.retentionLogsDesc')}</li>
+                <li><strong>{t('privacy.retentionBilling')}</strong> {t('privacy.retentionBillingDesc')}</li>
               </ul>
               <p className="text-sm text-muted-foreground">
                 {t('privacy.retentionNote')}
@@ -333,8 +333,8 @@ export default function Privacy() {
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">{t('privacy.cookiesDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                <li><strong>Strictly Necessary Cookies</strong> (login, security, performance).</li>
-                <li><strong>Optional Cookies</strong> (analytics, marketing) only with your consent.</li>
+                <li><strong>{t('privacy.cookiesNecessary')}</strong> {t('privacy.cookiesNecessaryDesc')}</li>
+                <li><strong>{t('privacy.cookiesOptional')}</strong> {t('privacy.cookiesOptionalDesc')}</li>
               </ul>
               <p className="text-sm text-muted-foreground">
                 {t('privacy.cookiesNote')}{' '}
@@ -384,12 +384,12 @@ export default function Privacy() {
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">{t('privacy.gdprRightsDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                <li>Access your data</li>
-                <li>Rectify inaccuracies</li>
-                <li>Request deletion ("right to be forgotten")</li>
-                <li>Restrict or object to processing</li>
-                <li>Receive your data (portability)</li>
-                <li>Withdraw consent at any time</li>
+                <li>{t('privacy.gdprRight1')}</li>
+                <li>{t('privacy.gdprRight2')}</li>
+                <li>{t('privacy.gdprRight3')}</li>
+                <li>{t('privacy.gdprRight4')}</li>
+                <li>{t('privacy.gdprRight5')}</li>
+                <li>{t('privacy.gdprRight6')}</li>
               </ul>
               <p className="text-sm text-muted-foreground">
                 {t('privacy.gdprRightsNote')}
@@ -408,9 +408,9 @@ export default function Privacy() {
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">{t('privacy.californiaDesc')}</p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                <li>Know what data we collect and how it's used</li>
-                <li>Request deletion or correction</li>
-                <li>Opt-out of sale/sharing (we do not sell data)</li>
+                <li>{t('privacy.californiaRight1')}</li>
+                <li>{t('privacy.californiaRight2')}</li>
+                <li>{t('privacy.californiaRight3')}</li>
               </ul>
               <p className="text-sm text-muted-foreground">
                 {t('privacy.californiaNote')}
@@ -429,9 +429,9 @@ export default function Privacy() {
             <CardContent className="space-y-4">
               <p className="font-semibold">{t('privacy.deleteSubtitle')}</p>
               <ol className="list-decimal pl-6 space-y-1 text-muted-foreground">
-                <li>Log in → Account Settings → Delete Account</li>
-                <li>Confirm the deletion request</li>
-                <li>Upon confirmation, your account and related personal data will be deleted or anonymized, except where required by law</li>
+                <li>{t('privacy.deleteStep1')}</li>
+                <li>{t('privacy.deleteStep2')}</li>
+                <li>{t('privacy.deleteStep3')}</li>
               </ol>
               <p className="text-sm text-muted-foreground">
                 {t('privacy.deleteNote')}
@@ -464,19 +464,19 @@ export default function Privacy() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="font-semibold">Email (Privacy):</p>
+                <p className="font-semibold">{t('privacy.contactEmailPrivacy')}</p>
                 <a href="mailto:privacy@chatl.ai" className="text-primary hover:underline">privacy@chatl.ai</a>
               </div>
               <div>
-                <p className="font-semibold">Support:</p>
+                <p className="font-semibold">{t('privacy.contactSupport')}</p>
                 <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a>
               </div>
               <div>
-                <p className="font-semibold">Website:</p>
+                <p className="font-semibold">{t('privacy.contactWebsite')}</p>
                 <a href="https://chatl.ai" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">https://chatl.ai</a>
               </div>
               <div>
-                <p className="font-semibold">Mailing Address:</p>
+                <p className="font-semibold">{t('privacy.contactAddress')}</p>
                 <address className="text-muted-foreground not-italic text-sm">
                   TASOLAR<br />
                   Dimostheni Severi & Katsoni 2<br />
