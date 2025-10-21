@@ -9,7 +9,11 @@
   "hero": {
     "title": "Votre Compagnon d'Apprentissage IA",
     "subtitle": "Discutez avec plusieurs modèles d'IA, générez des images et améliorez votre expérience d'apprentissage",
-    "getStarted": "Commencer Gratuitement"
+    "getStarted": "Commencer Gratuitement",
+    "onePlatform": "Une Plateforme.",
+    "allAIModels": "Tous Vos Modèles d'IA.",
+    "chatCreateWrite": "Discutez, créez des images, écrivez, codez et apprenez avec GPT-4, GPT-5, Claude, Gemini et plus encore - tout depuis une seule plateforme.",
+    "startNow": "Commencer Maintenant"
   },
   "models": {
     "heading": "Choisissez la bonne IA pour chaque tâche",

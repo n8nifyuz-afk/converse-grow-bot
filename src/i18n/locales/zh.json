@@ -9,7 +9,11 @@
   "hero": {
     "title": "您的 AI 学习伙伴",
     "subtitle": "与多个 AI 模型聊天，生成图像，提升您的学习体验",
-    "getStarted": "免费开始"
+    "getStarted": "免费开始",
+    "onePlatform": "一个平台。",
+    "allAIModels": "您的所有 AI 模型。",
+    "chatCreateWrite": "与 GPT-4、GPT-5、Claude、Gemini 等聊天、创建图像、写作、编程和学习 - 全部来自一个平台。",
+    "startNow": "立即开始"
   },
   "models": {
     "heading": "为每项任务选择合适的 AI",

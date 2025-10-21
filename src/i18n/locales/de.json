@@ -9,7 +9,11 @@
   "hero": {
     "title": "Ihr KI-Lernbegleiter",
     "subtitle": "Chatten Sie mit mehreren KI-Modellen, generieren Sie Bilder und verbessern Sie Ihr Lernerlebnis",
-    "getStarted": "Kostenlos Starten"
+    "getStarted": "Kostenlos Starten",
+    "onePlatform": "Eine Plattform.",
+    "allAIModels": "Alle Ihre KI-Modelle.",
+    "chatCreateWrite": "Chatten, Bilder erstellen, schreiben, programmieren und lernen Sie mit GPT-4, GPT-5, Claude, Gemini und mehr - alles von einer einzigen Plattform aus.",
+    "startNow": "Jetzt Starten"
   },
   "models": {
     "heading": "Wählen Sie die richtige KI für jede Aufgabe",
