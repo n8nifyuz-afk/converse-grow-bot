@@ -71,37 +71,53 @@ serve(async (req) => {
       }
       
       // Detect customer's existing currency from past invoices or subscriptions
-      const invoices = await stripe.invoices.list({
-        customer: customerId,
-        limit: 1,
-      });
-      
-      if (invoices.data.length > 0) {
-        customerCurrency = invoices.data[0].currency;
-        logStep("Detected customer currency from invoices", { currency: customerCurrency });
-      } else {
-        // Check from past subscriptions (including canceled ones)
-        const pastSubscriptions = await stripe.subscriptions.list({
+      try {
+        const invoices = await stripe.invoices.list({
           customer: customerId,
           limit: 1,
         });
         
-        if (pastSubscriptions.data.length > 0) {
-          customerCurrency = pastSubscriptions.data[0].currency;
-          logStep("Detected customer currency from subscriptions", { currency: customerCurrency });
+        if (invoices.data.length > 0) {
+          customerCurrency = invoices.data[0].currency;
+          logStep("Detected customer currency from invoices", { currency: customerCurrency });
+        } else {
+          // Check from past subscriptions (including canceled ones)
+          const pastSubscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            limit: 1,
+          });
+          
+          if (pastSubscriptions.data.length > 0) {
+            customerCurrency = pastSubscriptions.data[0].currency;
+            logStep("Detected customer currency from subscriptions", { currency: customerCurrency });
+          }
         }
-      }
-      
-      // If customer has USD currency but we're trying to charge EUR, we need to create a new customer
-      const priceDetails = await stripe.prices.retrieve(priceId);
-      if (customerCurrency.toLowerCase() !== priceDetails.currency.toLowerCase()) {
-        logStep("Currency mismatch detected, creating new customer", { 
-          existingCurrency: customerCurrency, 
-          newCurrency: priceDetails.currency 
+        
+        // Retrieve price details to check currency
+        logStep("Retrieving price details", { priceId });
+        const priceDetails = await stripe.prices.retrieve(priceId);
+        logStep("Price details retrieved", { 
+          priceCurrency: priceDetails.currency, 
+          priceAmount: priceDetails.unit_amount,
+          recurring: priceDetails.recurring 
         });
         
-        // Don't use the existing customer - let Stripe create a new one
-        customerId = undefined;
+        // If customer has different currency, create a new customer
+        if (customerCurrency.toLowerCase() !== priceDetails.currency.toLowerCase()) {
+          logStep("Currency mismatch detected, creating new customer", { 
+            existingCurrency: customerCurrency, 
+            newCurrency: priceDetails.currency 
+          });
+          
+          // Don't use the existing customer - let Stripe create a new one
+          customerId = undefined;
+        }
+      } catch (currencyCheckError) {
+        logStep("Error during currency check", { 
+          error: currencyCheckError instanceof Error ? currencyCheckError.message : String(currencyCheckError) 
+        });
+        // If currency check fails, continue without it
+        // The checkout will still work, just might have currency issues
       }
     } else {
       logStep("No existing customer, will create during checkout");
