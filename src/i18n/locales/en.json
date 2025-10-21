@@ -510,7 +510,7 @@
     "pricingPlans": "Pricing & Plans",
     "faq": "Frequently Asked Questions"
   },
-  "models": {
+  "modelDescriptions": {
     "gpt4oMini": {
       "description": "Default model (fast + low cost)",
       "descriptionLong": "Fast and cost-efficient model, perfect for most tasks."
