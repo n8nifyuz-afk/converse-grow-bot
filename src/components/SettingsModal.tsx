@@ -541,9 +541,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         {user ? t('settings.languageSavedDescription') : t('settings.languageAutoDescription')}
                       </p>
                     </div>
-                    <Select value={i18n.language} onValueChange={handleLanguageChange}>
+                    <Select value={i18n.language.split('-')[0]} onValueChange={handleLanguageChange}>
                       <SelectTrigger className="w-full sm:w-40 h-11 bg-background border-2 border-border hover:border-primary/50 transition-colors">
-                        <SelectValue />
+                        <SelectValue placeholder={t('settings.selectLanguage')} />
                       </SelectTrigger>
                       <SelectContent className="bg-background border-2 border-border shadow-xl max-h-[300px]">
                         {[
