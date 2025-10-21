@@ -43,19 +43,19 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
     { 
       name: 'Anthropic – Claude 3.5', 
       included: plan === 'ultra', 
-      description: plan === 'ultra' ? 'Advanced reasoning with extended thinking' : 'Available only in Ultra',
+      description: plan === 'ultra' ? 'Ideal for writing, summaries, and analysis' : 'Available only in Ultra',
       ultraOnly: true
     },
     { 
       name: 'DeepSeek V3', 
       included: plan === 'ultra', 
-      description: 'Available only in Ultra',
+      description: plan === 'ultra' ? 'Logical and analytical AI for structured tasks' : 'Available only in Ultra',
       ultraOnly: true
     },
     { 
       name: 'Grok (X AI – Live Web)', 
       included: plan === 'ultra', 
-      description: 'Available only in Ultra',
+      description: plan === 'ultra' ? 'Real-time web access and trending insights' : 'Available only in Ultra',
       ultraOnly: true
     },
     { 
@@ -73,12 +73,12 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
     { 
       name: 'Priority Support', 
       included: true, 
-      description: plan === 'ultra' ? 'Premium priority support' : 'Standard priority support',
+      description: plan === 'ultra' ? 'Faster help and responses from our team' : 'Standard priority support',
       proOnly: false
     },
     { 
       name: 'Chat on WhatsApp', 
-      included: true, 
+      included: false, 
       description: 'Mobile AI chat integration (coming soon)',
       proOnly: false
     },
@@ -242,7 +242,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                         {feature.name}
                       </div>
                       <div className="flex justify-center items-center">
-                        {feature.included ? (
+                        {feature.name === 'Chat on WhatsApp' ? (
+                          <span className="text-xs text-zinc-400">Coming soon</span>
+                        ) : feature.included ? (
                           <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-green-500/20 flex items-center justify-center">
                             <Check className="w-3 h-3 md:w-4 md:h-4 text-green-400" />
                           </div>
@@ -253,7 +255,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                         )}
                       </div>
                       <div className="text-xs md:text-sm text-zinc-400 flex items-center leading-tight">
-                        {feature.description}
+                        {feature.name === 'Priority Support' && selectedPlan === 'ultra' ? (
+                          <>
+                            <Check className="w-3 h-3 md:w-4 md:h-4 text-green-400 mr-1" />
+                            <span>(High-priority)</span>
+                            <span className="ml-1">{feature.description}</span>
+                          </>
+                        ) : (
+                          feature.description
+                        )}
                       </div>
                     </div>
                   ))}
