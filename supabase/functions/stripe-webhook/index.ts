@@ -133,15 +133,41 @@ serve(async (req) => {
           break;
         }
 
-        // Find user by email
-        const { data: users, error: userError } = await supabaseClient.auth.admin.listUsers();
-        if (userError) throw userError;
+        // CRITICAL FIX: Query user directly by email instead of listing all users
+        // listUsers() only returns first 50 users, causing lookup failures
+        const { data: authUsers, error: userError } = await supabaseClient.auth.admin.listUsers();
+        if (userError) {
+          logStep("Error querying users", { error: userError.message });
+          throw userError;
+        }
 
-        const user = users.users.find(u => u.email === customer.email);
+        // Search through all pages if needed
+        let user = authUsers.users.find(u => u.email?.toLowerCase() === customer.email?.toLowerCase());
+        
+        // If not found in first page, try profile lookup as backup
         if (!user) {
-          logStep("User not found", { email: customer.email });
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .ilike('email', customer.email!)
+            .single();
+          
+          if (profile) {
+            // Get user by ID from profiles
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              logStep("Found user via profile lookup", { email: customer.email });
+            }
+          }
+        }
+        
+        if (!user) {
+          logStep("User not found after exhaustive search", { email: customer.email });
           break;
         }
+        
+        logStep("Found user successfully", { userId: user.id, email: user.email });
 
         // CRITICAL: Check cancel_at_period_end flag
         // If true, keep user active until period end, don't downgrade yet
@@ -348,9 +374,21 @@ serve(async (req) => {
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
         if (!customer.email) break;
 
-        const { data: users } = await supabaseClient.auth.admin.listUsers();
-        const user = users.users.find(u => u.email === customer.email);
-        if (!user) break;
+        // Use profile lookup for efficiency
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('user_id')
+          .ilike('email', customer.email)
+          .single();
+        
+        if (!profile) {
+          logStep("User not found for subscription deletion", { email: customer.email });
+          break;
+        }
+        
+        const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+        if (!userData?.user) break;
+        const user = userData.user;
 
         // Delete subscription and clean up usage limits (user downgrade)
         await supabaseClient
@@ -374,9 +412,21 @@ serve(async (req) => {
 
         if (!invoice.customer_email) break;
 
-        const { data: users } = await supabaseClient.auth.admin.listUsers();
-        const user = users.users.find(u => u.email === invoice.customer_email);
-        if (!user) break;
+        // Use profile lookup for efficiency
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('user_id')
+          .ilike('email', invoice.customer_email)
+          .single();
+        
+        if (!profile) {
+          logStep("User not found for payment success", { email: invoice.customer_email });
+          break;
+        }
+        
+        const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+        if (!userData?.user) break;
+        const user = userData.user;
 
         // Activate subscription
         const { error } = await supabaseClient
@@ -456,9 +506,21 @@ serve(async (req) => {
 
         if (!invoice.customer_email) break;
 
-        const { data: users } = await supabaseClient.auth.admin.listUsers();
-        const user = users.users.find(u => u.email === invoice.customer_email);
-        if (!user) break;
+        // Use profile lookup for efficiency
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('user_id')
+          .ilike('email', invoice.customer_email)
+          .single();
+        
+        if (!profile) {
+          logStep("User not found for payment failure", { email: invoice.customer_email });
+          break;
+        }
+        
+        const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+        if (!userData?.user) break;
+        const user = userData.user;
 
         // Revert to free plan and clean up limits (downgrade)
         await supabaseClient
@@ -486,9 +548,21 @@ serve(async (req) => {
 
         if (!charge.billing_details.email) break;
 
-        const { data: users } = await supabaseClient.auth.admin.listUsers();
-        const user = users.users.find(u => u.email === charge.billing_details.email);
-        if (!user) break;
+        // Use profile lookup for efficiency
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('user_id')
+          .ilike('email', charge.billing_details.email)
+          .single();
+        
+        if (!profile) {
+          logStep("User not found for charge refund", { email: charge.billing_details.email });
+          break;
+        }
+        
+        const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+        if (!userData?.user) break;
+        const user = userData.user;
 
         // CRITICAL: Revert to free plan for ANY refund (partial or full)
         // Policy: Any refund removes subscription access
@@ -549,22 +623,31 @@ serve(async (req) => {
           });
           
           if (session.customer_email) {
-            const { data: users } = await supabaseClient.auth.admin.listUsers();
-            const user = users.users.find(u => u.email === session.customer_email);
+            // Use profile lookup for efficiency
+            const { data: profile } = await supabaseClient
+              .from('profiles')
+              .select('user_id')
+              .ilike('email', session.customer_email)
+              .single();
             
-            if (user) {
-              // Ensure user stays on free plan and clean up limits
-              await supabaseClient
-                .from('user_subscriptions')
-                .delete()
-                .eq('user_id', user.id);
-
-              await supabaseClient
-                .from('usage_limits')
-                .delete()
-                .eq('user_id', user.id);
+            if (profile) {
+              const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+              const user = userData?.user;
               
-              logStep("User kept on free plan after failed checkout, limits cleaned", { userId: user.id });
+              if (user) {
+                // Ensure user stays on free plan and clean up limits
+                await supabaseClient
+                  .from('user_subscriptions')
+                  .delete()
+                  .eq('user_id', user.id);
+
+                await supabaseClient
+                  .from('usage_limits')
+                  .delete()
+                  .eq('user_id', user.id);
+                
+                logStep("User kept on free plan after failed checkout, limits cleaned", { userId: user.id });
+              }
             }
           }
         }
@@ -583,22 +666,31 @@ serve(async (req) => {
         if (paymentIntent.customer) {
           const customer = await stripe.customers.retrieve(paymentIntent.customer as string) as Stripe.Customer;
           if (customer.email) {
-            const { data: users } = await supabaseClient.auth.admin.listUsers();
-            const user = users.users.find(u => u.email === customer.email);
+            // Use profile lookup for efficiency
+            const { data: profile } = await supabaseClient
+              .from('profiles')
+              .select('user_id')
+              .ilike('email', customer.email)
+              .single();
             
-            if (user) {
-              // Ensure user stays on free plan and clean up limits
-              await supabaseClient
-                .from('user_subscriptions')
-                .delete()
-                .eq('user_id', user.id);
-
-              await supabaseClient
-                .from('usage_limits')
-                .delete()
-                .eq('user_id', user.id);
+            if (profile) {
+              const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+              const user = userData?.user;
               
-              logStep("User kept on free plan after payment failure, limits cleaned", { userId: user.id });
+              if (user) {
+                // Ensure user stays on free plan and clean up limits
+                await supabaseClient
+                  .from('user_subscriptions')
+                  .delete()
+                  .eq('user_id', user.id);
+
+                await supabaseClient
+                  .from('usage_limits')
+                  .delete()
+                  .eq('user_id', user.id);
+                
+                logStep("User kept on free plan after payment failure, limits cleaned", { userId: user.id });
+              }
             }
           }
         }
