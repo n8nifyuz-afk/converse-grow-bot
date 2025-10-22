@@ -1341,55 +1341,59 @@ export default function Admin() {
             setSelectedChatForMessages(null);
           }
         }}>
-          <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="max-w-full sm:max-w-[95vw] lg:max-w-5xl h-[100dvh] sm:h-auto sm:max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
             {!viewingMessages ? (
               <>
-                <DialogHeader className="border-b pb-4">
-                  <DialogTitle className="text-xl font-semibold">
+                <DialogHeader className="border-b pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6 shrink-0">
+                  <DialogTitle className="text-lg sm:text-xl font-semibold">
                     {selectedUserForChats?.display_name}'s Conversations
                   </DialogTitle>
-                  <DialogDescription className="text-sm">
+                  <DialogDescription className="text-xs sm:text-sm mt-1">
                     {selectedUserForChats?.email}
                     {loadingChats ? ' • Loading...' : ` • ${userChats.length} chat${userChats.length !== 1 ? 's' : ''}`}
                   </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
                   {loadingChats ? (
-                    <div className="flex items-center justify-center py-16">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <div className="flex items-center justify-center py-12 sm:py-16">
+                      <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
                     </div>
                   ) : userChats.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                      <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
-                      <p className="text-base">No conversations found</p>
+                    <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-muted-foreground">
+                      <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16 opacity-10 mb-3 sm:mb-4" />
+                      <p className="text-sm sm:text-base">No conversations found</p>
                     </div>
                   ) : (
-                    <div className="grid gap-3">
+                    <div className="grid gap-2 sm:gap-3">
                       {userChats.map((chat) => (
                         <Card 
                           key={chat.id} 
-                          className="border overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all group"
+                          className="border overflow-hidden cursor-pointer hover:border-primary/50 active:scale-[0.98] hover:shadow-sm transition-all group"
                           onClick={() => openChatMessages(chat)}
                         >
-                          <div className="flex items-center justify-between p-5">
+                          <div className="flex items-center justify-between p-3 sm:p-5">
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-medium text-base mb-2 truncate group-hover:text-primary transition-colors">
+                              <h3 className="font-medium text-sm sm:text-base mb-1 sm:mb-2 truncate group-hover:text-primary transition-colors">
                                 {chat.title}
                               </h3>
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-muted-foreground">
                                 <span>{chat.message_count} message{chat.message_count !== 1 ? 's' : ''}</span>
-                                <span>•</span>
-                                <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
+                                <span className="hidden sm:inline">•</span>
+                                <span className="hidden sm:inline">{new Date(chat.updated_at).toLocaleDateString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
                                   year: 'numeric',
                                   hour: '2-digit',
                                   minute: '2-digit'
                                 })}</span>
+                                <span className="sm:hidden">{new Date(chat.updated_at).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}</span>
                               </div>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-4" />
+                            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-2 sm:ml-4" />
                           </div>
                         </Card>
                       ))}
@@ -1399,21 +1403,21 @@ export default function Admin() {
               </>
             ) : (
               <>
-                <DialogHeader className="border-b pb-4">
-                  <div className="flex items-center gap-3">
+                <DialogHeader className="border-b pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6 shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={backToChatList}
-                      className="h-8 w-8 p-0"
+                      className="h-8 w-8 p-0 shrink-0"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <div className="flex-1">
-                      <DialogTitle className="text-xl font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <DialogTitle className="text-base sm:text-xl font-semibold truncate">
                         {selectedChatForMessages?.title}
                       </DialogTitle>
-                      <DialogDescription className="text-sm">
+                      <DialogDescription className="text-[11px] sm:text-sm mt-0.5 sm:mt-1 truncate">
                         {selectedChatForMessages?.message_count} message{selectedChatForMessages?.message_count !== 1 ? 's' : ''} • {selectedChatForMessages && new Date(selectedChatForMessages.updated_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -1426,20 +1430,20 @@ export default function Admin() {
                   </div>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto px-6 py-4">
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
                   {selectedChatForMessages && loadingMessages[selectedChatForMessages.id] ? (
-                    <div className="flex items-center justify-center py-16">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <div className="flex items-center justify-center py-12 sm:py-16">
+                      <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
                     </div>
                   ) : selectedChatForMessages && chatMessages[selectedChatForMessages.id] && chatMessages[selectedChatForMessages.id].length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                       {chatMessages[selectedChatForMessages.id].map((message) => (
                         <div
                           key={message.id}
-                          className="space-y-2"
+                          className="space-y-1.5 sm:space-y-2"
                         >
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-medium ${
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className={`text-[11px] sm:text-xs font-medium ${
                               message.role === 'user' ? 'text-primary' : 'text-muted-foreground'
                             }`}>
                               {message.role === 'user' ? 'User' : 'Assistant'}
@@ -1453,16 +1457,16 @@ export default function Admin() {
                               })}
                             </span>
                           </div>
-                          <div className={`rounded-lg p-4 ${
+                          <div className={`rounded-lg p-3 sm:p-4 ${
                             message.role === 'user'
                               ? 'bg-primary/5 border border-primary/20'
                               : 'bg-muted/50 border border-border'
                           }`}>
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">
                               {message.content}
                             </p>
                             {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
-                              <div className="mt-4 space-y-3 pt-3 border-t border-current/10">
+                              <div className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 pt-2 sm:pt-3 border-t border-current/10">
                                 {message.file_attachments.map((file: any, idx: number) => {
                                   const isImage = file.type?.startsWith('image/') || 
                                                 file.file_type?.startsWith('image/') ||
@@ -1477,7 +1481,7 @@ export default function Admin() {
                                         <img 
                                           src={fileUrl} 
                                           alt={fileName}
-                                          className="max-w-full max-h-[400px] object-contain bg-background"
+                                          className="max-w-full max-h-[250px] sm:max-h-[400px] object-contain bg-background"
                                         />
                                       </div>
                                     );
@@ -1489,10 +1493,10 @@ export default function Admin() {
                                       href={fileUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors group"
+                                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border border-border hover:bg-muted/50 active:bg-muted transition-colors group"
                                     >
-                                      <Paperclip className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
-                                      <span className="text-sm truncate">{fileName}</span>
+                                      <Paperclip className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                      <span className="text-xs sm:text-sm truncate">{fileName}</span>
                                     </a>
                                   );
                                 })}
@@ -1503,9 +1507,9 @@ export default function Admin() {
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                      <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
-                      <p className="text-base">No messages in this conversation</p>
+                    <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-muted-foreground">
+                      <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16 opacity-10 mb-3 sm:mb-4" />
+                      <p className="text-sm sm:text-base">No messages in this conversation</p>
                     </div>
                   )}
                 </div>
