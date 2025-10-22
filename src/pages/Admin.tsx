@@ -871,55 +871,7 @@ export default function Admin() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 px-2 text-xs"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  try {
-                                    toast.loading('Downloading chat data...');
-                                    const { data, error } = await supabase.functions.invoke('export-user-chats', {
-                                      body: { userId: usage.user_id }
-                                    });
-
-                                    if (error) throw error;
-
-                                    // Extract Excel base64 from JSON response
-                                    const excelBase64 = data.excel;
-                                    const filename = data.filename || `user_chats_${usage.user_id}_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-                                    // Convert base64 to blob
-                                    const byteCharacters = atob(excelBase64);
-                                    const byteNumbers = new Array(byteCharacters.length);
-                                    for (let i = 0; i < byteCharacters.length; i++) {
-                                      byteNumbers[i] = byteCharacters.charCodeAt(i);
-                                    }
-                                    const byteArray = new Uint8Array(byteNumbers);
-                                    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                                    
-                                    // Create download link
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = filename;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    window.URL.revokeObjectURL(url);
-                                    document.body.removeChild(a);
-
-                                    toast.dismiss();
-                                    toast.success('Chat data downloaded as Excel file');
-                                  } catch (error) {
-                                    console.error('Error downloading chats:', error);
-                                    toast.dismiss();
-                                    toast.error('Failed to download chat data');
-                                  }
-                                }}
-                              >
-                                Download
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 px-2 text-xs gap-1"
+                                className="h-7 px-3 text-xs"
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   setSelectedUserForChats(usage);
@@ -927,7 +879,6 @@ export default function Admin() {
                                   await fetchUserChats(usage.user_id);
                                 }}
                               >
-                                <MessageSquare className="h-3 w-3" />
                                 Chats
                               </Button>
                               <Button
@@ -1427,64 +1378,57 @@ export default function Admin() {
             setSelectedUserForChats(null);
           }
         }}>
-          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-              <DialogTitle className="text-lg sm:text-xl flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                {selectedUserForChats?.display_name}'s Chats
+          <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="border-b pb-4">
+              <DialogTitle className="text-xl font-semibold">
+                {selectedUserForChats?.display_name}'s Conversations
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm">
                 {selectedUserForChats?.email}
-                {loadingChats ? ' • Loading...' : ` • ${userChats.length} chats`}
+                {loadingChats ? ' • Loading...' : ` • ${userChats.length} chat${userChats.length !== 1 ? 's' : ''}`}
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+            <div className="flex-1 overflow-y-auto p-6">
               {loadingChats ? (
-                <div className="flex items-center justify-center py-12">
+                <div className="flex items-center justify-center py-16">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : userChats.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <MessageSquare className="h-12 w-12 opacity-20 mb-3" />
-                  <p className="text-sm">No chats found for this user</p>
+                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                  <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
+                  <p className="text-base">No conversations found</p>
                 </div>
               ) : (
-                userChats.map((chat) => (
-                  <Card 
-                    key={chat.id} 
-                    className="border-border/50 overflow-hidden cursor-pointer hover:bg-muted/30 transition-all hover:shadow-md"
-                    onClick={() => openChatMessages(chat)}
-                  >
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex-1">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-1 h-2 w-2 rounded-full flex-shrink-0 bg-primary/60" />
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm sm:text-base truncate">
-                              {chat.title}
-                            </h3>
-                            <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <MessageSquare className="h-3 w-3" />
-                                {chat.message_count} messages
-                              </span>
-                              <span>•</span>
-                              <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}</span>
-                            </div>
+                <div className="grid gap-3">
+                  {userChats.map((chat) => (
+                    <Card 
+                      key={chat.id} 
+                      className="border overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all group"
+                      onClick={() => openChatMessages(chat)}
+                    >
+                      <div className="flex items-center justify-between p-5">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-base mb-2 truncate group-hover:text-primary transition-colors">
+                            {chat.title}
+                          </h3>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>{chat.message_count} message{chat.message_count !== 1 ? 's' : ''}</span>
+                            <span>•</span>
+                            <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}</span>
                           </div>
                         </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-4" />
                       </div>
-                      <Eye className="h-4 w-4 text-muted-foreground ml-2" />
-                    </div>
-                  </Card>
-                ))
+                    </Card>
+                  ))}
+                </div>
               )}
             </div>
           </DialogContent>
@@ -1497,14 +1441,13 @@ export default function Admin() {
             setSelectedChatForMessages(null);
           }
         }}>
-          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-              <DialogTitle className="text-lg sm:text-xl flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="border-b pb-4">
+              <DialogTitle className="text-xl font-semibold">
                 {selectedChatForMessages?.title}
               </DialogTitle>
-              <DialogDescription>
-                {selectedChatForMessages?.message_count} messages • Last updated {selectedChatForMessages && new Date(selectedChatForMessages.updated_at).toLocaleDateString('en-US', {
+              <DialogDescription className="text-sm">
+                {selectedChatForMessages?.message_count} message{selectedChatForMessages?.message_count !== 1 ? 's' : ''} • {selectedChatForMessages && new Date(selectedChatForMessages.updated_at).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',
@@ -1514,88 +1457,86 @@ export default function Admin() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto pr-2">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
               {selectedChatForMessages && loadingMessages[selectedChatForMessages.id] ? (
-                <div className="flex items-center justify-center py-12">
+                <div className="flex items-center justify-center py-16">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : selectedChatForMessages && chatMessages[selectedChatForMessages.id] && chatMessages[selectedChatForMessages.id].length > 0 ? (
-                <div className="space-y-4 py-4">
+                <div className="space-y-6">
                   {chatMessages[selectedChatForMessages.id].map((message) => (
                     <div
                       key={message.id}
-                      className={`flex gap-3 ${
-                        message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'
-                      }`}
+                      className="space-y-2"
                     >
-                      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                        message.role === 'user' 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-muted border border-border'
-                      }`}>
-                        {message.role === 'user' ? '👤' : '🤖'}
-                      </div>
-                      <div className={`flex-1 ${message.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
-                        <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                          message.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-card border border-border'
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-medium ${
+                          message.role === 'user' ? 'text-primary' : 'text-muted-foreground'
                         }`}>
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                            {message.content}
-                          </p>
-                          {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
-                            <div className="mt-3 space-y-2">
-                              {message.file_attachments.map((file: any, idx: number) => {
-                                const isImage = file.type?.startsWith('image/') || 
-                                              file.file_type?.startsWith('image/') ||
-                                              /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name || file.file_name || '');
-                                
-                                const fileUrl = file.url || file.file_url || file.path || file.file_path;
-                                const fileName = file.name || file.file_name || `File ${idx + 1}`;
-                                
-                                if (isImage && fileUrl) {
-                                  return (
-                                    <div key={idx} className="rounded-lg overflow-hidden border border-current/20">
-                                      <img 
-                                        src={fileUrl} 
-                                        alt={fileName}
-                                        className="max-w-full max-h-[300px] object-contain bg-muted/20"
-                                      />
-                                    </div>
-                                  );
-                                }
-                                
-                                return (
-                                  <a
-                                    key={idx}
-                                    href={fileUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 p-2 rounded-lg border border-current/20 hover:bg-current/5 transition-colors text-xs"
-                                  >
-                                    <Paperclip className="h-3 w-3 flex-shrink-0" />
-                                    <span className="truncate">{fileName}</span>
-                                  </a>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground mt-1 px-2">
-                          {new Date(message.created_at).toLocaleTimeString('en-US', {
+                          {message.role === 'user' ? 'User' : 'Assistant'}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(message.created_at).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'
                           })}
                         </span>
                       </div>
+                      <div className={`rounded-lg p-4 ${
+                        message.role === 'user'
+                          ? 'bg-primary/5 border border-primary/20'
+                          : 'bg-muted/50 border border-border'
+                      }`}>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                          {message.content}
+                        </p>
+                        {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
+                          <div className="mt-4 space-y-3 pt-3 border-t border-current/10">
+                            {message.file_attachments.map((file: any, idx: number) => {
+                              const isImage = file.type?.startsWith('image/') || 
+                                            file.file_type?.startsWith('image/') ||
+                                            /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name || file.file_name || '');
+                              
+                              const fileUrl = file.url || file.file_url || file.path || file.file_path;
+                              const fileName = file.name || file.file_name || `File ${idx + 1}`;
+                              
+                              if (isImage && fileUrl) {
+                                return (
+                                  <div key={idx} className="rounded-lg overflow-hidden border border-border">
+                                    <img 
+                                      src={fileUrl} 
+                                      alt={fileName}
+                                      className="max-w-full max-h-[400px] object-contain bg-background"
+                                    />
+                                  </div>
+                                );
+                              }
+                              
+                              return (
+                                <a
+                                  key={idx}
+                                  href={fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors group"
+                                >
+                                  <Paperclip className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                  <span className="text-sm truncate">{fileName}</span>
+                                </a>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <MessageSquare className="h-12 w-12 opacity-20 mb-3" />
-                  <p className="text-sm">No messages in this chat</p>
+                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                  <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
+                  <p className="text-base">No messages in this conversation</p>
                 </div>
               )}
             </div>
