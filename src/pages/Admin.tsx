@@ -218,7 +218,7 @@ export default function Admin() {
       const {
         data: allProfilesData,
         error: allProfilesError
-      } = await supabase.from('profiles').select('user_id, email, display_name, signup_method');
+      } = await supabase.from('profiles').select('user_id, email, display_name, signup_method, blocked');
       if (allProfilesError) throw allProfilesError;
       console.log('Total profiles (auth.users):', allProfilesData?.length);
 
@@ -262,8 +262,9 @@ export default function Admin() {
             product_id: null,
             plan: null,
             subscription_end: null
-          }
-        });
+          },
+          blocked: profile.blocked || false
+        } as any);
       });
 
       // Then add token usage data to the users
@@ -683,6 +684,66 @@ export default function Admin() {
                     })()}
                   </>
                 )}
+              </div>
+
+              {/* Admin Actions */}
+              <div className="flex gap-2 pt-4 border-t border-border/50">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={async () => {
+                    if (!confirm(`Are you sure you want to ${(selectedUser as any).blocked ? 'unblock' : 'block'} this user?`)) {
+                      return;
+                    }
+                    
+                    try {
+                      const { error } = await supabase.functions.invoke('admin-block-user', {
+                        body: { 
+                          userId: selectedUser.user_id,
+                          blocked: !(selectedUser as any).blocked 
+                        }
+                      });
+
+                      if (error) throw error;
+
+                      toast.success(`User ${(selectedUser as any).blocked ? 'unblocked' : 'blocked'} successfully`);
+                      setIsModalOpen(false);
+                      await fetchTokenUsageData();
+                    } catch (error) {
+                      console.error('Error blocking user:', error);
+                      toast.error('Failed to block user');
+                    }
+                  }}
+                >
+                  {(selectedUser as any).blocked ? 'Unblock User' : 'Block User'}
+                </Button>
+                
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={async () => {
+                    if (!confirm('Are you sure you want to PERMANENTLY DELETE this user? This action cannot be undone!')) {
+                      return;
+                    }
+                    
+                    try {
+                      const { error } = await supabase.functions.invoke('admin-delete-user', {
+                        body: { userId: selectedUser.user_id }
+                      });
+
+                      if (error) throw error;
+
+                      toast.success('User deleted successfully');
+                      setIsModalOpen(false);
+                      await fetchTokenUsageData();
+                    } catch (error) {
+                      console.error('Error deleting user:', error);
+                      toast.error('Failed to delete user');
+                    }
+                  }}
+                >
+                  Delete User
+                </Button>
               </div>
             </DialogHeader>
             

@@ -162,16 +162,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(session);
           setUser(session.user);
           
-          // Check if this is a new signup by verifying if profile exists
-          // This works for all auth methods (email, Google, Apple, etc.)
+          // Check if user is blocked and logout immediately
           setTimeout(async () => {
             const { data: profile } = await supabase
               .from('profiles')
-              .select('id')
+              .select('id, blocked')
               .eq('user_id', session.user.id)
               .single();
             
-            // If profile was just created (trigger created it), it's a new signup
+            // If user is blocked, logout immediately
+            if (profile?.blocked) {
+              console.log('[AUTH] 🚫 User is blocked - logging out');
+              await supabase.auth.signOut();
+              window.location.href = '/';
+              return;
+            }
+            
+            // Check if this is a new signup
             if (profile) {
               const profileCreated = new Date(session.user.created_at).getTime();
               const now = Date.now();
