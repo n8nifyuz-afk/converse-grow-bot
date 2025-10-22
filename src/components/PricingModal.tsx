@@ -215,9 +215,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             )}
             
             {/* Left Panel - Features Comparison */}
-            <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-200 dark:border-zinc-800 flex-col relative">
+            <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-blue-50 via-white to-zinc-50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-blue-100 dark:border-zinc-800 flex-col relative">
               {/* Decorative gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-white/5 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-400/5 pointer-events-none"></div>
               
               {/* Comparison Table */}
               <div className="flex-1 flex flex-col min-h-0 relative z-10">
