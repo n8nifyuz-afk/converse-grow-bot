@@ -541,7 +541,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Skip pricing modal if user signed in to send a message
     const skipPricingModal = sessionStorage.getItem('skipPricingModal');
     if (skipPricingModal === 'true') {
-      return; // Persists for entire session until browser tab is closed
+      // Clear the flag immediately after using it (only skip once)
+      sessionStorage.removeItem('skipPricingModal');
+      return;
     }
     
     // Check if modal was already shown this session
