@@ -493,6 +493,28 @@ serve(async (req) => {
         // CRITICAL: Revert to free plan for ANY refund (partial or full)
         // Policy: Any refund removes subscription access
         if (charge.amount_refunded > 0) {
+          // CRITICAL FIX: Get user's subscription and cancel it in Stripe
+          // This prevents subscription.updated events from re-activating the user
+          const { data: userSub } = await supabaseClient
+            .from('user_subscriptions')
+            .select('stripe_subscription_id')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (userSub?.stripe_subscription_id) {
+            try {
+              // Cancel the subscription immediately in Stripe
+              await stripe.subscriptions.cancel(userSub.stripe_subscription_id);
+              logStep("Cancelled Stripe subscription after refund", { 
+                subscriptionId: userSub.stripe_subscription_id 
+              });
+            } catch (cancelError) {
+              logStep("Failed to cancel Stripe subscription (may already be cancelled)", { 
+                error: cancelError instanceof Error ? cancelError.message : String(cancelError)
+              });
+            }
+          }
+          
           await supabaseClient
             .from('user_subscriptions')
             .delete()
