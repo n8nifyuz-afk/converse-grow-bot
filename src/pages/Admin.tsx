@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -214,6 +214,50 @@ export default function Admin() {
       console.error('Error checking admin access:', error);
       toast.error('Failed to verify admin access');
       navigate('/');
+    }
+  };
+
+  const handleDownloadUserList = async () => {
+    try {
+      toast.loading('Generating user export...');
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Session expired. Please log in again.');
+        return;
+      }
+
+      const supabaseUrl = 'https://lciaiunzacgvvbvcshdh.supabase.co';
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/export-users`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to export users');
+      }
+
+      // Download the CSV file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('User list downloaded successfully!');
+    } catch (error) {
+      console.error('Error downloading user list:', error);
+      toast.error('Failed to download user list');
     }
   };
   const fetchTokenUsageData = async () => {
@@ -433,7 +477,20 @@ export default function Admin() {
 
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
         {/* Header Section */}
-        
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Admin Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Manage users and monitor system usage</p>
+          </div>
+          <Button 
+            onClick={handleDownloadUserList}
+            className="gap-2"
+            variant="outline"
+          >
+            <Download className="w-4 h-4" />
+            Download User List
+          </Button>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
