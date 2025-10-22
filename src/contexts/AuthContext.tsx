@@ -173,36 +173,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               window.history.replaceState({}, document.title, window.location.pathname);
             }
             
-            // Check if user is blocked and logout immediately
+            // Defer async operations to prevent blocking auth flow
             setTimeout(async () => {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('id, blocked')
-              .eq('user_id', session.user.id)
-              .single();
-            
-            // If user is blocked, logout immediately
-            if (profile?.blocked) {
-              console.log('[AUTH] 🚫 User is blocked - logging out');
-              await supabase.auth.signOut();
-              window.location.href = '/';
-              return;
-            }
-            
-            // Check if this is a new signup
-            if (profile) {
-              const profileCreated = new Date(session.user.created_at).getTime();
-              const now = Date.now();
-              // Profile created within last 10 seconds = new signup
-              if ((now - profileCreated) < 10000) {
-                console.log('[AUTH] 🎯 New user signup detected - tracking registration_complete');
-                trackRegistrationComplete();
+              // Check if this is a new signup
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('id, created_at')
+                .eq('user_id', session.user.id)
+                .single();
+              
+              if (profile) {
+                const profileCreated = new Date(session.user.created_at).getTime();
+                const now = Date.now();
+                // Profile created within last 10 seconds = new signup
+                if ((now - profileCreated) < 10000) {
+                  console.log('[AUTH] 🎯 New user signup detected - tracking registration_complete');
+                  trackRegistrationComplete();
+                }
               }
-            }
-            
-            syncOAuthProfile(session);
-            checkSubscription();
-          }, 500);
+              
+              syncOAuthProfile(session);
+              checkSubscription();
+            }, 500);
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
