@@ -89,7 +89,6 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
 
 const pricingOptions = {
   pro: {
-    cheap: { price: 1.00, perDay: 0.03 },        // €1.00/month (cheap subscription)
     monthly: { price: 19.99, perDay: 0.67 },     // €19.99/month
     '3month': { price: 39.99, perDay: 0.44 },    // €39.99 for 3 months
     yearly: { price: 59.99, perDay: 0.16, savings: 75 } // €59.99/year (save 75%)
@@ -103,7 +102,6 @@ const pricingOptions = {
 
 const priceIds = {
   pro: {
-    cheap: 'price_1SKxcNL8Zm4LqDn4kcfP73KV',     // €1.00/month (cheap subscription)
     monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',   // €19.99/month
     '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',  // €39.99 for 3 months
     yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'     // €59.99/year
@@ -120,7 +118,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const isMobile = useIsMobile();
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'cheap' | 'monthly' | '3month' | 'yearly'>('yearly');
+  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | '3month' | 'yearly'>('yearly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -130,7 +128,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_THWfIRwAZHPr4s': 'Pro (Cheap)', // Pro Cheap €1/month
     'prod_TGsOnuDkIh9hVG': 'Pro',        // Pro Monthly
     'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month
     'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly
@@ -299,33 +296,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Billing Period Options */}
               <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-2.5 flex-shrink-0">
-                {selectedPlan === 'pro' && (
-                  <button
-                    onClick={() => setSelectedPeriod('cheap')}
-                    className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
-                      selectedPeriod === 'cheap'
-                        ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-lg'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
-                    }`}
-                  >
-                    <Badge className="absolute -top-2 right-2 sm:right-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md px-2 py-0.5 text-[10px] font-bold border-0">
-                      CHEAP
-                    </Badge>
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="font-semibold text-sm text-zinc-900 dark:text-white">Cheap Pro</div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                          €{pricingOptions.pro.cheap.price}/{t('pricingModal.perMonth').toLowerCase()}
-                        </div>
-                      </div>
-                      <div className="text-right ml-3">
-                        <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions.pro.cheap.perDay}</div>
-                        <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
-                      </div>
-                    </div>
-                  </button>
-                )}
-                
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
