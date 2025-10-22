@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import XLSX from "https://esm.sh/xlsx@0.18.5";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -103,29 +104,39 @@ serve(async (req) => {
       })
     );
 
-    // Create CSV content
-    const headers = ["Username", "Email", "Login Method", "Plan", "Total Spent (EUR)", "Account Created"];
-    const csvRows = [
-      headers.join(","),
-      ...userDataWithSpending.map(user => 
-        [
-          `"${user.username}"`,
-          `"${user.email}"`,
-          user.login_method,
-          user.plan,
-          user.total_spent,
-          user.created_at
-        ].join(",")
-      )
+    // Create Excel workbook
+    const worksheet = XLSX.utils.json_to_sheet(
+      userDataWithSpending.map(user => ({
+        "Username": user.username,
+        "Email": user.email,
+        "Login Method": user.login_method,
+        "Plan": user.plan,
+        "Total Spent (EUR)": user.total_spent,
+        "Account Created": user.created_at
+      }))
+    );
+
+    // Set column widths for better readability
+    worksheet["!cols"] = [
+      { wch: 25 }, // Username
+      { wch: 35 }, // Email
+      { wch: 15 }, // Login Method
+      { wch: 15 }, // Plan
+      { wch: 18 }, // Total Spent
+      { wch: 18 }  // Account Created
     ];
 
-    const csvContent = csvRows.join("\n");
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
 
-    return new Response(csvContent, {
+    // Generate XLSX file
+    const xlsxBuffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+    return new Response(xlsxBuffer, {
       headers: {
         ...corsHeaders,
-        "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="users_export_${new Date().toISOString().split('T')[0]}.csv"`,
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="users_export_${new Date().toISOString().split('T')[0]}.xlsx"`,
       },
     });
 
