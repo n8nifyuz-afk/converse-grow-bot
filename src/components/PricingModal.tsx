@@ -90,26 +90,26 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
 const pricingOptions = {
   pro: {
     monthly: { price: 19.99, perDay: 0.67 },     // €19.99/month
-    '3month': { price: 39.99, perDay: 0.44 },    // €39.99 for 3 months
+    '3month': { price: 49.99, perDay: 0.55 },    // €49.99 for 3 months
     yearly: { price: 59.99, perDay: 0.16, savings: 75 } // €59.99/year (save 75%)
   },
   ultra: {
     monthly: { price: 39.99, perDay: 1.33 },     // €39.99/month
-    '3month': { price: 79.99, perDay: 0.89 },    // €79.99 for 3 months
+    '3month': { price: 99.99, perDay: 1.11 },    // €99.99 for 3 months
     yearly: { price: 119.99, perDay: 0.33, savings: 75 } // €119.99/year (save 75%)
   }
 };
 
-const priceIds = {
+const paymentLinks = {
   pro: {
-    monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',   // €19.99/month
-    '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',  // €39.99 for 3 months
-    yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'     // €59.99/year
+    monthly: 'https://checkout.chatl.ai/b/fZu5kEcg21xG7qpdETdZ607',
+    '3month': 'https://checkout.chatl.ai/b/aFabJ20xk3FOfWVeIXdZ608',
+    yearly: 'https://checkout.chatl.ai/b/9B69AU1Bob8g121dETdZ609'
   },
   ultra: {
-    monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',   // €39.99/month
-    '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',  // €79.99 for 3 months
-    yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'     // €119.99/year
+    monthly: 'https://checkout.chatl.ai/b/eVqbJ2bbY2BK9yxbwLdZ60a',
+    '3month': 'https://checkout.chatl.ai/b/fZu28s3Jw1xG121eIXdZ60b',
+    yearly: 'https://checkout.chatl.ai/b/9B6cN6bbYcck4ed58ndZ60c'
   }
 };
 
@@ -152,31 +152,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
     setIsLoading(true);
     try {
-      const priceId = priceIds[selectedPlan][selectedPeriod];
+      const paymentLink = paymentLinks[selectedPlan][selectedPeriod];
       
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId }
-      });
-
-      if (error) {
-        // Check if error is about active subscription
-        const errorMessage = error.message || '';
-        if (errorMessage.includes('active subscription')) {
-          toast.dismiss();
-          const currentPlanName = productToPlanMap[subscriptionStatus.product_id || ''] || 'Unknown';
-          setBlockedPlanName(currentPlanName);
-          setShowUpgradeBlockedDialog(true);
-          return;
-        }
-        throw error;
+      if (!paymentLink) {
+        throw new Error('Payment link not available');
       }
 
-      if (data?.url) {
-        // Redirect to Stripe checkout in the same window
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL received from server');
-      }
+      // Redirect to Stripe checkout
+      window.location.href = paymentLink;
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to start subscription process';
       

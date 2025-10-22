@@ -17,7 +17,7 @@ const Pricing = () => {
   const location = useLocation();
   const { user, subscriptionStatus, checkSubscription } = useAuth();
   const { t } = useTranslation();
-  const [isYearly, setIsYearly] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -56,6 +56,7 @@ const Pricing = () => {
     name: t('pricingPage.free'),
     emoji: "🆓",
     price: 0,
+    quarterlyPrice: 0,
     yearlyPrice: 0,
     icon: Zap,
     description: t('pricingPage.freeDesc'),
@@ -77,11 +78,17 @@ const Pricing = () => {
       included: false
     }],
     buttonText: t('pricingPage.getStarted'),
-    buttonVariant: "outline" as const
+    buttonVariant: "outline" as const,
+    paymentLinks: {
+      monthly: '',
+      quarterly: '',
+      yearly: ''
+    }
   }, {
     name: t('pricingPage.pro'),
     emoji: "⭐",
     price: 19.99,
+    quarterlyPrice: 49.99,
     yearlyPrice: 59.99,
     icon: Star,
     description: t('pricingPage.proDesc'),
@@ -115,11 +122,17 @@ const Pricing = () => {
       included: true
     }],
     buttonText: t('pricingPage.subscribeNow'),
-    buttonVariant: "default" as const
+    buttonVariant: "default" as const,
+    paymentLinks: {
+      monthly: 'https://checkout.chatl.ai/b/fZu5kEcg21xG7qpdETdZ607',
+      quarterly: 'https://checkout.chatl.ai/b/aFabJ20xk3FOfWVeIXdZ608',
+      yearly: 'https://checkout.chatl.ai/b/9B69AU1Bob8g121dETdZ609'
+    }
   }, {
     name: t('pricingPage.ultraPro'),
     emoji: "🚀",
     price: 39.99,
+    quarterlyPrice: 99.99,
     yearlyPrice: 119.99,
     icon: Crown,
     description: t('pricingPage.ultraProDesc'),
@@ -153,10 +166,17 @@ const Pricing = () => {
       included: false
     }],
     buttonText: t('pricingPage.subscribeNow'),
-    buttonVariant: "outline" as const
+    buttonVariant: "outline" as const,
+    paymentLinks: {
+      monthly: 'https://checkout.chatl.ai/b/eVqbJ2bbY2BK9yxbwLdZ60a',
+      quarterly: 'https://checkout.chatl.ai/b/fZu28s3Jw1xG121eIXdZ60b',
+      yearly: 'https://checkout.chatl.ai/b/9B6cN6bbYcck4ed58ndZ60c'
+    }
   }];
   const getPrice = (plan: typeof plans[0]) => {
-    return isYearly ? plan.yearlyPrice : plan.price;
+    if (billingPeriod === 'yearly') return plan.yearlyPrice;
+    if (billingPeriod === 'quarterly') return plan.quarterlyPrice;
+    return plan.price;
   };
   const getSavings = (plan: typeof plans[0]) => {
     if (plan.price === 0 || plan.yearlyPrice === 0) return 0;
@@ -176,7 +196,7 @@ const Pricing = () => {
       return;
     }
     
-    // Check if user already has an active subscription BEFORE showing any loading messages
+    // Check if user already has an active subscription
     if (subscriptionStatus.subscribed && subscriptionStatus.product_id) {
       const currentPlanName = productToPlanMap[subscriptionStatus.product_id] || 'Unknown';
       setBlockedPlanName(currentPlanName);
@@ -184,72 +204,16 @@ const Pricing = () => {
       return;
     }
     
-    try {
-      // Map plan to price ID based on billing period
-      const priceIds = {
-        'Pro': {
-          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq', // €19.99
-          yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'   // €59.99
-        },
-        'Ultra Pro': {
-          monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8', // €39.99
-          yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'   // €119.99
-        }
-      };
-      
-      const planPrices = priceIds[plan.name as keyof typeof priceIds];
-      const priceId = planPrices ? (isYearly ? planPrices.yearly : planPrices.monthly) : null;
-      
-      if (!priceId) {
-        toast.error('Invalid plan selected');
-        return;
-      }
-      
-      // Show loading toast ONLY after subscription check passes
-      toast.loading('Redirecting to checkout...');
-      
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId }
-      });
-      
-      toast.dismiss(); // Dismiss loading toast
-      
-      if (error) {
-        const errorMessage = error.message || '';
-        
-        // Provide user-friendly error messages
-        if (errorMessage.includes('active subscription')) {
-          toast.error('You already have an active subscription', {
-            description: 'Please cancel your current plan first to switch plans',
-            action: {
-              label: 'Manage',
-              onClick: () => navigate('/cancel-subscription')
-            }
-          });
-        } else if (errorMessage.includes('authentication')) {
-          toast.error('Authentication failed', {
-            description: 'Please sign in and try again'
-          });
-        } else {
-          toast.error('Failed to start checkout', {
-            description: errorMessage
-          });
-        }
-        console.error('Checkout error:', error);
-        return;
-      }
-      
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      toast.dismiss(); // Dismiss loading toast on error
-      console.error('Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-      toast.error('Unable to process request', {
-        description: errorMessage
-      });
+    // Get the payment link based on billing period
+    const paymentLink = plan.paymentLinks[billingPeriod];
+    
+    if (!paymentLink) {
+      toast.error('Payment link not available');
+      return;
     }
+    
+    // Redirect to Stripe checkout
+    window.location.href = paymentLink;
   };
 
   const handleAuthSuccess = () => {
@@ -291,19 +255,34 @@ const Pricing = () => {
             {t('pricingPage.startFreeScale')}
           </p>
 
-          {/* Billing Toggle */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 animate-fade-in" style={{
+          {/* Billing Period Selector */}
+          <div className="flex items-center justify-center gap-2 mb-6 sm:mb-8 animate-fade-in" style={{
           animationDelay: '0.2s'
         }}>
-            <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Button
+              variant={billingPeriod === 'monthly' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setBillingPeriod('monthly')}
+              className="text-xs sm:text-sm"
+            >
               {t('pricingPage.monthly')}
-            </span>
-            <button onClick={() => setIsYearly(!isYearly)} className={`relative w-14 h-7 sm:w-16 sm:h-8 rounded-full transition-colors duration-300 ${isYearly ? 'bg-primary' : 'bg-muted'}`}>
-              <div className={`absolute top-1 left-1 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${isYearly ? 'translate-x-7 sm:translate-x-8' : 'translate-x-0'}`}></div>
-            </button>
-            <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
+            </Button>
+            <Button
+              variant={billingPeriod === 'quarterly' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setBillingPeriod('quarterly')}
+              className="text-xs sm:text-sm"
+            >
+              3 Months
+            </Button>
+            <Button
+              variant={billingPeriod === 'yearly' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setBillingPeriod('yearly')}
+              className="text-xs sm:text-sm"
+            >
               {t('pricingPage.yearly')}
-            </span>
+            </Button>
           </div>
         </div>
       </section>
@@ -332,7 +311,7 @@ const Pricing = () => {
                         €{currentPrice}
                       </span>
                       <span className="text-muted-foreground text-sm sm:text-base md:text-lg">
-                        / {isYearly ? t('pricingPage.year') : t('pricingPage.month')}
+                        / {billingPeriod === 'yearly' ? t('pricingPage.year') : billingPeriod === 'quarterly' ? '3 months' : t('pricingPage.month')}
                       </span>
                     </div>
                     
