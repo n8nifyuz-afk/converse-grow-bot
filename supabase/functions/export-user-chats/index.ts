@@ -66,15 +66,20 @@ Deno.serve(async (req) => {
     const chatIds = chats?.map(chat => chat.id) || [];
     
     if (chatIds.length === 0) {
-      // Return empty CSV
-      const csvContent = 'Chat Title,Chat Created At,Model,Message Role,Message Content,Message Created At\n';
-      return new Response(csvContent, {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="user_chats_${userId}_${new Date().toISOString().split('T')[0]}.csv"`,
-        },
-      });
+      // Return empty CSV wrapped in JSON
+      const csvContent = 'Chat Title,Chat Created At,Model,Message Role,Message Content,Message Created At,Image URLs\n';
+      return new Response(
+        JSON.stringify({ 
+          csv: csvContent,
+          filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.csv`
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
     }
 
     const { data: messages, error: messagesError } = await supabase
@@ -92,7 +97,7 @@ Deno.serve(async (req) => {
 
     // Build CSV
     const csvRows: string[] = [];
-    csvRows.push('Chat Title,Chat Created At,Model,Message Role,Message Content,Message Created At,Has Attachments');
+    csvRows.push('Chat Title,Chat Created At,Model,Message Role,Message Content,Message Created At,Image URLs');
 
     // Create a map of chat IDs to chat details
     const chatMap = new Map(chats?.map(chat => [chat.id, chat]) || []);
@@ -111,7 +116,24 @@ Deno.serve(async (req) => {
         return value;
       };
 
-      const hasAttachments = message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0;
+      // Extract image URLs from file_attachments
+      let imageUrls = '';
+      if (message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0) {
+        const urls = message.file_attachments
+          .map((attachment: any) => {
+            if (typeof attachment === 'string') {
+              return attachment;
+            } else if (attachment && attachment.url) {
+              return attachment.url;
+            } else if (attachment && attachment.path) {
+              return `https://lciaiunzacgvvbvcshdh.supabase.co/storage/v1/object/public/chat-images/${attachment.path}`;
+            }
+            return null;
+          })
+          .filter((url: string | null) => url !== null)
+          .join(' | ');
+        imageUrls = urls;
+      }
 
       csvRows.push([
         escapeCsv(chat.title),
@@ -120,7 +142,7 @@ Deno.serve(async (req) => {
         escapeCsv(message.role),
         escapeCsv(message.content),
         new Date(message.created_at).toISOString(),
-        hasAttachments ? 'Yes' : 'No',
+        escapeCsv(imageUrls),
       ].join(','));
     });
 
@@ -128,13 +150,19 @@ Deno.serve(async (req) => {
 
     console.log(`Exported ${messages?.length || 0} messages from ${chats?.length || 0} chats`);
 
-    return new Response(csvContent, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename="user_chats_${userId}_${new Date().toISOString().split('T')[0]}.csv"`,
-      },
-    });
+    // Return CSV wrapped in JSON for proper handling by Supabase client
+    return new Response(
+      JSON.stringify({ 
+        csv: csvContent,
+        filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.csv`
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
   } catch (error) {
     console.error('Error exporting user chats:', error);

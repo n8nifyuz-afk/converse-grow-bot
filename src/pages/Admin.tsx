@@ -683,12 +683,16 @@ export default function Admin() {
 
                                     if (error) throw error;
 
+                                    // Extract CSV from JSON response
+                                    const csvContent = data.csv;
+                                    const filename = data.filename || `user_chats_${usage.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+
                                     // Create blob and download
-                                    const blob = new Blob([data], { type: 'text/csv' });
+                                    const blob = new Blob([csvContent], { type: 'text/csv' });
                                     const url = window.URL.createObjectURL(blob);
                                     const a = document.createElement('a');
                                     a.href = url;
-                                    a.download = `user_chats_${usage.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+                                    a.download = filename;
                                     document.body.appendChild(a);
                                     a.click();
                                     window.URL.revokeObjectURL(url);
@@ -939,12 +943,16 @@ export default function Admin() {
 
                       if (error) throw error;
 
+                      // Extract CSV from JSON response
+                      const csvContent = data.csv;
+                      const filename = data.filename || `user_chats_${selectedUser.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+
                       // Create blob and download
-                      const blob = new Blob([data], { type: 'text/csv' });
+                      const blob = new Blob([csvContent], { type: 'text/csv' });
                       const url = window.URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `user_chats_${selectedUser.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+                      a.download = filename;
                       document.body.appendChild(a);
                       a.click();
                       window.URL.revokeObjectURL(url);
