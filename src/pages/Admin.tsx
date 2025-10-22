@@ -207,7 +207,7 @@ export default function Admin() {
   const [chatMessages, setChatMessages] = useState<{[chatId: string]: ChatMessage[]}>({});
   const [loadingMessages, setLoadingMessages] = useState<{[chatId: string]: boolean}>({});
   const [showChatsModal, setShowChatsModal] = useState(false);
-  const [showMessagesModal, setShowMessagesModal] = useState(false);
+  const [viewingMessages, setViewingMessages] = useState(false);
   const [selectedUserForChats, setSelectedUserForChats] = useState<UserTokenUsage | null>(null);
   const usersPerPage = 15;
   useEffect(() => {
@@ -600,11 +600,17 @@ export default function Admin() {
     }
   };
 
-  // Open chat messages in modal
+  // Open chat messages in same modal
   const openChatMessages = async (chat: UserChat) => {
     setSelectedChatForMessages(chat);
-    setShowMessagesModal(true);
+    setViewingMessages(true);
     await fetchChatMessages(chat.id);
+  };
+
+  // Go back to chat list
+  const backToChatList = () => {
+    setViewingMessages(false);
+    setSelectedChatForMessages(null);
   };
 
   // Get plan display info
@@ -1376,170 +1382,180 @@ export default function Admin() {
             setUserChats([]);
             setChatMessages({});
             setSelectedUserForChats(null);
-          }
-        }}>
-          <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader className="border-b pb-4">
-              <DialogTitle className="text-xl font-semibold">
-                {selectedUserForChats?.display_name}'s Conversations
-              </DialogTitle>
-              <DialogDescription className="text-sm">
-                {selectedUserForChats?.email}
-                {loadingChats ? ' • Loading...' : ` • ${userChats.length} chat${userChats.length !== 1 ? 's' : ''}`}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex-1 overflow-y-auto p-6">
-              {loadingChats ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : userChats.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                  <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
-                  <p className="text-base">No conversations found</p>
-                </div>
-              ) : (
-                <div className="grid gap-3">
-                  {userChats.map((chat) => (
-                    <Card 
-                      key={chat.id} 
-                      className="border overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all group"
-                      onClick={() => openChatMessages(chat)}
-                    >
-                      <div className="flex items-center justify-between p-5">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-base mb-2 truncate group-hover:text-primary transition-colors">
-                            {chat.title}
-                          </h3>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span>{chat.message_count} message{chat.message_count !== 1 ? 's' : ''}</span>
-                            <span>•</span>
-                            <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}</span>
-                          </div>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-4" />
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Messages Modal */}
-        <Dialog open={showMessagesModal} onOpenChange={(open) => {
-          setShowMessagesModal(open);
-          if (!open) {
+            setViewingMessages(false);
             setSelectedChatForMessages(null);
           }
         }}>
-          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader className="border-b pb-4">
-              <DialogTitle className="text-xl font-semibold">
-                {selectedChatForMessages?.title}
-              </DialogTitle>
-              <DialogDescription className="text-sm">
-                {selectedChatForMessages?.message_count} message{selectedChatForMessages?.message_count !== 1 ? 's' : ''} • {selectedChatForMessages && new Date(selectedChatForMessages.updated_at).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            {!viewingMessages ? (
+              <>
+                <DialogHeader className="border-b pb-4">
+                  <DialogTitle className="text-xl font-semibold">
+                    {selectedUserForChats?.display_name}'s Conversations
+                  </DialogTitle>
+                  <DialogDescription className="text-sm">
+                    {selectedUserForChats?.email}
+                    {loadingChats ? ' • Loading...' : ` • ${userChats.length} chat${userChats.length !== 1 ? 's' : ''}`}
+                  </DialogDescription>
+                </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              {selectedChatForMessages && loadingMessages[selectedChatForMessages.id] ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : selectedChatForMessages && chatMessages[selectedChatForMessages.id] && chatMessages[selectedChatForMessages.id].length > 0 ? (
-                <div className="space-y-6">
-                  {chatMessages[selectedChatForMessages.id].map((message) => (
-                    <div
-                      key={message.id}
-                      className="space-y-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs font-medium ${
-                          message.role === 'user' ? 'text-primary' : 'text-muted-foreground'
-                        }`}>
-                          {message.role === 'user' ? 'User' : 'Assistant'}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {new Date(message.created_at).toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                      </div>
-                      <div className={`rounded-lg p-4 ${
-                        message.role === 'user'
-                          ? 'bg-primary/5 border border-primary/20'
-                          : 'bg-muted/50 border border-border'
-                      }`}>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                          {message.content}
-                        </p>
-                        {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
-                          <div className="mt-4 space-y-3 pt-3 border-t border-current/10">
-                            {message.file_attachments.map((file: any, idx: number) => {
-                              const isImage = file.type?.startsWith('image/') || 
-                                            file.file_type?.startsWith('image/') ||
-                                            /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name || file.file_name || '');
-                              
-                              const fileUrl = file.url || file.file_url || file.path || file.file_path;
-                              const fileName = file.name || file.file_name || `File ${idx + 1}`;
-                              
-                              if (isImage && fileUrl) {
-                                return (
-                                  <div key={idx} className="rounded-lg overflow-hidden border border-border">
-                                    <img 
-                                      src={fileUrl} 
-                                      alt={fileName}
-                                      className="max-w-full max-h-[400px] object-contain bg-background"
-                                    />
-                                  </div>
-                                );
-                              }
-                              
-                              return (
-                                <a
-                                  key={idx}
-                                  href={fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors group"
-                                >
-                                  <Paperclip className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
-                                  <span className="text-sm truncate">{fileName}</span>
-                                </a>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
+                <div className="flex-1 overflow-y-auto p-6">
+                  {loadingChats ? (
+                    <div className="flex items-center justify-center py-16">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
-                  ))}
+                  ) : userChats.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                      <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
+                      <p className="text-base">No conversations found</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {userChats.map((chat) => (
+                        <Card 
+                          key={chat.id} 
+                          className="border overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all group"
+                          onClick={() => openChatMessages(chat)}
+                        >
+                          <div className="flex items-center justify-between p-5">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-base mb-2 truncate group-hover:text-primary transition-colors">
+                                {chat.title}
+                              </h3>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span>{chat.message_count} message{chat.message_count !== 1 ? 's' : ''}</span>
+                                <span>•</span>
+                                <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}</span>
+                              </div>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-4" />
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                  <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
-                  <p className="text-base">No messages in this conversation</p>
+              </>
+            ) : (
+              <>
+                <DialogHeader className="border-b pb-4">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={backToChatList}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="flex-1">
+                      <DialogTitle className="text-xl font-semibold">
+                        {selectedChatForMessages?.title}
+                      </DialogTitle>
+                      <DialogDescription className="text-sm">
+                        {selectedChatForMessages?.message_count} message{selectedChatForMessages?.message_count !== 1 ? 's' : ''} • {selectedChatForMessages && new Date(selectedChatForMessages.updated_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </DialogDescription>
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                  {selectedChatForMessages && loadingMessages[selectedChatForMessages.id] ? (
+                    <div className="flex items-center justify-center py-16">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : selectedChatForMessages && chatMessages[selectedChatForMessages.id] && chatMessages[selectedChatForMessages.id].length > 0 ? (
+                    <div className="space-y-6">
+                      {chatMessages[selectedChatForMessages.id].map((message) => (
+                        <div
+                          key={message.id}
+                          className="space-y-2"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs font-medium ${
+                              message.role === 'user' ? 'text-primary' : 'text-muted-foreground'
+                            }`}>
+                              {message.role === 'user' ? 'User' : 'Assistant'}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {new Date(message.created_at).toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <div className={`rounded-lg p-4 ${
+                            message.role === 'user'
+                              ? 'bg-primary/5 border border-primary/20'
+                              : 'bg-muted/50 border border-border'
+                          }`}>
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                              {message.content}
+                            </p>
+                            {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
+                              <div className="mt-4 space-y-3 pt-3 border-t border-current/10">
+                                {message.file_attachments.map((file: any, idx: number) => {
+                                  const isImage = file.type?.startsWith('image/') || 
+                                                file.file_type?.startsWith('image/') ||
+                                                /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name || file.file_name || '');
+                                  
+                                  const fileUrl = file.url || file.file_url || file.path || file.file_path;
+                                  const fileName = file.name || file.file_name || `File ${idx + 1}`;
+                                  
+                                  if (isImage && fileUrl) {
+                                    return (
+                                      <div key={idx} className="rounded-lg overflow-hidden border border-border">
+                                        <img 
+                                          src={fileUrl} 
+                                          alt={fileName}
+                                          className="max-w-full max-h-[400px] object-contain bg-background"
+                                        />
+                                      </div>
+                                    );
+                                  }
+                                  
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href={fileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors group"
+                                    >
+                                      <Paperclip className="h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                      <span className="text-sm truncate">{fileName}</span>
+                                    </a>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                      <MessageSquare className="h-16 w-16 opacity-10 mb-4" />
+                      <p className="text-base">No messages in this conversation</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </DialogContent>
         </Dialog>
       </div>
