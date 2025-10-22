@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Gem } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,8 +18,14 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
   const { subscriptionStatus, loadingSubscription } = useAuth();
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const { t } = useTranslation();
+  const warningRef = useRef<HTMLDivElement>(null);
 
-  // Notification now stays visible without auto-hiding
+  // Scroll to warning when it appears
+  useEffect(() => {
+    if (show && warningRef.current) {
+      warningRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [show]);
 
   const handleUpgradeClick = () => {
     // Only show pricing modal for free users
@@ -32,7 +38,7 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
 
   return (
     <>
-      <div className="w-full max-w-3xl mx-auto px-4 py-3">
+      <div ref={warningRef} className="w-full max-w-3xl mx-auto px-4 py-3">
         <div className="bg-destructive/10 dark:bg-destructive/10 border border-destructive/30 dark:border-destructive/20 rounded-lg p-4 space-y-2">
           <p className="text-destructive dark:text-destructive-foreground text-sm font-medium">
             {t('messageLimitWarning.limitReached')}
