@@ -50,7 +50,7 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
           client_id: clientId,
           callback: handleCredentialResponse,
           auto_select: false,
-          cancel_on_tap_outside: false,
+          cancel_on_tap_outside: true, // Allow user to dismiss if they want
           context: 'signin',
           ux_mode: 'popup',
           // No nonce parameter - this prevents Google from adding nonce to token
@@ -71,6 +71,8 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
 
     const handleCredentialResponse = async (response: any) => {
       try {
+        logInfo('Google One Tap: Starting authentication...');
+        
         // CRITICAL: Don't decode or extract nonce - just pass the raw token
         // Supabase will validate the Google ID token directly without nonce checking
         const { data, error } = await supabase.auth.signInWithIdToken({
@@ -93,8 +95,21 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
           if (oauthError) {
             logError('OAuth authentication failed');
           }
-        } else {
-          onSuccess?.();
+        } else if (data?.session) {
+          logInfo('Google One Tap: Session created successfully');
+          
+          // CRITICAL: Wait for session to be fully established
+          // This prevents the "too fast" redirect issue when user has only 1 Google account
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Verify session is actually set in Supabase
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData?.session) {
+            logInfo('Google One Tap: Session verified, authentication complete');
+            onSuccess?.();
+          } else {
+            logError('Google One Tap: Session not found after creation');
+          }
         }
       } catch (error) {
         logError('Authentication error occurred');
