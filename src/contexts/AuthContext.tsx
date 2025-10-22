@@ -154,6 +154,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let initialCheckComplete = false;
     
+    // Clean any hash fragments immediately on page load (before auth state check)
+    // This handles email confirmation redirects and OAuth redirects
+    if (window.location.hash) {
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    }
+    
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, session) => {
