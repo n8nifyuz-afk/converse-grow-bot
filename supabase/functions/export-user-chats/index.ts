@@ -79,11 +79,19 @@ Deno.serve(async (req) => {
         'Attached Files/Images': ''
       }]);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Chat Messages');
-      const excelBuffer = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+      
+      // Generate Excel file as array buffer to avoid stack overflow
+      const excelArrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+      const uint8Array = new Uint8Array(excelArrayBuffer);
+      let binaryString = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
+      }
+      const excelBase64 = btoa(binaryString);
       
       return new Response(
         JSON.stringify({ 
-          excel: excelBuffer,
+          excel: excelBase64,
           filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.xlsx`
         }),
         {
@@ -179,15 +187,23 @@ Deno.serve(async (req) => {
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Chat Messages');
 
-    // Generate Excel file as base64
-    const excelBuffer = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+    // Generate Excel file as array buffer to avoid stack overflow with large data
+    const excelArrayBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+    
+    // Convert to base64 using standard encoding
+    const uint8Array = new Uint8Array(excelArrayBuffer);
+    let binaryString = '';
+    for (let i = 0; i < uint8Array.length; i++) {
+      binaryString += String.fromCharCode(uint8Array[i]);
+    }
+    const excelBase64 = btoa(binaryString);
 
     console.log(`Exported ${messages?.length || 0} messages from ${chats?.length || 0} chats to Excel`);
 
     // Return Excel file as base64 wrapped in JSON
     return new Response(
       JSON.stringify({ 
-        excel: excelBuffer,
+        excel: excelBase64,
         filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.xlsx`
       }),
       {
