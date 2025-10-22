@@ -297,6 +297,8 @@ export default function Index() {
       if (storedMessage) {
         localStorage.removeItem('pendingChatMessage');
         localStorage.removeItem('pendingChatModel');
+        // Clear the skip pricing modal flag after handling message
+        localStorage.removeItem('skipPricingModal');
         createChatWithMessage(user.id, storedMessage, storedModel || 'gpt-4o-mini');
       }
     }
@@ -601,6 +603,8 @@ export default function Index() {
       setPendingMessage(message);
       localStorage.setItem('pendingChatMessage', message);
       localStorage.setItem('pendingChatModel', selectedModel);
+      // Flag to skip pricing modal when user signs in to send message
+      localStorage.setItem('skipPricingModal', 'true');
       setShowAuthModal(true);
       return;
     }

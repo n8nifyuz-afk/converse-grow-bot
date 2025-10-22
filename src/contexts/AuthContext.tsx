@@ -538,6 +538,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
+    // Skip pricing modal if user signed in to send a message
+    const skipPricingModal = localStorage.getItem('skipPricingModal');
+    if (skipPricingModal === 'true') {
+      localStorage.removeItem('skipPricingModal');
+      return;
+    }
+    
     // Check if modal was already shown this session
     const modalShownKey = 'pricing_modal_shown_session';
     const wasShown = sessionStorage.getItem(modalShownKey);
