@@ -297,8 +297,7 @@ export default function Index() {
       if (storedMessage) {
         localStorage.removeItem('pendingChatMessage');
         localStorage.removeItem('pendingChatModel');
-        // Clear the skip pricing modal flag after handling message
-        localStorage.removeItem('skipPricingModal');
+        // Don't clear skipPricingModal here - let AuthContext clear it after subscription check
         createChatWithMessage(user.id, storedMessage, storedModel || 'gpt-4o-mini');
       }
     }
