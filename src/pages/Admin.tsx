@@ -670,6 +670,42 @@ export default function Admin() {
                           <TableCell className="hidden lg:table-cell">
                             <div className="flex items-center gap-2">
                               <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    toast.loading('Downloading chat messages...');
+                                    const { data, error } = await supabase.functions.invoke('export-user-chats', {
+                                      body: { userId: usage.user_id }
+                                    });
+
+                                    if (error) throw error;
+
+                                    // Create blob and download
+                                    const blob = new Blob([data], { type: 'text/csv' });
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `user_chats_${usage.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    window.URL.revokeObjectURL(url);
+                                    document.body.removeChild(a);
+
+                                    toast.dismiss();
+                                    toast.success('Chat messages downloaded');
+                                  } catch (error) {
+                                    console.error('Error downloading chats:', error);
+                                    toast.dismiss();
+                                    toast.error('Failed to download chat messages');
+                                  }
+                                }}
+                              >
+                                Download
+                              </Button>
+                              <Button
                                 variant="destructive"
                                 size="sm"
                                 className="h-7 px-2 text-xs"
@@ -891,6 +927,40 @@ export default function Admin() {
 
               {/* Admin Actions - Mobile/Tablet Only */}
               <div className="flex gap-2 pt-4 border-t border-border/50 lg:hidden">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      toast.loading('Downloading chat messages...');
+                      const { data, error } = await supabase.functions.invoke('export-user-chats', {
+                        body: { userId: selectedUser.user_id }
+                      });
+
+                      if (error) throw error;
+
+                      // Create blob and download
+                      const blob = new Blob([data], { type: 'text/csv' });
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `user_chats_${selectedUser.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+
+                      toast.dismiss();
+                      toast.success('Chat messages downloaded');
+                    } catch (error) {
+                      console.error('Error downloading chats:', error);
+                      toast.dismiss();
+                      toast.error('Failed to download chat messages');
+                    }
+                  }}
+                >
+                  Download Chats
+                </Button>
                 <Button
                   variant="destructive"
                   size="sm"
