@@ -12,6 +12,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('[ADMIN-BLOCK-USER] Function invoked');
+    
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -25,35 +27,45 @@ serve(async (req) => {
 
     // Get the requesting user's auth header
     const authHeader = req.headers.get('Authorization');
+    console.log('[ADMIN-BLOCK-USER] Auth header present:', !!authHeader);
+    
     if (!authHeader) {
       throw new Error('No authorization header');
     }
 
-    // Verify requesting user is admin
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader }
-        }
-      }
-    );
+    // Extract JWT token from "Bearer <token>" format
+    const token = authHeader.replace('Bearer ', '');
+    console.log('[ADMIN-BLOCK-USER] Token extracted, length:', token.length);
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    // Verify the JWT token and get user using service role
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    
+    console.log('[ADMIN-BLOCK-USER] User verification result:', { 
+      hasUser: !!user, 
+      hasError: !!userError,
+      userId: user?.id 
+    });
+    
     if (userError || !user) {
+      console.error('[ADMIN-BLOCK-USER] User error:', userError);
       throw new Error('Unauthorized');
     }
 
-    // Check if user is admin
-    const { data: adminRole, error: roleError } = await supabaseClient
+    // Check if user is admin using service role client
+    const { data: adminRole, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .eq('role', 'admin')
       .maybeSingle();
 
+    console.log('[ADMIN-BLOCK-USER] Admin check result:', { 
+      hasAdminRole: !!adminRole, 
+      hasError: !!roleError 
+    });
+
     if (roleError || !adminRole) {
+      console.error('[ADMIN-BLOCK-USER] Role error:', roleError);
       throw new Error('Admin access required');
     }
 
