@@ -21,6 +21,7 @@ interface UserTokenUsage {
   user_id: string;
   email: string;
   display_name: string;
+  created_at: string;
   model_usages: ModelUsageDetail[];
   subscription_status?: {
     subscribed: boolean;
@@ -219,7 +220,7 @@ export default function Admin() {
       const {
         data: allProfilesData,
         error: allProfilesError
-      } = await supabase.from('profiles').select('user_id, email, display_name, signup_method, blocked');
+      } = await supabase.from('profiles').select('user_id, email, display_name, signup_method, blocked, created_at');
       if (allProfilesError) throw allProfilesError;
       console.log('Total profiles (auth.users):', allProfilesData?.length);
 
@@ -252,6 +253,7 @@ export default function Admin() {
           user_id: profile.user_id,
           email: profile.email || 'Unknown',
           display_name: profile.display_name || profile.email?.split('@')[0] || 'Unknown User',
+          created_at: profile.created_at,
           model_usages: [],
           subscription_status: subscription && subscription.status === 'active' ? {
             subscribed: true,
@@ -630,6 +632,20 @@ export default function Admin() {
                 <p className="text-xs text-muted-foreground">Email</p>
                 <p className="text-sm sm:text-base font-medium text-foreground break-all">
                   {selectedUser?.email}
+                </p>
+              </div>
+              
+              {/* Registration Date */}
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Registered</p>
+                <p className="text-sm font-medium text-foreground">
+                  {selectedUser?.created_at ? new Date(selectedUser.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) : 'Unknown'}
                 </p>
               </div>
               
