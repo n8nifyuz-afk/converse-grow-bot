@@ -219,10 +219,14 @@ export default function Admin() {
       setLoading(true);
 
       // Fetch ALL profiles (which represents ALL auth.users via trigger)
+      // Order by created_at DESC to show newest users first
       const {
         data: allProfilesData,
         error: allProfilesError
-      } = await supabase.from('profiles').select('user_id, email, display_name, signup_method, blocked, created_at');
+      } = await supabase
+        .from('profiles')
+        .select('user_id, email, display_name, signup_method, blocked, created_at')
+        .order('created_at', { ascending: false });
       if (allProfilesError) throw allProfilesError;
       console.log('Total profiles (auth.users):', allProfilesData?.length);
 
