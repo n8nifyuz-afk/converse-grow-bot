@@ -5,13 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -32,6 +33,23 @@ interface UserTokenUsage {
     stripe_subscription_id?: string | null;
     stripe_customer_id?: string | null;
   };
+}
+
+interface UserChat {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  model_id: string;
+  message_count?: number;
+}
+
+interface ChatMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  created_at: string;
+  file_attachments?: any;
 }
 interface TokenUsageByModel {
   model: string;
@@ -184,6 +202,11 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<'name' | 'email' | 'plan' | 'cost' | 'registered'>('registered');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [userChats, setUserChats] = useState<UserChat[]>([]);
+  const [loadingChats, setLoadingChats] = useState(false);
+  const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<{[chatId: string]: ChatMessage[]}>({});
+  const [loadingMessages, setLoadingMessages] = useState<{[chatId: string]: boolean}>({});
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -506,6 +529,83 @@ export default function Admin() {
   const fetchUserSubscription = async (userId: string) => {
     // Subscription is already loaded from database, no need to fetch again
     setLoadingSubscription(false);
+  };
+
+  // Fetch chats for a specific user
+  const fetchUserChats = async (userId: string) => {
+    try {
+      setLoadingChats(true);
+      const { data, error } = await supabase
+        .from('chats')
+        .select('id, title, created_at, updated_at, model_id')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Get message counts for each chat
+      const chatsWithCounts = await Promise.all(
+        (data || []).map(async (chat) => {
+          const { count } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('chat_id', chat.id);
+          return { ...chat, message_count: count || 0 };
+        })
+      );
+
+      setUserChats(chatsWithCounts);
+    } catch (error) {
+      console.error('Error fetching user chats:', error);
+      toast.error('Failed to load user chats');
+    } finally {
+      setLoadingChats(false);
+    }
+  };
+
+  // Fetch messages for a specific chat
+  const fetchChatMessages = async (chatId: string) => {
+    if (chatMessages[chatId]) {
+      // Already loaded
+      return;
+    }
+
+    try {
+      setLoadingMessages(prev => ({ ...prev, [chatId]: true }));
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, content, role, created_at, file_attachments')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Cast the data to the correct type
+      const messages: ChatMessage[] = (data || []).map(msg => ({
+        id: msg.id,
+        content: msg.content,
+        role: msg.role as 'user' | 'assistant',
+        created_at: msg.created_at,
+        file_attachments: msg.file_attachments
+      }));
+
+      setChatMessages(prev => ({ ...prev, [chatId]: messages }));
+    } catch (error) {
+      console.error('Error fetching chat messages:', error);
+      toast.error('Failed to load messages');
+    } finally {
+      setLoadingMessages(prev => ({ ...prev, [chatId]: false }));
+    }
+  };
+
+  // Toggle chat expansion
+  const toggleChat = async (chatId: string) => {
+    if (expandedChatId === chatId) {
+      setExpandedChatId(null);
+    } else {
+      setExpandedChatId(chatId);
+      await fetchChatMessages(chatId);
+    }
   };
 
   // Get plan display info
@@ -885,6 +985,7 @@ export default function Admin() {
                                 setSelectedUser(usage);
                                 setIsModalOpen(true);
                                 await fetchUserSubscription(usage.user_id);
+                                await fetchUserChats(usage.user_id);
                               }}
                             >
                               <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -941,7 +1042,15 @@ export default function Admin() {
         </Card>
 
         {/* User Details Modal */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isModalOpen} onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            // Reset state when modal closes
+            setUserChats([]);
+            setExpandedChatId(null);
+            setChatMessages({});
+          }
+        }}>
           <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader className="space-y-3">
               <DialogTitle className="text-lg sm:text-xl md:text-2xl flex items-center gap-2">
@@ -1164,6 +1273,107 @@ export default function Admin() {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* User Chats & Messages Section */}
+                <Card className="border-border/50">
+                  <CardHeader className="p-3 sm:p-4">
+                    <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      Chats & Messages
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      {loadingChats ? 'Loading...' : `${userChats.length} chats found`}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4 pt-0 space-y-2">
+                    {loadingChats ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : userChats.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground text-sm">
+                        No chats found for this user
+                      </div>
+                    ) : (
+                      userChats.map((chat) => (
+                        <Collapsible
+                          key={chat.id}
+                          open={expandedChatId === chat.id}
+                          onOpenChange={() => toggleChat(chat.id)}
+                        >
+                          <Card className="border-border/50 bg-muted/20">
+                            <CollapsibleTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-between p-3 h-auto hover:bg-muted/40"
+                              >
+                                <div className="flex flex-col items-start gap-1 text-left">
+                                  <span className="font-medium text-sm">{chat.title}</span>
+                                  <div className="flex gap-2 text-xs text-muted-foreground">
+                                    <span>{chat.message_count} messages</span>
+                                    <span>•</span>
+                                    <span>{new Date(chat.updated_at).toLocaleDateString()}</span>
+                                  </div>
+                                </div>
+                                {expandedChatId === chat.id ? (
+                                  <ChevronUp className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="px-3 pb-3 space-y-2 max-h-96 overflow-y-auto">
+                                {loadingMessages[chat.id] ? (
+                                  <div className="flex items-center justify-center py-4">
+                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                  </div>
+                                ) : chatMessages[chat.id] && chatMessages[chat.id].length > 0 ? (
+                                  chatMessages[chat.id].map((message) => (
+                                    <div
+                                      key={message.id}
+                                      className={`p-2 rounded-lg text-xs ${
+                                        message.role === 'user'
+                                          ? 'bg-primary/10 border border-primary/20'
+                                          : 'bg-muted border border-border'
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <Badge
+                                          variant={message.role === 'user' ? 'default' : 'secondary'}
+                                          className="text-[10px] px-1.5 py-0"
+                                        >
+                                          {message.role}
+                                        </Badge>
+                                        <span className="text-[10px] text-muted-foreground">
+                                          {new Date(message.created_at).toLocaleString()}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs break-words whitespace-pre-wrap">
+                                        {message.content.length > 500
+                                          ? message.content.substring(0, 500) + '...'
+                                          : message.content}
+                                      </p>
+                                      {message.file_attachments && message.file_attachments.length > 0 && (
+                                        <div className="mt-1 text-[10px] text-muted-foreground">
+                                          📎 {message.file_attachments.length} attachment(s)
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="text-center py-4 text-muted-foreground text-xs">
+                                    No messages in this chat
+                                  </div>
+                                )}
+                              </div>
+                            </CollapsibleContent>
+                          </Card>
+                        </Collapsible>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Mobile Card Layout */}
                 <div className="space-y-3 md:hidden">
