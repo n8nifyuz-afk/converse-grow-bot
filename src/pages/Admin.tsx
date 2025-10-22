@@ -853,18 +853,6 @@ export default function Admin() {
                                 </span>
                               )}
                             </div>
-                            {stripeSubId && (
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Stripe Subscription ID</p>
-                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeSubId}</code>
-                              </div>
-                            )}
-                            {stripeCustId && (
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Stripe Customer ID</p>
-                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeCustId}</code>
-                              </div>
-                            )}
                           </div>
                         );
                       } else if (plan === 'ultra') {
@@ -884,18 +872,6 @@ export default function Admin() {
                                 </span>
                               )}
                             </div>
-                            {stripeSubId && (
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Stripe Subscription ID</p>
-                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeSubId}</code>
-                              </div>
-                            )}
-                            {stripeCustId && (
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Stripe Customer ID</p>
-                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeCustId}</code>
-                              </div>
-                            )}
                           </div>
                         );
                       } else {
