@@ -168,49 +168,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          console.log('[AUTH-STATE] 🔔 Auth state changed:', event, {
-            hasSession: !!session,
-            userId: session?.user?.id,
-            currentURL: window.location.href,
-            hash: window.location.hash
-          });
+      (event, session) => {
+        console.log('[AUTH-STATE] 🔔 Auth state changed:', event, {
+          hasSession: !!session,
+          userId: session?.user?.id,
+          currentURL: window.location.href,
+          hash: window.location.hash
+        });
+        
+        // CRITICAL: Only synchronous state updates here to prevent auth loops
+        if (event === 'SIGNED_IN' && session) {
+          console.log('[AUTH-STATE] ✅ User signed in:', session.user.email);
+          setSession(session);
+          setUser(session.user);
           
-          // CRITICAL: Only synchronous state updates here to prevent auth loops
-          if (event === 'SIGNED_IN' && session) {
-            console.log('[AUTH-STATE] ✅ User signed in:', session.user.email);
-            setSession(session);
-            setUser(session.user);
+          // Clean URL - remove hash fragments from OAuth redirects
+          if (window.location.hash) {
+            console.log('[AUTH-STATE] 🧹 Cleaning OAuth hash:', window.location.hash);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            console.log('[AUTH-STATE] ✅ URL cleaned to:', window.location.href);
+          }
+          
+          // Defer async operations to prevent blocking auth flow
+          setTimeout(async () => {
+            // Check if this is a new signup
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, created_at')
+              .eq('user_id', session.user.id)
+              .single();
             
-            // Clean URL - remove hash fragments from OAuth redirects
-            if (window.location.hash) {
-              console.log('[AUTH-STATE] 🧹 Cleaning OAuth hash:', window.location.hash);
-              window.history.replaceState({}, document.title, window.location.pathname);
-              console.log('[AUTH-STATE] ✅ URL cleaned to:', window.location.href);
+            if (profile) {
+              const profileCreated = new Date(session.user.created_at).getTime();
+              const now = Date.now();
+              // Profile created within last 10 seconds = new signup
+              if ((now - profileCreated) < 10000) {
+                console.log('[AUTH] 🎯 New user signup detected - tracking registration_complete');
+                trackRegistrationComplete();
+              }
             }
             
-            // Defer async operations to prevent blocking auth flow
-            setTimeout(async () => {
-              // Check if this is a new signup
-              const { data: profile } = await supabase
-                .from('profiles')
-                .select('id, created_at')
-                .eq('user_id', session.user.id)
-                .single();
-              
-              if (profile) {
-                const profileCreated = new Date(session.user.created_at).getTime();
-                const now = Date.now();
-                // Profile created within last 10 seconds = new signup
-                if ((now - profileCreated) < 10000) {
-                  console.log('[AUTH] 🎯 New user signup detected - tracking registration_complete');
-                  trackRegistrationComplete();
-                }
-              }
-              
-              syncOAuthProfile(session);
-              checkSubscription();
-            }, 500);
+            syncOAuthProfile(session);
+            checkSubscription();
+          }, 500);
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
