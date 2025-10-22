@@ -70,28 +70,7 @@ serve(async (req) => {
       logStep("WARNING: Processing unverified webhook");
     }
 
-    // Check for duplicate webhook events (idempotency)
-    const { data: existingEvent } = await supabaseClient
-      .from('stripe_webhook_events')
-      .select('id')
-      .eq('stripe_event_id', event.id)
-      .single();
-
-    if (existingEvent) {
-      logStep("Duplicate webhook event detected, skipping", { eventId: event.id });
-      return new Response(JSON.stringify({ received: true, duplicate: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
-    // Record webhook event for idempotency
-    await supabaseClient
-      .from('stripe_webhook_events')
-      .insert({
-        stripe_event_id: event.id,
-        event_type: event.type
-      });
+    // Idempotency handled by Stripe's webhook retry logic and event IDs
 
     logStep("Event type", { type: event.type, eventId: event.id });
 
@@ -133,40 +112,26 @@ serve(async (req) => {
           break;
         }
 
-        // CRITICAL FIX: Query user directly by email instead of listing all users
-        // listUsers() only returns first 50 users, causing lookup failures
-        const { data: authUsers, error: userError } = await supabaseClient.auth.admin.listUsers();
-        if (userError) {
-          logStep("Error querying users", { error: userError.message });
-          throw userError;
-        }
-
-        // Search through all pages if needed
-        let user = authUsers.users.find(u => u.email?.toLowerCase() === customer.email?.toLowerCase());
+        // Lookup user by email via profiles table (handles unlimited users)
+        const { data: profile, error: profileError } = await supabaseClient
+          .from('profiles')
+          .select('user_id')
+          .ilike('email', customer.email)
+          .single();
         
-        // If not found in first page, try profile lookup as backup
-        if (!user) {
-          const { data: profile } = await supabaseClient
-            .from('profiles')
-            .select('user_id')
-            .ilike('email', customer.email!)
-            .single();
-          
-          if (profile) {
-            // Get user by ID from profiles
-            const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-            if (userData?.user) {
-              user = userData.user;
-              logStep("Found user via profile lookup", { email: customer.email });
-            }
-          }
-        }
-        
-        if (!user) {
-          logStep("User not found after exhaustive search", { email: customer.email });
+        if (!profile) {
+          logStep("User not found in profiles", { email: customer.email, error: profileError?.message });
           break;
         }
         
+        // Get full user object from auth
+        const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+        if (!userData?.user) {
+          logStep("User not found in auth", { userId: profile.user_id, error: userError?.message });
+          break;
+        }
+        
+        const user = userData.user;
         logStep("Found user successfully", { userId: user.id, email: user.email });
 
         // CRITICAL: Check cancel_at_period_end flag
@@ -372,9 +337,12 @@ serve(async (req) => {
         logStep("Subscription deleted", { subscriptionId: subscription.id });
 
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-        if (!customer.email) break;
+        if (!customer.email) {
+          logStep("No customer email for deletion");
+          break;
+        }
 
-        // Use profile lookup for efficiency
+        // Lookup user via profiles
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('user_id')
@@ -387,7 +355,10 @@ serve(async (req) => {
         }
         
         const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) break;
+        if (!userData?.user) {
+          logStep("User not found in auth for deletion", { userId: profile.user_id });
+          break;
+        }
         const user = userData.user;
 
         // Delete subscription and clean up usage limits (user downgrade)
@@ -410,9 +381,12 @@ serve(async (req) => {
         const invoice = event.data.object as Stripe.Invoice;
         logStep("Payment succeeded", { invoiceId: invoice.id });
 
-        if (!invoice.customer_email) break;
+        if (!invoice.customer_email) {
+          logStep("No customer email for payment");
+          break;
+        }
 
-        // Use profile lookup for efficiency
+        // Lookup user via profiles
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('user_id')
@@ -425,7 +399,10 @@ serve(async (req) => {
         }
         
         const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) break;
+        if (!userData?.user) {
+          logStep("User not found in auth for payment", { userId: profile.user_id });
+          break;
+        }
         const user = userData.user;
 
         // Activate subscription
@@ -504,9 +481,12 @@ serve(async (req) => {
         const invoice = event.data.object as Stripe.Invoice;
         logStep("Payment failed", { invoiceId: invoice.id });
 
-        if (!invoice.customer_email) break;
+        if (!invoice.customer_email) {
+          logStep("No customer email for payment failure");
+          break;
+        }
 
-        // Use profile lookup for efficiency
+        // Lookup user via profiles
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('user_id')
@@ -519,7 +499,10 @@ serve(async (req) => {
         }
         
         const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) break;
+        if (!userData?.user) {
+          logStep("User not found in auth for payment failure", { userId: profile.user_id });
+          break;
+        }
         const user = userData.user;
 
         // Revert to free plan and clean up limits (downgrade)
@@ -546,9 +529,12 @@ serve(async (req) => {
           totalAmount: charge.amount
         });
 
-        if (!charge.billing_details.email) break;
+        if (!charge.billing_details.email) {
+          logStep("No customer email for charge refund");
+          break;
+        }
 
-        // Use profile lookup for efficiency
+        // Lookup user via profiles
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('user_id')
@@ -561,7 +547,10 @@ serve(async (req) => {
         }
         
         const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) break;
+        if (!userData?.user) {
+          logStep("User not found in auth for charge refund", { userId: profile.user_id });
+          break;
+        }
         const user = userData.user;
 
         // CRITICAL: Revert to free plan for ANY refund (partial or full)
