@@ -535,6 +535,8 @@ export default function Admin() {
                         <TableHead className="font-semibold text-foreground text-xs sm:text-sm">Email</TableHead>
                         <TableHead className="font-semibold text-foreground text-xs sm:text-sm">Plan</TableHead>
                         <TableHead className="text-right font-semibold text-foreground text-xs sm:text-sm">Cost</TableHead>
+                        <TableHead className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm">Registered</TableHead>
+                        <TableHead className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm">Actions</TableHead>
                         <TableHead className="w-[60px] sm:w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -543,12 +545,7 @@ export default function Admin() {
                         const totalCost = usage.model_usages.reduce((sum, m) => sum + m.cost, 0);
                         return <TableRow 
                           key={usage.user_id} 
-                          className="hover:bg-muted/50 transition-colors cursor-pointer" 
-                          onClick={async () => {
-                            setSelectedUser(usage);
-                            setIsModalOpen(true);
-                            await fetchUserSubscription(usage.user_id);
-                          }}
+                          className="hover:bg-muted/50 transition-colors"
                         >
                           <TableCell className="hidden sm:table-cell font-semibold text-foreground text-xs sm:text-sm">
                             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -565,8 +562,85 @@ export default function Admin() {
                           <TableCell className="text-right font-mono font-bold text-foreground text-xs sm:text-sm whitespace-nowrap">
                             ${totalCost.toFixed(4)}
                           </TableCell>
+                          <TableCell className="hidden lg:table-cell text-xs text-muted-foreground whitespace-nowrap">
+                            {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            }) : 'Unknown'}
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (!confirm(`Are you sure you want to ${usage.blocked ? 'unblock' : 'block'} this user?`)) {
+                                    return;
+                                  }
+                                  
+                                  try {
+                                    const { error } = await supabase.functions.invoke('admin-block-user', {
+                                      body: { 
+                                        userId: usage.user_id,
+                                        blocked: !usage.blocked 
+                                      }
+                                    });
+
+                                    if (error) throw error;
+
+                                    toast.success(`User ${usage.blocked ? 'unblocked' : 'blocked'} successfully`);
+                                    await fetchTokenUsageData();
+                                  } catch (error) {
+                                    console.error('Error blocking/unblocking user:', error);
+                                    toast.error('Failed to update user status');
+                                  }
+                                }}
+                              >
+                                {usage.blocked ? 'Unblock' : 'Block'}
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                                    return;
+                                  }
+                                  
+                                  try {
+                                    const { error } = await supabase.functions.invoke('admin-delete-user', {
+                                      body: { userId: usage.user_id }
+                                    });
+
+                                    if (error) throw error;
+
+                                    toast.success('User deleted successfully');
+                                    await fetchTokenUsageData();
+                                  } catch (error) {
+                                    console.error('Error deleting user:', error);
+                                    toast.error('Failed to delete user');
+                                  }
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-2 sm:px-3">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 sm:h-8 px-2 sm:px-3"
+                              onClick={async () => {
+                                setSelectedUser(usage);
+                                setIsModalOpen(true);
+                                await fetchUserSubscription(usage.user_id);
+                              }}
+                            >
                               <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                               <span className="ml-1 hidden sm:inline text-xs">View</span>
                             </Button>
@@ -574,7 +648,7 @@ export default function Admin() {
                         </TableRow>;
                       })}
                       {paginatedUsers.length === 0 && <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground h-32">
+                        <TableCell colSpan={7} className="text-center text-muted-foreground h-32">
                           <div className="flex flex-col items-center gap-2">
                             <Users className="h-8 w-8 opacity-20" />
                             <p className="text-xs sm:text-sm">No users found in this category</p>
@@ -635,8 +709,8 @@ export default function Admin() {
                 </p>
               </div>
               
-              {/* Registration Date */}
-              <div className="space-y-1">
+              {/* Registration Date - Mobile/Tablet Only */}
+              <div className="space-y-1 lg:hidden">
                 <p className="text-xs text-muted-foreground">Registered</p>
                 <p className="text-sm font-medium text-foreground">
                   {selectedUser?.created_at ? new Date(selectedUser.created_at).toLocaleDateString('en-US', {
@@ -703,8 +777,8 @@ export default function Admin() {
                 )}
               </div>
 
-              {/* Admin Actions */}
-              <div className="flex gap-2 pt-4 border-t border-border/50">
+              {/* Admin Actions - Mobile/Tablet Only */}
+              <div className="flex gap-2 pt-4 border-t border-border/50 lg:hidden">
                 <Button
                   variant="destructive"
                   size="sm"
