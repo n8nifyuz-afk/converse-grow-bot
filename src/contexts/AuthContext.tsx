@@ -162,6 +162,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(session);
           setUser(session.user);
           
+          // CRITICAL: Set loading to false immediately for OAuth redirects to prevent blank screen
+          setLoading(false);
+          
           // Clean URL - remove hash fragments from OAuth redirects AFTER session is established
           if (window.location.hash && window.location.hash.includes('access_token')) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
@@ -192,6 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSession(null);
           setUser(null);
           setUserProfile(null);
+          setLoading(false);
           
           // Clear subscription status and cache
           setSubscriptionStatus({
@@ -205,8 +209,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           sessionStorage.removeItem('pricing_modal_shown_session');
         }
         
-        // Only set loading to false after initial check is complete
-        if (initialCheckComplete) {
+        // Set loading to false for other auth state changes if initial check is complete
+        if (initialCheckComplete && event !== 'SIGNED_IN' && event !== 'SIGNED_OUT') {
           setLoading(false);
         }
       }
