@@ -1540,11 +1540,40 @@ export default function Admin() {
                                         {message.content}
                                       </p>
                                       {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
-                                        <div className="mt-2 pt-2 border-t border-current/10">
-                                          <div className="flex items-center gap-1 text-xs opacity-80">
-                                            <Paperclip className="h-3 w-3" />
-                                            {message.file_attachments.length} attachment{message.file_attachments.length > 1 ? 's' : ''}
-                                          </div>
+                                        <div className="mt-3 space-y-2">
+                                          {message.file_attachments.map((file: any, idx: number) => {
+                                            const isImage = file.type?.startsWith('image/') || 
+                                                          file.file_type?.startsWith('image/') ||
+                                                          /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name || file.file_name || '');
+                                            
+                                            const fileUrl = file.url || file.file_url || file.path || file.file_path;
+                                            const fileName = file.name || file.file_name || `File ${idx + 1}`;
+                                            
+                                            if (isImage && fileUrl) {
+                                              return (
+                                                <div key={idx} className="rounded-lg overflow-hidden border border-current/20">
+                                                  <img 
+                                                    src={fileUrl} 
+                                                    alt={fileName}
+                                                    className="max-w-full max-h-[200px] object-contain bg-muted/20"
+                                                  />
+                                                </div>
+                                              );
+                                            }
+                                            
+                                            return (
+                                              <a
+                                                key={idx}
+                                                href={fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 p-2 rounded-lg border border-current/20 hover:bg-current/5 transition-colors text-xs"
+                                              >
+                                                <Paperclip className="h-3 w-3 flex-shrink-0" />
+                                                <span className="truncate">{fileName}</span>
+                                              </a>
+                                            );
+                                          })}
                                         </div>
                                       )}
                                     </div>
