@@ -217,11 +217,12 @@ export default function Admin() {
   };
 
   const handleDownloadUserList = async () => {
+    const toastId = toast.loading('Generating user export...');
+    
     try {
-      toast.loading('Generating user export...');
-      
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
+        toast.dismiss(toastId);
         toast.error('Session expired. Please log in again.');
         return;
       }
@@ -253,9 +254,11 @@ export default function Admin() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
+      toast.dismiss(toastId);
       toast.success('User list downloaded successfully!');
     } catch (error) {
       console.error('Error downloading user list:', error);
+      toast.dismiss(toastId);
       toast.error('Failed to download user list');
     }
   };
