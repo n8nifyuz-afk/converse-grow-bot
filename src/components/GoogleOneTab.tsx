@@ -71,6 +71,8 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
 
     const handleCredentialResponse = async (response: any) => {
       try {
+        console.log('[GOOGLE-ONETAP] 🔵 Starting authentication...');
+        console.log('[GOOGLE-ONETAP] 📍 Current URL:', window.location.href);
         logInfo('Google One Tap: Starting authentication...');
         
         // CRITICAL: Don't decode or extract nonce - just pass the raw token
@@ -82,9 +84,11 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
         });
 
         if (error) {
+          console.error('[GOOGLE-ONETAP] ❌ Authentication failed:', error);
           logError('Google One Tap authentication failed');
           
           // Fallback: Try regular OAuth as backup
+          console.log('[GOOGLE-ONETAP] 🔄 Trying OAuth fallback...');
           const { error: oauthError } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -93,25 +97,35 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
           });
           
           if (oauthError) {
+            console.error('[GOOGLE-ONETAP] ❌ OAuth fallback failed:', oauthError);
             logError('OAuth authentication failed');
           }
         } else if (data?.session) {
+          console.log('[GOOGLE-ONETAP] ✅ Session created:', data.session.user.email);
+          console.log('[GOOGLE-ONETAP] 📍 URL after session creation:', window.location.href);
           logInfo('Google One Tap: Session created successfully');
           
           // CRITICAL: Wait for session to be fully established
           // This prevents the "too fast" redirect issue when user has only 1 Google account
+          console.log('[GOOGLE-ONETAP] ⏳ Waiting 500ms for session to stabilize...');
           await new Promise(resolve => setTimeout(resolve, 500));
           
           // Verify session is actually set in Supabase
           const { data: sessionData } = await supabase.auth.getSession();
           if (sessionData?.session) {
+            console.log('[GOOGLE-ONETAP] ✅ Session verified successfully');
+            console.log('[GOOGLE-ONETAP] 📍 Final URL:', window.location.href);
             logInfo('Google One Tap: Session verified, authentication complete');
             onSuccess?.();
           } else {
+            console.error('[GOOGLE-ONETAP] ❌ Session not found after creation');
             logError('Google One Tap: Session not found after creation');
           }
+        } else {
+          console.warn('[GOOGLE-ONETAP] ⚠️ No session and no error - unexpected state');
         }
       } catch (error) {
+        console.error('[GOOGLE-ONETAP] ❌ Unexpected error:', error);
         logError('Authentication error occurred');
       }
     };

@@ -154,23 +154,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let initialCheckComplete = false;
     
+    // LOGGING: Track initial page load URL
+    console.log('[AUTH-INIT] 🚀 Page loaded, current URL:', window.location.href);
+    console.log('[AUTH-INIT] 📍 Hash fragment:', window.location.hash || 'none');
+    
     // Clean any hash fragments immediately on page load (before auth state check)
     // This handles email confirmation redirects and OAuth redirects
     if (window.location.hash) {
+      console.log('[AUTH-INIT] 🧹 Cleaning hash fragment:', window.location.hash);
       window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      console.log('[AUTH-INIT] ✅ URL cleaned to:', window.location.href);
     }
     
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, session) => {
+          console.log('[AUTH-STATE] 🔔 Auth state changed:', event, {
+            hasSession: !!session,
+            userId: session?.user?.id,
+            currentURL: window.location.href,
+            hash: window.location.hash
+          });
+          
           // CRITICAL: Only synchronous state updates here to prevent auth loops
           if (event === 'SIGNED_IN' && session) {
+            console.log('[AUTH-STATE] ✅ User signed in:', session.user.email);
             setSession(session);
             setUser(session.user);
             
             // Clean URL - remove hash fragments from OAuth redirects
             if (window.location.hash) {
+              console.log('[AUTH-STATE] 🧹 Cleaning OAuth hash:', window.location.hash);
               window.history.replaceState({}, document.title, window.location.pathname);
+              console.log('[AUTH-STATE] ✅ URL cleaned to:', window.location.href);
             }
             
             // Defer async operations to prevent blocking auth flow
@@ -492,6 +508,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
     
+    console.log('[GOOGLE-SIGNIN] 🔵 Starting Google sign-in...');
+    console.log('[GOOGLE-SIGNIN] 📍 Current URL:', window.location.href);
+    console.log('[GOOGLE-SIGNIN] 🔗 Redirect URL:', redirectUrl);
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -501,6 +521,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     });
+    
+    if (error) {
+      console.error('[GOOGLE-SIGNIN] ❌ Google sign-in error:', error);
+    } else {
+      console.log('[GOOGLE-SIGNIN] ✅ OAuth initiated successfully, redirecting to Google...');
+    }
     
     return { error };
   };
