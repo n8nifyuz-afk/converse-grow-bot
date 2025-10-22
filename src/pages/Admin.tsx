@@ -839,8 +839,8 @@ export default function Admin() {
                             {getSortIcon('registered')}
                           </div>
                         </TableHead>
-                        <TableHead className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm">Actions</TableHead>
-                        <TableHead className="w-[60px] sm:w-[100px]"></TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm">Actions</TableHead>
+                    <TableHead className="w-[60px] sm:w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -872,12 +872,12 @@ export default function Admin() {
                               day: 'numeric'
                             }) : 'Unknown'}
                           </TableCell>
-                          <TableCell className="hidden lg:table-cell">
+                          <TableCell>
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 px-3 text-xs"
+                                className="h-7 px-2 sm:px-3 text-xs"
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   setSelectedUserForChats(usage);
@@ -885,12 +885,13 @@ export default function Admin() {
                                   await fetchUserChats(usage.user_id);
                                 }}
                               >
-                                Chats
+                                <span className="hidden sm:inline">Chats</span>
+                                <MessageSquare className="h-3 w-3 sm:hidden" />
                               </Button>
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                className="h-7 px-2 text-xs"
+                                className="h-7 px-2 text-xs hidden lg:inline-flex"
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   
@@ -1117,52 +1118,6 @@ export default function Admin() {
 
               {/* Admin Actions - Mobile/Tablet Only */}
               <div className="flex gap-2 pt-4 border-t border-border/50 lg:hidden">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    try {
-                      toast.loading('Downloading chat data...');
-                      const { data, error } = await supabase.functions.invoke('export-user-chats', {
-                        body: { userId: selectedUser.user_id }
-                      });
-
-                      if (error) throw error;
-
-                      // Extract Excel base64 from JSON response
-                      const excelBase64 = data.excel;
-                      const filename = data.filename || `user_chats_${selectedUser.user_id}_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-                      // Convert base64 to blob
-                      const byteCharacters = atob(excelBase64);
-                      const byteNumbers = new Array(byteCharacters.length);
-                      for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                      }
-                      const byteArray = new Uint8Array(byteNumbers);
-                      const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                      
-                      // Create download link
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = filename;
-                      document.body.appendChild(a);
-                      a.click();
-                      window.URL.revokeObjectURL(url);
-                      document.body.removeChild(a);
-
-                      toast.dismiss();
-                      toast.success('Chat data downloaded as Excel file');
-                    } catch (error) {
-                      console.error('Error downloading chats:', error);
-                      toast.dismiss();
-                      toast.error('Failed to download chat data');
-                    }
-                  }}
-                >
-                  Download Chats
-                </Button>
                 <Button
                   variant="destructive"
                   size="sm"
