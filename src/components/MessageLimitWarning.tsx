@@ -19,14 +19,7 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    if (show) {
-      const timer = setTimeout(() => {
-        onHide();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [show, onHide]);
+  // Notification now stays visible without auto-hiding
 
   const handleUpgradeClick = () => {
     // Only show pricing modal for free users
