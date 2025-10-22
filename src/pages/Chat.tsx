@@ -292,6 +292,8 @@ export default function Chat() {
   const sendingInProgressRef = useRef(false);
   // Track if auth was just completed to prevent pricing modal on mobile
   const justAuthenticatedRef = useRef(false);
+  // Track if page was just loaded to prevent pricing modal on refresh
+  const justLoadedRef = useRef(true);
   const selectedModelData = models.find(m => m.id === selectedModel);
   
   // Show all models to everyone - access control happens on selection
@@ -677,6 +679,16 @@ export default function Chat() {
       window.history.replaceState({}, document.title);
     }
   }, [chatId, location.state]);
+
+  // Clear the justLoaded flag after initial render to allow normal pricing modal behavior
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      justLoadedRef.current = false;
+      console.log('[PAGE-LOAD] Cleared justLoaded flag - pricing modal now allowed');
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-trigger AI response for user messages that don't have responses
   useEffect(() => {

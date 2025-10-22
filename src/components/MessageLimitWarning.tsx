@@ -28,11 +28,19 @@ export const MessageLimitWarning: React.FC<MessageLimitWarningProps> = ({ messag
   }, [show]);
 
   const handleUpgradeClick = () => {
-    // Only show pricing modal for free users
+    // Only show pricing modal for free users, and only if explicitly clicked by user
     if (!loadingSubscription && !subscriptionStatus.subscribed) {
+      console.log('[LIMIT-WARNING] User clicked upgrade button - opening pricing modal');
       setIsPricingModalOpen(true);
     }
   };
+
+  // Prevent auto-opening pricing modal on mount/refresh
+  useEffect(() => {
+    if (show) {
+      console.log('[LIMIT-WARNING] Warning shown, but NOT auto-opening pricing modal');
+    }
+  }, [show]);
 
   if (!show) return null;
 
