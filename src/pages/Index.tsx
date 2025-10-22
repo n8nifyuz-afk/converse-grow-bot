@@ -299,13 +299,8 @@ export default function Index() {
         localStorage.removeItem('pendingChatModel');
         
         // Create chat with the message
+        // The flag will be cleared when navigation happens in createChatWithMessage
         createChatWithMessage(user.id, storedMessage, storedModel || 'gpt-4o-mini');
-        
-        // Clear the skip pricing modal flag AFTER handling the message
-        // Use setTimeout to ensure the chat creation has started
-        setTimeout(() => {
-          localStorage.removeItem('skipPricingModal');
-        }, 1000);
       }
     }
   }, [user]);
@@ -609,8 +604,8 @@ export default function Index() {
       setPendingMessage(message);
       localStorage.setItem('pendingChatMessage', message);
       localStorage.setItem('pendingChatModel', selectedModel);
-      // Flag to skip pricing modal when user signs in to send message
-      localStorage.setItem('skipPricingModal', 'true');
+      // Use sessionStorage so it persists for entire session (until tab close)
+      sessionStorage.setItem('skipPricingModal', 'true');
       setShowAuthModal(true);
       return;
     }
