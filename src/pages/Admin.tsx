@@ -5,12 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -179,6 +180,7 @@ export default function Admin() {
   const [loadingSubscription, setLoadingSubscription] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -358,8 +360,20 @@ export default function Admin() {
 
   // Filter users by plan
   const filteredUsers = userUsages.filter(usage => {
-    if (planFilter === 'all') return true;
-    return getUserPlan(usage) === planFilter;
+    // Filter by plan
+    if (planFilter !== 'all' && getUserPlan(usage) !== planFilter) {
+      return false;
+    }
+    
+    // Filter by search query (name or email)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      const nameMatch = usage.display_name?.toLowerCase().includes(query);
+      const emailMatch = usage.email?.toLowerCase().includes(query);
+      return nameMatch || emailMatch;
+    }
+    
+    return true;
   });
 
   // Pagination
@@ -368,10 +382,10 @@ export default function Admin() {
   const endIndex = startIndex + usersPerPage;
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filter changes
+  // Reset to page 1 when filter or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [planFilter]);
+  }, [planFilter, searchQuery]);
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -486,13 +500,29 @@ export default function Admin() {
         {/* User Token Usage Table with Tabs */}
         <Card className="border-border/50 overflow-hidden">
           <CardHeader className="bg-muted/30 border-b border-border/50 p-3 sm:p-4 md:p-6">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-              <CardTitle className="text-base sm:text-lg md:text-xl">Token Usage by User</CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+                  <CardTitle className="text-base sm:text-lg md:text-xl">Token Usage by User</CardTitle>
+                </div>
+                <CardDescription className="text-xs sm:text-sm md:text-base mt-1">
+                  Click on a user to view detailed breakdown • Showing {paginatedUsers.length} of {filteredUsers.length} users
+                </CardDescription>
+              </div>
+              
+              {/* Search Input */}
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
             </div>
-            <CardDescription className="text-xs sm:text-sm md:text-base">
-              Click on a user to view detailed breakdown • Showing {paginatedUsers.length} of {filteredUsers.length} users
-            </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {/* Filter Tabs */}
