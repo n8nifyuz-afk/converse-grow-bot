@@ -217,7 +217,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             {/* Left Panel - Features Comparison */}
             <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-700 dark:border-zinc-800 flex-col relative">
               {/* Decorative gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-purple-600/10 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-white/5 pointer-events-none"></div>
               
               {/* Comparison Table */}
               <div className="flex-1 flex flex-col min-h-0 relative z-10">
@@ -279,14 +279,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 <TabsList className="grid w-full grid-cols-2 h-8 sm:h-9 md:h-10 bg-zinc-100 dark:bg-zinc-900 p-0.5 sm:p-1 border border-zinc-200 dark:border-zinc-800 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.pro')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.ultraPro')}
@@ -300,7 +300,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
                     selectedPeriod === 'monthly'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-lg'
+                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
                   }`}
                 >
@@ -322,7 +322,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   onClick={() => setSelectedPeriod('3month')}
                   className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
                     selectedPeriod === '3month'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-lg'
+                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
                   }`}
                 >
@@ -344,7 +344,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   onClick={() => setSelectedPeriod('yearly')}
                   className={`w-full p-2.5 sm:p-3 pt-4 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
                     selectedPeriod === 'yearly'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 shadow-lg'
+                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
                   }`}
                 >
@@ -370,7 +370,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-sm shadow-lg hover:shadow-blue-500/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
+                className="w-full h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-sm shadow-lg hover:shadow-blue-500/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
               >
                 {isLoading ? (
                   <>
