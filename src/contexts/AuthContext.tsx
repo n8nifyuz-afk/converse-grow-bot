@@ -541,8 +541,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Skip pricing modal if user signed in to send a message
     const skipPricingModal = localStorage.getItem('skipPricingModal');
     if (skipPricingModal === 'true') {
-      localStorage.removeItem('skipPricingModal');
-      return;
+      return; // Don't remove yet - will be removed after subscription check
     }
     
     // Check if modal was already shown this session
@@ -720,9 +719,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       setSubscriptionStatus(resetStatus);
       clearCachedSubscription();
+      checkAndShowPricingModal(resetStatus);
     } finally {
       setIsCheckingSubscription(false);
       setLoadingSubscription(false);
+      // Clear the skip pricing modal flag after subscription check is complete
+      localStorage.removeItem('skipPricingModal');
     }
   };
 
