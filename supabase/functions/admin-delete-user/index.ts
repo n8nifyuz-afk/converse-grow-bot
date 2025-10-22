@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
@@ -82,20 +82,77 @@ serve(async (req) => {
 
     console.log(`Admin ${user.id} deleting user ${userId}`);
 
-    // Delete user from auth.users (this will cascade delete profile via foreign key)
+    // STEP 1: Get user info before deletion (for logging)
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('email, display_name')
+      .eq('user_id', userId)
+      .single();
+
+    // STEP 2: Get subscription info before deletion
+    const { data: subscription } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('plan, status, stripe_subscription_id, current_period_end')
+      .eq('user_id', userId)
+      .single();
+
+    console.log(`Deleting user ${userId}:`, {
+      email: profile?.email,
+      name: profile?.display_name,
+      subscription: subscription ? {
+        plan: subscription.plan,
+        status: subscription.status,
+        stripe_id: subscription.stripe_subscription_id,
+        period_end: subscription.current_period_end
+      } : 'No subscription'
+    });
+
+    // STEP 3: Delete from all related tables manually
+    const tables = [
+      'message_ratings',
+      'messages', 
+      'image_analyses',
+      'chats',
+      'projects',
+      'usage_limits',
+      'user_subscriptions',
+      'user_roles',
+      'token_usage',
+      'profiles'
+    ];
+
+    for (const table of tables) {
+      const { error } = await supabaseAdmin
+        .from(table)
+        .delete()
+        .eq('user_id', userId);
+      
+      if (error) {
+        console.log(`Error deleting from ${table}:`, error.message);
+      } else {
+        console.log(`Deleted from ${table}`);
+      }
+    }
+
+    // STEP 4: Delete from auth.users
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (deleteError) {
-      console.error('Error deleting user:', deleteError);
+      console.error('Error deleting auth user:', deleteError);
       throw deleteError;
     }
 
-    console.log(`User ${userId} deleted successfully`);
+    console.log(`User ${userId} deleted successfully (had ${subscription?.plan || 'free'} plan)`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'User deleted successfully'
+        message: 'User deleted successfully',
+        deletedUser: {
+          email: profile?.email,
+          plan: subscription?.plan || 'free',
+          hadActiveSubscription: subscription?.status === 'active'
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

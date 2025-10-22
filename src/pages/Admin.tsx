@@ -637,18 +637,48 @@ export default function Admin() {
                                 className="h-7 px-2 text-xs"
                                 onClick={async (e) => {
                                   e.stopPropagation();
-                                  if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                                  
+                                  // Get user plan info
+                                  const plan = getUserPlan(usage);
+                                  const planBadge = plan === 'ultra' ? 'Ultra Pro' : plan === 'pro' ? 'Pro' : 'Free';
+                                  
+                                  // Calculate total tokens
+                                  const totalTokens = usage.model_usages.reduce(
+                                    (sum, m) => sum + m.input_tokens + m.output_tokens, 
+                                    0
+                                  );
+                                  
+                                  const confirmMessage = `⚠️ PERMANENTLY DELETE USER?\n\n` +
+                                    `Email: ${usage.email}\n` +
+                                    `Name: ${usage.display_name || 'N/A'}\n` +
+                                    `Plan: ${planBadge}\n` +
+                                    `Total tokens: ${totalTokens.toLocaleString()}\n\n` +
+                                    `This will delete ALL:\n` +
+                                    `• Profile & account data\n` +
+                                    `• Chats & messages\n` +
+                                    `• Projects & files\n` +
+                                    `• Subscription data\n` +
+                                    `• Usage statistics\n\n` +
+                                    `THIS CANNOT BE UNDONE!`;
+                                    
+                                  if (!confirm(confirmMessage)) {
                                     return;
                                   }
                                   
                                   try {
-                                    const { error } = await supabase.functions.invoke('admin-delete-user', {
+                                    const { data, error } = await supabase.functions.invoke('admin-delete-user', {
                                       body: { userId: usage.user_id }
                                     });
 
                                     if (error) throw error;
 
-                                    toast.success('User deleted successfully');
+                                    // Show detailed success message
+                                    const deletedInfo = data?.deletedUser;
+                                    const successMsg = deletedInfo 
+                                      ? `User deleted (${deletedInfo.plan} plan${deletedInfo.hadActiveSubscription ? ', had active subscription' : ''})`
+                                      : 'User deleted successfully';
+                                    
+                                    toast.success(successMsg);
                                     await fetchTokenUsageData();
                                   } catch (error) {
                                     console.error('Error deleting user:', error);
@@ -843,18 +873,47 @@ export default function Admin() {
                   variant="destructive"
                   size="sm"
                   onClick={async () => {
-                    if (!confirm('Are you sure you want to PERMANENTLY DELETE this user? This action cannot be undone!')) {
+                    // Get user plan info
+                    const plan = getUserPlan(selectedUser);
+                    const planBadge = plan === 'ultra' ? 'Ultra Pro' : plan === 'pro' ? 'Pro' : 'Free';
+                    
+                    // Calculate total tokens
+                    const totalTokens = selectedUser.model_usages.reduce(
+                      (sum, m) => sum + m.input_tokens + m.output_tokens, 
+                      0
+                    );
+                    
+                    const confirmMessage = `⚠️ PERMANENTLY DELETE USER?\n\n` +
+                      `Email: ${selectedUser.email}\n` +
+                      `Name: ${selectedUser.display_name || 'N/A'}\n` +
+                      `Plan: ${planBadge}\n` +
+                      `Total tokens: ${totalTokens.toLocaleString()}\n\n` +
+                      `This will delete ALL:\n` +
+                      `• Profile & account data\n` +
+                      `• Chats & messages\n` +
+                      `• Projects & files\n` +
+                      `• Subscription data\n` +
+                      `• Usage statistics\n\n` +
+                      `THIS CANNOT BE UNDONE!`;
+                      
+                    if (!confirm(confirmMessage)) {
                       return;
                     }
                     
                     try {
-                      const { error } = await supabase.functions.invoke('admin-delete-user', {
+                      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
                         body: { userId: selectedUser.user_id }
                       });
 
                       if (error) throw error;
 
-                      toast.success('User deleted successfully');
+                      // Show detailed success message
+                      const deletedInfo = data?.deletedUser;
+                      const successMsg = deletedInfo 
+                        ? `User deleted (${deletedInfo.plan} plan${deletedInfo.hadActiveSubscription ? ', had active subscription' : ''})`
+                        : 'User deleted successfully';
+                      
+                      toast.success(successMsg);
                       setIsModalOpen(false);
                       await fetchTokenUsageData();
                     } catch (error) {
