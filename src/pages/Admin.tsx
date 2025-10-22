@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -182,6 +182,8 @@ export default function Admin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<'name' | 'email' | 'plan' | 'cost' | 'registered'>('registered');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -413,6 +415,26 @@ export default function Admin() {
     return 'free';
   };
 
+  // Toggle sort
+  const handleSort = (field: 'name' | 'email' | 'plan' | 'cost' | 'registered') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Get sort icon
+  const getSortIcon = (field: 'name' | 'email' | 'plan' | 'cost' | 'registered') => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-50" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4" />
+      : <ArrowDown className="h-3 w-3 sm:h-4 sm:w-4" />;
+  };
+
   // Filter users by plan
   const filteredUsers = userUsages.filter(usage => {
     // Filter by plan
@@ -431,16 +453,54 @@ export default function Admin() {
     return true;
   });
 
+  // Sort filtered users
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortField) {
+      case 'name':
+        aValue = a.display_name?.toLowerCase() || '';
+        bValue = b.display_name?.toLowerCase() || '';
+        break;
+      case 'email':
+        aValue = a.email?.toLowerCase() || '';
+        bValue = b.email?.toLowerCase() || '';
+        break;
+      case 'plan':
+        const planOrder = { free: 0, pro: 1, ultra: 2 };
+        aValue = planOrder[getUserPlan(a)];
+        bValue = planOrder[getUserPlan(b)];
+        break;
+      case 'cost':
+        aValue = a.model_usages.reduce((sum, m) => sum + m.cost, 0);
+        bValue = b.model_usages.reduce((sum, m) => sum + m.cost, 0);
+        break;
+      case 'registered':
+        aValue = new Date(a.created_at).getTime();
+        bValue = new Date(b.created_at).getTime();
+        break;
+      default:
+        return 0;
+    }
+
+    if (sortDirection === 'asc') {
+      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+    } else {
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+    }
+  });
+
   // Pagination
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
   const startIndex = (currentPage - 1) * usersPerPage;
   const endIndex = startIndex + usersPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+  const paginatedUsers = sortedUsers.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filter or search changes
+  // Reset to page 1 when filter, search, or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [planFilter, searchQuery]);
+  }, [planFilter, searchQuery, sortField, sortDirection]);
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -575,7 +635,7 @@ export default function Admin() {
                   <CardTitle className="text-base sm:text-lg md:text-xl">Token Usage by User</CardTitle>
                 </div>
                 <CardDescription className="text-xs sm:text-sm md:text-base mt-1">
-                  Click on a user to view detailed breakdown • Showing {paginatedUsers.length} of {filteredUsers.length} users
+                  Click on a user to view detailed breakdown • Showing {paginatedUsers.length} of {sortedUsers.length} users
                 </CardDescription>
               </div>
               
@@ -629,11 +689,51 @@ export default function Admin() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50 hover:bg-muted/50">
-                        <TableHead className="hidden sm:table-cell font-semibold text-foreground text-xs sm:text-sm">User</TableHead>
-                        <TableHead className="font-semibold text-foreground text-xs sm:text-sm">Email</TableHead>
-                        <TableHead className="font-semibold text-foreground text-xs sm:text-sm">Plan</TableHead>
-                        <TableHead className="text-right font-semibold text-foreground text-xs sm:text-sm">Cost</TableHead>
-                        <TableHead className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm">Registered</TableHead>
+                        <TableHead 
+                          className="hidden sm:table-cell font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          onClick={() => handleSort('name')}
+                        >
+                          <div className="flex items-center gap-1">
+                            User
+                            {getSortIcon('name')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          onClick={() => handleSort('email')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Email
+                            {getSortIcon('email')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          onClick={() => handleSort('plan')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Plan
+                            {getSortIcon('plan')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="text-right font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          onClick={() => handleSort('cost')}
+                        >
+                          <div className="flex items-center gap-1 justify-end">
+                            Cost
+                            {getSortIcon('cost')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          onClick={() => handleSort('registered')}
+                        >
+                          <div className="flex items-center gap-1">
+                            Registered
+                            {getSortIcon('registered')}
+                          </div>
+                        </TableHead>
                         <TableHead className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm">Actions</TableHead>
                         <TableHead className="w-[60px] sm:w-[100px]"></TableHead>
                       </TableRow>
