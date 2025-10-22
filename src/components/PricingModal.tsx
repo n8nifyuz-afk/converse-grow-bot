@@ -306,7 +306,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.monthly')}</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">1 Month</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan].monthly.price}/{t('pricingModal.perMonth').toLowerCase()}
                       </div>
