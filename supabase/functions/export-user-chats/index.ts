@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import * as XLSX from 'https://esm.sh/xlsx@0.18.5';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -66,12 +67,24 @@ Deno.serve(async (req) => {
     const chatIds = chats?.map(chat => chat.id) || [];
     
     if (chatIds.length === 0) {
-      // Return empty CSV wrapped in JSON
-      const csvContent = 'Chat Title,Chat Created At,Model,Message Role,Message Content,Message Created At,Image URLs\n';
+      // Return empty Excel wrapped in JSON
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet([{
+        'Chat Title': 'No chats found',
+        'Chat Created': '',
+        'Model': '',
+        'Role': '',
+        'Message': '',
+        'Sent At': '',
+        'Attached Files/Images': ''
+      }]);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Chat Messages');
+      const excelBuffer = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+      
       return new Response(
         JSON.stringify({ 
-          csv: csvContent,
-          filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.csv`
+          excel: excelBuffer,
+          filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.xlsx`
         }),
         {
           headers: {
@@ -95,26 +108,15 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${messages?.length || 0} messages`);
 
-    // Build CSV
-    const csvRows: string[] = [];
-    csvRows.push('Chat Title,Chat Created At,Model,Message Role,Message Content,Message Created At,Image URLs');
-
+    // Build Excel data structure
+    const excelData: any[] = [];
+    
     // Create a map of chat IDs to chat details
     const chatMap = new Map(chats?.map(chat => [chat.id, chat]) || []);
 
     messages?.forEach(message => {
       const chat = chatMap.get(message.chat_id);
       if (!chat) return;
-
-      // Escape and format values for CSV
-      const escapeCsv = (value: string) => {
-        if (!value) return '';
-        // Replace quotes with double quotes and wrap in quotes if contains comma, newline, or quote
-        if (value.includes(',') || value.includes('\n') || value.includes('"')) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
-      };
 
       // Extract image URLs from file_attachments
       let imageUrls = '';
@@ -131,30 +133,62 @@ Deno.serve(async (req) => {
             return null;
           })
           .filter((url: string | null) => url !== null)
-          .join(' | ');
+          .join('\n');
         imageUrls = urls;
       }
 
-      csvRows.push([
-        escapeCsv(chat.title),
-        new Date(chat.created_at).toISOString(),
-        escapeCsv(chat.model_id || ''),
-        escapeCsv(message.role),
-        escapeCsv(message.content),
-        new Date(message.created_at).toISOString(),
-        escapeCsv(imageUrls),
-      ].join(','));
+      excelData.push({
+        'Chat Title': chat.title,
+        'Chat Created': new Date(chat.created_at).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        'Model': chat.model_id || 'N/A',
+        'Role': message.role,
+        'Message': message.content,
+        'Sent At': new Date(message.created_at).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        'Attached Files/Images': imageUrls || 'None'
+      });
     });
 
-    const csvContent = csvRows.join('\n');
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
 
-    console.log(`Exported ${messages?.length || 0} messages from ${chats?.length || 0} chats`);
+    // Set column widths for better readability
+    worksheet['!cols'] = [
+      { wch: 30 }, // Chat Title
+      { wch: 18 }, // Chat Created
+      { wch: 20 }, // Model
+      { wch: 10 }, // Role
+      { wch: 80 }, // Message (wider for content)
+      { wch: 20 }, // Sent At
+      { wch: 60 }  // Attached Files/Images
+    ];
 
-    // Return CSV wrapped in JSON for proper handling by Supabase client
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Chat Messages');
+
+    // Generate Excel file as base64
+    const excelBuffer = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+
+    console.log(`Exported ${messages?.length || 0} messages from ${chats?.length || 0} chats to Excel`);
+
+    // Return Excel file as base64 wrapped in JSON
     return new Response(
       JSON.stringify({ 
-        csv: csvContent,
-        filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.csv`
+        excel: excelBuffer,
+        filename: `user_chats_${userId}_${new Date().toISOString().split('T')[0]}.xlsx`
       }),
       {
         headers: {

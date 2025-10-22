@@ -676,19 +676,27 @@ export default function Admin() {
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   try {
-                                    toast.loading('Downloading chat messages...');
+                                    toast.loading('Downloading chat data...');
                                     const { data, error } = await supabase.functions.invoke('export-user-chats', {
                                       body: { userId: usage.user_id }
                                     });
 
                                     if (error) throw error;
 
-                                    // Extract CSV from JSON response
-                                    const csvContent = data.csv;
-                                    const filename = data.filename || `user_chats_${usage.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+                                    // Extract Excel base64 from JSON response
+                                    const excelBase64 = data.excel;
+                                    const filename = data.filename || `user_chats_${usage.user_id}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
-                                    // Create blob and download
-                                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                                    // Convert base64 to blob
+                                    const byteCharacters = atob(excelBase64);
+                                    const byteNumbers = new Array(byteCharacters.length);
+                                    for (let i = 0; i < byteCharacters.length; i++) {
+                                      byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                    }
+                                    const byteArray = new Uint8Array(byteNumbers);
+                                    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                                    
+                                    // Create download link
                                     const url = window.URL.createObjectURL(blob);
                                     const a = document.createElement('a');
                                     a.href = url;
@@ -699,11 +707,11 @@ export default function Admin() {
                                     document.body.removeChild(a);
 
                                     toast.dismiss();
-                                    toast.success('Chat messages downloaded');
+                                    toast.success('Chat data downloaded as Excel file');
                                   } catch (error) {
                                     console.error('Error downloading chats:', error);
                                     toast.dismiss();
-                                    toast.error('Failed to download chat messages');
+                                    toast.error('Failed to download chat data');
                                   }
                                 }}
                               >
@@ -936,19 +944,27 @@ export default function Admin() {
                   size="sm"
                   onClick={async () => {
                     try {
-                      toast.loading('Downloading chat messages...');
+                      toast.loading('Downloading chat data...');
                       const { data, error } = await supabase.functions.invoke('export-user-chats', {
                         body: { userId: selectedUser.user_id }
                       });
 
                       if (error) throw error;
 
-                      // Extract CSV from JSON response
-                      const csvContent = data.csv;
-                      const filename = data.filename || `user_chats_${selectedUser.user_id}_${new Date().toISOString().split('T')[0]}.csv`;
+                      // Extract Excel base64 from JSON response
+                      const excelBase64 = data.excel;
+                      const filename = data.filename || `user_chats_${selectedUser.user_id}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
-                      // Create blob and download
-                      const blob = new Blob([csvContent], { type: 'text/csv' });
+                      // Convert base64 to blob
+                      const byteCharacters = atob(excelBase64);
+                      const byteNumbers = new Array(byteCharacters.length);
+                      for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                      }
+                      const byteArray = new Uint8Array(byteNumbers);
+                      const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                      
+                      // Create download link
                       const url = window.URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
@@ -959,11 +975,11 @@ export default function Admin() {
                       document.body.removeChild(a);
 
                       toast.dismiss();
-                      toast.success('Chat messages downloaded');
+                      toast.success('Chat data downloaded as Excel file');
                     } catch (error) {
                       console.error('Error downloading chats:', error);
                       toast.dismiss();
-                      toast.error('Failed to download chat messages');
+                      toast.error('Failed to download chat data');
                     }
                   }}
                 >
