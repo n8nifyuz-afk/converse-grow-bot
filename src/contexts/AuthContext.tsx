@@ -723,8 +723,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsCheckingSubscription(false);
       setLoadingSubscription(false);
-      // Clear the skip pricing modal flag after subscription check is complete
-      localStorage.removeItem('skipPricingModal');
+      // Don't clear skipPricingModal here - let Index.tsx clear it after message is sent
     }
   };
 

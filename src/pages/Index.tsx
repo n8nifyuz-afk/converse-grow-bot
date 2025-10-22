@@ -297,8 +297,15 @@ export default function Index() {
       if (storedMessage) {
         localStorage.removeItem('pendingChatMessage');
         localStorage.removeItem('pendingChatModel');
-        // Don't clear skipPricingModal here - let AuthContext clear it after subscription check
+        
+        // Create chat with the message
         createChatWithMessage(user.id, storedMessage, storedModel || 'gpt-4o-mini');
+        
+        // Clear the skip pricing modal flag AFTER handling the message
+        // Use setTimeout to ensure the chat creation has started
+        setTimeout(() => {
+          localStorage.removeItem('skipPricingModal');
+        }, 1000);
       }
     }
   }, [user]);
