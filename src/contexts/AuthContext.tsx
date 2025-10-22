@@ -154,39 +154,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let initialCheckComplete = false;
     
-    // LOGGING: Track initial page load URL
-    console.log('[AUTH-INIT] 🚀 Page loaded, current URL:', window.location.href);
-    console.log('[AUTH-INIT] 📍 Hash fragment:', window.location.hash || 'none');
-    
-    // Clean any hash fragments immediately on page load (before auth state check)
-    // This handles email confirmation redirects and OAuth redirects
-    if (window.location.hash) {
-      console.log('[AUTH-INIT] 🧹 Cleaning hash fragment:', window.location.hash);
-      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-      console.log('[AUTH-INIT] ✅ URL cleaned to:', window.location.href);
-    }
-    
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('[AUTH-STATE] 🔔 Auth state changed:', event, {
-          hasSession: !!session,
-          userId: session?.user?.id,
-          currentURL: window.location.href,
-          hash: window.location.hash
-        });
-        
         // CRITICAL: Only synchronous state updates here to prevent auth loops
         if (event === 'SIGNED_IN' && session) {
-          console.log('[AUTH-STATE] ✅ User signed in:', session.user.email);
           setSession(session);
           setUser(session.user);
           
-          // Clean URL - remove hash fragments from OAuth redirects
-          if (window.location.hash) {
-            console.log('[AUTH-STATE] 🧹 Cleaning OAuth hash:', window.location.hash);
-            window.history.replaceState({}, document.title, window.location.pathname);
-            console.log('[AUTH-STATE] ✅ URL cleaned to:', window.location.href);
+          // Clean URL - remove hash fragments from OAuth redirects AFTER session is established
+          if (window.location.hash && window.location.hash.includes('access_token')) {
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
           // Defer async operations to prevent blocking auth flow
@@ -203,7 +181,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const now = Date.now();
               // Profile created within last 10 seconds = new signup
               if ((now - profileCreated) < 10000) {
-                console.log('[AUTH] 🎯 New user signup detected - tracking registration_complete');
                 trackRegistrationComplete();
               }
             }
@@ -469,8 +446,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .maybeSingle();
         
         if (profile?.signup_method === 'google' || profile?.signup_method === 'apple') {
-          console.log(`🔐 Detected ${profile.signup_method} account without password, sending reset link...`);
-          
           // Use production domain to avoid security warnings
           const redirectUrl = 'https://www.chatl.ai/reset-password';
           const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
@@ -478,7 +453,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           
           if (resetError) {
-            console.error('❌ Failed to send password reset:', resetError);
             return { 
               error: { 
                 message: `This email is registered via ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. Please use "Continue with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}" to sign in.`,
@@ -487,7 +461,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
           }
           
-          console.log('✅ Password reset email sent');
           return { 
             error: { 
               message: `This account was created with ${profile.signup_method === 'google' ? 'Google' : 'Apple'}. We've sent you an email to set up a password so you can sign in with email too.`,
@@ -504,13 +477,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+
   const signInWithGoogle = async () => {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
-    
-    console.log('[GOOGLE-SIGNIN] 🔵 Starting Google sign-in...');
-    console.log('[GOOGLE-SIGNIN] 📍 Current URL:', window.location.href);
-    console.log('[GOOGLE-SIGNIN] 🔗 Redirect URL:', redirectUrl);
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -521,12 +491,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     });
-    
-    if (error) {
-      console.error('[GOOGLE-SIGNIN] ❌ Google sign-in error:', error);
-    } else {
-      console.log('[GOOGLE-SIGNIN] ✅ OAuth initiated successfully, redirecting to Google...');
-    }
     
     return { error };
   };
@@ -552,12 +516,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use current domain dynamically to ensure it matches Supabase settings
     const currentOrigin = window.location.origin;
     const redirectUrl = `${currentOrigin}/reset-password`;
-    
-    console.log('🔐 Sending password reset email:', { 
-      email, 
-      redirectUrl,
-      timestamp: new Date().toISOString() 
-    });
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl
@@ -603,15 +561,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoadingSubscription(true);
     try {
       // First, refresh the session to ensure we have a valid token
-      console.log('🔄 Refreshing session and token before subscription check...');
       const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
       
       if (refreshError || !refreshedSession) {
-        console.warn('⚠️ Session refresh failed - using fallback', refreshError);
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
         if (sessionError || !sessionData.session) {
-          console.warn('⚠️ Session not available, falling back to database check');
         // Fallback: Check database directly
         const { data: dbSub, error: dbError } = await supabase
           .from('user_subscriptions')
@@ -621,7 +576,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .maybeSingle();
         
         if (!dbError && dbSub) {
-          console.log('✅ Found active subscription in database:', dbSub);
           const newStatus = {
             subscribed: true,
             product_id: dbSub.product_id,
@@ -631,7 +585,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           saveCachedSubscription(newStatus);
           checkAndShowPricingModal(newStatus);
         } else {
-          console.log('ℹ️ No active subscription found in database');
           const resetStatus = {
             subscribed: false,
             product_id: null,
@@ -648,12 +601,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Check with Stripe API - source of truth
-      console.log('🔍 Checking subscription via Stripe API with refreshed token...');
       
       // Get the current session to ensure we have a valid token
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       if (!currentSession?.access_token) {
-        console.error('❌ No valid session token available');
         throw new Error('No valid authentication token');
       }
       
@@ -684,7 +635,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           subscription_end: data.subscription_end || null
         };
         
-        console.log('✅ Subscription status updated from Stripe:', newStatus);
         setSubscriptionStatus(newStatus);
         
         // Track payment complete if user just upgraded
@@ -694,8 +644,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const alreadyTracked = localStorage.getItem(trackedKey);
           
           if (!alreadyTracked) {
-            console.log('🎉 User upgraded! Fetching plan details for GTM tracking...');
-            
             // Fetch full subscription details for tracking
             const { data: subDetails, error: subError } = await supabase
               .from('user_subscriptions')
@@ -731,20 +679,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   }
                 }
                 
-                console.log('📊 Tracking payment:', { planType, planDuration, planPrice });
                 trackPaymentComplete(planType, planDuration, planPrice);
                 
                 // Mark as tracked in localStorage to prevent duplicates
                 localStorage.setItem(trackedKey, 'true');
               } catch (trackError) {
-                console.error('Error tracking payment:', trackError);
                 // Still track with default values
                 trackPaymentComplete(planType, 'monthly', planType === 'Ultra' ? 39.99 : 19.99);
                 localStorage.setItem(trackedKey, 'true');
               }
             }
-          } else {
-            console.log('⏭️ Payment already tracked for this subscription, skipping');
           }
         }
         
