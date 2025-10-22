@@ -28,6 +28,7 @@ interface UserTokenUsage {
     plan: string | null;
     subscription_end: string | null;
   };
+  blocked?: boolean;
 }
 interface TokenUsageByModel {
   model: string;
@@ -264,7 +265,7 @@ export default function Admin() {
             subscription_end: null
           },
           blocked: profile.blocked || false
-        } as any);
+        });
       });
 
       // Then add token usage data to the users
@@ -692,7 +693,7 @@ export default function Admin() {
                   variant="destructive"
                   size="sm"
                   onClick={async () => {
-                    if (!confirm(`Are you sure you want to ${(selectedUser as any).blocked ? 'unblock' : 'block'} this user?`)) {
+                    if (!confirm(`Are you sure you want to ${selectedUser?.blocked ? 'unblock' : 'block'} this user?`)) {
                       return;
                     }
                     
@@ -700,13 +701,13 @@ export default function Admin() {
                       const { error } = await supabase.functions.invoke('admin-block-user', {
                         body: { 
                           userId: selectedUser.user_id,
-                          blocked: !(selectedUser as any).blocked 
+                          blocked: !selectedUser?.blocked 
                         }
                       });
 
                       if (error) throw error;
 
-                      toast.success(`User ${(selectedUser as any).blocked ? 'unblocked' : 'blocked'} successfully`);
+                      toast.success(`User ${selectedUser?.blocked ? 'unblocked' : 'blocked'} successfully`);
                       setIsModalOpen(false);
                       await fetchTokenUsageData();
                     } catch (error) {
@@ -715,7 +716,7 @@ export default function Admin() {
                     }
                   }}
                 >
-                  {(selectedUser as any).blocked ? 'Unblock User' : 'Block User'}
+                  {selectedUser?.blocked ? 'Unblock User' : 'Block User'}
                 </Button>
                 
                 <Button
