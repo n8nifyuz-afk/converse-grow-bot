@@ -5,14 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, ChevronDown, ChevronUp, Paperclip } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -204,10 +203,11 @@ export default function Admin() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [userChats, setUserChats] = useState<UserChat[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
-  const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
+  const [selectedChatForMessages, setSelectedChatForMessages] = useState<UserChat | null>(null);
   const [chatMessages, setChatMessages] = useState<{[chatId: string]: ChatMessage[]}>({});
   const [loadingMessages, setLoadingMessages] = useState<{[chatId: string]: boolean}>({});
   const [showChatsModal, setShowChatsModal] = useState(false);
+  const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [selectedUserForChats, setSelectedUserForChats] = useState<UserTokenUsage | null>(null);
   const usersPerPage = 15;
   useEffect(() => {
@@ -600,14 +600,11 @@ export default function Admin() {
     }
   };
 
-  // Toggle chat expansion
-  const toggleChat = async (chatId: string) => {
-    if (expandedChatId === chatId) {
-      setExpandedChatId(null);
-    } else {
-      setExpandedChatId(chatId);
-      await fetchChatMessages(chatId);
-    }
+  // Open chat messages in modal
+  const openChatMessages = async (chat: UserChat) => {
+    setSelectedChatForMessages(chat);
+    setShowMessagesModal(true);
+    await fetchChatMessages(chat.id);
   };
 
   // Get plan display info
@@ -1063,7 +1060,6 @@ export default function Admin() {
           if (!open) {
             // Reset state when modal closes
             setUserChats([]);
-            setExpandedChatId(null);
             setChatMessages({});
           }
         }}>
@@ -1427,7 +1423,6 @@ export default function Admin() {
           setShowChatsModal(open);
           if (!open) {
             setUserChats([]);
-            setExpandedChatId(null);
             setChatMessages({});
             setSelectedUserForChats(null);
           }
@@ -1456,147 +1451,152 @@ export default function Admin() {
                 </div>
               ) : (
                 userChats.map((chat) => (
-                  <Collapsible
-                    key={chat.id}
-                    open={expandedChatId === chat.id}
-                    onOpenChange={() => toggleChat(chat.id)}
+                  <Card 
+                    key={chat.id} 
+                    className="border-border/50 overflow-hidden cursor-pointer hover:bg-muted/30 transition-all hover:shadow-md"
+                    onClick={() => openChatMessages(chat)}
                   >
-                    <Card className="border-border/50 overflow-hidden">
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex-1">
-                            <div className="flex items-start gap-3">
-                              <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
-                                expandedChatId === chat.id ? 'bg-primary' : 'bg-muted-foreground/30'
-                              }`} />
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-sm sm:text-base truncate">
-                                  {chat.title}
-                                </h3>
-                                <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                                  <span className="flex items-center gap-1">
-                                    <MessageSquare className="h-3 w-3" />
-                                    {chat.message_count} messages
-                                  </span>
-                                  <span>•</span>
-                                  <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}</span>
-                                  {chat.model_id && (
-                                    <>
-                                      <span>•</span>
-                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                                        {chat.model_id}
-                                      </Badge>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex-1">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-1 h-2 w-2 rounded-full flex-shrink-0 bg-primary/60" />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm sm:text-base truncate">
+                              {chat.title}
+                            </h3>
+                            <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <MessageSquare className="h-3 w-3" />
+                                {chat.message_count} messages
+                              </span>
+                              <span>•</span>
+                              <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}</span>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" className="ml-2">
-                            {expandedChatId === chat.id ? (
-                              <ChevronUp className="h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4" />
-                            )}
-                          </Button>
                         </div>
-                      </CollapsibleTrigger>
+                      </div>
+                      <Eye className="h-4 w-4 text-muted-foreground ml-2" />
+                    </div>
+                  </Card>
+                ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
-                      <CollapsibleContent>
-                        <div className="border-t border-border/50 bg-muted/20">
-                          {loadingMessages[chat.id] ? (
-                            <div className="flex items-center justify-center py-8">
-                              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                            </div>
-                          ) : chatMessages[chat.id] && chatMessages[chat.id].length > 0 ? (
-                            <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
-                              {chatMessages[chat.id].map((message) => (
-                                <div
-                                  key={message.id}
-                                  className={`flex gap-3 ${
-                                    message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'
-                                  }`}
-                                >
-                                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                                    message.role === 'user' 
-                                      ? 'bg-primary text-primary-foreground' 
-                                      : 'bg-muted border border-border'
-                                  }`}>
-                                    {message.role === 'user' ? '👤' : '🤖'}
-                                  </div>
-                                  <div className={`flex-1 ${message.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
-                                    <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                                      message.role === 'user'
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-card border border-border'
-                                    }`}>
-                                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                                        {message.content}
-                                      </p>
-                                      {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
-                                        <div className="mt-3 space-y-2">
-                                          {message.file_attachments.map((file: any, idx: number) => {
-                                            const isImage = file.type?.startsWith('image/') || 
-                                                          file.file_type?.startsWith('image/') ||
-                                                          /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name || file.file_name || '');
-                                            
-                                            const fileUrl = file.url || file.file_url || file.path || file.file_path;
-                                            const fileName = file.name || file.file_name || `File ${idx + 1}`;
-                                            
-                                            if (isImage && fileUrl) {
-                                              return (
-                                                <div key={idx} className="rounded-lg overflow-hidden border border-current/20">
-                                                  <img 
-                                                    src={fileUrl} 
-                                                    alt={fileName}
-                                                    className="max-w-full max-h-[200px] object-contain bg-muted/20"
-                                                  />
-                                                </div>
-                                              );
-                                            }
-                                            
-                                            return (
-                                              <a
-                                                key={idx}
-                                                href={fileUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-2 p-2 rounded-lg border border-current/20 hover:bg-current/5 transition-colors text-xs"
-                                              >
-                                                <Paperclip className="h-3 w-3 flex-shrink-0" />
-                                                <span className="truncate">{fileName}</span>
-                                              </a>
-                                            );
-                                          })}
-                                        </div>
-                                      )}
+        {/* Messages Modal */}
+        <Dialog open={showMessagesModal} onOpenChange={(open) => {
+          setShowMessagesModal(open);
+          if (!open) {
+            setSelectedChatForMessages(null);
+          }
+        }}>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-lg sm:text-xl flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                {selectedChatForMessages?.title}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedChatForMessages?.message_count} messages • Last updated {selectedChatForMessages && new Date(selectedChatForMessages.updated_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto pr-2">
+              {selectedChatForMessages && loadingMessages[selectedChatForMessages.id] ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : selectedChatForMessages && chatMessages[selectedChatForMessages.id] && chatMessages[selectedChatForMessages.id].length > 0 ? (
+                <div className="space-y-4 py-4">
+                  {chatMessages[selectedChatForMessages.id].map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex gap-3 ${
+                        message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'
+                      }`}
+                    >
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                        message.role === 'user' 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted border border-border'
+                      }`}>
+                        {message.role === 'user' ? '👤' : '🤖'}
+                      </div>
+                      <div className={`flex-1 ${message.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
+                        <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-card border border-border'
+                        }`}>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            {message.content}
+                          </p>
+                          {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                              {message.file_attachments.map((file: any, idx: number) => {
+                                const isImage = file.type?.startsWith('image/') || 
+                                              file.file_type?.startsWith('image/') ||
+                                              /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name || file.file_name || '');
+                                
+                                const fileUrl = file.url || file.file_url || file.path || file.file_path;
+                                const fileName = file.name || file.file_name || `File ${idx + 1}`;
+                                
+                                if (isImage && fileUrl) {
+                                  return (
+                                    <div key={idx} className="rounded-lg overflow-hidden border border-current/20">
+                                      <img 
+                                        src={fileUrl} 
+                                        alt={fileName}
+                                        className="max-w-full max-h-[300px] object-contain bg-muted/20"
+                                      />
                                     </div>
-                                    <span className="text-[10px] text-muted-foreground mt-1 px-2">
-                                      {new Date(message.created_at).toLocaleTimeString('en-US', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-8 text-muted-foreground text-sm">
-                              No messages in this chat
+                                  );
+                                }
+                                
+                                return (
+                                  <a
+                                    key={idx}
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 p-2 rounded-lg border border-current/20 hover:bg-current/5 transition-colors text-xs"
+                                  >
+                                    <Paperclip className="h-3 w-3 flex-shrink-0" />
+                                    <span className="truncate">{fileName}</span>
+                                  </a>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
-                      </CollapsibleContent>
-                    </Card>
-                  </Collapsible>
-                ))
+                        <span className="text-[10px] text-muted-foreground mt-1 px-2">
+                          {new Date(message.created_at).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <MessageSquare className="h-12 w-12 opacity-20 mb-3" />
+                  <p className="text-sm">No messages in this chat</p>
+                </div>
               )}
             </div>
           </DialogContent>
