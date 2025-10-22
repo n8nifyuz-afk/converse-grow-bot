@@ -156,14 +156,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        // CRITICAL: Only synchronous state updates here to prevent auth loops
-        if (event === 'SIGNED_IN' && session) {
-          setSession(session);
-          setUser(session.user);
-          
-          // Check if user is blocked and logout immediately
-          setTimeout(async () => {
+        (event, session) => {
+          // CRITICAL: Only synchronous state updates here to prevent auth loops
+          if (event === 'SIGNED_IN' && session) {
+            setSession(session);
+            setUser(session.user);
+            
+            // Clean URL - remove hash fragments from OAuth redirects
+            if (window.location.hash) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            // Check if user is blocked and logout immediately
+            setTimeout(async () => {
             const { data: profile } = await supabase
               .from('profiles')
               .select('id, blocked')
