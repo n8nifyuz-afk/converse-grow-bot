@@ -634,9 +634,9 @@ export default function Index() {
 
       console.log('[INDEX] Chat created:', chatData.id);
       
-      // Track chat start event
+      // Track chat start event with deduplication
       console.log('[INDEX] 🎯 About to call trackChatStart...');
-      trackChatStart();
+      trackChatStart(chatData.id);
       console.log('[INDEX] 🎯 trackChatStart called');
 
       // Store the message and files for Chat page to process
@@ -688,8 +688,8 @@ export default function Index() {
       }]).select().single();
       if (chatError) throw chatError;
       
-      // Track chat start event
-      trackChatStart();
+      // Track chat start event with deduplication
+      trackChatStart(chatData.id);
       
       const {
         data: insertedMessage,

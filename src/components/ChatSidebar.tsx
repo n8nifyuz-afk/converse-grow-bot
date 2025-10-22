@@ -188,9 +188,9 @@ export default function ChatSidebar({
       }
 
       console.log('[SIDEBAR] Chat created:', newChat.id);
-      // Track chat start event
+      // Track chat start event with deduplication
       console.log('[SIDEBAR] 🎯 Tracking chat_start for new chat');
-      trackChatStart();
+      trackChatStart(newChat.id);
 
       // Refresh the sidebar immediately
       fetchChats();

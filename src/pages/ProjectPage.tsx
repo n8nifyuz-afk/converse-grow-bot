@@ -467,8 +467,8 @@ export default function ProjectPage() {
       }).select().single();
       if (error) throw error;
       
-      // Track chat start event
-      trackChatStart();
+      // Track chat start event with deduplication
+      trackChatStart(newChat.id);
 
       // Upload files for display in chat - use correct bucket based on file type
       const uploadedFiles = [];
