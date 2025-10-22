@@ -472,11 +472,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 </div>
 
-                <p className="text-[9px] sm:text-[10px] text-center text-zinc-500 dark:text-zinc-500 leading-snug px-1">
-                  {t('pricingModal.bySubscribing')}{' '}
-                  <a href="/terms" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">{t('pricingModal.terms')}</a>,{' '}
-                  <a href="/privacy" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">{t('pricingModal.privacyPolicy')}</a>, {t('pricingModal.and')}{' '}
-                  <a href="/refund-policy" className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">{t('pricingModal.refundPolicy')}</a>
+                <p className="text-[11px] sm:text-xs text-center text-zinc-400 dark:text-zinc-500 leading-relaxed px-2">
+                  By continuing an account, you agree to our{' '}
+                  <a href="https://www.chatl.ai/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Terms of Service</a>,{' '}
+                  <a href="https://www.chatl.ai/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Privacy & Cookie Statement</a>,{' '}
+                  and{' '}
+                  <a href="https://www.chatl.ai/refund-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Refund & Cancellation Policy</a>..
                 </p>
               </div>
             </div>
