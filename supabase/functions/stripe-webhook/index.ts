@@ -327,7 +327,7 @@ serve(async (req) => {
         
         logStep("Subscription activated, usage limits will reset naturally at period end", { 
           userId: user.id,
-          periodEnd: new Date(highestTierSub.current_period_end * 1000).toISOString()
+          periodEnd: periodEndDate.toISOString()
         });
         break;
       }
