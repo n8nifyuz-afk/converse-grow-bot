@@ -29,6 +29,8 @@ interface UserTokenUsage {
     product_id: string | null;
     plan: string | null;
     subscription_end: string | null;
+    stripe_subscription_id?: string | null;
+    stripe_customer_id?: string | null;
   };
   blocked?: boolean;
 }
@@ -234,7 +236,7 @@ export default function Admin() {
       const {
         data: subscriptionsData,
         error: subscriptionsError
-      } = await supabase.from('user_subscriptions').select('user_id, status, product_id, plan, plan_name, current_period_end');
+      } = await supabase.from('user_subscriptions').select('user_id, status, product_id, plan, plan_name, current_period_end, stripe_subscription_id, stripe_customer_id');
       if (subscriptionsError) console.error('Error fetching subscriptions:', subscriptionsError);
       console.log('Subscriptions data:', subscriptionsData);
 
@@ -265,12 +267,16 @@ export default function Admin() {
             subscribed: true,
             product_id: subscription.product_id,
             plan: subscription.plan,
-            subscription_end: subscription.current_period_end
+            subscription_end: subscription.current_period_end,
+            stripe_subscription_id: subscription.stripe_subscription_id,
+            stripe_customer_id: subscription.stripe_customer_id
           } : {
             subscribed: false,
             product_id: null,
             plan: null,
-            subscription_end: null
+            subscription_end: null,
+            stripe_subscription_id: null,
+            stripe_customer_id: null
           },
           blocked: profile.blocked || false
         });
@@ -788,7 +794,7 @@ export default function Admin() {
               </div>
               
               {/* Subscription Status */}
-              <div className="space-y-1 pt-2">
+              <div className="space-y-2 pt-2 border-t border-border/50">
                 <p className="text-xs text-muted-foreground">Subscription Status</p>
                 {loadingSubscription ? (
                   <div className="flex items-center gap-2">
@@ -802,30 +808,68 @@ export default function Admin() {
                       const isSubscribed = selectedUser.subscription_status?.subscribed;
                       const productId = selectedUser.subscription_status?.product_id;
                       const subscriptionEnd = selectedUser.subscription_status?.subscription_end;
+                      const stripeSubId = selectedUser.subscription_status?.stripe_subscription_id;
+                      const stripeCustId = selectedUser.subscription_status?.stripe_customer_id;
                       
                       if (plan === 'pro') {
                         return (
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30">
-                              Pro
-                            </Badge>
-                            {subscriptionEnd && (
-                              <span className="text-xs text-muted-foreground">
-                                Until {new Date(subscriptionEnd).toLocaleDateString()}
-                              </span>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30">
+                                Pro Plan
+                              </Badge>
+                              {subscriptionEnd && (
+                                <span className="text-xs text-muted-foreground">
+                                  Until {new Date(subscriptionEnd).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                            {stripeSubId && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Stripe Subscription ID</p>
+                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeSubId}</code>
+                              </div>
+                            )}
+                            {stripeCustId && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Stripe Customer ID</p>
+                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeCustId}</code>
+                              </div>
                             )}
                           </div>
                         );
                       } else if (plan === 'ultra') {
                         return (
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30">
-                              Ultra Pro
-                            </Badge>
-                            {subscriptionEnd && (
-                              <span className="text-xs text-muted-foreground">
-                                Until {new Date(subscriptionEnd).toLocaleDateString()}
-                              </span>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30">
+                                Ultra Pro Plan
+                              </Badge>
+                              {subscriptionEnd && (
+                                <span className="text-xs text-muted-foreground">
+                                  Until {new Date(subscriptionEnd).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                            {stripeSubId && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Stripe Subscription ID</p>
+                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeSubId}</code>
+                              </div>
+                            )}
+                            {stripeCustId && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Stripe Customer ID</p>
+                                <code className="text-xs bg-muted px-2 py-1 rounded block break-all">{stripeCustId}</code>
+                              </div>
                             )}
                           </div>
                         );
