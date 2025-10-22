@@ -205,8 +205,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           clearCachedSubscription();
           
-          // Clear pricing modal session flag on sign-out
-          sessionStorage.removeItem('pricing_modal_shown_session');
+          // Clear pricing modal auth flag on sign-out so it can show again on next sign-in
+          sessionStorage.removeItem('pricing_modal_shown_auth');
         }
         
         // Set loading to false for other auth state changes if initial check is complete
@@ -530,14 +530,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Helper function to check and show pricing modal for free users
   const checkAndShowPricingModal = (status: { subscribed: boolean; product_id: string | null; subscription_end: string | null }) => {
-    // Don't show on page refresh for non-authenticated users
-    const isPageRefresh = performance.navigation?.type === 1 || 
-                          (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type === 'reload';
-    
-    if (isPageRefresh && !user) {
-      return;
-    }
-    
     // Skip pricing modal if user signed in to send a message
     const skipPricingModal = sessionStorage.getItem('skipPricingModal');
     if (skipPricingModal === 'true') {
@@ -546,14 +538,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
-    // Check if modal was already shown this session
-    const modalShownKey = 'pricing_modal_shown_session';
+    // Check if modal was already shown this authentication (cleared on sign-out)
+    const modalShownKey = 'pricing_modal_shown_auth';
     const wasShown = sessionStorage.getItem(modalShownKey);
     
     // Only show if:
-    // 1. Not already shown this session
+    // 1. Not already shown for this authentication session
     // 2. User is not subscribed (free user or no subscription)
-    if (!wasShown && !status.subscribed) {
+    // 3. User exists (signed in)
+    if (!wasShown && !status.subscribed && user) {
       setShowPricingModal(true);
       sessionStorage.setItem(modalShownKey, 'true');
     }
