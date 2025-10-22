@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, ChevronDown, ChevronUp, Paperclip } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -207,6 +207,8 @@ export default function Admin() {
   const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<{[chatId: string]: ChatMessage[]}>({});
   const [loadingMessages, setLoadingMessages] = useState<{[chatId: string]: boolean}>({});
+  const [showChatsModal, setShowChatsModal] = useState(false);
+  const [selectedUserForChats, setSelectedUserForChats] = useState<UserTokenUsage | null>(null);
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -918,6 +920,20 @@ export default function Admin() {
                                 Download
                               </Button>
                               <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2 text-xs gap-1"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setSelectedUserForChats(usage);
+                                  setShowChatsModal(true);
+                                  await fetchUserChats(usage.user_id);
+                                }}
+                              >
+                                <MessageSquare className="h-3 w-3" />
+                                Chats
+                              </Button>
+                              <Button
                                 variant="destructive"
                                 size="sm"
                                 className="h-7 px-2 text-xs"
@@ -1274,107 +1290,6 @@ export default function Admin() {
                   </Card>
                 </div>
 
-                {/* User Chats & Messages Section */}
-                <Card className="border-border/50">
-                  <CardHeader className="p-3 sm:p-4">
-                    <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      Chats & Messages
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      {loadingChats ? 'Loading...' : `${userChats.length} chats found`}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0 space-y-2">
-                    {loadingChats ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : userChats.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground text-sm">
-                        No chats found for this user
-                      </div>
-                    ) : (
-                      userChats.map((chat) => (
-                        <Collapsible
-                          key={chat.id}
-                          open={expandedChatId === chat.id}
-                          onOpenChange={() => toggleChat(chat.id)}
-                        >
-                          <Card className="border-border/50 bg-muted/20">
-                            <CollapsibleTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-between p-3 h-auto hover:bg-muted/40"
-                              >
-                                <div className="flex flex-col items-start gap-1 text-left">
-                                  <span className="font-medium text-sm">{chat.title}</span>
-                                  <div className="flex gap-2 text-xs text-muted-foreground">
-                                    <span>{chat.message_count} messages</span>
-                                    <span>•</span>
-                                    <span>{new Date(chat.updated_at).toLocaleDateString()}</span>
-                                  </div>
-                                </div>
-                                {expandedChatId === chat.id ? (
-                                  <ChevronUp className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <div className="px-3 pb-3 space-y-2 max-h-96 overflow-y-auto">
-                                {loadingMessages[chat.id] ? (
-                                  <div className="flex items-center justify-center py-4">
-                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                                  </div>
-                                ) : chatMessages[chat.id] && chatMessages[chat.id].length > 0 ? (
-                                  chatMessages[chat.id].map((message) => (
-                                    <div
-                                      key={message.id}
-                                      className={`p-2 rounded-lg text-xs ${
-                                        message.role === 'user'
-                                          ? 'bg-primary/10 border border-primary/20'
-                                          : 'bg-muted border border-border'
-                                      }`}
-                                    >
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <Badge
-                                          variant={message.role === 'user' ? 'default' : 'secondary'}
-                                          className="text-[10px] px-1.5 py-0"
-                                        >
-                                          {message.role}
-                                        </Badge>
-                                        <span className="text-[10px] text-muted-foreground">
-                                          {new Date(message.created_at).toLocaleString()}
-                                        </span>
-                                      </div>
-                                      <p className="text-xs break-words whitespace-pre-wrap">
-                                        {message.content.length > 500
-                                          ? message.content.substring(0, 500) + '...'
-                                          : message.content}
-                                      </p>
-                                      {message.file_attachments && message.file_attachments.length > 0 && (
-                                        <div className="mt-1 text-[10px] text-muted-foreground">
-                                          📎 {message.file_attachments.length} attachment(s)
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="text-center py-4 text-muted-foreground text-xs">
-                                    No messages in this chat
-                                  </div>
-                                )}
-                              </div>
-                            </CollapsibleContent>
-                          </Card>
-                        </Collapsible>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-
                 {/* Mobile Card Layout */}
                 <div className="space-y-3 md:hidden">
                   <h3 className="text-sm font-semibold text-foreground">Model Breakdown</h3>
@@ -1506,6 +1421,157 @@ export default function Admin() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Chats Modal */}
+        <Dialog open={showChatsModal} onOpenChange={(open) => {
+          setShowChatsModal(open);
+          if (!open) {
+            setUserChats([]);
+            setExpandedChatId(null);
+            setChatMessages({});
+            setSelectedUserForChats(null);
+          }
+        }}>
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-lg sm:text-xl flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                {selectedUserForChats?.display_name}'s Chats
+              </DialogTitle>
+              <DialogDescription>
+                {selectedUserForChats?.email}
+                {loadingChats ? ' • Loading...' : ` • ${userChats.length} chats`}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+              {loadingChats ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : userChats.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <MessageSquare className="h-12 w-12 opacity-20 mb-3" />
+                  <p className="text-sm">No chats found for this user</p>
+                </div>
+              ) : (
+                userChats.map((chat) => (
+                  <Collapsible
+                    key={chat.id}
+                    open={expandedChatId === chat.id}
+                    onOpenChange={() => toggleChat(chat.id)}
+                  >
+                    <Card className="border-border/50 overflow-hidden">
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                          <div className="flex-1">
+                            <div className="flex items-start gap-3">
+                              <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
+                                expandedChatId === chat.id ? 'bg-primary' : 'bg-muted-foreground/30'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-sm sm:text-base truncate">
+                                  {chat.title}
+                                </h3>
+                                <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <MessageSquare className="h-3 w-3" />
+                                    {chat.message_count} messages
+                                  </span>
+                                  <span>•</span>
+                                  <span>{new Date(chat.updated_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}</span>
+                                  {chat.model_id && (
+                                    <>
+                                      <span>•</span>
+                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                        {chat.model_id}
+                                      </Badge>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" className="ml-2">
+                            {expandedChatId === chat.id ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </CollapsibleTrigger>
+
+                      <CollapsibleContent>
+                        <div className="border-t border-border/50 bg-muted/20">
+                          {loadingMessages[chat.id] ? (
+                            <div className="flex items-center justify-center py-8">
+                              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                            </div>
+                          ) : chatMessages[chat.id] && chatMessages[chat.id].length > 0 ? (
+                            <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
+                              {chatMessages[chat.id].map((message) => (
+                                <div
+                                  key={message.id}
+                                  className={`flex gap-3 ${
+                                    message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'
+                                  }`}
+                                >
+                                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                    message.role === 'user' 
+                                      ? 'bg-primary text-primary-foreground' 
+                                      : 'bg-muted border border-border'
+                                  }`}>
+                                    {message.role === 'user' ? '👤' : '🤖'}
+                                  </div>
+                                  <div className={`flex-1 ${message.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
+                                    <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                                      message.role === 'user'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-card border border-border'
+                                    }`}>
+                                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                                        {message.content}
+                                      </p>
+                                      {message.file_attachments && Array.isArray(message.file_attachments) && message.file_attachments.length > 0 && (
+                                        <div className="mt-2 pt-2 border-t border-current/10">
+                                          <div className="flex items-center gap-1 text-xs opacity-80">
+                                            <Paperclip className="h-3 w-3" />
+                                            {message.file_attachments.length} attachment{message.file_attachments.length > 1 ? 's' : ''}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] text-muted-foreground mt-1 px-2">
+                                      {new Date(message.created_at).toLocaleTimeString('en-US', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8 text-muted-foreground text-sm">
+                              No messages in this chat
+                            </div>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
+                ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>;
 }
