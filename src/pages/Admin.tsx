@@ -32,6 +32,7 @@ interface UserTokenUsage {
     stripe_subscription_id?: string | null;
     stripe_customer_id?: string | null;
   };
+  blocked?: boolean;
 }
 interface TokenUsageByModel {
   model: string;
@@ -270,7 +271,7 @@ export default function Admin() {
         error: allProfilesError
       } = await supabase
         .from('profiles')
-        .select('user_id, email, display_name, signup_method, created_at')
+        .select('user_id, email, display_name, signup_method, blocked, created_at')
         .order('created_at', { ascending: false });
       if (allProfilesError) throw allProfilesError;
       console.log('Total profiles (auth.users):', allProfilesData?.length);
@@ -320,7 +321,8 @@ export default function Admin() {
             subscription_end: null,
             stripe_subscription_id: null,
             stripe_customer_id: null
-          }
+          },
+          blocked: profile.blocked || false
         });
       });
 
@@ -672,6 +674,36 @@ export default function Admin() {
                                 className="h-7 px-2 text-xs"
                                 onClick={async (e) => {
                                   e.stopPropagation();
+                                  if (!confirm(`Are you sure you want to ${usage.blocked ? 'unblock' : 'block'} this user?`)) {
+                                    return;
+                                  }
+                                  
+                                  try {
+                                    const { error } = await supabase.functions.invoke('admin-block-user', {
+                                      body: { 
+                                        userId: usage.user_id,
+                                        blocked: !usage.blocked 
+                                      }
+                                    });
+
+                                    if (error) throw error;
+
+                                    toast.success(`User ${usage.blocked ? 'unblocked' : 'blocked'} successfully`);
+                                    await fetchTokenUsageData();
+                                  } catch (error) {
+                                    console.error('Error blocking/unblocking user:', error);
+                                    toast.error('Failed to update user status');
+                                  }
+                                }}
+                              >
+                                {usage.blocked ? 'Unblock' : 'Block'}
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
                                   
                                   // Get user plan info
                                   const plan = getUserPlan(usage);
@@ -912,6 +944,36 @@ export default function Admin() {
 
               {/* Admin Actions - Mobile/Tablet Only */}
               <div className="flex gap-2 pt-4 border-t border-border/50 lg:hidden">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={async () => {
+                    if (!confirm(`Are you sure you want to ${selectedUser?.blocked ? 'unblock' : 'block'} this user?`)) {
+                      return;
+                    }
+                    
+                    try {
+                      const { error } = await supabase.functions.invoke('admin-block-user', {
+                        body: { 
+                          userId: selectedUser.user_id,
+                          blocked: !selectedUser?.blocked 
+                        }
+                      });
+
+                      if (error) throw error;
+
+                      toast.success(`User ${selectedUser?.blocked ? 'unblocked' : 'blocked'} successfully`);
+                      setIsModalOpen(false);
+                      await fetchTokenUsageData();
+                    } catch (error) {
+                      console.error('Error blocking user:', error);
+                      toast.error('Failed to block user');
+                    }
+                  }}
+                >
+                  {selectedUser?.blocked ? 'Unblock User' : 'Block User'}
+                </Button>
+                
                 <Button
                   variant="destructive"
                   size="sm"

@@ -221,6 +221,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          blocked: boolean
           created_at: string
           display_name: string | null
           email: string | null
@@ -231,6 +232,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          blocked?: boolean
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -241,6 +243,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          blocked?: boolean
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -493,6 +496,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
       check_and_reset_usage_limits: {
         Args: { p_user_id: string }
         Returns: {
@@ -502,14 +509,33 @@ export type Database = {
           reset_date: string
         }[]
       }
-      delete_user_account: { Args: never; Returns: undefined }
+      delete_user_account: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_misplaced_generated_images: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           bucket_name: string
           created_at: string
           file_path: string
         }[]
+      }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
       has_role: {
         Args: {
@@ -517,6 +543,22 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
       }
       increment_image_generation: {
         Args: { p_user_id: string }
@@ -526,9 +568,65 @@ export type Database = {
         Args: { p_session_id?: string; p_user_id?: string }
         Returns: number
       }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
       reset_user_message_count: {
         Args: { p_user_id: string }
         Returns: undefined
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
     }
     Enums: {
