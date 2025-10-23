@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('user_id', userId);
       }
     } catch (error) {
-      console.warn('Failed to update login geo data:', error);
+      // Login geo data update failed silently
     }
   };
 
@@ -116,9 +116,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const user = session.user;
       const metadata = user.user_metadata;
       const appMetadata = user.app_metadata;
-      
-      console.log('📊 OAuth Sync - Raw user_metadata:', JSON.stringify(metadata, null, 2));
-      console.log('📊 OAuth Sync - Raw app_metadata:', JSON.stringify(appMetadata, null, 2));
       
       // Detect provider
       const isGoogleSignIn = 
@@ -134,7 +131,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         appMetadata?.provider === 'microsoft';
       
       const provider = isGoogleSignIn ? 'google' : isAppleSignIn ? 'apple' : isMicrosoftSignIn ? 'microsoft' : 'email';
-      console.log('🔐 Detected OAuth provider:', provider);
       
       // Update geo data for all logins (OAuth and email)
       await updateLoginGeoData(user.id);
@@ -149,9 +145,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle();
       
-      // LOG RAW METADATA FOR DEBUGGING
-      console.log('📋 RAW USER METADATA:', JSON.stringify(metadata, null, 2));
-      console.log('📋 RAW APP METADATA:', JSON.stringify(appMetadata, null, 2));
       
       // Extract comprehensive OAuth data - STORE EVERYTHING
       const updateData: any = {
@@ -164,62 +157,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const latestName = metadata?.full_name || metadata?.name || metadata?.display_name || metadata?.given_name || currentProfile?.display_name;
       if (latestName && currentProfile?.display_name !== latestName) {
         updateData.display_name = latestName;
-        console.log('✅ Extracted display_name:', latestName);
       }
       
       // Extract avatar (works for all providers)
       const latestAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo;
       if (latestAvatar && currentProfile?.avatar_url !== latestAvatar) {
         updateData.avatar_url = latestAvatar;
-        console.log('✅ Extracted avatar_url:', latestAvatar);
       }
       
       // Extract email (update if changed)
       if (metadata?.email && currentProfile?.email !== metadata.email) {
         updateData.email = metadata.email;
-        console.log('✅ Updated email:', metadata.email);
       }
       
       // Extract timezone (with browser fallback)
       const timezone = metadata?.iana_timezone || metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
       if (timezone && currentProfile?.timezone !== timezone) {
         updateData.timezone = timezone;
-        console.log('✅ Timezone:', timezone);
       }
       
       // Extract locale (with browser fallback)
       const locale = metadata?.locale || metadata?.preferredLanguage || navigator.language;
       if (locale && currentProfile?.locale !== locale) {
         updateData.locale = locale;
-        console.log('✅ Locale:', locale);
       }
       
       // Google-specific extended data
       if (isGoogleSignIn) {
-        console.log('🔍 Google OAuth - Basic scopes only (email, profile, openid)');
-        
-        // Locale (available with basic scopes)
         if (metadata?.locale) {
           updateData.locale = metadata.locale;
-          console.log('✅ Extracted locale:', updateData.locale);
         }
-        
-        // Extract basic Google fields available
-        const googleFields = [
-          'email_verified', 'provider_id', 'sub', 
-          'given_name', 'family_name'
-        ];
-        
-        googleFields.forEach(field => {
-          if (metadata?.[field]) {
-            console.log(`✅ Found Google field: ${field} =`, metadata[field]);
-          }
-        });
       }
       
       // Microsoft-specific extended data
       if (isMicrosoftSignIn) {
-        console.log('🔍 Microsoft OAuth - Extracting Microsoft Graph data...');
         
         // Store ALL Microsoft Graph fields
         const msFields = {
@@ -242,7 +213,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Phone from Microsoft
         if (metadata?.mobilePhone || metadata?.businessPhones?.[0]) {
           updateData.phone_number = metadata.mobilePhone || metadata.businessPhones?.[0];
-          console.log('✅ Extracted phone_number:', updateData.phone_number);
         }
         
         // Preferred language

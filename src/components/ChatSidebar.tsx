@@ -119,12 +119,11 @@ export default function ChatSidebar({
         ascending: false
       });
       if (error) {
-        console.error('Error fetching chats:', error);
         return;
       }
       setChats(chatsData || []);
     } catch (error) {
-      console.error('Error in fetchChats:', error);
+      // Error fetching chats
     }
   };
   const fetchProjects = async () => {
@@ -140,12 +139,11 @@ export default function ChatSidebar({
         ascending: false
       });
       if (error) {
-        console.error('Error fetching projects:', error);
         return;
       }
       setProjects(projectsData || []);
     } catch (error) {
-      console.error('Error in fetchProjects:', error);
+      // Error fetching projects
     }
   };
 
@@ -174,7 +172,6 @@ export default function ChatSidebar({
       return;
     }
     try {
-      console.log('[SIDEBAR] Creating new chat...');
       const {
         data: newChat,
         error
@@ -183,20 +180,16 @@ export default function ChatSidebar({
         title: 'New Chat'
       }).select().single();
       if (error) {
-        console.error('Error creating chat:', error);
         return;
       }
 
-      console.log('[SIDEBAR] Chat created:', newChat.id);
-      // Track chat start event with deduplication
-      console.log('[SIDEBAR] 🎯 Tracking chat_start for new chat');
       trackChatStart(newChat.id);
 
       // Refresh the sidebar immediately
       fetchChats();
       navigate(`/chat/${newChat.id}`);
     } catch (error) {
-      console.error('Error in handleNewChat:', error);
+      // Error creating chat
     }
   };
   const handlePricingPlans = () => {
@@ -214,7 +207,6 @@ export default function ChatSidebar({
             }
           });
         } catch (imageError) {
-          console.error('Error deleting chat images:', imageError);
           // Continue with chat deletion even if image deletion fails
         }
       }
@@ -224,7 +216,7 @@ export default function ChatSidebar({
         error
       } = await supabase.from('chats').delete().eq('id', chatId);
       if (error) {
-        console.error('Error deleting chat:', error);
+        // Error deleting chat
       } else {
         fetchChats();
         fetchProjects();
@@ -233,7 +225,7 @@ export default function ChatSidebar({
         }
       }
     } catch (error) {
-      console.error('Error in handleDeleteChat:', error);
+      // Error in handleDeleteChat
     }
   };
   const handleRenameChat = async (chatId: string, newTitle: string) => {
@@ -249,14 +241,14 @@ export default function ChatSidebar({
         title: newTitle.trim()
       }).eq('id', chatId);
       if (error) {
-        console.error('Error renaming chat:', error);
+        // Error renaming chat
       } else {
         fetchChats();
         fetchProjects();
         setEditingChatId(null);
       }
     } catch (error) {
-      console.error('Error in handleRenameChat:', error);
+      // Error in handleRenameChat
     }
   };
   const startEditing = (chatId: string, currentTitle: string) => {
@@ -284,31 +276,25 @@ export default function ChatSidebar({
   };
   const executeDeleteProject = async (projectId: string) => {
     try {
-      console.log(`[PROJECT-DELETE] Starting deletion process for project: ${projectId}`);
-
       // First, delete all chats associated with this project
       const {
         error: chatsError
       } = await supabase.from('chats').delete().eq('project_id', projectId);
       if (chatsError) {
-        console.error('Error deleting project chats:', chatsError);
         throw chatsError;
       }
-      console.log(`[PROJECT-DELETE] Successfully deleted chats for project: ${projectId}`);
 
       // Then delete the project itself
       const {
         error
       } = await supabase.from('projects').delete().eq('id', projectId);
       if (error) {
-        console.error('Error deleting project:', error);
         throw error;
       }
-      console.log(`[PROJECT-DELETE] Successfully deleted project and associated chats: ${projectId}`);
       fetchProjects();
       fetchChats();
     } catch (error: any) {
-      console.error('Error deleting project:', error);
+      // Error deleting project
     }
   };
   const handleRenameProject = async (projectId: string, newTitle: string) => {
@@ -324,7 +310,7 @@ export default function ChatSidebar({
       setEditingProjectId(null);
       setEditingProjectTitle('');
     } catch (error: any) {
-      console.error('Error renaming project:', error);
+      // Error renaming project
     }
   };
   const handleSignOut = async () => {
@@ -332,7 +318,7 @@ export default function ChatSidebar({
       await signOut();
       navigate('/');
     } catch (error) {
-      console.error('Error signing out:', error);
+      // Error signing out
     }
   };
 
