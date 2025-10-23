@@ -1276,22 +1276,6 @@ export default function Admin() {
                 </p>
               </div>
               
-              {/* Location Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">IP Address</p>
-                  <p className="text-sm font-medium text-foreground">
-                    {selectedUser?.ip_address || 'N/A'}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Country</p>
-                  <p className="text-sm font-medium text-foreground">
-                    {getCountryName(selectedUser?.country)}
-                  </p>
-                </div>
-              </div>
-              
               {/* Registration Date - Mobile/Tablet Only */}
               <div className="space-y-1 lg:hidden">
                 <p className="text-xs text-muted-foreground">Registered</p>
