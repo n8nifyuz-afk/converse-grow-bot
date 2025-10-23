@@ -604,8 +604,6 @@ export default function Index() {
       setPendingMessage(message);
       localStorage.setItem('pendingChatMessage', message);
       localStorage.setItem('pendingChatModel', selectedModel);
-      // Use sessionStorage so it persists for entire session (until tab close)
-      sessionStorage.setItem('skipPricingModal', 'true');
       setShowAuthModal(true);
       return;
     }

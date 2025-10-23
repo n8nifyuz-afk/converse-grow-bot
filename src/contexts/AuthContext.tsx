@@ -530,14 +530,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Helper function to check and show pricing modal for free users
   const checkAndShowPricingModal = (status: { subscribed: boolean; product_id: string | null; subscription_end: string | null }) => {
-    // Skip pricing modal if user signed in to send a message
-    const skipPricingModal = sessionStorage.getItem('skipPricingModal');
-    if (skipPricingModal === 'true') {
-      // Clear the flag immediately after using it (only skip once)
-      sessionStorage.removeItem('skipPricingModal');
-      return;
-    }
-    
     // Check if modal was already shown this authentication (cleared on sign-out)
     const modalShownKey = 'pricing_modal_shown_auth';
     const wasShown = sessionStorage.getItem(modalShownKey);
@@ -718,7 +710,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsCheckingSubscription(false);
       setLoadingSubscription(false);
-      // Don't clear skipPricingModal here - let Index.tsx clear it after message is sent
     }
   };
 
