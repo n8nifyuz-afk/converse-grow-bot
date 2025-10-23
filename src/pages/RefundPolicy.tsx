@@ -243,6 +243,31 @@ const RefundPolicy = () => {
             </CardContent>
           </Card>
 
+          {/* Subscription Cancellation */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <XCircle className="h-5 w-5 text-primary" />
+                Subscription Cancellation
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Users may cancel their subscription at any time through their account settings or by contacting our support team at{' '}
+                <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a>.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                <li>Cancellations take effect at the end of the current billing period, and users will retain access to the service until that date.</li>
+                <li>Once canceled, no further charges will be applied, and renewal payments will stop automatically.</li>
+              </ul>
+              <div className="p-4 bg-muted/50 border rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Note:</strong> Refunds for the remaining period are not provided, except as outlined in this Refund Policy.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Policy Updates */}
           <Card>
             <CardHeader>
