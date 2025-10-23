@@ -705,23 +705,34 @@ export default function Admin() {
   }
   return <div className="min-h-full w-full bg-gradient-to-br from-background via-background to-muted/20">
       {/* Mobile & Tablet Navbar */}
-      <div className="lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <div className="flex items-center h-14 px-4">
-          <SidebarTrigger className="h-8 w-8 p-0 bg-transparent hover:bg-sidebar-accent text-sidebar-foreground rounded-lg" />
-          <h2 className="ml-4 text-lg font-semibold">Admin Dashboard</h2>
-        </div>
-      </div>
-
-      <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Admin Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manage users and monitor system usage</p>
+      <div className="lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-sm">
+        <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger className="h-9 w-9 p-0 bg-transparent hover:bg-sidebar-accent text-sidebar-foreground rounded-lg" />
+            <h2 className="text-lg sm:text-xl font-bold">Admin Dashboard</h2>
           </div>
           <Button 
             onClick={handleDownloadUserList}
-            className="gap-2"
+            size="sm"
+            variant="outline"
+            className="h-9 gap-2"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Download</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="container mx-auto p-4 sm:p-5 md:p-6 lg:p-8 space-y-5 sm:space-y-6 md:space-y-8 animate-fade-in">
+        {/* Header Section - Desktop Only */}
+        <div className="hidden lg:flex flex-row justify-between items-center">
+          <div>
+            <h1 className="text-3xl xl:text-4xl font-bold text-foreground">Admin Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-2">Manage users and monitor system usage</p>
+          </div>
+          <Button 
+            onClick={handleDownloadUserList}
+            className="gap-2 h-10"
             variant="outline"
           >
             <Download className="w-4 h-4" />
@@ -730,71 +741,71 @@ export default function Admin() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Users</CardTitle>
-              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+        <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Total Users</CardTitle>
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground">{userUsages.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">Registered users</p>
+            <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
+              <div className="text-3xl sm:text-4xl font-bold text-foreground">{userUsages.length}</div>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">Registered users</p>
             </CardContent>
           </Card>
 
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Free Users</CardTitle>
-              <Badge variant="secondary">{userUsages.filter(u => getUserPlan(u) === 'free').length}</Badge>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Free Users</CardTitle>
+              <Badge variant="secondary" className="text-xs sm:text-sm">{userUsages.filter(u => getUserPlan(u) === 'free').length}</Badge>
             </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
+            <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
                 {userUsages.filter(u => getUserPlan(u) === 'free').length}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">On free plan</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">On free plan</p>
             </CardContent>
           </Card>
 
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Pro Users</CardTitle>
-              <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Pro Users</CardTitle>
+              <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30 text-xs sm:text-sm">
                 {userUsages.filter(u => getUserPlan(u) === 'pro').length}
               </Badge>
             </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
+            <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
                 {userUsages.filter(u => getUserPlan(u) === 'pro').length}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Pro subscribers</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">Pro subscribers</p>
             </CardContent>
           </Card>
 
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Ultra Pro Users</CardTitle>
-              <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Ultra Pro</CardTitle>
+              <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30 text-xs sm:text-sm">
                 {userUsages.filter(u => getUserPlan(u) === 'ultra').length}
               </Badge>
             </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
+            <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
                 {userUsages.filter(u => getUserPlan(u) === 'ultra').length}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Ultra Pro subscribers</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">Ultra subscribers</p>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Usage</CardTitle>
-              <Badge className="bg-green-500/10 text-green-600 border-green-500/30">Cost</Badge>
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Total Usage</CardTitle>
+              <Badge className="bg-green-500/10 text-green-600 border-green-500/30 text-xs sm:text-sm">Cost</Badge>
             </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground">
+            <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
+              <div className="text-3xl sm:text-4xl font-bold text-foreground">
                 ${modelUsages.reduce((sum, m) => sum + m.total_cost, 0).toFixed(2)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                 {(modelUsages.reduce((sum, m) => sum + m.input_tokens + m.output_tokens, 0) / 1000000).toFixed(2)}M tokens
               </p>
             </CardContent>
@@ -803,27 +814,29 @@ export default function Admin() {
 
         {/* User Token Usage Table with Tabs */}
         <Card className="border-border/50 overflow-hidden">
-          <CardHeader className="bg-muted/30 border-b border-border/50 p-3 sm:p-4 md:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Token Usage by User</CardTitle>
+          <CardHeader className="bg-muted/30 border-b border-border/50 p-4 sm:p-5 md:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold">Token Usage by User</CardTitle>
+                  </div>
+                  <CardDescription className="text-xs sm:text-sm mt-2">
+                    Showing {paginatedUsers.length} of {sortedUsers.length} users
+                  </CardDescription>
                 </div>
-                <CardDescription className="text-xs sm:text-sm md:text-base mt-1">
-                  Click on a user to view detailed breakdown • Showing {paginatedUsers.length} of {sortedUsers.length} users
-                </CardDescription>
               </div>
               
               {/* Search Input */}
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="relative w-full sm:w-80 md:w-96">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   type="text"
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9"
+                  className="pl-10 h-11 text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -831,31 +844,31 @@ export default function Admin() {
           <CardContent className="p-0">
             {/* Filter Tabs */}
             <Tabs value={planFilter} onValueChange={(v) => setPlanFilter(v as any)} className="w-full">
-              <div className="border-b border-border/50 px-3 sm:px-4 md:px-6">
-                <TabsList className="bg-transparent border-0 h-auto p-0 gap-2">
+              <div className="border-b border-border/50 px-4 sm:px-5 md:px-6 overflow-x-auto">
+                <TabsList className="bg-transparent border-0 h-auto p-0 gap-1 sm:gap-2 w-full sm:w-auto justify-start">
                   <TabsTrigger 
                     value="all" 
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 py-2"
+                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
-                    All Users ({userUsages.length})
+                    All ({userUsages.length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="free"
-                    className="data-[state=active]:bg-muted data-[state=active]:text-foreground border-b-2 border-transparent data-[state=active]:border-muted-foreground rounded-none px-3 py-2"
+                    className="data-[state=active]:bg-muted data-[state=active]:text-foreground border-b-2 border-transparent data-[state=active]:border-muted-foreground rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
                     Free ({userUsages.filter(u => getUserPlan(u) === 'free').length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="pro"
-                    className="data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-600 border-b-2 border-transparent data-[state=active]:border-blue-500 rounded-none px-3 py-2"
+                    className="data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-600 border-b-2 border-transparent data-[state=active]:border-blue-500 rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
                     Pro ({userUsages.filter(u => getUserPlan(u) === 'pro').length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra"
-                    className="data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-600 border-b-2 border-transparent data-[state=active]:border-purple-500 rounded-none px-3 py-2"
+                    className="data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-600 border-b-2 border-transparent data-[state=active]:border-purple-500 rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
-                    Ultra Pro ({userUsages.filter(u => getUserPlan(u) === 'ultra').length})
+                    Ultra ({userUsages.filter(u => getUserPlan(u) === 'ultra').length})
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -943,12 +956,12 @@ export default function Admin() {
                               day: 'numeric'
                             }) : 'Unknown'}
                           </TableCell>
-                          <TableCell>
+                           <TableCell className="hidden lg:table-cell">
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 px-2 sm:px-3 text-xs"
+                                className="h-8 px-3 text-xs"
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   setSelectedUserForChats(usage);
@@ -956,13 +969,12 @@ export default function Admin() {
                                   await fetchUserChats(usage.user_id);
                                 }}
                               >
-                                <span className="hidden sm:inline">Chats</span>
-                                <MessageSquare className="h-3 w-3 sm:hidden" />
+                                Chats
                               </Button>
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                className="h-7 px-2 text-xs hidden lg:inline-flex"
+                                className="h-8 px-3 text-xs"
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   
@@ -1019,42 +1031,57 @@ export default function Admin() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
+                            <div className="flex items-center justify-end gap-1.5 sm:gap-2">
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-7 sm:h-8 px-2 sm:px-3"
-                                onClick={async () => {
+                                className="h-9 sm:h-10 px-2 sm:px-3 min-w-[44px]"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
                                   await fetchUserDetailedInfo(usage.user_id);
                                 }}
                                 disabled={loadingUserInfo}
                               >
-                                <Info className="h-3 w-3 sm:h-4 sm:w-4" />
-                                <span className="ml-1 hidden sm:inline text-xs">Info</span>
+                                <Info className="h-4 w-4" />
+                                <span className="ml-1.5 hidden lg:inline text-xs">Info</span>
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-7 sm:h-8 px-2 sm:px-3"
-                                onClick={async () => {
+                                className="h-9 sm:h-10 px-2 sm:px-3 min-w-[44px]"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
                                   setSelectedUser(usage);
                                   setIsModalOpen(true);
                                   await fetchUserSubscription(usage.user_id);
                                   await fetchUserChats(usage.user_id);
                                 }}
                               >
-                                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                                <span className="ml-1 hidden sm:inline text-xs">View</span>
+                                <Eye className="h-4 w-4" />
+                                <span className="ml-1.5 hidden lg:inline text-xs">View</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-9 sm:h-10 px-2 min-w-[44px] lg:hidden"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setSelectedUserForChats(usage);
+                                  setShowChatsModal(true);
+                                  await fetchUserChats(usage.user_id);
+                                }}
+                              >
+                                <MessageSquare className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
                         </TableRow>;
                       })}
                       {paginatedUsers.length === 0 && <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground h-32">
-                          <div className="flex flex-col items-center gap-2">
-                            <Users className="h-8 w-8 opacity-20" />
-                            <p className="text-xs sm:text-sm">No users found in this category</p>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground h-40 sm:h-48">
+                          <div className="flex flex-col items-center gap-3">
+                            <Users className="h-12 w-12 sm:h-16 sm:w-16 opacity-10" />
+                            <p className="text-sm sm:text-base">No users found in this category</p>
                           </div>
                         </TableCell>
                       </TableRow>}
@@ -1064,30 +1091,30 @@ export default function Admin() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between border-t border-border/50 p-3 sm:p-4">
-                    <div className="text-xs sm:text-sm text-muted-foreground">
-                      Page {currentPage} of {totalPages}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/50 p-4 sm:p-5">
+                    <div className="text-sm text-muted-foreground order-2 sm:order-1">
+                      Page {currentPage} of {totalPages} • {sortedUsers.length} total users
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 order-1 sm:order-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="h-8"
+                        className="h-10 px-4 min-w-[100px]"
                       >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline ml-1">Previous</span>
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        <span>Previous</span>
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
-                        className="h-8"
+                        className="h-10 px-4 min-w-[100px]"
                       >
-                        <span className="hidden sm:inline mr-1">Next</span>
-                        <ChevronRight className="h-4 w-4" />
+                        <span>Next</span>
+                        <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
                     </div>
                   </div>
