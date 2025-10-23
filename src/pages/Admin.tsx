@@ -901,13 +901,7 @@ export default function Admin() {
                             {getSortIcon('cost')}
                           </div>
                         </TableHead>
-                        <TableHead className="hidden xl:table-cell font-semibold text-foreground text-xs sm:text-sm">
-                          IP Address
-                        </TableHead>
-                        <TableHead className="hidden xl:table-cell font-semibold text-foreground text-xs sm:text-sm">
-                          Country
-                        </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('registered')}
                         >
@@ -941,12 +935,6 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="text-right font-mono font-bold text-foreground text-xs sm:text-sm whitespace-nowrap">
                             ${totalCost.toFixed(4)}
-                          </TableCell>
-                          <TableCell className="hidden xl:table-cell text-muted-foreground text-xs sm:text-sm">
-                            {usage.ip_address || '-'}
-                          </TableCell>
-                          <TableCell className="hidden xl:table-cell text-muted-foreground text-xs sm:text-sm">
-                            {getCountryName(usage.country)}
                           </TableCell>
                           <TableCell className="hidden lg:table-cell text-xs text-muted-foreground whitespace-nowrap">
                             {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
