@@ -64,6 +64,16 @@ serve(async (req) => {
 
     // Update profile with browser and device info
     if (userId) {
+      // First get current login count
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('login_count')
+        .eq('user_id', userId)
+        .single()
+
+      const currentLoginCount = currentProfile?.login_count || 0
+
+      // Update profile with incremented login count
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -74,12 +84,14 @@ serve(async (req) => {
           timezone: deviceInfo?.timezone,
           locale: deviceInfo?.language,
           last_login_at: new Date().toISOString(),
-          login_count: supabase.rpc('increment', { x: 1 }).single()
+          login_count: currentLoginCount + 1
         })
         .eq('user_id', userId)
 
       if (profileError) {
         console.warn('Failed to update profile:', profileError)
+      } else {
+        console.log(`Updated profile for user ${userId} - login count: ${currentLoginCount + 1}`)
       }
     }
 
