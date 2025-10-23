@@ -280,14 +280,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 <TabsList className="grid w-full grid-cols-2 h-11 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.pro')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.ultraPro')}
