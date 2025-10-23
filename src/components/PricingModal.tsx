@@ -488,7 +488,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="h-[97vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700 flex flex-col">
+          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700 flex flex-col">
             <div className="overflow-y-auto flex-1">
               {modalContent}
             </div>
@@ -496,7 +496,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[80vh] md:h-[75vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
+          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[85vh] md:h-[85vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
             {modalContent}
           </DialogContent>
         </Dialog>
