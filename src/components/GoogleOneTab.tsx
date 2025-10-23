@@ -53,8 +53,8 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
           cancel_on_tap_outside: true,
           context: 'signin',
           ux_mode: 'popup',
-          // Request extended scopes for comprehensive user data
-          scope: 'email profile openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.phonenumbers.read',
+          // Only request basic scopes for smooth sign-in (no consent screens)
+          scope: 'email profile openid',
         });
 
         // Display the One Tap prompt
