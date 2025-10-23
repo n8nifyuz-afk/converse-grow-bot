@@ -203,17 +203,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="flex flex-col md:flex-row h-full">
-            {/* Mobile/Tablet Close Button */}
-            {isMobile && (
-              <button
-                onClick={() => onOpenChange(false)}
-                className="absolute top-3 right-3 z-50 w-8 h-8 rounded-full bg-zinc-800/80 hover:bg-zinc-700 flex items-center justify-center transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4 text-white" />
-              </button>
-            )}
-            
             {/* Left Panel - Features Comparison */}
             <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-200 dark:border-zinc-700 flex-col relative">
               {/* Decorative gradient overlay */}
@@ -495,7 +484,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[80vh] md:h-[75vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
+          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[80vh] md:h-[75vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl [&>button]:flex">
             {modalContent}
           </DialogContent>
         </Dialog>
