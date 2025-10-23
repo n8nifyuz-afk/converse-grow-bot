@@ -5,13 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { UserInformationModal } from '@/components/UserInformationModal';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -236,6 +237,10 @@ export default function Admin() {
   const [showChatsModal, setShowChatsModal] = useState(false);
   const [viewingMessages, setViewingMessages] = useState(false);
   const [selectedUserForChats, setSelectedUserForChats] = useState<UserTokenUsage | null>(null);
+  const [showUserInfoModal, setShowUserInfoModal] = useState(false);
+  const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null);
+  const [userActivityLogs, setUserActivityLogs] = useState<any[]>([]);
+  const [loadingUserInfo, setLoadingUserInfo] = useState(false);
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -642,6 +647,43 @@ export default function Admin() {
     setSelectedChatForMessages(null);
   };
 
+  // Fetch comprehensive user information
+  const fetchUserDetailedInfo = async (userId: string) => {
+    try {
+      setLoadingUserInfo(true);
+      
+      // Fetch detailed profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (profileError) throw profileError;
+      
+      // Fetch activity logs
+      const { data: logs, error: logsError } = await supabase
+        .from('user_activity_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (logsError) {
+        console.warn('Error fetching activity logs:', logsError);
+      }
+      
+      setSelectedUserInfo(profile);
+      setUserActivityLogs(logs || []);
+      setShowUserInfoModal(true);
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      toast.error('Failed to load user information');
+    } finally {
+      setLoadingUserInfo(false);
+    }
+  };
+
   // Get plan display info
   const getPlanBadge = (usage: UserTokenUsage) => {
     const plan = getUserPlan(usage);
@@ -989,20 +1031,34 @@ export default function Admin() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-7 sm:h-8 px-2 sm:px-3"
-                              onClick={async () => {
-                                setSelectedUser(usage);
-                                setIsModalOpen(true);
-                                await fetchUserSubscription(usage.user_id);
-                                await fetchUserChats(usage.user_id);
-                              }}
-                            >
-                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                              <span className="ml-1 hidden sm:inline text-xs">View</span>
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 sm:h-8 px-2 sm:px-3"
+                                onClick={async () => {
+                                  await fetchUserDetailedInfo(usage.user_id);
+                                }}
+                                disabled={loadingUserInfo}
+                              >
+                                <Info className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="ml-1 hidden sm:inline text-xs">Info</span>
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 sm:h-8 px-2 sm:px-3"
+                                onClick={async () => {
+                                  setSelectedUser(usage);
+                                  setIsModalOpen(true);
+                                  await fetchUserSubscription(usage.user_id);
+                                  await fetchUserChats(usage.user_id);
+                                }}
+                              >
+                                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="ml-1 hidden sm:inline text-xs">View</span>
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>;
                       })}
@@ -1574,6 +1630,14 @@ export default function Admin() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* User Information Modal */}
+        <UserInformationModal 
+          open={showUserInfoModal}
+          onOpenChange={setShowUserInfoModal}
+          userInfo={selectedUserInfo}
+          activityLogs={userActivityLogs}
+        />
       </div>
     </div>;
 }

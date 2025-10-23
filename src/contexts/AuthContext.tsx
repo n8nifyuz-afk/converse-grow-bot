@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { trackPaymentComplete, trackRegistrationComplete } from '@/utils/gtmTracking';
 import { fetchIPAndCountry } from '@/utils/webhookMetadata';
+import { logUserActivity, getFullTrackingData } from '@/utils/browserTracking';
 
 interface AuthContextType {
   user: User | null;
@@ -80,17 +81,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
-  // Update user profile with IP and country on login
+  // Update user profile with comprehensive tracking data on login
   const updateLoginGeoData = async (userId: string) => {
     try {
       const { ip, country } = await fetchIPAndCountry();
+      const trackingData = getFullTrackingData('login');
       
+      // Log the login activity with full tracking data
+      await logUserActivity(userId, 'login');
+      
+      // Update profile with IP and country
       if (ip || country) {
         await supabase
           .from('profiles')
           .update({
             ip_address: ip,
             country: country,
+            browser_info: JSON.parse(JSON.stringify(trackingData.browserInfo)),
+            device_info: JSON.parse(JSON.stringify(trackingData.deviceInfo)),
+            timezone: trackingData.deviceInfo.timezone,
+            locale: trackingData.deviceInfo.language,
+            last_login_at: new Date().toISOString(),
           })
           .eq('user_id', userId);
       }

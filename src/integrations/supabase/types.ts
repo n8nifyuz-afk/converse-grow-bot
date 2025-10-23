@@ -221,37 +221,70 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          browser_info: Json | null
           country: string | null
           created_at: string
+          date_of_birth: string | null
+          device_info: Json | null
           display_name: string | null
           email: string | null
+          gender: string | null
           id: string
           ip_address: string | null
+          last_login_at: string | null
+          locale: string | null
+          login_count: number | null
+          oauth_metadata: Json | null
+          oauth_provider: string | null
+          phone_number: string | null
           signup_method: string | null
+          timezone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          browser_info?: Json | null
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          device_info?: Json | null
           display_name?: string | null
           email?: string | null
+          gender?: string | null
           id?: string
           ip_address?: string | null
+          last_login_at?: string | null
+          locale?: string | null
+          login_count?: number | null
+          oauth_metadata?: Json | null
+          oauth_provider?: string | null
+          phone_number?: string | null
           signup_method?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          browser_info?: Json | null
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          device_info?: Json | null
           display_name?: string | null
           email?: string | null
+          gender?: string | null
           id?: string
           ip_address?: string | null
+          last_login_at?: string | null
+          locale?: string | null
+          login_count?: number | null
+          oauth_metadata?: Json | null
+          oauth_provider?: string | null
+          phone_number?: string | null
           signup_method?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -398,6 +431,57 @@ export type Database = {
           period_start?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_activity_logs: {
+        Row: {
+          activity_type: string
+          browser: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          id: string
+          ip_address: string | null
+          language: string | null
+          metadata: Json | null
+          os: string | null
+          referrer: string | null
+          screen_resolution: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          browser?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          language?: string | null
+          metadata?: Json | null
+          os?: string | null
+          referrer?: string | null
+          screen_resolution?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          browser?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          language?: string | null
+          metadata?: Json | null
+          os?: string | null
+          referrer?: string | null
+          screen_resolution?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
