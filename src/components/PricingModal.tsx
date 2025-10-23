@@ -216,43 +216,43 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             )}
             
             {/* Left Panel - Features Comparison */}
-            <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-200 dark:border-zinc-700 flex-col relative">
+            <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-white via-zinc-50/50 to-white p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-200 flex-col relative">
               {/* Decorative gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-zinc-100/30 via-transparent to-zinc-50/20 dark:from-zinc-800/20 dark:via-transparent dark:to-zinc-900/10 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-zinc-100/30 via-transparent to-zinc-50/20 pointer-events-none"></div>
               
               {/* Comparison Table */}
               <div className="flex-1 flex flex-col min-h-0 relative z-10">
                 {/* Header Row */}
-                <div className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 pb-3 md:pb-4 border-b border-zinc-300 dark:border-zinc-700 mb-2 flex-shrink-0">
-                  <div className="text-sm md:text-base font-bold text-zinc-900 dark:text-zinc-100">{t('pricingModal.modelFeature')}</div>
-                  <div className="text-sm md:text-base font-bold text-center text-zinc-900 dark:text-zinc-100">{t('pricingModal.included')}</div>
-                  <div className="text-sm md:text-base font-bold text-zinc-900 dark:text-zinc-100">{t('pricingModal.descriptionNotes')}</div>
+                <div className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 pb-3 md:pb-4 border-b border-zinc-300 mb-2 flex-shrink-0">
+                  <div className="text-sm md:text-base font-bold text-zinc-900">{t('pricingModal.modelFeature')}</div>
+                  <div className="text-sm md:text-base font-bold text-center text-zinc-900">{t('pricingModal.included')}</div>
+                  <div className="text-sm md:text-base font-bold text-zinc-900">{t('pricingModal.descriptionNotes')}</div>
                 </div>
                 
                 {/* Feature Rows */}
                 <div className="flex-1 space-y-0 overflow-y-auto">
                   {allFeatures.map((feature, index) => (
-                    <div key={index} className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 py-2 md:py-2.5 px-2 md:px-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700">
-                      <div className="text-xs md:text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center leading-tight">
+                    <div key={index} className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 py-2 md:py-2.5 px-2 md:px-3 rounded-lg hover:bg-zinc-100 transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-zinc-300">
+                      <div className="text-xs md:text-sm font-semibold text-zinc-900 flex items-center leading-tight">
                         {feature.name}
                       </div>
                       <div className="flex justify-center items-center">
                         {feature.name === 'Chat on WhatsApp' ? (
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400">{t('pricingModal.comingSoon')}</span>
+                          <span className="text-xs text-zinc-500">{t('pricingModal.comingSoon')}</span>
                         ) : feature.included ? (
-                          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                            <Check className="w-3 h-3 md:w-4 md:h-4 text-emerald-600 dark:text-emerald-400" />
+                          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <Check className="w-3 h-3 md:w-4 md:h-4 text-emerald-600" />
                           </div>
                         ) : (
-                          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-red-50 dark:bg-red-500/20 flex items-center justify-center">
-                            <X className="w-3 h-3 md:w-4 md:h-4 text-red-500 dark:text-red-400" />
+                          <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-red-50 flex items-center justify-center">
+                            <X className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
                           </div>
                         )}
                       </div>
-                      <div className="text-xs md:text-sm text-zinc-700 dark:text-zinc-300 flex items-center leading-tight">
+                      <div className="text-xs md:text-sm text-zinc-700 flex items-center leading-tight">
                         {feature.name === 'Priority Support' && selectedPlan === 'ultra' ? (
                           <>
-                            <Check className="w-3 h-3 md:w-4 md:h-4 text-emerald-600 dark:text-emerald-400 mr-1" />
+                            <Check className="w-3 h-3 md:w-4 md:h-4 text-emerald-600 mr-1" />
                             <span>{t('pricingModal.highPriority')}</span>
                             <span className="ml-1">{feature.description}</span>
                           </>
@@ -267,27 +267,27 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-4 sm:p-4 md:p-5 pb-6 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
+            <div className="w-full md:w-5/12 p-4 sm:p-4 md:p-5 pb-6 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between">
               <div className="mb-3 sm:mb-2.5 flex-shrink-0">
-                <h2 className="text-xl sm:text-xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
+                <h2 className="text-xl sm:text-xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
                 </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
+                <p className="text-zinc-600 text-sm sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
               </div>
 
               {/* Plan Tabs */}
               <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-3 sm:mb-2.5 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-11 sm:h-9 md:h-10 bg-zinc-200 dark:bg-zinc-800 p-1 sm:p-1 border border-zinc-300 dark:border-zinc-700 rounded-lg">
+                <TabsList className="grid w-full grid-cols-2 h-11 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.pro')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.ultraPro')}
@@ -301,20 +301,20 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
                     selectedPeriod === 'monthly'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
+                      : 'border-zinc-200 hover:border-zinc-300 bg-white'
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900 dark:text-white">{t('pricingModal.oneMonth')}</div>
-                      <div className="text-sm sm:text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.oneMonth')}</div>
+                      <div className="text-sm sm:text-xs text-zinc-500">
                         €{pricingOptions[selectedPlan].monthly.price}/{t('pricingModal.perMonth').toLowerCase()}
                       </div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
-                      <div className="text-xs sm:text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].monthly.perDay}</div>
+                      <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
@@ -323,20 +323,20 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   onClick={() => setSelectedPeriod('3month')}
                   className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
                     selectedPeriod === '3month'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
+                      : 'border-zinc-200 hover:border-zinc-300 bg-white'
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900 dark:text-white">{t('pricingModal.threeMonths')}</div>
-                      <div className="text-sm sm:text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.threeMonths')}</div>
+                      <div className="text-sm sm:text-xs text-zinc-500">
                         €{pricingOptions[selectedPlan]['3month'].price} {t('pricingModal.total')}
                       </div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
-                      <div className="text-xs sm:text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
+                      <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
@@ -345,8 +345,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   onClick={() => setSelectedPeriod('yearly')}
                   className={`w-full p-3.5 sm:p-3 pt-5 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
                     selectedPeriod === 'yearly'
-                      ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
+                      : 'border-zinc-200 hover:border-zinc-300 bg-white'
                   }`}
                 >
                   <Badge className="absolute -top-2 right-2 sm:right-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-2 py-0.5 text-[10px] font-bold border-0">
@@ -354,14 +354,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </Badge>
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900 dark:text-white">{t('pricingModal.yearly')}</div>
-                      <div className="text-sm sm:text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.yearly')}</div>
+                      <div className="text-sm sm:text-xs text-zinc-500">
                         €{pricingOptions[selectedPlan].yearly.price} {t('pricingModal.total')}
                       </div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
-                      <div className="text-xs sm:text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].yearly.perDay}</div>
+                      <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
