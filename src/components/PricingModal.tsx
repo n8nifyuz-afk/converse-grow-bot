@@ -276,17 +276,17 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Plan Tabs */}
               <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-2 sm:mb-2.5 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-8 sm:h-9 md:h-10 bg-zinc-100 dark:bg-zinc-900 p-0.5 sm:p-1 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                <TabsList className="grid w-full grid-cols-2 h-8 sm:h-9 md:h-10 bg-zinc-200 dark:bg-zinc-800 p-0.5 sm:p-1 border border-zinc-300 dark:border-zinc-700 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.pro')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
                     <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {t('pricingModal.ultraPro')}
