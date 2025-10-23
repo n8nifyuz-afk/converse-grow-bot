@@ -28,6 +28,7 @@ export default function AuthModal({
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const [microsoftLoading, setMicrosoftLoading] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [lastSignupAttempt, setLastSignupAttempt] = useState<number>(0);
   const [signupCooldown, setSignupCooldown] = useState<number>(0);
@@ -40,6 +41,7 @@ export default function AuthModal({
     signUp,
     signInWithGoogle,
     signInWithApple,
+    signInWithMicrosoft,
     signInWithPhone,
     verifyOtp,
     resetPassword
@@ -292,6 +294,30 @@ export default function AuthModal({
     }
   };
 
+  const handleMicrosoftSignIn = async () => {
+    setMicrosoftLoading(true);
+    try {
+      const {
+        error
+      } = await signInWithMicrosoft();
+      if (error) {
+        toast({
+          title: "Microsoft sign-in failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "An error occurred",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setMicrosoftLoading(false);
+    }
+  };
+
   const handlePhoneSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone) return;
@@ -499,7 +525,7 @@ export default function AuthModal({
                           </>}
                       </Button>
 
-                      <Button onClick={handleAppleSignIn} disabled={googleLoading || appleLoading || loading} variant="outline" className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base">
+                      <Button onClick={handleAppleSignIn} disabled={googleLoading || appleLoading || microsoftLoading || loading} variant="outline" className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base">
                         {appleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
                             {t('authModal.continueWithApple')}
@@ -512,8 +538,28 @@ export default function AuthModal({
                       </Button>
 
                       <Button 
+                        onClick={handleMicrosoftSignIn} 
+                        disabled={googleLoading || appleLoading || microsoftLoading || loading} 
+                        variant="outline" 
+                        className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base"
+                      >
+                        {microsoftLoading ? <>
+                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
+                            Continue with Microsoft
+                          </> : <>
+                            <svg className="w-6 h-6 mr-3" viewBox="0 0 23 23" fill="none">
+                              <path d="M0 0h11v11H0V0z" fill="#f25022"/>
+                              <path d="M12 0h11v11H12V0z" fill="#00a4ef"/>
+                              <path d="M0 12h11v11H0V12z" fill="#7fba00"/>
+                              <path d="M12 12h11v11H12V12z" fill="#ffb900"/>
+                            </svg>
+                            Continue with Microsoft
+                          </>}
+                      </Button>
+
+                      <Button 
                         onClick={() => setMode('phone')} 
-                        disabled={googleLoading || appleLoading || loading} 
+                        disabled={googleLoading || appleLoading || microsoftLoading || loading}
                         variant="outline" 
                         className="w-full h-11 md:h-12 mb-4 border-2 border-gray-400 dark:border-gray-600 text-base"
                       >

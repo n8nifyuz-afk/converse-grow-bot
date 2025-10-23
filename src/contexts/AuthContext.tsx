@@ -21,6 +21,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signInWithApple: () => Promise<{ error: any }>;
+  signInWithMicrosoft: () => Promise<{ error: any }>;
   signInWithPhone: (phone: string) => Promise<{ error: any }>;
   verifyOtp: (phone: string, token: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -518,6 +519,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  const signInWithMicrosoft = async () => {
+    // Use production domain
+    const redirectUrl = 'https://www.chatl.ai/';
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'azure',
+      options: {
+        redirectTo: redirectUrl,
+        scopes: 'email profile openid',
+        queryParams: {
+          signup_method: 'microsoft'
+        }
+      }
+    });
+    
+    return { error };
+  };
+
   const signInWithPhone = async (phone: string) => {
     const { error } = await supabase.auth.signInWithOtp({
       phone,
@@ -765,11 +784,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setShowPricingModal,
     checkSubscription,
     signUp,
-    signIn,
-    signInWithGoogle,
-    signInWithApple,
-    signInWithPhone,
-    verifyOtp,
+      signIn,
+      signInWithGoogle,
+      signInWithApple,
+      signInWithMicrosoft,
+      signInWithPhone,
+      verifyOtp,
     signOut,
     resetPassword
   };
