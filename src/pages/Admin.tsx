@@ -703,19 +703,19 @@ export default function Admin() {
   if (!isAdmin) {
     return null;
   }
-  return <div className="min-h-full w-full bg-gradient-to-br from-background via-background to-muted/20">
+  return <div className="min-h-full w-full bg-gradient-to-br from-background via-background to-muted/20 overflow-x-hidden">
       {/* Mobile & Tablet Navbar */}
       <div className="lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-sm">
-        <div className="flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-3">
-            <SidebarTrigger className="h-9 w-9 p-0 bg-transparent hover:bg-sidebar-accent text-sidebar-foreground rounded-lg" />
-            <h2 className="text-lg sm:text-xl font-bold">Admin Dashboard</h2>
+        <div className="flex items-center justify-between h-16 px-4 max-w-full">
+          <div className="flex items-center gap-3 min-w-0">
+            <SidebarTrigger className="h-9 w-9 p-0 bg-transparent hover:bg-sidebar-accent text-sidebar-foreground rounded-lg flex-shrink-0" />
+            <h2 className="text-lg sm:text-xl font-bold truncate">Admin Dashboard</h2>
           </div>
           <Button 
             onClick={handleDownloadUserList}
             size="sm"
             variant="outline"
-            className="h-9 gap-2"
+            className="h-9 gap-2 flex-shrink-0"
           >
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Download</span>
@@ -723,7 +723,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4 sm:p-5 md:p-6 lg:p-8 space-y-5 sm:space-y-6 md:space-y-8 animate-fade-in">
+      <div className="container mx-auto p-4 sm:p-5 md:p-6 lg:p-8 space-y-5 sm:space-y-6 md:space-y-8 animate-fade-in max-w-full overflow-x-hidden">
         {/* Header Section - Desktop Only */}
         <div className="hidden lg:flex flex-row justify-between items-center">
           <div>
@@ -741,11 +741,11 @@ export default function Admin() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5">
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1">
+        <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5 w-full">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
-              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Total Users</CardTitle>
-              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Total Users</CardTitle>
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-3xl sm:text-4xl font-bold text-foreground">{userUsages.length}</div>
@@ -753,10 +753,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
-              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Free Users</CardTitle>
-              <Badge variant="secondary" className="text-xs sm:text-sm">{userUsages.filter(u => getUserPlan(u) === 'free').length}</Badge>
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Free Users</CardTitle>
+              <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0">{userUsages.filter(u => getUserPlan(u) === 'free').length}</Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -766,10 +766,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
-              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Pro Users</CardTitle>
-              <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30 text-xs sm:text-sm">
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Pro Users</CardTitle>
+              <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30 text-xs sm:text-sm flex-shrink-0">
                 {userUsages.filter(u => getUserPlan(u) === 'pro').length}
               </Badge>
             </CardHeader>
@@ -781,10 +781,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
-              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Ultra Pro</CardTitle>
-              <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30 text-xs sm:text-sm">
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Ultra Pro</CardTitle>
+              <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30 text-xs sm:text-sm flex-shrink-0">
                 {userUsages.filter(u => getUserPlan(u) === 'ultra').length}
               </Badge>
             </CardHeader>
@@ -796,10 +796,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
-              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground">Total Usage</CardTitle>
-              <Badge className="bg-green-500/10 text-green-600 border-green-500/30 text-xs sm:text-sm">Cost</Badge>
+              <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Total Usage</CardTitle>
+              <Badge className="bg-green-500/10 text-green-600 border-green-500/30 text-xs sm:text-sm flex-shrink-0">Cost</Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-3xl sm:text-4xl font-bold text-foreground">
@@ -813,35 +813,35 @@ export default function Admin() {
         </div>
 
         {/* User Token Usage Table with Tabs */}
-        <Card className="border-border/50 overflow-hidden">
+        <Card className="border-border/50 overflow-hidden w-full">
           <CardHeader className="bg-muted/30 border-b border-border/50 p-4 sm:p-5 md:p-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
+            <div className="flex flex-col gap-4 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold">Token Usage by User</CardTitle>
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse flex-shrink-0" />
+                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">Token Usage by User</CardTitle>
                   </div>
-                  <CardDescription className="text-xs sm:text-sm mt-2">
+                  <CardDescription className="text-xs sm:text-sm mt-2 truncate">
                     Showing {paginatedUsers.length} of {sortedUsers.length} users
                   </CardDescription>
                 </div>
               </div>
               
               {/* Search Input */}
-              <div className="relative w-full sm:w-80 md:w-96">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <div className="relative w-full max-w-full sm:max-w-80 md:max-w-96">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
                 <Input
                   type="text"
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 text-sm sm:text-base"
+                  className="pl-10 h-11 text-sm sm:text-base w-full"
                 />
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 w-full overflow-hidden">
             {/* Filter Tabs */}
             <Tabs value={planFilter} onValueChange={(v) => setPlanFilter(v as any)} className="w-full">
               <div className="border-b border-border/50 px-4 sm:px-5 md:px-6 overflow-x-auto">
@@ -874,12 +874,108 @@ export default function Admin() {
               </div>
 
               <TabsContent value={planFilter} className="m-0">
-                <div className="overflow-x-auto">
+                {/* Mobile/Tablet Card Layout */}
+                <div className="lg:hidden">
+                  {paginatedUsers.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                      <Users className="h-16 w-16 opacity-10 mb-4" />
+                      <p className="text-sm">No users found in this category</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 p-4">
+                      {paginatedUsers.map(usage => {
+                        const totalCost = usage.model_usages.reduce((sum, m) => sum + m.cost, 0);
+                        const plan = getUserPlan(usage);
+                        return (
+                          <Card key={usage.user_id} className="border-border/50 hover:border-primary/30 transition-all">
+                            <CardContent className="p-4 space-y-3">
+                              {/* User Info */}
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className="h-2 w-2 rounded-full bg-primary/60" />
+                                    <h3 className="font-semibold text-sm truncate">{usage.display_name}</h3>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground truncate">{usage.email}</p>
+                                </div>
+                                {getPlanBadge(usage)}
+                              </div>
+
+                              {/* Stats */}
+                              <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                                <div>
+                                  <p className="text-xs text-muted-foreground mb-1">Total Cost</p>
+                                  <p className="text-lg font-bold font-mono">${totalCost.toFixed(4)}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs text-muted-foreground mb-1">Registered</p>
+                                  <p className="text-xs font-medium">
+                                    {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    }) : 'Unknown'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex gap-2 pt-3 border-t border-border/50">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="flex-1 h-10"
+                                  onClick={async () => {
+                                    await fetchUserDetailedInfo(usage.user_id);
+                                  }}
+                                  disabled={loadingUserInfo}
+                                >
+                                  <Info className="h-4 w-4 mr-2" />
+                                  Info
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="flex-1 h-10"
+                                  onClick={async () => {
+                                    setSelectedUser(usage);
+                                    setIsModalOpen(true);
+                                    await fetchUserSubscription(usage.user_id);
+                                    await fetchUserChats(usage.user_id);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="flex-1 h-10"
+                                  onClick={async () => {
+                                    setSelectedUserForChats(usage);
+                                    setShowChatsModal(true);
+                                    await fetchUserChats(usage.user_id);
+                                  }}
+                                >
+                                  <MessageSquare className="h-4 w-4 mr-2" />
+                                  Chats
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Desktop Table Layout */}
+                <div className="hidden lg:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50 hover:bg-muted/50">
                         <TableHead 
-                          className="hidden sm:table-cell font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('name')}
                         >
                           <div className="flex items-center gap-1">
@@ -888,7 +984,7 @@ export default function Admin() {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('email')}
                         >
                           <div className="flex items-center gap-1">
@@ -897,7 +993,7 @@ export default function Admin() {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('plan')}
                         >
                           <div className="flex items-center gap-1">
@@ -906,7 +1002,7 @@ export default function Admin() {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="text-right font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          className="text-right font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('cost')}
                         >
                           <div className="flex items-center gap-1 justify-end">
@@ -915,7 +1011,7 @@ export default function Admin() {
                           </div>
                         </TableHead>
                         <TableHead
-                          className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
+                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('registered')}
                         >
                           <div className="flex items-center gap-1">
@@ -923,198 +1019,186 @@ export default function Admin() {
                             {getSortIcon('registered')}
                           </div>
                         </TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm">Actions</TableHead>
-                    <TableHead className="w-[60px] sm:w-[100px]"></TableHead>
+                        <TableHead className="font-semibold text-foreground text-sm">Actions</TableHead>
+                        <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {paginatedUsers.map(usage => {
                         const totalCost = usage.model_usages.reduce((sum, m) => sum + m.cost, 0);
-                        return <TableRow 
-                          key={usage.user_id} 
-                          className="hover:bg-muted/50 transition-colors"
-                        >
-                          <TableCell className="hidden sm:table-cell font-semibold text-foreground text-xs sm:text-sm">
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                              <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary/60" />
-                              <span className="truncate max-w-[150px] md:max-w-none">{usage.display_name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-xs sm:text-sm">
-                            <span className="truncate block max-w-[140px] sm:max-w-[180px] md:max-w-none">{usage.email}</span>
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm">
-                            {getPlanBadge(usage)}
-                          </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-foreground text-xs sm:text-sm whitespace-nowrap">
-                            ${totalCost.toFixed(4)}
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell text-xs text-muted-foreground whitespace-nowrap">
-                            {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            }) : 'Unknown'}
-                          </TableCell>
-                           <TableCell className="hidden lg:table-cell">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-3 text-xs"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  setSelectedUserForChats(usage);
-                                  setShowChatsModal(true);
-                                  await fetchUserChats(usage.user_id);
-                                }}
-                              >
-                                Chats
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="h-8 px-3 text-xs"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  
-                                  // Get user plan info
-                                  const plan = getUserPlan(usage);
-                                  const planBadge = plan === 'ultra' ? 'Ultra Pro' : plan === 'pro' ? 'Pro' : 'Free';
-                                  
-                                  // Calculate total tokens
-                                  const totalTokens = usage.model_usages.reduce(
-                                    (sum, m) => sum + m.input_tokens + m.output_tokens, 
-                                    0
-                                  );
-                                  
-                                  const confirmMessage = `⚠️ PERMANENTLY DELETE USER?\n\n` +
-                                    `Email: ${usage.email}\n` +
-                                    `Name: ${usage.display_name || 'N/A'}\n` +
-                                    `Plan: ${planBadge}\n` +
-                                    `Total tokens: ${totalTokens.toLocaleString()}\n\n` +
-                                    `This will delete ALL:\n` +
-                                    `• Profile & account data\n` +
-                                    `• Chats & messages\n` +
-                                    `• Projects & files\n` +
-                                    `• Subscription data\n` +
-                                    `• Usage statistics\n\n` +
-                                    `THIS CANNOT BE UNDONE!`;
+                        return (
+                          <TableRow 
+                            key={usage.user_id} 
+                            className="hover:bg-muted/50 transition-colors"
+                          >
+                            <TableCell className="font-semibold text-foreground text-sm">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-primary/60" />
+                                <span className="truncate max-w-[200px]">{usage.display_name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              <span className="truncate block max-w-[250px]">{usage.email}</span>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {getPlanBadge(usage)}
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-bold text-foreground text-sm whitespace-nowrap">
+                              ${totalCost.toFixed(4)}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                              {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              }) : 'Unknown'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 px-3 text-xs"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    setSelectedUserForChats(usage);
+                                    setShowChatsModal(true);
+                                    await fetchUserChats(usage.user_id);
+                                  }}
+                                >
+                                  Chats
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  className="h-8 px-3 text-xs"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
                                     
-                                  if (!confirm(confirmMessage)) {
-                                    return;
-                                  }
-                                  
-                                  try {
-                                    const { data, error } = await supabase.functions.invoke('admin-delete-user', {
-                                      body: { userId: usage.user_id }
-                                    });
-
-                                    if (error) throw error;
-
-                                    // Show detailed success message
-                                    const deletedInfo = data?.deletedUser;
-                                    const successMsg = deletedInfo 
-                                      ? `User deleted (${deletedInfo.plan} plan${deletedInfo.hadActiveSubscription ? ', had active subscription' : ''})`
-                                      : 'User deleted successfully';
+                                    const plan = getUserPlan(usage);
+                                    const planBadge = plan === 'ultra' ? 'Ultra Pro' : plan === 'pro' ? 'Pro' : 'Free';
+                                    const totalTokens = usage.model_usages.reduce(
+                                      (sum, m) => sum + m.input_tokens + m.output_tokens, 
+                                      0
+                                    );
                                     
-                                    toast.success(successMsg);
-                                    await fetchTokenUsageData();
-                                  } catch (error) {
-                                    console.error('Error deleting user:', error);
-                                    toast.error('Failed to delete user');
-                                  }
-                                }}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1.5 sm:gap-2">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-9 sm:h-10 px-2 sm:px-3 min-w-[44px]"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  await fetchUserDetailedInfo(usage.user_id);
-                                }}
-                                disabled={loadingUserInfo}
-                              >
-                                <Info className="h-4 w-4" />
-                                <span className="ml-1.5 hidden lg:inline text-xs">Info</span>
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-9 sm:h-10 px-2 sm:px-3 min-w-[44px]"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  setSelectedUser(usage);
-                                  setIsModalOpen(true);
-                                  await fetchUserSubscription(usage.user_id);
-                                  await fetchUserChats(usage.user_id);
-                                }}
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span className="ml-1.5 hidden lg:inline text-xs">View</span>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-9 sm:h-10 px-2 min-w-[44px] lg:hidden"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  setSelectedUserForChats(usage);
-                                  setShowChatsModal(true);
-                                  await fetchUserChats(usage.user_id);
-                                }}
-                              >
-                                <MessageSquare className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>;
+                                    const confirmMessage = `⚠️ PERMANENTLY DELETE USER?\n\n` +
+                                      `Email: ${usage.email}\n` +
+                                      `Name: ${usage.display_name || 'N/A'}\n` +
+                                      `Plan: ${planBadge}\n` +
+                                      `Total tokens: ${totalTokens.toLocaleString()}\n\n` +
+                                      `This will delete ALL:\n` +
+                                      `• Profile & account data\n` +
+                                      `• Chats & messages\n` +
+                                      `• Projects & files\n` +
+                                      `• Subscription data\n` +
+                                      `• Usage statistics\n\n` +
+                                      `THIS CANNOT BE UNDONE!`;
+                                      
+                                    if (!confirm(confirmMessage)) {
+                                      return;
+                                    }
+                                    
+                                    try {
+                                      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+                                        body: { userId: usage.user_id }
+                                      });
+
+                                      if (error) throw error;
+
+                                      const deletedInfo = data?.deletedUser;
+                                      const successMsg = deletedInfo 
+                                        ? `User deleted (${deletedInfo.plan} plan${deletedInfo.hadActiveSubscription ? ', had active subscription' : ''})`
+                                        : 'User deleted successfully';
+                                      
+                                      toast.success(successMsg);
+                                      await fetchTokenUsageData();
+                                    } catch (error) {
+                                      console.error('Error deleting user:', error);
+                                      toast.error('Failed to delete user');
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-9 px-3"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    await fetchUserDetailedInfo(usage.user_id);
+                                  }}
+                                  disabled={loadingUserInfo}
+                                >
+                                  <Info className="h-4 w-4 mr-1" />
+                                  Info
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-9 px-3"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    setSelectedUser(usage);
+                                    setIsModalOpen(true);
+                                    await fetchUserSubscription(usage.user_id);
+                                    await fetchUserChats(usage.user_id);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
                       })}
-                      {paginatedUsers.length === 0 && <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground h-40 sm:h-48">
-                          <div className="flex flex-col items-center gap-3">
-                            <Users className="h-12 w-12 sm:h-16 sm:w-16 opacity-10" />
-                            <p className="text-sm sm:text-base">No users found in this category</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>}
+                      {paginatedUsers.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center text-muted-foreground h-48">
+                            <div className="flex flex-col items-center gap-3">
+                              <Users className="h-16 w-16 opacity-10" />
+                              <p className="text-base">No users found in this category</p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/50 p-4 sm:p-5">
-                    <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                      Page {currentPage} of {totalPages} • {sortedUsers.length} total users
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/50 p-4 sm:p-5 w-full">
+                    <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1 text-center sm:text-left">
+                      Page {currentPage} of {totalPages} • {sortedUsers.length} total
                     </div>
-                    <div className="flex gap-2 order-1 sm:order-2">
+                    <div className="flex gap-2 order-1 sm:order-2 flex-shrink-0">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="h-10 px-4 min-w-[100px]"
+                        className="h-10 px-3 sm:px-4 min-w-[90px] sm:min-w-[100px]"
                       >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        <span>Previous</span>
+                        <ChevronLeft className="h-4 w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Previous</span>
+                        <span className="sm:hidden">Prev</span>
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
-                        className="h-10 px-4 min-w-[100px]"
+                        className="h-10 px-3 sm:px-4 min-w-[90px] sm:min-w-[100px]"
                       >
                         <span>Next</span>
-                        <ChevronRight className="h-4 w-4 ml-1" />
+                        <ChevronRight className="h-4 w-4 sm:ml-1" />
                       </Button>
                     </div>
                   </div>
