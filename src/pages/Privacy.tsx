@@ -142,7 +142,7 @@ export default function Privacy() {
               </p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li>OpenAI (GPT-5, GPT-4o, GPT-4o mini, DALL·E 3)</li>
-                <li>Anthropic (Claude Sonnet 4)</li>
+                <li>Anthropic (Claude Haiku 4.5)</li>
                 <li>Google DeepMind (Gemini 2.5 Flash)</li>
                 <li>xAI (Grok 4)</li>
                 <li>DeepSeek V2</li>

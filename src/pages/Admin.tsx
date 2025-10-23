@@ -170,7 +170,7 @@ const calculateCost = (model: string, inputTokens: number, outputTokens: number)
     return outputTokens / 100;
   }
 
-  // Handle tiered pricing (e.g., Claude Sonnet 4 with >200k tokens)
+  // Handle tiered pricing (e.g., Claude Haiku 4.5 with >200k tokens)
   let inputCost = 0;
   if (pricing.tier2Threshold && pricing.inputTier2 && inputTokens > pricing.tier2Threshold) {
     // Tokens up to threshold use tier 1 rate, tokens above use tier 2 rate
