@@ -471,13 +471,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 </div>
 
-                <p className="text-xs sm:text-xs text-center text-zinc-400 dark:text-zinc-500 leading-relaxed px-3 sm:px-2">
+                <p className="text-xs sm:text-xs text-center text-zinc-400 leading-relaxed px-3 sm:px-2">
                   {t('pricingModal.byContinuing')}{' '}
-                  <a href="https://www.chatl.ai/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.termsConditions')}</a>,{' '}
-                  <a href="https://www.chatl.ai/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.privacyPolicy')}</a>,{' '}
-                  <a href="https://www.chatl.ai/cookies" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.cookiePolicy')}</a>,{' '}
+                  <a href="https://www.chatl.ai/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.termsConditions')}</a>,{' '}
+                  <a href="https://www.chatl.ai/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.privacyPolicy')}</a>,{' '}
+                  <a href="https://www.chatl.ai/cookies" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.cookiePolicy')}</a>,{' '}
                   {t('pricingModal.and')}{' '}
-                  <a href="https://www.chatl.ai/refund-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.refundCancellationPolicy')}</a>.
+                  <a href="https://www.chatl.ai/refund-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.refundCancellationPolicy')}</a>.
                 </p>
               </div>
             </div>
@@ -488,7 +488,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700 flex flex-col">
+          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
             <div className="overflow-y-auto flex-1">
               {modalContent}
             </div>
@@ -496,7 +496,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[85vh] md:h-[85vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border border-zinc-300 dark:border-zinc-700 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
+          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[85vh] md:h-[85vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white border border-zinc-300 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
             {modalContent}
           </DialogContent>
         </Dialog>
