@@ -202,7 +202,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     : 0;
 
   const modalContent = (
-    <div className="light flex flex-col md:flex-row h-full">
+    <div className="flex flex-col md:flex-row h-full">
             {/* Mobile/Tablet Close Button */}
             {isMobile && (
               <button
