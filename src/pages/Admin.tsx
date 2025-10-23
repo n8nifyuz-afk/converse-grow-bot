@@ -954,21 +954,15 @@ export default function Admin() {
                               </div>
 
                               {/* Stats */}
-                              <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Total Cost</p>
-                                  <p className="text-lg font-bold font-mono">${totalCost.toFixed(4)}</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-xs text-muted-foreground mb-1">Registered</p>
-                                  <p className="text-xs font-medium">
-                                    {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
-                                      month: 'short',
-                                      day: 'numeric',
-                                      year: 'numeric'
-                                    }) : 'Unknown'}
-                                  </p>
-                                </div>
+                              <div className="pt-3 border-t border-border/50">
+                                <p className="text-xs text-muted-foreground mb-1">Registered</p>
+                                <p className="text-sm font-medium">
+                                  {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  }) : 'Unknown'}
+                                </p>
                               </div>
 
                               {/* Actions */}
