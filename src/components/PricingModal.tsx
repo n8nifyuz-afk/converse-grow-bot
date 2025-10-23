@@ -267,7 +267,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-6 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 sm:justify-between">
+            <div className="w-full md:w-5/12 p-6 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
               <div className="mb-4 sm:mb-3 flex-shrink-0">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -371,7 +371,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-12 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-4 sm:mb-3 md:mb-4"
+                className="w-full h-12 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-4 sm:mb-3"
               >
                 {isLoading ? (
                   <>
@@ -385,11 +385,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 )}
               </Button>
 
-              {/* Spacer to push footer down on mobile */}
-              <div className="flex-1 sm:flex-none min-h-[2rem]"></div>
-              
               {/* Footer */}
-              <div className="space-y-2 sm:space-y-1.5 flex-shrink-0 mt-auto sm:mt-0">
+              <div className="space-y-2 sm:space-y-1.5 flex-shrink-0">
                 {/* Pay Safe & Secure */}
                 <div className="flex items-center justify-center gap-1.5 py-2 sm:py-1">
                   <Shield className="w-4 h-4 text-emerald-500" />
