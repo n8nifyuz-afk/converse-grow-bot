@@ -202,7 +202,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     : 0;
 
   const modalContent = (
-    <div className="flex flex-col md:flex-row md:h-full min-h-full">
+    <div className="flex flex-col md:flex-row h-full">
             {/* Mobile/Tablet Close Button */}
             {isMobile && (
               <button
@@ -267,7 +267,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 md:justify-between">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
               <div className="mb-2 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -296,7 +296,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-2.5 flex-shrink-0">
+              <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-2.5 flex-1 flex flex-col justify-center md:flex-initial md:block">
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
                   className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
@@ -371,7 +371,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-10 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
+                className="w-full h-10 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-3 sm:mb-4"
               >
                 {isLoading ? (
                   <>
