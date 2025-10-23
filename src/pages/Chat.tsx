@@ -290,8 +290,6 @@ export default function Chat() {
   const userSelectedModelRef = useRef<string | null>(null);
   // Track if a send is in progress to prevent duplicates
   const sendingInProgressRef = useRef(false);
-  // Track if auth was just completed to prevent pricing modal on mobile
-  const justAuthenticatedRef = useRef(false);
   // Track if page was just loaded to prevent pricing modal on refresh
   const justLoadedRef = useRef(true);
   const selectedModelData = models.find(m => m.id === selectedModel);
@@ -3050,13 +3048,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       setIsPopoverOpen(false);
       return;
     }
-    // Don't show pricing modal if user just authenticated (prevent mobile issue)
-    if (justAuthenticatedRef.current) {
-      console.log('[FILE-UPLOAD] Skipping pricing modal check - user just authenticated');
-      fileInputRef.current?.click();
-      setIsPopoverOpen(false);
-      return;
-    }
     // Check if user has a subscription (only show modal for free users)
     if (!loadingSubscription && !subscriptionStatus.subscribed) {
       setShowPricingModal(true);
@@ -4521,14 +4512,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
           setShowAuthModal(false);
         }} 
         onSuccess={() => {
-          // Mark that user just authenticated to prevent pricing modal on mobile
-          justAuthenticatedRef.current = true;
-          
-          // Clear the flag after 2 seconds
-          setTimeout(() => {
-            justAuthenticatedRef.current = false;
-          }, 2000);
-          
           // Force subscription check immediately after login
           if (user) {
             console.log('[AUTH] User logged in, checking subscription...');
