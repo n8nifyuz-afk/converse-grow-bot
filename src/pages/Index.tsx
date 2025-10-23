@@ -888,7 +888,7 @@ export default function Index() {
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
             <Select value={selectedModel} onValueChange={handleModelSelect} onOpenChange={setIsModelDropdownOpen}>
               <SelectTrigger className="bg-transparent border-0 hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-all duration-200 h-auto p-2 [&>svg]:hidden touch-manipulation" aria-label="Select AI model">
-                <div className="flex items-center justify-center gap-1 whitespace-nowrap pointer-events-none">
+                <div className="flex items-center justify-center gap-1 whitespace-nowrap">
                   <span className="text-lg font-semibold">{selectedModelData?.shortLabel || 'ChatLearn'}</span>
                   {isModelDropdownOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
