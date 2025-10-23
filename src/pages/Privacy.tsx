@@ -42,6 +42,8 @@ export default function Privacy() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
             <a href="#definitions" className="text-primary hover:underline">{t('privacy.definitions')}</a>
             <a href="#data-categories" className="text-primary hover:underline">{t('privacy.dataCategories')}</a>
+            <a href="#marketing-customer-match" className="text-primary hover:underline">{t('privacy.marketingCustomerMatch')}</a>
+            <a href="#email-phone-consent" className="text-primary hover:underline">{t('privacy.emailPhoneConsent')}</a>
             <a href="#how-we-use" className="text-primary hover:underline">{t('privacy.howWeUse')}</a>
             <a href="#how-we-disclose" className="text-primary hover:underline">{t('privacy.howWeDisclose')}</a>
             <a href="#international" className="text-primary hover:underline">{t('privacy.international')}</a>
@@ -216,6 +218,45 @@ export default function Privacy() {
                   <p><span className="font-medium">{t('privacy.legalBasisLabel')}</span> {t('privacy.dataCategory5Legal')}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Direct Marketing & Customer Match */}
+          <Card id="marketing-customer-match">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                {t('privacy.marketingCustomerMatchTitle')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                {t('privacy.marketingCustomerMatchDesc1')}
+              </p>
+              <p className="text-muted-foreground">
+                {t('privacy.marketingCustomerMatchDesc2')}
+              </p>
+              <p className="text-muted-foreground">
+                {t('privacy.marketingCustomerMatchDesc3')}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Email & Phone Communications Consent */}
+          <Card id="email-phone-consent">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                {t('privacy.emailPhoneConsentTitle')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                {t('privacy.emailPhoneConsentDesc1')}
+              </p>
+              <p className="text-muted-foreground">
+                {t('privacy.emailPhoneConsentDesc2')}
+              </p>
             </CardContent>
           </Card>
 
