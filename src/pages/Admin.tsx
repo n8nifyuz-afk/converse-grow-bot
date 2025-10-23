@@ -153,6 +153,31 @@ const MODEL_PRICING: Record<string, {
     output: 0
   } // Image generation model (stored as price * 100)
 };
+// Country code to full name mapping
+const COUNTRY_NAMES: Record<string, string> = {
+  'US': 'United States', 'GB': 'United Kingdom', 'CA': 'Canada', 'AU': 'Australia',
+  'DE': 'Germany', 'FR': 'France', 'ES': 'Spain', 'IT': 'Italy', 'NL': 'Netherlands',
+  'BE': 'Belgium', 'CH': 'Switzerland', 'AT': 'Austria', 'SE': 'Sweden', 'NO': 'Norway',
+  'DK': 'Denmark', 'FI': 'Finland', 'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland',
+  'PT': 'Portugal', 'GR': 'Greece', 'RO': 'Romania', 'HU': 'Hungary', 'SK': 'Slovakia',
+  'BG': 'Bulgaria', 'HR': 'Croatia', 'SI': 'Slovenia', 'LT': 'Lithuania', 'LV': 'Latvia',
+  'EE': 'Estonia', 'LU': 'Luxembourg', 'MT': 'Malta', 'CY': 'Cyprus', 'IS': 'Iceland',
+  'JP': 'Japan', 'CN': 'China', 'IN': 'India', 'KR': 'South Korea', 'SG': 'Singapore',
+  'HK': 'Hong Kong', 'TW': 'Taiwan', 'TH': 'Thailand', 'MY': 'Malaysia', 'ID': 'Indonesia',
+  'PH': 'Philippines', 'VN': 'Vietnam', 'NZ': 'New Zealand', 'BR': 'Brazil', 'MX': 'Mexico',
+  'AR': 'Argentina', 'CL': 'Chile', 'CO': 'Colombia', 'PE': 'Peru', 'VE': 'Venezuela',
+  'ZA': 'South Africa', 'EG': 'Egypt', 'NG': 'Nigeria', 'KE': 'Kenya', 'MA': 'Morocco',
+  'RU': 'Russia', 'TR': 'Turkey', 'IL': 'Israel', 'SA': 'Saudi Arabia', 'AE': 'UAE',
+  'QA': 'Qatar', 'KW': 'Kuwait', 'BH': 'Bahrain', 'OM': 'Oman', 'JO': 'Jordan',
+  'LB': 'Lebanon', 'IQ': 'Iraq', 'PK': 'Pakistan', 'BD': 'Bangladesh', 'LK': 'Sri Lanka',
+  'UA': 'Ukraine', 'BY': 'Belarus', 'KZ': 'Kazakhstan', 'UZ': 'Uzbekistan',
+};
+
+const getCountryName = (code: string | null | undefined): string => {
+  if (!code) return 'N/A';
+  return COUNTRY_NAMES[code.toUpperCase()] || code;
+};
+
 const formatModelName = (model: string): string => {
   if (model === 'generate-image' || model === 'dall-e-3') return 'DALL-E-3';
   return model;
@@ -879,7 +904,7 @@ export default function Admin() {
                             {usage.ip_address || '-'}
                           </TableCell>
                           <TableCell className="hidden xl:table-cell text-muted-foreground text-xs sm:text-sm">
-                            {usage.country || '-'}
+                            {getCountryName(usage.country)}
                           </TableCell>
                           <TableCell className="hidden lg:table-cell text-xs text-muted-foreground whitespace-nowrap">
                             {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
@@ -1048,6 +1073,22 @@ export default function Admin() {
                 <p className="text-sm sm:text-base font-medium text-foreground break-all">
                   {selectedUser?.email}
                 </p>
+              </div>
+              
+              {/* Location Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">IP Address</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {selectedUser?.ip_address || 'N/A'}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Country</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {getCountryName(selectedUser?.country)}
+                  </p>
+                </div>
               </div>
               
               {/* Registration Date - Mobile/Tablet Only */}
