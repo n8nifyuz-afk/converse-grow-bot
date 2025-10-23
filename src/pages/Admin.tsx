@@ -23,6 +23,8 @@ interface UserTokenUsage {
   email: string;
   display_name: string;
   created_at: string;
+  ip_address?: string | null;
+  country?: string | null;
   model_usages: ModelUsageDetail[];
   subscription_status?: {
     subscribed: boolean;
@@ -300,7 +302,7 @@ export default function Admin() {
         error: allProfilesError
       } = await supabase
         .from('profiles')
-        .select('user_id, email, display_name, signup_method, created_at')
+        .select('user_id, email, display_name, signup_method, created_at, ip_address, country')
         .order('created_at', { ascending: false });
       if (allProfilesError) throw allProfilesError;
       console.log('Total profiles (auth.users):', allProfilesData?.length);
@@ -335,6 +337,8 @@ export default function Admin() {
           email: profile.email || 'Unknown',
           display_name: profile.display_name || profile.email?.split('@')[0] || 'Unknown User',
           created_at: profile.created_at,
+          ip_address: profile.ip_address,
+          country: profile.country,
           model_usages: [],
           subscription_status: subscription && subscription.status === 'active' ? {
             subscribed: true,
@@ -830,6 +834,12 @@ export default function Admin() {
                             {getSortIcon('cost')}
                           </div>
                         </TableHead>
+                        <TableHead className="hidden xl:table-cell font-semibold text-foreground text-xs sm:text-sm">
+                          IP Address
+                        </TableHead>
+                        <TableHead className="hidden xl:table-cell font-semibold text-foreground text-xs sm:text-sm">
+                          Country
+                        </TableHead>
                         <TableHead 
                           className="hidden lg:table-cell font-semibold text-foreground text-xs sm:text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('registered')}
@@ -864,6 +874,12 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="text-right font-mono font-bold text-foreground text-xs sm:text-sm whitespace-nowrap">
                             ${totalCost.toFixed(4)}
+                          </TableCell>
+                          <TableCell className="hidden xl:table-cell text-muted-foreground text-xs sm:text-sm">
+                            {usage.ip_address || '-'}
+                          </TableCell>
+                          <TableCell className="hidden xl:table-cell text-muted-foreground text-xs sm:text-sm">
+                            {usage.country || '-'}
                           </TableCell>
                           <TableCell className="hidden lg:table-cell text-xs text-muted-foreground whitespace-nowrap">
                             {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {

@@ -52,7 +52,7 @@ serve(async (req) => {
     // Fetch all profiles (represents all users)
     const { data: profiles, error: profilesError } = await supabaseClient
       .from("profiles")
-      .select("user_id, email, display_name, signup_method, created_at")
+      .select("user_id, email, display_name, signup_method, created_at, ip_address, country")
       .order("created_at", { ascending: false });
 
     if (profilesError) throw profilesError;
@@ -99,6 +99,8 @@ serve(async (req) => {
           login_method: profile.signup_method || "email",
           plan: subscription?.status === "active" ? (subscription.plan_name || subscription.plan || "Free") : "Free",
           total_spent: totalSpent.toFixed(2),
+          ip_address: profile.ip_address || "N/A",
+          country: profile.country || "N/A",
           created_at: new Date(profile.created_at).toISOString().split('T')[0], // YYYY-MM-DD format
         };
       })
@@ -112,6 +114,8 @@ serve(async (req) => {
         "Login Method": user.login_method,
         "Plan": user.plan,
         "Total Spent (EUR)": user.total_spent,
+        "IP Address": user.ip_address,
+        "Country": user.country,
         "Account Created": user.created_at
       }))
     );
@@ -123,6 +127,8 @@ serve(async (req) => {
       { wch: 15 }, // Login Method
       { wch: 15 }, // Plan
       { wch: 18 }, // Total Spent
+      { wch: 18 }, // IP Address
+      { wch: 15 }, // Country
       { wch: 18 }  // Account Created
     ];
 

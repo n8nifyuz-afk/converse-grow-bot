@@ -400,20 +400,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Continue with signup if check fails
     }
     
+    // Get IP address and country
+    let ipAddress: string | undefined;
+    let country: string | undefined;
+    
+    try {
+      const geoResponse = await fetch('https://ipapi.co/json/');
+      if (geoResponse.ok) {
+        const geoData = await geoResponse.json();
+        ipAddress = geoData.ip;
+        country = geoData.country_name;
+      }
+    } catch (geoError) {
+      // Silently fail - continue signup without geo data
+      console.error('Failed to fetch geo data:', geoError);
+    }
+    
     // Use production domain for email confirmation
     const redirectUrl = 'https://www.chatl.ai/';
+    
+    const signupData: any = {
+      signup_method: 'email'
+    };
+    
+    if (displayName) {
+      signupData.display_name = displayName;
+    }
+    
+    if (ipAddress) {
+      signupData.ip_address = ipAddress;
+    }
+    
+    if (country) {
+      signupData.country = country;
+    }
     
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: displayName ? { 
-          display_name: displayName,
-          signup_method: 'email'
-        } : {
-          signup_method: 'email'
-        }
+        data: signupData
       }
     });
     
