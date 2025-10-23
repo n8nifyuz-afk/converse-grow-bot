@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Sync OAuth profile data (Google & Apple) on sign-in
+  // Sync OAuth profile data (Google, Apple, Microsoft) on sign-in
   const syncOAuthProfile = async (session: Session) => {
     try {
       const user = session.user;
@@ -126,11 +126,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         metadata?.iss === 'https://appleid.apple.com' ||
         appMetadata?.provider === 'apple';
       
+      const isMicrosoftSignIn = 
+        appMetadata?.provider === 'azure' ||
+        appMetadata?.provider === 'microsoft';
+      
       // Update geo data for all logins (OAuth and email)
       await updateLoginGeoData(user.id);
       
       // Only sync profile data for OAuth providers
-      if (!isGoogleSignIn && !isAppleSignIn) return;
+      if (!isGoogleSignIn && !isAppleSignIn && !isMicrosoftSignIn) return;
       
       // Get current profile
       const { data: currentProfile } = await supabase
@@ -139,35 +143,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle();
       
-      // Extract latest OAuth data (works for both Google and Apple)
+      // Extract comprehensive OAuth data
+      const updateData: any = {
+        updated_at: new Date().toISOString(),
+        oauth_metadata: metadata // Store full OAuth metadata
+      };
+      
+      // Extract display name (works for all providers)
       const latestName = metadata?.full_name || metadata?.name || metadata?.display_name || currentProfile?.display_name;
+      if (latestName && currentProfile?.display_name !== latestName) {
+        updateData.display_name = latestName;
+      }
+      
+      // Extract avatar (works for all providers)
       const latestAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo;
+      if (latestAvatar && currentProfile?.avatar_url !== latestAvatar) {
+        updateData.avatar_url = latestAvatar;
+      }
       
-      // Check if update is needed
-      const needsUpdate = 
-        (latestName && currentProfile?.display_name !== latestName) ||
-        (latestAvatar && currentProfile?.avatar_url !== latestAvatar);
-      
-      if (needsUpdate && currentProfile) {
-        const updateData: any = {
-          updated_at: new Date().toISOString()
-        };
-        
-        if (latestName && currentProfile.display_name !== latestName) {
-          updateData.display_name = latestName;
+      // Google-specific extended data
+      if (isGoogleSignIn) {
+        // Birthday
+        if (metadata?.birthdate && metadata.birthdate !== currentProfile?.date_of_birth) {
+          updateData.date_of_birth = metadata.birthdate;
         }
         
-        if (latestAvatar && currentProfile.avatar_url !== latestAvatar) {
-          updateData.avatar_url = latestAvatar;
+        // Gender
+        if (metadata?.gender && metadata.gender !== currentProfile?.gender) {
+          updateData.gender = metadata.gender;
         }
         
+        // Locale
+        if (metadata?.locale && metadata.locale !== currentProfile?.locale) {
+          updateData.locale = metadata.locale;
+        }
+        
+        // Phone number
+        if (metadata?.phone_number && metadata.phone_number !== currentProfile?.phone_number) {
+          updateData.phone_number = metadata.phone_number;
+        }
+      }
+      
+      // Microsoft-specific extended data
+      if (isMicrosoftSignIn) {
+        // Job title, office location, etc. are in metadata
+        if (metadata?.jobTitle) {
+          updateData.oauth_metadata = {
+            ...metadata,
+            jobTitle: metadata.jobTitle,
+            officeLocation: metadata.officeLocation,
+            mobilePhone: metadata.mobilePhone,
+            businessPhones: metadata.businessPhones
+          };
+        }
+        
+        // Phone from Microsoft
+        if (metadata?.mobilePhone && metadata.mobilePhone !== currentProfile?.phone_number) {
+          updateData.phone_number = metadata.mobilePhone;
+        }
+        
+        // Preferred language
+        if (metadata?.preferredLanguage && metadata.preferredLanguage !== currentProfile?.locale) {
+          updateData.locale = metadata.preferredLanguage;
+        }
+      }
+      
+      // Only update if there are changes
+      if (Object.keys(updateData).length > 1 && currentProfile) { // More than just updated_at
         await supabase
           .from('profiles')
           .update(updateData)
           .eq('user_id', user.id);
       }
     } catch (error) {
-      // Silent error handling
+      console.warn('OAuth profile sync error:', error);
     }
   };
 
@@ -559,8 +608,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
+        scopes: 'email profile openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.phonenumbers.read',
         queryParams: {
-          signup_method: 'google'
+          signup_method: 'google',
+          access_type: 'offline',
+          prompt: 'consent'
         }
       }
     });
@@ -593,7 +645,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: 'azure',
       options: {
         redirectTo: redirectUrl,
-        scopes: 'email profile openid',
+        scopes: 'email profile openid User.Read User.ReadBasic.All',
         queryParams: {
           signup_method: 'microsoft'
         }
