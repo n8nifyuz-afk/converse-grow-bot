@@ -196,23 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Google-specific extended data
       if (isGoogleSignIn) {
-        console.log('🔍 Google OAuth - Checking for extended scopes...');
-        
-        // Birthday (requires https://www.googleapis.com/auth/user.birthday.read)
-        if (metadata?.birthdate || metadata?.birthday) {
-          updateData.date_of_birth = metadata.birthdate || metadata.birthday;
-          console.log('✅ Extracted date_of_birth:', updateData.date_of_birth);
-        } else {
-          console.log('⚠️ date_of_birth not available (requires birthday scope + verification)');
-        }
-        
-        // Gender (requires https://www.googleapis.com/auth/user.gender.read)
-        if (metadata?.gender) {
-          updateData.gender = metadata.gender;
-          console.log('✅ Extracted gender:', updateData.gender);
-        } else {
-          console.log('⚠️ gender not available (requires gender scope + verification)');
-        }
+        console.log('🔍 Google OAuth - Basic scopes only (email, profile, openid)');
         
         // Locale (available with basic scopes)
         if (metadata?.locale) {
@@ -220,18 +204,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('✅ Extracted locale:', updateData.locale);
         }
         
-        // Phone (requires https://www.googleapis.com/auth/user.phonenumbers.read)
-        if (metadata?.phone_number || metadata?.phoneNumber) {
-          updateData.phone_number = metadata.phone_number || metadata.phoneNumber;
-          console.log('✅ Extracted phone_number:', updateData.phone_number);
-        } else {
-          console.log('⚠️ phone_number not available (requires phonenumbers scope + verification)');
-        }
-        
-        // Extract ALL additional Google fields available
+        // Extract basic Google fields available
         const googleFields = [
-          'email_verified', 'phone_verified', 'provider_id', 'sub', 
-          'given_name', 'family_name', 'accent_color', 'theme'
+          'email_verified', 'provider_id', 'sub', 
+          'given_name', 'family_name'
         ];
         
         googleFields.forEach(field => {
@@ -697,7 +673,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
-        scopes: 'email profile openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.phonenumbers.read',
+        scopes: 'email profile openid',
         queryParams: {
           signup_method: 'google',
           access_type: 'offline',
