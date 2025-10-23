@@ -131,7 +131,7 @@ const Pricing = () => {
       text: 'Google Gemini',
       included: true
     }, {
-      text: 'Anthropic Claude 3.5',
+      text: 'Anthropic Claude Haiku 4.5',
       included: true
     }, {
       text: 'DeepSeek V3',
@@ -416,7 +416,7 @@ const Pricing = () => {
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">Anthropic Claude 3.5</td>
+                    <td className="py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-xs sm:text-sm md:text-base">Anthropic Claude Haiku 4.5</td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><X className="h-5 w-5 text-muted-foreground mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>

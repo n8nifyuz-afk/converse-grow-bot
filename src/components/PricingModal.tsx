@@ -41,7 +41,7 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
       proOnly: false
     },
     { 
-      name: 'Anthropic – Claude 3.5', 
+      name: 'Anthropic – Claude Haiku 4.5', 
       included: plan === 'ultra', 
       description: plan === 'ultra' ? t('pricingModal.claudeDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
