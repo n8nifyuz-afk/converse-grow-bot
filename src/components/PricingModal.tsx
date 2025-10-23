@@ -202,7 +202,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     : 0;
 
   const modalContent = (
-    <div className="flex flex-col md:flex-row md:h-full min-h-full">
+    <div className="flex flex-col md:flex-row h-full">
             {/* Mobile/Tablet Close Button */}
             {isMobile && (
               <button
@@ -267,7 +267,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 md:justify-between">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
               <div className="mb-2 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -488,8 +488,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="max-h-[97vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700">
-            <div className="overflow-y-auto max-h-[97vh]">
+          <DrawerContent className="h-[97vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700">
+            <div className="overflow-y-auto h-[97vh]">
               {modalContent}
             </div>
           </DrawerContent>
