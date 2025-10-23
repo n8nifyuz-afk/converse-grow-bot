@@ -22,12 +22,16 @@ export default function AuthModal({
 }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'reset' | 'phone' | 'verify'>('signin');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
   const [lastSignupAttempt, setLastSignupAttempt] = useState<number>(0);
   const [signupCooldown, setSignupCooldown] = useState<number>(0);
+  const [otpTimer, setOtpTimer] = useState<number>(0);
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const {
@@ -36,6 +40,8 @@ export default function AuthModal({
     signUp,
     signInWithGoogle,
     signInWithApple,
+    signInWithPhone,
+    verifyOtp,
     resetPassword
   } = useAuth();
   const {
@@ -63,13 +69,26 @@ export default function AuthModal({
     }
   }, [signupCooldown]);
 
+  // Countdown timer for OTP resend
+  useEffect(() => {
+    if (otpTimer > 0) {
+      const timer = setTimeout(() => {
+        setOtpTimer(otpTimer - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpTimer]);
+
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setEmail('');
       setPassword('');
+      setPhone('');
+      setOtp('');
       setMode('signin');
       setSignupCooldown(0);
+      setOtpTimer(0);
       setError('');
       setShowPassword(false);
     }
@@ -272,6 +291,94 @@ export default function AuthModal({
       setAppleLoading(false);
     }
   };
+
+  const handlePhoneSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone) return;
+    
+    setPhoneLoading(true);
+    setError('');
+    
+    try {
+      const { error } = await signInWithPhone(phone);
+      
+      if (error) {
+        toast({
+          title: "Failed to send code",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        setMode('verify');
+        setOtpTimer(60); // 60 seconds countdown
+        toast({
+          title: "Code sent!",
+          description: "Please check your phone for the verification code."
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "An error occurred",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone || !otp) return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const { error } = await verifyOtp(phone, otp);
+      
+      if (error) {
+        setError("Invalid verification code. Please try again.");
+      }
+      // If success, the useEffect will handle closing the modal
+    } catch (error) {
+      setError("An error occurred. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (otpTimer > 0) return;
+    
+    setPhoneLoading(true);
+    try {
+      const { error } = await signInWithPhone(phone);
+      
+      if (error) {
+        toast({
+          title: "Failed to resend code",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        setOtpTimer(60);
+        toast({
+          title: "Code sent!",
+          description: "A new verification code has been sent."
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "An error occurred",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
   const authContent = <div className="flex flex-col min-h-[320px] md:min-h-[420px]">
           {/* Auth Form */}
           <div className="w-full p-4 md:p-6 flex flex-col">
@@ -304,6 +411,77 @@ export default function AuthModal({
           }} className="text-sm text-primary hover:underline">
                     ← Back to sign in
                   </button>
+                </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-4">
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Enter your phone number to receive a verification code.
+                  </div>
+                  <Input 
+                    type="tel" 
+                    placeholder="+1234567890" 
+                    value={phone} 
+                    onChange={e => setPhone(e.target.value)} 
+                    required 
+                    className="h-11 md:h-12 text-base"
+                    pattern="^\+[1-9]\d{1,14}$"
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    Include country code (e.g., +1 for US, +44 for UK)
+                  </div>
+                  {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                     {error}
+                   </div>}
+                  <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-11 md:h-12 text-base">
+                    {phoneLoading ? <>
+                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                        Sending code...
+                      </> : 'Send Verification Code'}
+                  </Button>
+                  <button type="button" onClick={() => {
+            setMode('signin');
+            setPhone('');
+            setError('');
+          }} className="text-sm text-primary hover:underline">
+                    ← Back to sign in
+                  </button>
+                </form> : mode === 'verify' ? <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Enter the 6-digit code sent to {phone}
+                  </div>
+                  <Input 
+                    type="text" 
+                    placeholder="000000" 
+                    value={otp} 
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                    required 
+                    className="h-11 md:h-12 text-base text-center text-xl tracking-widest"
+                    maxLength={6}
+                  />
+                  {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                     {error}
+                   </div>}
+                  <Button type="submit" disabled={loading || otp.length !== 6} className="w-full h-11 md:h-12 text-base">
+                    {loading ? <>
+                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                        Verifying...
+                      </> : 'Verify Code'}
+                  </Button>
+                  <div className="flex justify-between items-center text-sm">
+                    <button 
+                      type="button" 
+                      onClick={handleResendOtp} 
+                      disabled={otpTimer > 0 || phoneLoading}
+                      className="text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {phoneLoading ? 'Sending...' : otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend code'}
+                    </button>
+                    <button type="button" onClick={() => {
+              setMode('phone');
+              setOtp('');
+              setError('');
+            }} className="text-primary hover:underline">
+                      Change number
+                    </button>
+                  </div>
                 </form> : <>
                   {!showPassword && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
@@ -321,7 +499,7 @@ export default function AuthModal({
                           </>}
                       </Button>
 
-                      <Button onClick={handleAppleSignIn} disabled={googleLoading || appleLoading || loading} variant="outline" className="w-full h-11 md:h-12 mb-4 border-2 border-gray-400 dark:border-gray-600 text-base">
+                      <Button onClick={handleAppleSignIn} disabled={googleLoading || appleLoading || loading} variant="outline" className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base">
                         {appleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
                             {t('authModal.continueWithApple')}
@@ -331,6 +509,18 @@ export default function AuthModal({
                             </svg>
                             {t('authModal.continueWithApple')}
                           </>}
+                      </Button>
+
+                      <Button 
+                        onClick={() => setMode('phone')} 
+                        disabled={googleLoading || appleLoading || loading} 
+                        variant="outline" 
+                        className="w-full h-11 md:h-12 mb-4 border-2 border-gray-400 dark:border-gray-600 text-base"
+                      >
+                        <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        Continue with Phone
                       </Button>
 
                       <div className="relative my-4">
