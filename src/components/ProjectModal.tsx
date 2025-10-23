@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { PricingModal } from './PricingModal';
 import { 
   Briefcase, 
   BookOpen, 
@@ -48,13 +49,14 @@ export function ProjectModal({
   onProjectUpdated 
 }: ProjectModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const [title, setTitle] = useState(project?.title || '');
   const [selectedIcon, setSelectedIcon] = useState(
     iconOptions.find(opt => opt.name === project?.icon) || iconOptions[0]
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { user } = useAuth();
+  const { user, subscriptionStatus } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -123,19 +125,29 @@ export function ProjectModal({
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (open && !user && !isEditing) {
-      // If trying to open for new project creation and user is not signed in
-      navigate('/pricing-plans');
-      return;
+    if (open && !isEditing) {
+      // If trying to create a new project
+      if (!user) {
+        // Not signed in - redirect to pricing
+        navigate('/pricing-plans');
+        return;
+      }
+      
+      // Signed in but not subscribed (free user) - show pricing modal
+      if (!subscriptionStatus.subscribed) {
+        setShowPricingModal(true);
+        return;
+      }
     }
     setIsOpen(open);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-w-[95vw] bg-background border shadow-lg mx-2">
         <DialogHeader className="text-center pb-4 sm:pb-6">
           <DialogTitle className="text-xl sm:text-2xl font-semibold text-foreground">
@@ -203,5 +215,11 @@ export function ProjectModal({
         </div>
       </DialogContent>
     </Dialog>
+    
+    <PricingModal 
+      open={showPricingModal} 
+      onOpenChange={setShowPricingModal} 
+    />
+    </>
   );
 }
