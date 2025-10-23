@@ -370,7 +370,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-sm shadow-lg hover:shadow-blue-500/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
+                className="w-full h-10 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
               >
                 {isLoading ? (
                   <>
@@ -379,9 +379,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </>
                 ) : (
                   <>
-                    <span className="hidden sm:inline">{t('pricingModal.subscribeTo')} {selectedPlan === 'pro' ? t('pricingModal.pro') : t('pricingModal.ultraPro')} {t('pricingModal.plan')}</span>
-                    <span className="sm:hidden">{t('pricingModal.subscribe')}</span>
-                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
+                    Continue
                   </>
                 )}
               </Button>
