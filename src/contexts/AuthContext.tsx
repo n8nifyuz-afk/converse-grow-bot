@@ -149,6 +149,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle();
       
+      // LOG RAW METADATA FOR DEBUGGING
+      console.log('📋 RAW USER METADATA:', JSON.stringify(metadata, null, 2));
+      console.log('📋 RAW APP METADATA:', JSON.stringify(appMetadata, null, 2));
+      
       // Extract comprehensive OAuth data - STORE EVERYTHING
       const updateData: any = {
         updated_at: new Date().toISOString(),
@@ -168,6 +172,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (latestAvatar && currentProfile?.avatar_url !== latestAvatar) {
         updateData.avatar_url = latestAvatar;
         console.log('✅ Extracted avatar_url:', latestAvatar);
+      }
+      
+      // Extract email (update if changed)
+      if (metadata?.email && currentProfile?.email !== metadata.email) {
+        updateData.email = metadata.email;
+        console.log('✅ Updated email:', metadata.email);
+      }
+      
+      // Extract timezone (with browser fallback)
+      const timezone = metadata?.iana_timezone || metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (timezone && currentProfile?.timezone !== timezone) {
+        updateData.timezone = timezone;
+        console.log('✅ Timezone:', timezone);
+      }
+      
+      // Extract locale (with browser fallback)
+      const locale = metadata?.locale || metadata?.preferredLanguage || navigator.language;
+      if (locale && currentProfile?.locale !== locale) {
+        updateData.locale = locale;
+        console.log('✅ Locale:', locale);
       }
       
       // Google-specific extended data
