@@ -453,22 +453,109 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
             <TabsContent value="raw" className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 mt-0">
               <Card>
                 <CardHeader className="p-3 sm:p-4 md:p-6">
-                  <CardTitle className="text-sm sm:text-base">Raw OAuth Metadata</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">Complete OAuth provider response data</CardDescription>
+                  <CardTitle className="text-sm sm:text-base">Complete OAuth Metadata</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    All data received from the OAuth provider (Google, Microsoft, Apple)
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
-                  <pre className="text-[10px] sm:text-xs bg-muted p-2.5 sm:p-4 rounded overflow-auto max-h-64 sm:max-h-96">
-                    {JSON.stringify(oauthMetadata, null, 2)}
-                  </pre>
+                  {oauthMetadata && Object.keys(oauthMetadata).length > 0 ? (
+                    <>
+                      {/* Show structured OAuth fields first */}
+                      <div className="space-y-3 mb-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                          {oauthMetadata.email && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Email</p>
+                              <p className="text-xs sm:text-sm font-mono break-all">{oauthMetadata.email}</p>
+                            </div>
+                          )}
+                          {oauthMetadata.email_verified !== undefined && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Email Verified</p>
+                              <Badge variant={oauthMetadata.email_verified ? "default" : "secondary"} className="text-xs">
+                                {oauthMetadata.email_verified ? "✓ Verified" : "✗ Not Verified"}
+                              </Badge>
+                            </div>
+                          )}
+                          {oauthMetadata.phone_verified !== undefined && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Phone Verified</p>
+                              <Badge variant={oauthMetadata.phone_verified ? "default" : "secondary"} className="text-xs">
+                                {oauthMetadata.phone_verified ? "✓ Verified" : "✗ Not Verified"}
+                              </Badge>
+                            </div>
+                          )}
+                          {oauthMetadata.provider_id && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Provider ID</p>
+                              <p className="text-[10px] sm:text-xs font-mono break-all">{oauthMetadata.provider_id}</p>
+                            </div>
+                          )}
+                          {oauthMetadata.sub && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Subject (Sub)</p>
+                              <p className="text-[10px] sm:text-xs font-mono break-all">{oauthMetadata.sub}</p>
+                            </div>
+                          )}
+                          {oauthMetadata.iss && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Issuer</p>
+                              <p className="text-[10px] sm:text-xs font-mono break-all">{oauthMetadata.iss}</p>
+                            </div>
+                          )}
+                          {oauthMetadata.given_name && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Given Name</p>
+                              <p className="text-xs sm:text-sm">{oauthMetadata.given_name}</p>
+                            </div>
+                          )}
+                          {oauthMetadata.family_name && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Family Name</p>
+                              <p className="text-xs sm:text-sm">{oauthMetadata.family_name}</p>
+                            </div>
+                          )}
+                          {oauthMetadata.accent_color && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Accent Color</p>
+                              <p className="text-xs sm:text-sm capitalize">{oauthMetadata.accent_color}</p>
+                            </div>
+                          )}
+                          {oauthMetadata.theme && (
+                            <div className="p-2 sm:p-2.5 bg-muted/50 rounded border">
+                              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Theme Preference</p>
+                              <p className="text-xs sm:text-sm capitalize">{oauthMetadata.theme}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <Separator className="my-4" />
+
+                      {/* Raw JSON for technical analysis */}
+                      <div>
+                        <p className="text-xs sm:text-sm font-medium mb-2">Complete Raw JSON</p>
+                        <pre className="text-[10px] sm:text-xs bg-muted p-2.5 sm:p-4 rounded overflow-auto max-h-64 sm:max-h-96 border">
+                          {JSON.stringify(oauthMetadata, null, 2)}
+                        </pre>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs sm:text-sm text-muted-foreground text-center py-6">
+                      No OAuth metadata available (email/password signup)
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="p-3 sm:p-4 md:p-6">
                   <CardTitle className="text-sm sm:text-base">Complete Profile Data</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Full database record</CardDescription>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
-                  <pre className="text-[10px] sm:text-xs bg-muted p-2.5 sm:p-4 rounded overflow-auto max-h-64 sm:max-h-96">
+                  <pre className="text-[10px] sm:text-xs bg-muted p-2.5 sm:p-4 rounded overflow-auto max-h-64 sm:max-h-96 border">
                     {JSON.stringify(userInfo, null, 2)}
                   </pre>
                 </CardContent>

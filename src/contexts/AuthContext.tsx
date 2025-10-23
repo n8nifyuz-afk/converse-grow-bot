@@ -117,6 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const metadata = user.user_metadata;
       const appMetadata = user.app_metadata;
       
+      console.log('📊 OAuth Sync - Raw user_metadata:', JSON.stringify(metadata, null, 2));
+      console.log('📊 OAuth Sync - Raw app_metadata:', JSON.stringify(appMetadata, null, 2));
+      
       // Detect provider
       const isGoogleSignIn = 
         metadata?.iss === 'https://accounts.google.com' ||
@@ -129,6 +132,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const isMicrosoftSignIn = 
         appMetadata?.provider === 'azure' ||
         appMetadata?.provider === 'microsoft';
+      
+      const provider = isGoogleSignIn ? 'google' : isAppleSignIn ? 'apple' : isMicrosoftSignIn ? 'microsoft' : 'email';
+      console.log('🔐 Detected OAuth provider:', provider);
       
       // Update geo data for all logins (OAuth and email)
       await updateLoginGeoData(user.id);
@@ -143,80 +149,139 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle();
       
-      // Extract comprehensive OAuth data
+      // Extract comprehensive OAuth data - STORE EVERYTHING
       const updateData: any = {
         updated_at: new Date().toISOString(),
-        oauth_metadata: metadata // Store full OAuth metadata
+        oauth_provider: provider,
+        oauth_metadata: metadata // Store COMPLETE OAuth metadata for admin analysis
       };
       
       // Extract display name (works for all providers)
-      const latestName = metadata?.full_name || metadata?.name || metadata?.display_name || currentProfile?.display_name;
+      const latestName = metadata?.full_name || metadata?.name || metadata?.display_name || metadata?.given_name || currentProfile?.display_name;
       if (latestName && currentProfile?.display_name !== latestName) {
         updateData.display_name = latestName;
+        console.log('✅ Extracted display_name:', latestName);
       }
       
       // Extract avatar (works for all providers)
       const latestAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo;
       if (latestAvatar && currentProfile?.avatar_url !== latestAvatar) {
         updateData.avatar_url = latestAvatar;
+        console.log('✅ Extracted avatar_url:', latestAvatar);
       }
       
       // Google-specific extended data
       if (isGoogleSignIn) {
-        // Birthday
-        if (metadata?.birthdate && metadata.birthdate !== currentProfile?.date_of_birth) {
-          updateData.date_of_birth = metadata.birthdate;
+        console.log('🔍 Google OAuth - Checking for extended scopes...');
+        
+        // Birthday (requires https://www.googleapis.com/auth/user.birthday.read)
+        if (metadata?.birthdate || metadata?.birthday) {
+          updateData.date_of_birth = metadata.birthdate || metadata.birthday;
+          console.log('✅ Extracted date_of_birth:', updateData.date_of_birth);
+        } else {
+          console.log('⚠️ date_of_birth not available (requires birthday scope + verification)');
         }
         
-        // Gender
-        if (metadata?.gender && metadata.gender !== currentProfile?.gender) {
+        // Gender (requires https://www.googleapis.com/auth/user.gender.read)
+        if (metadata?.gender) {
           updateData.gender = metadata.gender;
+          console.log('✅ Extracted gender:', updateData.gender);
+        } else {
+          console.log('⚠️ gender not available (requires gender scope + verification)');
         }
         
-        // Locale
-        if (metadata?.locale && metadata.locale !== currentProfile?.locale) {
+        // Locale (available with basic scopes)
+        if (metadata?.locale) {
           updateData.locale = metadata.locale;
+          console.log('✅ Extracted locale:', updateData.locale);
         }
         
-        // Phone number
-        if (metadata?.phone_number && metadata.phone_number !== currentProfile?.phone_number) {
-          updateData.phone_number = metadata.phone_number;
+        // Phone (requires https://www.googleapis.com/auth/user.phonenumbers.read)
+        if (metadata?.phone_number || metadata?.phoneNumber) {
+          updateData.phone_number = metadata.phone_number || metadata.phoneNumber;
+          console.log('✅ Extracted phone_number:', updateData.phone_number);
+        } else {
+          console.log('⚠️ phone_number not available (requires phonenumbers scope + verification)');
         }
+        
+        // Extract ALL additional Google fields available
+        const googleFields = [
+          'email_verified', 'phone_verified', 'provider_id', 'sub', 
+          'given_name', 'family_name', 'accent_color', 'theme'
+        ];
+        
+        googleFields.forEach(field => {
+          if (metadata?.[field]) {
+            console.log(`✅ Found Google field: ${field} =`, metadata[field]);
+          }
+        });
       }
       
       // Microsoft-specific extended data
       if (isMicrosoftSignIn) {
-        // Job title, office location, etc. are in metadata
-        if (metadata?.jobTitle) {
-          updateData.oauth_metadata = {
-            ...metadata,
-            jobTitle: metadata.jobTitle,
-            officeLocation: metadata.officeLocation,
-            mobilePhone: metadata.mobilePhone,
-            businessPhones: metadata.businessPhones
-          };
-        }
+        console.log('🔍 Microsoft OAuth - Extracting Microsoft Graph data...');
+        
+        // Store ALL Microsoft Graph fields
+        const msFields = {
+          ...metadata,
+          jobTitle: metadata?.jobTitle,
+          officeLocation: metadata?.officeLocation,
+          department: metadata?.department,
+          companyName: metadata?.companyName,
+          mobilePhone: metadata?.mobilePhone,
+          businessPhones: metadata?.businessPhones,
+          city: metadata?.city,
+          country: metadata?.country,
+          postalCode: metadata?.postalCode,
+          state: metadata?.state,
+          streetAddress: metadata?.streetAddress,
+        };
+        
+        updateData.oauth_metadata = msFields;
         
         // Phone from Microsoft
-        if (metadata?.mobilePhone && metadata.mobilePhone !== currentProfile?.phone_number) {
-          updateData.phone_number = metadata.mobilePhone;
+        if (metadata?.mobilePhone || metadata?.businessPhones?.[0]) {
+          updateData.phone_number = metadata.mobilePhone || metadata.businessPhones?.[0];
+          console.log('✅ Extracted phone_number:', updateData.phone_number);
         }
         
         // Preferred language
-        if (metadata?.preferredLanguage && metadata.preferredLanguage !== currentProfile?.locale) {
-          updateData.locale = metadata.preferredLanguage;
+        if (metadata?.preferredLanguage || metadata?.locale) {
+          updateData.locale = metadata.preferredLanguage || metadata.locale;
+          console.log('✅ Extracted locale:', updateData.locale);
         }
+        
+        // Log all Microsoft fields
+        Object.entries(msFields).forEach(([key, value]) => {
+          if (value) console.log(`✅ Microsoft field: ${key} =`, value);
+        });
       }
       
+      // Apple-specific data
+      if (isAppleSignIn) {
+        console.log('🔍 Apple OAuth - Limited data due to Apple privacy (email + name only)');
+        if (metadata?.email) console.log('✅ Extracted email:', metadata.email);
+      }
+      
+      console.log('💾 Updating profile with fields:', Object.keys(updateData));
+      
       // Only update if there are changes
-      if (Object.keys(updateData).length > 1 && currentProfile) { // More than just updated_at
-        await supabase
+      if (Object.keys(updateData).length > 2 && currentProfile) { // More than just updated_at + oauth_provider
+        const { error } = await supabase
           .from('profiles')
           .update(updateData)
           .eq('user_id', user.id);
+        
+        if (error) {
+          console.error('❌ Profile update error:', error);
+        } else {
+          console.log('✅ Profile updated successfully');
+        }
+      } else {
+        console.log('ℹ️ No profile changes detected');
       }
     } catch (error) {
-      console.warn('OAuth profile sync error:', error);
+      console.warn('❌ OAuth profile sync error:', error);
     }
   };
 
