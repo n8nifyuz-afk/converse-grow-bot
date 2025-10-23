@@ -731,6 +731,29 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           </div>
                         </div>
                       )}
+
+                      {/* Microsoft Provider */}
+                      {user?.app_metadata?.providers?.includes('azure') && (
+                        <div className="flex items-center justify-between gap-3 p-3 md:p-4 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
+                          <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+                            <div className="p-1.5 md:p-2 bg-white rounded-lg shadow-sm flex-shrink-0">
+                              <svg className="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 23 23">
+                                <path fill="#f35325" d="M0 0h11v11H0z"/>
+                                <path fill="#81bc06" d="M12 0h11v11H12z"/>
+                                <path fill="#05a6f0" d="M0 12h11v11H0z"/>
+                                <path fill="#ffba08" d="M12 12h11v11H12z"/>
+                              </svg>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-foreground text-sm md:text-base">Microsoft</p>
+                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithMicrosoft')}</p>
+                            </div>
+                          </div>
+                          <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
+                            <Check className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
+                          </div>
+                        </div>
+                      )}
                       
                       {/* Email Provider */}
                       {(user?.app_metadata?.providers?.includes('email') || 

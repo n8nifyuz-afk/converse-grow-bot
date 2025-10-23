@@ -282,6 +282,7 @@
     "connectedProviders": "Connected authentication providers",
     "signInWithGoogle": "Sign in with your Google account",
     "signInWithApple": "Sign in with your Apple account",
+    "signInWithMicrosoft": "Sign in with your Microsoft account",
     "emailAndPassword": "Email & Password",
     "signInWithEmail": "Sign in with your email address"
   },
