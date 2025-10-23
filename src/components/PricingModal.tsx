@@ -371,11 +371,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-10 sm:h-11 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-sm shadow-lg hover:shadow-xl transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
+                className="w-full h-10 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2 sm:mb-2.5"
               >
                 {isLoading ? (
                   <>
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white dark:border-zinc-900 border-t-transparent rounded-full animate-spin mr-2" />
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                     {t('pricingModal.processing')}
                   </>
                 ) : (
@@ -394,7 +394,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 </div>
                 
                 {/* Payment Cards */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-0.5 [&_svg]:dark:opacity-80 [&_rect[fill='white']]:dark:fill-zinc-800 [&_rect[stroke='#F3F3F3']]:dark:stroke-zinc-700 [&_rect[stroke='#D9D9D9']]:dark:stroke-zinc-700">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-0.5">
                   {/* Visa */}
                   <div className="w-9 h-6 sm:w-10 sm:h-7 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 750 471" fill="none">
@@ -427,10 +427,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       <g fill="#5f6368"><path d="M168.58 20.77V56.5h22.04c5.25 0 9.59-1.76 13.02-5.29 3.53-3.52 5.29-7.72 5.29-12.58s-1.76-8.91-5.29-12.44c-3.44-3.62-7.78-5.43-13.02-5.43h-22.04zm0 48.32v41.45h-13.16V8.19h34.91c8.87 0 16.39 2.96 22.6 8.86 6.31 5.9 9.45 13.1 9.45 21.58s-3.14 15.92-9.45 21.72c-6.1 5.82-13.64 8.72-22.6 8.72h-21.75zM235.68 89.08c0 3.44 1.45 6.29 4.37 8.58 2.91 2.28 6.32 3.43 10.23 3.43 5.54 0 10.46-2.05 14.8-6.14 4.34-4.1 6.51-8.91 6.51-14.43-4.1-3.25-9.83-4.86-17.17-4.86-5.34 0-9.8 1.29-13.37 3.86s-5.37 5.75-5.37 9.56m17.03-50.88c9.73 0 17.41 2.59 23.04 7.79s8.43 12.31 8.43 21.36v43.17h-12.59v-9.72h-.57c-5.44 8-12.68 12-21.74 12-7.73 0-14.2-2.28-19.39-6.85-5.2-4.58-7.8-10.29-7.8-17.16 0-7.24 2.73-13 8.22-17.28 5.49-4.29 12.81-6.43 21.96-6.43 7.82 0 14.26 1.43 19.31 4.29v-3c0-4.57-1.81-8.45-5.43-11.64-3.63-3.2-7.86-4.79-12.73-4.79-7.35 0-13.16 3.09-17.45 9.29l-11.6-7.29c6.4-9.15 15.84-13.72 28.34-13.72M356.44 40.49l-43.93 100.9h-13.59l16.31-35.3-28.9-65.6h14.31l20.89 50.31h.28l20.32-50.31z"/></g><path d="M115.39 60.14c0-4.14-.35-8.14-1.01-11.96H58.86v22.65h31.79c-1.36 7.38-5.49 13.66-11.75 17.87v14.71h18.98c11.11-10.24 17.51-25.37 17.51-43.26" fill="#4285f4"/><path d="M58.86 117.61c15.89 0 29.26-5.21 39.02-14.2L78.9 88.7c-5.28 3.55-12.08 5.63-20.04 5.63-15.35 0-28.38-10.34-33.05-24.27H6.27v15.15c9.69 19.21 29.6 32.41 52.6 32.41" fill="#34a853"/><path d="M25.82 70.05c-1.19-3.55-1.85-7.34-1.85-11.25s.65-7.7 1.85-11.25V32.4H6.27C2.26 40.34 0 49.3 0 58.8s2.26 18.47 6.27 26.4z" fill="#fabb05"/><path d="M58.86 23.27c8.67 0 16.45 2.98 22.58 8.82s16.8-16.78 16.8-16.78C88.04 5.83 74.74 0 58.86 0 35.87 0 15.96 13.19 6.27 32.4l19.55 15.15c4.66-13.93 17.69-24.27 33.05-24.27" fill="#e94235"/>
                     </svg>
                   </div>
-                   {/* Revolut */}
+                  {/* Revolut */}
                   <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
-                    <svg className="w-full h-full" viewBox="0 0 294.2 65" fill="none" style={{ color: 'currentColor' }}>
-                      <path fillRule="evenodd" clipRule="evenodd" className="dark:fill-zinc-300 fill-zinc-900" d="M200.7,0h11.6v64.5h-11.6V0z M294.2,27.2v-10h-11.9v-13h-11.6v47.5c0,4.4,1.1,7.7,3.3,9.9
+                    <svg className="w-full h-full" viewBox="0 0 294.2 65" fill="none">
+                      <path fillRule="evenodd" clipRule="evenodd" fill="currentColor" d="M200.7,0h11.6v64.5h-11.6V0z M294.2,27.2v-10h-11.9v-13h-11.6v47.5c0,4.4,1.1,7.7,3.3,9.9
                         c2.2,2.2,5.5,3.3,10,3.3h10.2v-10h-7.5c-1.6,0-2.8-0.4-3.5-1.1c-0.6-0.6-1-2.3-1-4.1V27.2L294.2,27.2z M122.2,51.9l11.9-34.8h12.1
                         l-17.2,47.3h-13.7L98.1,17.2h12.1L122.2,51.9z M251.9,40.8c0,3-0.5,5.6-1.3,7.7c-0.9,2.1-2.2,3.8-3.8,4.9c-1.6,1.1-3.6,1.6-5.9,1.6
                         c-3.3,0-5.8-1.1-7.4-3.2c-1.6-2.2-2.5-5.4-2.5-9.7v-25h-11.6v26.2c0,4.1,0.5,7.6,1.5,10.3c1,2.8,2.4,5,4.1,6.7
