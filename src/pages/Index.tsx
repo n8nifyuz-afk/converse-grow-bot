@@ -1028,8 +1028,9 @@ export default function Index() {
           </div>
         )}
 
-        {/* Google One Tap for unauthenticated users */}
+        {/* Google One Tap temporarily disabled
         <GoogleOneTab />
+        */}
       
       <div className="text-center mb-6 sm:mb-8">
         {user ? <>
