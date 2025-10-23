@@ -60,6 +60,11 @@ async function getIPMetadata(): Promise<{ ip: string | null; country: string | n
   return cachedMetadata;
 }
 
+// Export IP metadata fetching for use in auth flows
+export async function fetchIPAndCountry(): Promise<{ ip: string | null; country: string | null }> {
+  return await getIPMetadata();
+}
+
 // Main function to gather all metadata
 export async function getWebhookMetadata(): Promise<WebhookMetadata> {
   const urlParams = getUrlParams();

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { trackPaymentComplete, trackRegistrationComplete } from '@/utils/gtmTracking';
+import { fetchIPAndCountry } from '@/utils/webhookMetadata';
 
 interface AuthContextType {
   user: User | null;
@@ -79,6 +80,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
+  // Update user profile with IP and country on login
+  const updateLoginGeoData = async (userId: string) => {
+    try {
+      const { ip, country } = await fetchIPAndCountry();
+      
+      if (ip || country) {
+        await supabase
+          .from('profiles')
+          .update({
+            ip_address: ip,
+            country: country,
+          })
+          .eq('user_id', userId);
+      }
+    } catch (error) {
+      console.warn('Failed to update login geo data:', error);
+    }
+  };
+
   // Sync OAuth profile data (Google & Apple) on sign-in
   const syncOAuthProfile = async (session: Session) => {
     try {
@@ -95,7 +115,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         metadata?.iss === 'https://appleid.apple.com' ||
         appMetadata?.provider === 'apple';
       
-      // Only sync for OAuth providers
+      // Update geo data for all logins (OAuth and email)
+      await updateLoginGeoData(user.id);
+      
+      // Only sync profile data for OAuth providers
       if (!isGoogleSignIn && !isAppleSignIn) return;
       
       // Get current profile
@@ -468,6 +491,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password
     });
+    
+    // Update geo data on successful login
+    if (!error && data.user) {
+      setTimeout(() => updateLoginGeoData(data.user.id), 0);
+    }
     
     // If login fails, check if user exists with OAuth provider
     if (error && error.message?.toLowerCase().includes('invalid')) {
