@@ -210,7 +210,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 className="absolute right-4 top-4 transition-all hover:scale-110 focus:outline-none z-50"
                 aria-label="Close"
               >
-                <X className="h-6 w-6 text-zinc-700 hover:text-zinc-900" />
+                <X className="h-5 w-5 text-zinc-700 hover:text-zinc-900" />
                 <span className="sr-only">Close</span>
               </button>
             )}
