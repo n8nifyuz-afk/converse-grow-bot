@@ -510,7 +510,6 @@ export default function AuthModal({
                   </div>
                 </form> : <>
                   {!showPassword && <>
-                      {/* Google Sign-In temporarily hidden
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
                         {googleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
@@ -525,7 +524,6 @@ export default function AuthModal({
                             {t('authModal.continueWithGoogle')}
                           </>}
                       </Button>
-                      */}
 
                       <Button onClick={handleAppleSignIn} disabled={googleLoading || appleLoading || microsoftLoading || loading} variant="outline" className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base">
                         {appleLoading ? <>
