@@ -784,12 +784,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setShowPricingModal,
     checkSubscription,
     signUp,
-      signIn,
-      signInWithGoogle,
-      signInWithApple,
-      signInWithMicrosoft,
-      signInWithPhone,
-      verifyOtp,
+    signIn,
+    signInWithGoogle,
+    signInWithApple,
+    signInWithMicrosoft,
+    signInWithPhone,
+    verifyOtp,
     signOut,
     resetPassword
   };
