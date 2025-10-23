@@ -50,10 +50,11 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
           client_id: clientId,
           callback: handleCredentialResponse,
           auto_select: false,
-          cancel_on_tap_outside: true, // Allow user to dismiss if they want
+          cancel_on_tap_outside: true,
           context: 'signin',
           ux_mode: 'popup',
-          // No nonce parameter - this prevents Google from adding nonce to token
+          // Request extended scopes for comprehensive user data
+          scope: 'email profile openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.phonenumbers.read',
         });
 
         // Display the One Tap prompt
