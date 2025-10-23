@@ -267,17 +267,17 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
-              <div className="mb-2 sm:mb-2.5 flex-shrink-0">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
+            <div className="w-full md:w-5/12 p-4 sm:p-4 md:p-5 pb-6 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
+              <div className="mb-3 sm:mb-2.5 flex-shrink-0">
+                <h2 className="text-xl sm:text-xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
                 </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-xs">{t('pricingModal.unlimitedAccess')}</p>
+                <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-2 sm:mb-2.5 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-8 sm:h-9 md:h-10 bg-zinc-200 dark:bg-zinc-800 p-0.5 sm:p-1 border border-zinc-300 dark:border-zinc-700 rounded-lg">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-3 sm:mb-2.5 flex-shrink-0">
+                <TabsList className="grid w-full grid-cols-2 h-11 sm:h-9 md:h-10 bg-zinc-200 dark:bg-zinc-800 p-1 sm:p-1 border border-zinc-300 dark:border-zinc-700 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
                     className="text-xs sm:text-sm font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-foreground data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
@@ -296,10 +296,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-2.5 flex-1 flex flex-col justify-center md:flex-initial md:block">
+              <div className="space-y-2.5 sm:space-y-2 mb-4 sm:mb-2.5 flex-1 flex flex-col justify-center md:flex-initial md:block">
                 <button
                   onClick={() => setSelectedPeriod('monthly')}
-                  className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
+                  className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left group relative overflow-hidden ${
                     selectedPeriod === 'monthly'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
@@ -307,21 +307,21 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.oneMonth')}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900 dark:text-white">{t('pricingModal.oneMonth')}</div>
+                      <div className="text-sm sm:text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan].monthly.price}/{t('pricingModal.perMonth').toLowerCase()}
                       </div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].monthly.perDay}</div>
+                      <div className="text-xs sm:text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setSelectedPeriod('3month')}
-                  className={`w-full p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
+                  className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
                     selectedPeriod === '3month'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
@@ -329,21 +329,21 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.threeMonths')}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900 dark:text-white">{t('pricingModal.threeMonths')}</div>
+                      <div className="text-sm sm:text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan]['3month'].price} {t('pricingModal.total')}
                       </div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
+                      <div className="text-xs sm:text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setSelectedPeriod('yearly')}
-                  className={`w-full p-2.5 sm:p-3 pt-4 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
+                  className={`w-full p-3.5 sm:p-3 pt-5 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
                     selectedPeriod === 'yearly'
                       ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-zinc-900/30 shadow-lg'
                       : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950'
@@ -354,14 +354,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </Badge>
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.yearly')}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900 dark:text-white">{t('pricingModal.yearly')}</div>
+                      <div className="text-sm sm:text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan].yearly.price} {t('pricingModal.total')}
                       </div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
-                      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900 dark:text-white">€{pricingOptions[selectedPlan].yearly.perDay}</div>
+                      <div className="text-xs sm:text-[10px] text-zinc-500 dark:text-zinc-400">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
@@ -371,7 +371,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-10 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-3 sm:mb-4"
+                className="w-full h-12 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-base sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-4 sm:mb-4"
               >
                 {isLoading ? (
                   <>
@@ -386,15 +386,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Button>
 
               {/* Footer */}
-              <div className="space-y-1 flex-shrink-0">
+              <div className="space-y-2 sm:space-y-1 flex-shrink-0">
                 {/* Pay Safe & Secure */}
-                <div className="flex items-center justify-center gap-1.5 py-1">
-                  <Shield className="w-4 h-4 text-emerald-500" />
-                  <span className="text-xs sm:text-sm font-medium text-emerald-500">{t('pricingModal.paySafeSecure')}</span>
+                <div className="flex items-center justify-center gap-2 sm:gap-1.5 py-2 sm:py-1">
+                  <Shield className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-500" />
+                  <span className="text-sm sm:text-sm font-medium text-emerald-500">{t('pricingModal.paySafeSecure')}</span>
                 </div>
                 
                 {/* Payment Cards */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-0.5">
+                <div className="flex items-center justify-center gap-2 sm:gap-2 py-1 sm:py-0.5">
                   {/* Visa */}
                   <div className="w-9 h-6 sm:w-10 sm:h-7 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 750 471" fill="none">
@@ -471,7 +471,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 </div>
 
-                <p className="text-[11px] sm:text-xs text-center text-zinc-400 dark:text-zinc-500 leading-relaxed px-2">
+                <p className="text-xs sm:text-xs text-center text-zinc-400 dark:text-zinc-500 leading-relaxed px-3 sm:px-2">
                   {t('pricingModal.byContinuing')}{' '}
                   <a href="https://www.chatl.ai/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.termsConditions')}</a>,{' '}
                   <a href="https://www.chatl.ai/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.privacyPolicy')}</a>,{' '}
