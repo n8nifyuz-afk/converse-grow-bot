@@ -267,7 +267,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-4 sm:p-4 md:p-5 pb-6 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
+            <div className="w-full md:w-[85%] p-4 sm:p-4 md:p-5 pb-6 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-950 dark:to-zinc-900/30 justify-between">
               <div className="mb-3 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-xl sm:text-xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-300 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
