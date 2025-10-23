@@ -885,15 +885,15 @@ export default function Index() {
           <SidebarTrigger className="h-9 w-9 hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary" aria-label="Open sidebar menu" />
           
           {/* Mobile Model Selector triggered by ChatLearn - Absolutely centered */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
             <Select value={selectedModel} onValueChange={handleModelSelect} onOpenChange={setIsModelDropdownOpen}>
-              <SelectTrigger className="bg-transparent border-0 hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-all duration-200 h-auto p-2 [&>svg]:hidden" aria-label="Select AI model">
-                <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+              <SelectTrigger className="bg-transparent border-0 hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-all duration-200 h-auto p-2 [&>svg]:hidden touch-manipulation" aria-label="Select AI model">
+                <div className="flex items-center justify-center gap-1 whitespace-nowrap pointer-events-none">
                   <span className="text-lg font-semibold">{selectedModelData?.shortLabel || 'ChatLearn'}</span>
                   {isModelDropdownOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
               </SelectTrigger>
-              <SelectContent className="z-[100] bg-background/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-2xl p-2 w-[calc(100vw-2rem)] max-w-[300px]" align="center">
+              <SelectContent className="z-[200] bg-background/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-2xl p-2 w-[calc(100vw-2rem)] max-w-[300px]" align="center" sideOffset={8}>
                 {availableModelsList.map(model => {
               const modelData = availableModels.find(m => m.id === model.id);
               // Check if user has Ultra subscription
