@@ -332,7 +332,7 @@ export default function Admin() {
         error: allProfilesError
       } = await supabase
         .from('profiles')
-        .select('user_id, email, display_name, signup_method, created_at, ip_address, country')
+        .select('user_id, email, display_name, signup_method, created_at, ip_address, country, avatar_url, oauth_provider, phone_number, gender, date_of_birth, locale, timezone, oauth_metadata')
         .order('created_at', { ascending: false });
       if (allProfilesError) throw allProfilesError;
       console.log('Total profiles (auth.users):', allProfilesData?.length);
