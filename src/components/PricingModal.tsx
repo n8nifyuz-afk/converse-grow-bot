@@ -389,7 +389,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <div className="flex-1 sm:flex-none sm:min-h-0"></div>
               
               {/* Footer */}
-              <div className="space-y-2 sm:space-y-1.5 flex-shrink-0 mt-auto sm:-mt-24">
+              <div className="space-y-2 sm:space-y-1.5 flex-shrink-0 mt-auto sm:-mt-32 md:-mt-24">
                 {/* Pay Safe & Secure */}
                 <div className="flex items-center justify-center gap-1.5 py-2 sm:py-1">
                   <Shield className="w-4 h-4 text-emerald-500" />
