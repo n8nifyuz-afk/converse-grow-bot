@@ -476,7 +476,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="max-h-[95vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700">
+          <DrawerContent className="max-h-[95vh] bg-gradient-to-br from-white via-zinc-50/50 to-white dark:from-zinc-950 dark:via-zinc-900/30 dark:to-zinc-950 border-t border-zinc-300 dark:border-zinc-700 relative">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-50"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
             <div className="overflow-y-auto max-h-[95vh]">
               {modalContent}
             </div>
