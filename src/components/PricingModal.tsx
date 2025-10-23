@@ -31,55 +31,55 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
     { 
       name: 'OpenAI – GPT-5 / GPT-4o', 
       included: true, 
-      description: 'Most advanced reasoning and creative models',
+      description: t('pricingModal.gptDesc'),
       proOnly: false
     },
     { 
       name: 'Google – Gemini', 
       included: true, 
-      description: 'Fast, multilingual model for everyday use',
+      description: t('pricingModal.geminiDesc'),
       proOnly: false
     },
     { 
       name: 'Anthropic – Claude 3.5', 
       included: plan === 'ultra', 
-      description: plan === 'ultra' ? 'Ideal for writing, summaries, and analysis' : 'Available only in Ultra',
+      description: plan === 'ultra' ? t('pricingModal.claudeDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
     },
     { 
       name: 'DeepSeek V3', 
       included: plan === 'ultra', 
-      description: plan === 'ultra' ? 'Logical and analytical AI for structured tasks' : 'Available only in Ultra',
+      description: plan === 'ultra' ? t('pricingModal.deepseekDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
     },
     { 
       name: 'Grok (X AI – Live Web)', 
       included: plan === 'ultra', 
-      description: plan === 'ultra' ? 'Real-time web access and trending insights' : 'Available only in Ultra',
+      description: plan === 'ultra' ? t('pricingModal.grokDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
     },
     { 
       name: 'Ask PDF / Docs AI', 
       included: true, 
-      description: 'Upload and chat with PDFs, Docs, and text files',
+      description: t('pricingModal.pdfDocsDesc'),
       proOnly: false
     },
     { 
       name: 'Voice Mode', 
       included: true, 
-      description: 'Talk to your AI naturally using voice',
+      description: t('pricingModal.voiceModeDesc'),
       proOnly: false
     },
     { 
       name: 'Priority Support', 
       included: true, 
-      description: plan === 'ultra' ? 'Faster help and responses from our team' : 'Standard priority support',
+      description: plan === 'ultra' ? t('pricingModal.prioritySupportDesc') : t('pricingModal.standardPrioritySupport'),
       proOnly: false
     },
     { 
       name: 'Chat on WhatsApp', 
       included: false, 
-      description: 'Mobile AI chat integration (coming soon)',
+      description: t('pricingModal.whatsappDesc'),
       proOnly: false
     },
   ];
@@ -224,9 +224,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <div className="flex-1 flex flex-col min-h-0 relative z-10">
                 {/* Header Row */}
                 <div className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 pb-3 md:pb-4 border-b border-zinc-300 dark:border-zinc-700 mb-2 flex-shrink-0">
-                  <div className="text-sm md:text-base font-bold text-zinc-900 dark:text-zinc-100">Model / Feature</div>
-                  <div className="text-sm md:text-base font-bold text-center text-zinc-900 dark:text-zinc-100">Included</div>
-                  <div className="text-sm md:text-base font-bold text-zinc-900 dark:text-zinc-100">Description / Notes</div>
+                  <div className="text-sm md:text-base font-bold text-zinc-900 dark:text-zinc-100">{t('pricingModal.modelFeature')}</div>
+                  <div className="text-sm md:text-base font-bold text-center text-zinc-900 dark:text-zinc-100">{t('pricingModal.included')}</div>
+                  <div className="text-sm md:text-base font-bold text-zinc-900 dark:text-zinc-100">{t('pricingModal.descriptionNotes')}</div>
                 </div>
                 
                 {/* Feature Rows */}
@@ -238,7 +238,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       </div>
                       <div className="flex justify-center items-center">
                         {feature.name === 'Chat on WhatsApp' ? (
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400">Coming soon</span>
+                          <span className="text-xs text-zinc-500 dark:text-zinc-400">{t('pricingModal.comingSoon')}</span>
                         ) : feature.included ? (
                           <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
                             <Check className="w-3 h-3 md:w-4 md:h-4 text-emerald-600 dark:text-emerald-400" />
@@ -253,7 +253,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                         {feature.name === 'Priority Support' && selectedPlan === 'ultra' ? (
                           <>
                             <Check className="w-3 h-3 md:w-4 md:h-4 text-emerald-600 dark:text-emerald-400 mr-1" />
-                            <span>(High-priority)</span>
+                            <span>{t('pricingModal.highPriority')}</span>
                             <span className="ml-1">{feature.description}</span>
                           </>
                         ) : (
@@ -307,7 +307,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">1 Month</div>
+                      <div className="font-semibold text-sm text-zinc-900 dark:text-white">{t('pricingModal.oneMonth')}</div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">
                         €{pricingOptions[selectedPlan].monthly.price}/{t('pricingModal.perMonth').toLowerCase()}
                       </div>
@@ -380,7 +380,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </>
                 ) : (
                   <>
-                    Continue
+                    {t('pricingModal.continue')}
                   </>
                 )}
               </Button>
@@ -390,7 +390,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 {/* Pay Safe & Secure */}
                 <div className="flex items-center justify-center gap-1.5 py-1">
                   <Shield className="w-4 h-4 text-emerald-500" />
-                  <span className="text-xs sm:text-sm font-medium text-emerald-500">Pay safe & secure</span>
+                  <span className="text-xs sm:text-sm font-medium text-emerald-500">{t('pricingModal.paySafeSecure')}</span>
                 </div>
                 
                 {/* Payment Cards */}
@@ -472,12 +472,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 </div>
 
                 <p className="text-[11px] sm:text-xs text-center text-zinc-400 dark:text-zinc-500 leading-relaxed px-2">
-                  By continuing an account, you agree to our{' '}
-                  <a href="https://www.chatl.ai/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Terms & Conditions</a>,{' '}
-                  <a href="https://www.chatl.ai/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Privacy Policy</a>,{' '}
-                  <a href="https://www.chatl.ai/cookies" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Cookie Policy</a>,{' '}
-                  and{' '}
-                  <a href="https://www.chatl.ai/refund-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">Refund & Cancellation Policy</a>.
+                  {t('pricingModal.byContinuing')}{' '}
+                  <a href="https://www.chatl.ai/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.termsConditions')}</a>,{' '}
+                  <a href="https://www.chatl.ai/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.privacyPolicy')}</a>,{' '}
+                  <a href="https://www.chatl.ai/cookies" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.cookiePolicy')}</a>,{' '}
+                  {t('pricingModal.and')}{' '}
+                  <a href="https://www.chatl.ai/refund-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">{t('pricingModal.refundCancellationPolicy')}</a>.
                 </p>
               </div>
             </div>
