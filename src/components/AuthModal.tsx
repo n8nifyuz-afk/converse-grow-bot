@@ -557,6 +557,7 @@ export default function AuthModal({
                           </>}
                       </Button>
 
+                      {/* Phone login temporarily disabled
                       <Button 
                         onClick={() => setMode('phone')} 
                         disabled={googleLoading || appleLoading || microsoftLoading || loading}
@@ -568,6 +569,7 @@ export default function AuthModal({
                         </svg>
                         Continue with Phone
                       </Button>
+                      */}
 
                       <div className="relative my-4">
                         <div className="absolute inset-0 flex items-center">
