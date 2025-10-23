@@ -218,40 +218,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Preferred language
         if (metadata?.preferredLanguage || metadata?.locale) {
           updateData.locale = metadata.preferredLanguage || metadata.locale;
-          console.log('✅ Extracted locale:', updateData.locale);
         }
-        
-        // Log all Microsoft fields
-        Object.entries(msFields).forEach(([key, value]) => {
-          if (value) console.log(`✅ Microsoft field: ${key} =`, value);
-        });
       }
       
-      // Apple-specific data
-      if (isAppleSignIn) {
-        console.log('🔍 Apple OAuth - Limited data due to Apple privacy (email + name only)');
-        if (metadata?.email) console.log('✅ Extracted email:', metadata.email);
-      }
-      
-      console.log('💾 Updating profile with fields:', Object.keys(updateData));
+      // Apple-specific data (limited due to Apple privacy)
       
       // Only update if there are changes
       if (Object.keys(updateData).length > 2 && currentProfile) { // More than just updated_at + oauth_provider
-        const { error } = await supabase
+        await supabase
           .from('profiles')
           .update(updateData)
           .eq('user_id', user.id);
-        
-        if (error) {
-          console.error('❌ Profile update error:', error);
-        } else {
-          console.log('✅ Profile updated successfully');
-        }
-      } else {
-        console.log('ℹ️ No profile changes detected');
       }
     } catch (error) {
-      console.warn('❌ OAuth profile sync error:', error);
+      // OAuth profile sync failed
     }
   };
 
