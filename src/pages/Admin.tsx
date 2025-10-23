@@ -876,6 +876,58 @@ export default function Admin() {
               <TabsContent value={planFilter} className="m-0">
                 {/* Mobile/Tablet Card Layout */}
                 <div className="lg:hidden">
+                  {/* Mobile Sort Controls */}
+                  <div className="border-b border-border/50 p-4 bg-muted/20">
+                    <p className="text-xs font-medium text-muted-foreground mb-3">Sort by:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant={sortField === 'name' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleSort('name')}
+                        className="h-9 text-xs gap-1.5"
+                      >
+                        Name
+                        {sortField === 'name' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                      </Button>
+                      <Button
+                        variant={sortField === 'email' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleSort('email')}
+                        className="h-9 text-xs gap-1.5"
+                      >
+                        Email
+                        {sortField === 'email' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                      </Button>
+                      <Button
+                        variant={sortField === 'plan' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleSort('plan')}
+                        className="h-9 text-xs gap-1.5"
+                      >
+                        Plan
+                        {sortField === 'plan' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                      </Button>
+                      <Button
+                        variant={sortField === 'cost' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleSort('cost')}
+                        className="h-9 text-xs gap-1.5"
+                      >
+                        Cost
+                        {sortField === 'cost' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                      </Button>
+                      <Button
+                        variant={sortField === 'registered' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleSort('registered')}
+                        className="h-9 text-xs gap-1.5"
+                      >
+                        Registered
+                        {sortField === 'registered' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                      </Button>
+                    </div>
+                  </div>
+
                   {paginatedUsers.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                       <Users className="h-16 w-16 opacity-10 mb-4" />
