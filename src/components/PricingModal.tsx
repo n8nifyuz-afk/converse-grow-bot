@@ -428,7 +428,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     </svg>
                   </div>
                   {/* Revolut */}
-                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center">
+                  <div className="w-10 h-7 sm:w-12 sm:h-8 flex items-center justify-center text-black">
                     <svg className="w-full h-full" viewBox="0 0 294.2 65" fill="none">
                       <path fillRule="evenodd" clipRule="evenodd" fill="currentColor" d="M200.7,0h11.6v64.5h-11.6V0z M294.2,27.2v-10h-11.9v-13h-11.6v47.5c0,4.4,1.1,7.7,3.3,9.9
                         c2.2,2.2,5.5,3.3,10,3.3h10.2v-10h-7.5c-1.6,0-2.8-0.4-3.5-1.1c-0.6-0.6-1-2.3-1-4.1V27.2L294.2,27.2z M122.2,51.9l11.9-34.8h12.1
