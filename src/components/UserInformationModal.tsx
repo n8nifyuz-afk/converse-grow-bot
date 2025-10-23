@@ -83,92 +83,114 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Comprehensive User Information
+      <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <User className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <span className="truncate">User Information</span>
           </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="device">Device & Browser</TabsTrigger>
-            <TabsTrigger value="activity">Activity Logs</TabsTrigger>
-            <TabsTrigger value="raw">Raw Data</TabsTrigger>
-          </TabsList>
+          <div className="border-b overflow-x-auto flex-shrink-0 px-2 sm:px-4">
+            <TabsList className="inline-flex w-auto min-w-full h-auto p-0 bg-transparent gap-0">
+              <TabsTrigger 
+                value="basic" 
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm whitespace-nowrap"
+              >
+                Basic
+              </TabsTrigger>
+              <TabsTrigger 
+                value="device"
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm whitespace-nowrap"
+              >
+                Device
+              </TabsTrigger>
+              <TabsTrigger 
+                value="activity"
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm whitespace-nowrap"
+              >
+                Activity
+              </TabsTrigger>
+              <TabsTrigger 
+                value="raw"
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm whitespace-nowrap"
+              >
+                Raw Data
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <ScrollArea className="flex-1 mt-4">
-            <TabsContent value="basic" className="space-y-4 p-1">
+          <ScrollArea className="flex-1">
+            <TabsContent value="basic" className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 mt-0">
               {/* Personal Information */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     Personal Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="space-y-3 p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Display Name</p>
-                      <p className="text-sm font-semibold">{userInfo.display_name || 'N/A'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Display Name</p>
+                      <p className="text-sm sm:text-base font-semibold truncate">{userInfo.display_name || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                        <Mail className="h-3 w-3 flex-shrink-0" />
                         Email
                       </p>
-                      <p className="text-sm font-semibold">{userInfo.email || 'N/A'}</p>
+                      <p className="text-sm sm:text-base font-semibold truncate">{userInfo.email || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Phone Number</p>
-                      <p className="text-sm">
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Phone Number</p>
+                      <p className="text-xs sm:text-sm">
                         {userInfo.phone_number || (
-                          <span className="text-muted-foreground italic">Not shared by OAuth provider</span>
+                          <span className="text-muted-foreground italic">Not shared</span>
                         )}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Gender</p>
-                      <p className="text-sm">
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Gender</p>
+                      <p className="text-xs sm:text-sm">
                         {userInfo.gender || (
-                          <span className="text-muted-foreground italic">Not shared by OAuth provider</span>
+                          <span className="text-muted-foreground italic">Not shared</span>
                         )}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
-                      <p className="text-sm">
-                        {userInfo.date_of_birth ? format(new Date(userInfo.date_of_birth), 'PPP') : (
-                          <span className="text-muted-foreground italic">Not shared by OAuth provider</span>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Date of Birth</p>
+                      <p className="text-xs sm:text-sm">
+                        {userInfo.date_of_birth ? format(new Date(userInfo.date_of_birth), 'PP') : (
+                          <span className="text-muted-foreground italic">Not shared</span>
                         )}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                        <Shield className="h-3 w-3" />
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                        <Shield className="h-3 w-3 flex-shrink-0" />
                         OAuth Provider
                       </p>
-                      <Badge variant="outline" className="capitalize">{userInfo.oauth_provider || 'email'}</Badge>
+                      <Badge variant="outline" className="capitalize text-xs">{userInfo.oauth_provider || 'email'}</Badge>
                     </div>
                   </div>
 
                   {userInfo.avatar_url && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Profile Picture</p>
+                    <div className="col-span-1 sm:col-span-2">
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Profile Picture</p>
                       <img 
                         src={userInfo.avatar_url} 
                         alt="Profile" 
-                        className="w-20 h-20 rounded-full border-2 border-primary/20 shadow-lg"
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-primary/20 shadow-lg"
                       />
                     </div>
                   )}
 
-                  <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-border">
-                    <p className="text-xs text-muted-foreground">
-                      <strong>Note:</strong> Phone number, gender, and date of birth are typically not shared by OAuth providers (Google, Apple, Microsoft) due to privacy policies. These fields can only be collected if users provide them directly through your application.
+                  <div className="col-span-1 sm:col-span-2 mt-2 p-2 sm:p-3 bg-muted/50 rounded-lg border border-border">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
+                      <strong>Note:</strong> Phone, gender, and birth date are typically not shared by OAuth providers due to privacy policies.
                     </p>
                   </div>
                 </CardContent>
@@ -176,43 +198,43 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
 
               {/* Location & Network */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     Location & Network
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="space-y-3 p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">IP Address</p>
-                      <p className="text-sm font-mono font-semibold">{userInfo.ip_address || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">IP Address</p>
+                      <p className="text-xs sm:text-sm font-mono font-semibold truncate">{userInfo.ip_address || 'Unknown'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                        <Globe className="h-3 w-3" />
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                        <Globe className="h-3 w-3 flex-shrink-0" />
                         Country
                       </p>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold">{getCountryName(userInfo.country)}</p>
+                        <p className="text-xs sm:text-sm font-semibold truncate">{getCountryName(userInfo.country)}</p>
                         {userInfo.country && (
-                          <Badge variant="secondary" className="text-xs">{userInfo.country.toUpperCase()}</Badge>
+                          <Badge variant="secondary" className="text-[10px] flex-shrink-0">{userInfo.country.toUpperCase()}</Badge>
                         )}
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                        <Clock className="h-3 w-3 flex-shrink-0" />
                         Timezone
                       </p>
-                      <p className="text-sm font-semibold">{userInfo.timezone || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-semibold truncate">{userInfo.timezone || 'Unknown'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                        <Languages className="h-3 w-3" />
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                        <Languages className="h-3 w-3 flex-shrink-0" />
                         Locale
                       </p>
-                      <p className="text-sm font-semibold">{userInfo.locale || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-semibold truncate">{userInfo.locale || 'Unknown'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -220,86 +242,86 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
 
               {/* Account Statistics */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-4 w-4" />
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Activity className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     Account Statistics
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="space-y-3 p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                        <Calendar className="h-3 w-3 flex-shrink-0" />
                         Account Created
                       </p>
-                      <p className="text-sm font-semibold">
-                        {userInfo.created_at ? format(new Date(userInfo.created_at), 'PPpp') : 'Unknown'}
+                      <p className="text-xs sm:text-sm font-semibold">
+                        {userInfo.created_at ? format(new Date(userInfo.created_at), 'PP p') : 'Unknown'}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                         {userInfo.created_at && `(${Math.floor((Date.now() - new Date(userInfo.created_at).getTime()) / (1000 * 60 * 60 * 24))} days ago)`}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Last Login</p>
-                      <p className="text-sm font-semibold">
-                        {userInfo.last_login_at ? format(new Date(userInfo.last_login_at), 'PPpp') : 'No login recorded'}
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Last Login</p>
+                      <p className="text-xs sm:text-sm font-semibold">
+                        {userInfo.last_login_at ? format(new Date(userInfo.last_login_at), 'PP p') : 'No login recorded'}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                         {userInfo.last_login_at && `(${Math.floor((Date.now() - new Date(userInfo.last_login_at).getTime()) / (1000 * 60 * 60))} hours ago)`}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Logins</p>
-                      <p className="text-2xl font-bold text-primary">{userInfo.login_count || 0}</p>
-                      <p className="text-xs text-muted-foreground mt-1">Login sessions</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Total Logins</p>
+                      <p className="text-xl sm:text-2xl font-bold text-primary">{userInfo.login_count || 0}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Login sessions</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Signup Method</p>
-                      <Badge variant="default" className="capitalize text-sm">{userInfo.signup_method || 'email'}</Badge>
-                      <p className="text-xs text-muted-foreground mt-2">Authentication provider</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Signup Method</p>
+                      <Badge variant="default" className="capitalize text-xs sm:text-sm">{userInfo.signup_method || 'email'}</Badge>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">Authentication provider</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="device" className="space-y-4 p-1">
+            <TabsContent value="device" className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 mt-0">
               {/* Browser Information */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Monitor className="h-4 w-4" />
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Monitor className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     Browser Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="space-y-3 p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Browser</p>
-                      <p className="text-sm">{browserInfo.browser || 'Unknown'} {browserInfo.browserVersion}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Browser</p>
+                      <p className="text-xs sm:text-sm truncate">{browserInfo.browser || 'Unknown'} {browserInfo.browserVersion}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Operating System</p>
-                      <p className="text-sm">{browserInfo.os || 'Unknown'} {browserInfo.osVersion}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Operating System</p>
+                      <p className="text-xs sm:text-sm truncate">{browserInfo.os || 'Unknown'} {browserInfo.osVersion}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Device Type</p>
-                      <Badge variant="outline">
-                        {browserInfo.isMobile ? <Smartphone className="h-3 w-3 mr-1" /> : <Monitor className="h-3 w-3 mr-1" />}
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Device Type</p>
+                      <Badge variant="outline" className="text-xs">
+                        {browserInfo.isMobile ? <Smartphone className="h-3 w-3 mr-1 flex-shrink-0" /> : <Monitor className="h-3 w-3 mr-1 flex-shrink-0" />}
                         {browserInfo.device || 'Unknown'}
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Platform</p>
-                      <p className="text-sm">{deviceInfo.platform || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Platform</p>
+                      <p className="text-xs sm:text-sm truncate">{deviceInfo.platform || 'Unknown'}</p>
                     </div>
                   </div>
 
                   {browserInfo.userAgent && (
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">User Agent</p>
-                      <p className="text-xs font-mono bg-muted p-2 rounded break-all">
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">User Agent</p>
+                      <p className="text-[10px] sm:text-xs font-mono bg-muted p-2 sm:p-2.5 rounded break-all leading-relaxed">
                         {browserInfo.userAgent}
                       </p>
                     </div>
@@ -309,58 +331,58 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
 
               {/* Device Specifications */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Smartphone className="h-4 w-4" />
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Smartphone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     Device Specifications
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="space-y-3 p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Screen Resolution</p>
-                      <p className="text-sm">{deviceInfo.screenResolution || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Screen Resolution</p>
+                      <p className="text-xs sm:text-sm truncate">{deviceInfo.screenResolution || 'Unknown'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Device Pixel Ratio</p>
-                      <p className="text-sm">{deviceInfo.devicePixelRatio || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Device Pixel Ratio</p>
+                      <p className="text-xs sm:text-sm truncate">{deviceInfo.devicePixelRatio || 'Unknown'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Color Depth</p>
-                      <p className="text-sm">{deviceInfo.colorDepth || 'Unknown'} bits</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Color Depth</p>
+                      <p className="text-xs sm:text-sm truncate">{deviceInfo.colorDepth || 'Unknown'} bits</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Touch Support</p>
-                      <Badge variant={deviceInfo.touchSupport ? "default" : "secondary"}>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Touch Support</p>
+                      <Badge variant={deviceInfo.touchSupport ? "default" : "secondary"} className="text-xs">
                         {deviceInfo.touchSupport ? 'Yes' : 'No'}
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">CPU Cores</p>
-                      <p className="text-sm">{deviceInfo.hardwareConcurrency || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">CPU Cores</p>
+                      <p className="text-xs sm:text-sm truncate">{deviceInfo.hardwareConcurrency || 'Unknown'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Device Memory</p>
-                      <p className="text-sm">{deviceInfo.deviceMemory ? `${deviceInfo.deviceMemory} GB` : 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Device Memory</p>
+                      <p className="text-xs sm:text-sm truncate">{deviceInfo.deviceMemory ? `${deviceInfo.deviceMemory} GB` : 'Unknown'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Cookies Enabled</p>
-                      <Badge variant={deviceInfo.cookiesEnabled ? "default" : "secondary"}>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Cookies Enabled</p>
+                      <Badge variant={deviceInfo.cookiesEnabled ? "default" : "secondary"} className="text-xs">
                         {deviceInfo.cookiesEnabled ? 'Yes' : 'No'}
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Do Not Track</p>
-                      <p className="text-sm">{deviceInfo.doNotTrack || 'Not set'}</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Do Not Track</p>
+                      <p className="text-xs sm:text-sm truncate">{deviceInfo.doNotTrack || 'Not set'}</p>
                     </div>
                   </div>
 
                   {deviceInfo.languages && deviceInfo.languages.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Preferred Languages</p>
-                      <div className="flex flex-wrap gap-1">
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Preferred Languages</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {deviceInfo.languages.map((lang: string, idx: number) => (
-                          <Badge key={idx} variant="outline" className="text-xs">{lang}</Badge>
+                          <Badge key={idx} variant="outline" className="text-[10px] sm:text-xs">{lang}</Badge>
                         ))}
                       </div>
                     </div>
@@ -369,30 +391,32 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
               </Card>
             </TabsContent>
 
-            <TabsContent value="activity" className="space-y-4 p-1">
+            <TabsContent value="activity" className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 mt-0">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-4 w-4" />
-                    Recent Activity
-                    <Badge variant="secondary" className="ml-auto">{activityLogs.length} events</Badge>
-                  </CardTitle>
-                  <CardDescription>
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                      <Activity className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      Recent Activity
+                    </CardTitle>
+                    <Badge variant="secondary" className="text-xs w-fit">{activityLogs.length} events</Badge>
+                  </div>
+                  <CardDescription className="text-xs sm:text-sm mt-2">
                     Track of user's actions and system events
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
                   {activityLogs.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2 sm:space-y-3">
                       {activityLogs.map((log, idx) => (
-                        <div key={idx} className="p-3 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <Badge variant="outline">{log.activity_type}</Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(log.created_at), 'PPpp')}
+                        <div key={idx} className="p-2.5 sm:p-3 border rounded-lg">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <Badge variant="outline" className="text-xs w-fit">{log.activity_type}</Badge>
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">
+                              {format(new Date(log.created_at), 'PP p')}
                             </span>
                           </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
                             {log.ip_address && (
                               <div>
                                 <span className="font-medium">IP:</span> {log.ip_address}
@@ -418,7 +442,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground text-center py-8">
+                    <p className="text-xs sm:text-sm text-muted-foreground text-center py-6 sm:py-8">
                       No activity logs available
                     </p>
                   )}
@@ -426,25 +450,25 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
               </Card>
             </TabsContent>
 
-            <TabsContent value="raw" className="space-y-4 p-1">
+            <TabsContent value="raw" className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 mt-0">
               <Card>
-                <CardHeader>
-                  <CardTitle>Raw OAuth Metadata</CardTitle>
-                  <CardDescription>Complete OAuth provider response data</CardDescription>
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-sm sm:text-base">Raw OAuth Metadata</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Complete OAuth provider response data</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <pre className="text-xs bg-muted p-4 rounded overflow-auto max-h-96">
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
+                  <pre className="text-[10px] sm:text-xs bg-muted p-2.5 sm:p-4 rounded overflow-auto max-h-64 sm:max-h-96">
                     {JSON.stringify(oauthMetadata, null, 2)}
                   </pre>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle>Complete Profile Data</CardTitle>
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <CardTitle className="text-sm sm:text-base">Complete Profile Data</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <pre className="text-xs bg-muted p-4 rounded overflow-auto max-h-96">
+                <CardContent className="p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
+                  <pre className="text-[10px] sm:text-xs bg-muted p-2.5 sm:p-4 rounded overflow-auto max-h-64 sm:max-h-96">
                     {JSON.stringify(userInfo, null, 2)}
                   </pre>
                 </CardContent>
