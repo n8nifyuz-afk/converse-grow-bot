@@ -123,24 +123,16 @@ serve(async (req) => {
       logStep("No existing customer, will create during checkout");
     }
 
-    // Determine target plan and actual price to charge
+    // Price IDs for Pro and Ultra Pro plans
     const proPriceId = 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'; // €19.99/month
     const ultraPriceId = 'price_1SKJAxL8Zm4LqDn43kl9BRd8'; // €39.99/month
-    const proTrialPriceId = 'price_1SLk5dL8Zm4LqDn4OKp1TLLK'; // Pro €0.99 one-time
-    const ultraTrialPriceId = 'price_1SLk6lL8Zm4LqDn4KFf5jbPP'; // Ultra €0.99 one-time
     
     const targetPlan = priceId === proPriceId ? 'pro' : 'ultra_pro';
-    
-    // For trials, use the €0.99/3-day price in checkout, then convert to monthly via schedule
-    const actualPriceId = isTrial 
-      ? (targetPlan === 'pro' ? proTrialPriceId : ultraTrialPriceId)
-      : priceId;
     
     logStep("Price details", { 
       isTrial, 
       targetPlan, 
-      requestedPriceId: priceId,
-      actualPriceId 
+      requestedPriceId: priceId
     });
 
     // Check if user has already used a trial
@@ -183,17 +175,17 @@ serve(async (req) => {
     // Redirect to main site after payment
     const mainSite = "https://www.chatl.ai";
     
-    // For trials: use payment mode (one-off), for regular: use subscription mode
+    // Always use subscription mode
     const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: actualPriceId,
+          price: priceId, // Always use the monthly subscription price
           quantity: 1,
         },
       ],
-      mode: isTrial ? "payment" : "subscription", // One-off payment for trials
+      mode: "subscription",
       success_url: `${mainSite}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${mainSite}`,
       payment_method_types: ['card'],
@@ -202,34 +194,54 @@ serve(async (req) => {
           request_three_d_secure: 'any',
         },
       },
+      subscription_data: {
+        metadata: {
+          plan: targetPlan,
+          user_id: user.id,
+        }
+      }
     };
     
-    // Add metadata for trial conversion
+    // For trials: add 3-day trial period + €0.99 upfront charge
     if (isTrial) {
       // Calculate renewal date (3 days from now)
       const renewalDate = new Date();
       renewalDate.setDate(renewalDate.getDate() + 3);
       const renewalDateStr = renewalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       
-      // Get the monthly price for display
-      const monthlyPrice = targetPlan === 'pro' ? '€19.99' : '€39.99';
-      
-      // Add metadata to payment session
-      sessionConfig.payment_intent_data = {
-        metadata: {
-          is_trial: 'true',
-          target_plan: targetPlan,
-          user_id: user.id,
-          monthly_price_id: priceId, // The monthly price to charge after 3 days
-          renewal_date: renewalDateStr
+      sessionConfig.subscription_data.trial_period_days = 3;
+      sessionConfig.subscription_data.trial_settings = {
+        end_behavior: {
+          missing_payment_method: 'cancel', // Cancel if no payment method after trial
         }
       };
       
-      logStep("Creating one-off trial payment", { 
+      // Add €0.99 invoice item charged immediately during trial
+      sessionConfig.add_invoice_items = [{
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: '3-Day Trial Access',
+            description: `Trial access to ${targetPlan === 'pro' ? 'Pro' : 'Ultra Pro'} plan`
+          },
+          unit_amount: 99, // €0.99 in cents
+        },
+        quantity: 1,
+      }];
+      
+      sessionConfig.subscription_data.metadata.is_trial = 'true';
+      sessionConfig.subscription_data.metadata.trial_end_date = renewalDateStr;
+      
+      logStep("Creating subscription with 3-day trial", { 
         targetPlan, 
-        trialPriceId: actualPriceId,
-        monthlyPriceId: priceId,
+        trialCharge: '€0.99',
+        monthlyPrice: priceId,
         renewalDate: renewalDateStr
+      });
+    } else {
+      logStep("Creating regular subscription (no trial)", { 
+        targetPlan, 
+        monthlyPrice: priceId
       });
     }
     
