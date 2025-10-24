@@ -216,8 +216,8 @@ serve(async (req) => {
         }
       };
       
-      // Add €0.99 invoice item charged immediately during trial
-      sessionConfig.add_invoice_items = [{
+      // Add €0.99 as a separate one-time line item charged immediately
+      sessionConfig.line_items.push({
         price_data: {
           currency: 'eur',
           product_data: {
@@ -227,7 +227,7 @@ serve(async (req) => {
           unit_amount: 99, // €0.99 in cents
         },
         quantity: 1,
-      }];
+      });
       
       sessionConfig.subscription_data.metadata.is_trial = 'true';
       sessionConfig.subscription_data.metadata.trial_end_date = renewalDateStr;
