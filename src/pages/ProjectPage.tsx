@@ -398,8 +398,7 @@ export default function ProjectPage() {
     
     // If Pro user tries to select Ultra model, show upgrade dialog
     if (subscriptionStatus.subscribed && selectedModelInfo?.type === 'ultra') {
-      const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
-      const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+      const hasUltra = subscriptionStatus.plan === 'ultra_pro';
       
       if (!hasUltra) {
         // User has Pro subscription, trying to use Ultra model
@@ -1133,8 +1132,7 @@ export default function ProjectPage() {
                     const modelData = availableModels.find(m => m.id === model.id);
                     const isSelected = selectedModel === model.id;
                     // Check if user has Ultra subscription
-                    const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
-                    const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+                    const hasUltra = subscriptionStatus.plan === 'ultra_pro';
                     
                     return (
                       <DropdownMenuItem 
@@ -1457,8 +1455,7 @@ export default function ProjectPage() {
                             {availableModelsList.map(model => {
                               const modelData = availableModels.find(m => m.id === model.id);
                               // Check if user has Ultra subscription
-                              const ultraProducts = ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U'];
-                              const hasUltra = subscriptionStatus.product_id && ultraProducts.includes(subscriptionStatus.product_id);
+                              const hasUltra = subscriptionStatus.plan === 'ultra_pro';
                               
                               // Disable pro/ultra models for free users
                               const isPro = model.type === 'pro';
