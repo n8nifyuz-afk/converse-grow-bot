@@ -204,14 +204,14 @@ serve(async (req) => {
           request_three_d_secure: 'any',
         },
       },
-      // Add metadata to track trial subscriptions and schedule cancellation
+      // Add metadata to track trial subscriptions
       subscription_data: isTrial ? {
-        cancel_at: Math.floor(Date.now() / 1000) + (3 * 24 * 60 * 60), // Cancel after 3 days
         metadata: {
           is_trial: 'true',
           target_plan: targetPlan,
           user_id: user.id,
-          trial_product_id: productId || ''
+          trial_product_id: productId || '',
+          trial_end_date: new Date(Date.now() + (3 * 24 * 60 * 60 * 1000)).toISOString()
         }
       } : undefined,
     });
