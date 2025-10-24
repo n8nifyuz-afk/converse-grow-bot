@@ -47,7 +47,7 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
       ultraOnly: true
     },
     { 
-      name: 'DeepSeek V3', 
+      name: 'DeepSeek V2', 
       included: plan === 'ultra', 
       description: plan === 'ultra' ? t('pricingModal.deepseekDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
