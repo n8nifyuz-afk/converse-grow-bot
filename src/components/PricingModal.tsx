@@ -376,11 +376,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                         <div className="font-bold text-xl sm:text-xl text-zinc-900">€0.99</div>
                       </div>
                     </button>
-                    {selectedPeriod === 'trial' && (
-                      <div className="text-xs text-zinc-600 px-2">
-                        After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -413,6 +408,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan]['3month'].price}</div>
                   </div>
                 </button>
+                {selectedPeriod === 'trial' && (
+                  <div className="text-xs text-zinc-600 px-2">
+                    After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
+                  </div>
+                )}
 
               </div>
 
