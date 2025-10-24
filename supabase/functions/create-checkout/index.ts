@@ -123,7 +123,7 @@ serve(async (req) => {
       logStep("No existing customer, will create during checkout");
     }
 
-    // Check if this is a trial subscription
+    // Check if this is a trial subscription by checking product ID
     const priceDetails = await stripe.prices.retrieve(priceId);
     const productId = typeof priceDetails.product === 'string' ? priceDetails.product : priceDetails.product?.id;
     const isTrial = productId === 'prod_TIHYThP5XmWyWy' || productId === 'prod_TIHZLvUNMqIiCj';
@@ -206,6 +206,7 @@ serve(async (req) => {
       },
       // Add metadata to track trial subscriptions
       subscription_data: isTrial ? {
+        cancel_at_period_end: true, // Auto-cancel after first period ends
         metadata: {
           is_trial: 'true',
           target_plan: targetPlan,
