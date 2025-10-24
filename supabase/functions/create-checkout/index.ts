@@ -123,20 +123,29 @@ serve(async (req) => {
       logStep("No existing customer, will create during checkout");
     }
 
-    // Check if this is a trial subscription
+    // Check if this is a trial request - detect by trial product IDs
     const priceDetails = await stripe.prices.retrieve(priceId);
     const productId = typeof priceDetails.product === 'string' ? priceDetails.product : priceDetails.product?.id;
-    const isTrial = productId === 'prod_TIHYThP5XmWyWy' || productId === 'prod_TIHZLvUNMqIiCj';
+    const isTrialRequest = productId === 'prod_TIHYThP5XmWyWy' || productId === 'prod_TIHZLvUNMqIiCj';
     const targetPlan = productId === 'prod_TIHYThP5XmWyWy' ? 'pro' : 'ultra_pro';
     
+    // If trial requested, use monthly price instead with trial_period_days
+    let finalPriceId = priceId;
+    if (isTrialRequest) {
+      finalPriceId = targetPlan === 'pro' 
+        ? 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'  // Pro Monthly €19.99
+        : 'price_1SKJAxL8Zm4LqDn43kl9BRd8'; // Ultra Pro Monthly €39.99
+    }
+    
     logStep("Price details", { 
-      isTrial, 
+      isTrialRequest, 
       targetPlan, 
-      productId: productId 
+      productId: productId,
+      finalPriceId 
     });
 
     // Check if user has already used a trial
-    if (isTrial) {
+    if (isTrialRequest) {
       // Check trial_conversions table for any trial usage
       const { data: existingTrial, error: trialCheckError } = await supabaseClient
         .from('trial_conversions')
@@ -191,31 +200,46 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: priceId,
+          price: finalPriceId, // Use monthly price for trials
           quantity: 1,
         },
       ],
       mode: "subscription",
       success_url: `${mainSite}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${mainSite}`,
+      automatic_tax: { enabled: true },
+      billing_address_collection: 'required',
+      tax_id_collection: { enabled: true },
+      payment_method_collection: 'always',
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
           request_three_d_secure: 'any',
         },
       },
-      // Add metadata to track trial subscriptions and schedule cancellation
-      subscription_data: isTrial ? {
-        cancel_at: Math.floor(Date.now() / 1000) + (3 * 24 * 60 * 60), // Cancel after 3 days
+      // Use Stripe's native trial for trial requests
+      subscription_data: isTrialRequest ? {
+        trial_period_days: 3,
+        payment_behavior: 'default_incomplete',
+        trial_settings: { 
+          end_behavior: { 
+            missing_payment_method: 'cancel' 
+          } 
+        },
         metadata: {
           is_trial: 'true',
-          target_plan: targetPlan,
+          plan: targetPlan,
           user_id: user.id,
           trial_product_id: productId || ''
         }
-      } : undefined,
+      } : {
+        metadata: {
+          plan: targetPlan,
+          user_id: user.id
+        }
+      },
     });
-    logStep("Checkout session created", { sessionId: session.id, isTrial });
+    logStep("Checkout session created", { sessionId: session.id, isTrialRequest });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
