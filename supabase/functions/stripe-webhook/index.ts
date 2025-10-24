@@ -230,17 +230,35 @@ serve(async (req) => {
         const plan = planMapping.tier;
         logStep("Determined plan", { plan, productId });
 
-        // CRITICAL FIX: If current_period_end is missing, fetch full subscription from Stripe
+        // CRITICAL FIX: Handle trial subscriptions and calculate correct period_end
         let periodEndTimestamp = highestTierSub.current_period_end;
         
-        if (!periodEndTimestamp || typeof periodEndTimestamp !== 'number') {
+        // Check if this is a trial subscription
+        const isTrial = highestTierSub.trial_end !== null;
+        
+        if (isTrial && highestTierSub.trial_end) {
+          // For trial subscriptions, use trial_end
+          periodEndTimestamp = highestTierSub.trial_end;
+          logStep("Trial subscription detected", { 
+            trialEnd: new Date(periodEndTimestamp * 1000).toISOString() 
+          });
+        } else if (!periodEndTimestamp || typeof periodEndTimestamp !== 'number') {
           logStep("Missing current_period_end, fetching full subscription", { 
             subscriptionId: highestTierSub.id 
           });
           
           try {
             const fullSubscription = await stripe.subscriptions.retrieve(highestTierSub.id);
-            periodEndTimestamp = fullSubscription.current_period_end;
+            
+            // Check trial_end first
+            if (fullSubscription.trial_end) {
+              periodEndTimestamp = fullSubscription.trial_end;
+              logStep("Using trial_end from full subscription", { 
+                trialEnd: new Date(periodEndTimestamp * 1000).toISOString() 
+              });
+            } else {
+              periodEndTimestamp = fullSubscription.current_period_end;
+            }
             
             // FALLBACK: Calculate from subscription creation date
             if (!periodEndTimestamp) {
@@ -258,6 +276,9 @@ serve(async (req) => {
                 periodEnd.setFullYear(periodEnd.getFullYear() + intervalCount);
               } else if (interval === 'month') {
                 periodEnd.setMonth(periodEnd.getMonth() + intervalCount);
+              } else if (interval === 'day') {
+                // Handle day intervals for trials
+                periodEnd.setDate(periodEnd.getDate() + intervalCount);
               }
               
               periodEndTimestamp = Math.floor(periodEnd.getTime() / 1000);
@@ -323,14 +344,66 @@ serve(async (req) => {
           currency: priceData.currency
         });
 
-        // CRITICAL FIX: Don't delete usage_limits on renewal/activation
-        // Let check_and_reset_usage_limits handle natural expiry and reset
-        // This prevents race conditions with other functions and cron jobs
-        // The DB function will create new period when old one expires
+        // CRITICAL: Create or update usage_limits for the subscription
+        const imageLimit = plan === 'ultra_pro' ? 2000 : plan === 'pro' ? 500 : 0;
         
-        logStep("Subscription activated, usage limits will reset naturally at period end", { 
+        if (imageLimit > 0) {
+          // Delete expired usage_limits first
+          await supabaseClient
+            .from('usage_limits')
+            .delete()
+            .eq('user_id', user.id)
+            .lt('period_end', new Date().toISOString());
+          
+          // Check if active usage_limits exist
+          const { data: existingLimits } = await supabaseClient
+            .from('usage_limits')
+            .select('*')
+            .eq('user_id', user.id)
+            .gt('period_end', new Date().toISOString())
+            .single();
+          
+          if (!existingLimits) {
+            // Create new usage_limits
+            const { error: limitsError } = await supabaseClient
+              .from('usage_limits')
+              .insert({
+                user_id: user.id,
+                period_start: new Date().toISOString(),
+                period_end: periodEndDate.toISOString(),
+                image_generations_used: 0,
+                image_generations_limit: imageLimit
+              });
+            
+            if (limitsError) {
+              logStep("ERROR: Failed to create usage_limits", { error: limitsError.message });
+            } else {
+              logStep("Created usage_limits", { userId: user.id, limit: imageLimit });
+            }
+          } else {
+            // Update existing limits
+            const { error: updateError } = await supabaseClient
+              .from('usage_limits')
+              .update({
+                image_generations_limit: imageLimit,
+                period_end: periodEndDate.toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id)
+              .gt('period_end', new Date().toISOString());
+            
+            if (updateError) {
+              logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
+            } else {
+              logStep("Updated usage_limits", { userId: user.id, limit: imageLimit });
+            }
+          }
+        }
+        
+        logStep("Subscription activated with usage limits", { 
           userId: user.id,
-          periodEnd: periodEndDate.toISOString()
+          periodEnd: periodEndDate.toISOString(),
+          imageLimit
         });
         break;
       }
