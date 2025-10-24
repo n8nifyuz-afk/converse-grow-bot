@@ -332,43 +332,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    <div className="flex-1">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.threeMonths')}</div>
-                      <div className="text-sm sm:text-xs text-zinc-500">
-                        €{pricingOptions[selectedPlan]['3month'].price} {t('pricingModal.total')}
-                      </div>
-                    </div>
-                    <div className="text-right ml-3">
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan]['3month'].perDay}</div>
-                      <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
-                    </div>
+                    <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.threeMonths')}</div>
+                    <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan]['3month'].price}</div>
                   </div>
                 </button>
 
-                <button
-                  onClick={() => setSelectedPeriod('yearly')}
-                  className={`w-full p-3.5 sm:p-3 pt-5 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
-                    selectedPeriod === 'yearly'
-                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
-                      : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                  }`}
-                >
-                  <Badge className="absolute -top-2 right-2 sm:right-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md px-2 py-0.5 text-[10px] font-bold border-0">
-                    {t('pricingModal.save')} {pricingOptions[selectedPlan].yearly.savings}%
-                  </Badge>
-                  <div className="flex justify-between items-center">
-                    <div className="flex-1">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.yearly')}</div>
-                      <div className="text-sm sm:text-xs text-zinc-500">
-                        €{pricingOptions[selectedPlan].yearly.price} {t('pricingModal.total')}
-                      </div>
-                    </div>
-                    <div className="text-right ml-3">
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].yearly.perDay}</div>
-                      <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
-                    </div>
-                  </div>
-                </button>
               </div>
 
               {/* Continue Button */}
