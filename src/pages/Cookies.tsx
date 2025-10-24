@@ -164,6 +164,15 @@ export default function Cookies() {
               <p className="text-muted-foreground">
                 When you first visit our Site, you may see a banner asking for your consent to use cookies.
               </p>
+              <p className="text-muted-foreground">
+                Our website uses Cookiebot by Usercentrics to manage cookie consent in compliance with the EU GDPR and ePrivacy Directive.
+              </p>
+              <p className="text-muted-foreground">
+                When you visit the Site, a consent banner powered by Cookiebot will appear, allowing you to accept, reject, or customize your cookie preferences at any time.
+              </p>
+              <p className="text-muted-foreground">
+                You can also change or withdraw your consent later by clicking the cookie icon at the bottom of the page.
+              </p>
               <div className="p-4 bg-muted/50 rounded-lg border">
                 <h3 className="font-semibold mb-3">Your Options:</h3>
                 <ul className="list-disc pl-6 space-y-2 text-sm text-muted-foreground">
@@ -194,7 +203,7 @@ export default function Cookies() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Some cookies are set by trusted third parties who help us analyze traffic and improve functionality.
               </p>
               <p className="font-semibold">These may include:</p>
@@ -205,6 +214,9 @@ export default function Cookies() {
               </ul>
               <p className="text-sm text-muted-foreground">
                 These providers may collect information like your IP address, browser type, or session details.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Cookie consent and logging are managed by Cookiebot (Usercentrics A/S, Denmark) to record and store your consent securely as required by EU law.
               </p>
               <div className="p-4 bg-muted/50 rounded-lg border mt-4">
                 <p className="font-semibold mb-3">Privacy Policies:</p>

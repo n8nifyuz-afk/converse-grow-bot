@@ -86,6 +86,29 @@ const RefundPolicy = () => {
             </CardContent>
           </Card>
 
+          {/* Paid Trial Policy */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                Paid Trial Policy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                ChatLearn offers a 3-day trial for €0.99, granting full access to all Pro features. After the 3-day trial, the plan renews automatically to a monthly subscription (€19.99/month) unless canceled before the renewal date.
+              </p>
+              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                <p className="font-semibold mb-2">Important:</p>
+                <ul className="list-disc pl-6 space-y-2 text-sm text-muted-foreground">
+                  <li>The €0.99 trial fee is non-refundable once the trial begins.</li>
+                  <li>Users may cancel anytime during the 3-day trial to prevent renewal.</li>
+                  <li>Cancellation after renewal will stop future payments, but no refunds will be issued for the trial or renewal period already started.</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* EU/UK/Cyprus Consumers */}
           <Card>
             <CardHeader>
@@ -179,6 +202,7 @@ const RefundPolicy = () => {
                 <li>The refund request is made more than 3 days after purchase</li>
                 <li>The account has already been used to access paid services</li>
                 <li>The subscription period has ended or expired</li>
+                <li>The €0.99 trial fee is non-refundable once the 3-day trial period begins</li>
               </ul>
               <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                 <p className="text-sm font-semibold mb-2 text-amber-700 dark:text-amber-400">Important Notice</p>
@@ -255,6 +279,9 @@ const RefundPolicy = () => {
               <p className="text-muted-foreground">
                 Users may cancel their subscription at any time through their account settings or by contacting our support team at{' '}
                 <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a>.
+              </p>
+              <p className="text-muted-foreground">
+                If your subscription began with a €0.99 3-day trial, canceling before the trial period ends will prevent automatic renewal. No refund is provided for the initial €0.99 trial payment.
               </p>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                 <li>Cancellations take effect at the end of the current billing period, and users will retain access to the service until that date.</li>

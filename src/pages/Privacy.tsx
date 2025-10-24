@@ -279,6 +279,7 @@ export default function Privacy() {
                 <li>{t('privacy.useItem6')}</li>
                 <li>{t('privacy.useItem7')}</li>
                 <li>{t('privacy.useItem8')}</li>
+                <li>Process billing, subscriptions, and renewals (including trial conversions).</li>
               </ul>
             </CardContent>
           </Card>
@@ -345,6 +346,9 @@ export default function Privacy() {
               <p className="text-sm text-muted-foreground">
                 {t('privacy.retentionNote')}
               </p>
+              <p className="text-sm text-muted-foreground">
+                Billing and subscription records (including trial start, renewal, and payment data) are retained securely as required for tax, compliance, and dispute resolution purposes.
+              </p>
             </CardContent>
           </Card>
 
@@ -395,6 +399,27 @@ export default function Privacy() {
             <CardContent>
               <p className="text-muted-foreground">
                 {t('privacy.paymentDesc')}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Trial and Subscription Payments */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                Trial and Subscription Payments
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                When you start a paid trial (€0.99 for 3 days), your payment information is securely processed by Stripe or PayPal.
+              </p>
+              <p className="text-muted-foreground">
+                After the 3-day trial period ends, your plan will automatically renew to a monthly subscription (€19.99/month) unless canceled before the renewal date.
+              </p>
+              <p className="text-muted-foreground">
+                No card or full payment data is stored on our servers. Stripe and PayPal handle all payment processing in compliance with PCI-DSS and EU regulations.
               </p>
             </CardContent>
           </Card>
