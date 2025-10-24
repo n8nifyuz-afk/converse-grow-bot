@@ -123,15 +123,24 @@ serve(async (req) => {
       logStep("No existing customer, will create during checkout");
     }
 
-    // Determine target plan from price ID
+    // Determine target plan and actual price to charge
     const proPriceId = 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'; // €19.99/month
     const ultraPriceId = 'price_1SKJAxL8Zm4LqDn43kl9BRd8'; // €39.99/month
+    const proTrialPriceId = 'price_1SLgzML8Zm4LqDn46ajkeXnj'; // Pro €0.99/3 days
+    const ultraTrialPriceId = 'price_1SLh0mL8Zm4LqDn47IgOIT5M'; // Ultra €0.99/3 days
+    
     const targetPlan = priceId === proPriceId ? 'pro' : 'ultra_pro';
+    
+    // For trials, use the €0.99/3-day price in checkout, then convert to monthly via schedule
+    const actualPriceId = isTrial 
+      ? (targetPlan === 'pro' ? proTrialPriceId : ultraTrialPriceId)
+      : priceId;
     
     logStep("Price details", { 
       isTrial, 
       targetPlan, 
-      priceId 
+      requestedPriceId: priceId,
+      actualPriceId 
     });
 
     // Check if user has already used a trial
@@ -179,7 +188,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: priceId,
+          price: actualPriceId, // Use €0.99/3-day price for trials, monthly price for regular
           quantity: 1,
         },
       ],
@@ -194,22 +203,23 @@ serve(async (req) => {
       },
     };
     
-    // Add trial configuration for subscription schedules
+    // Add metadata for trial conversion (NO trial_period_days - we charge €0.99 immediately)
     if (isTrial) {
       sessionConfig.subscription_data = {
-        trial_period_days: 3,
         metadata: {
           is_trial: 'true',
           needs_schedule_conversion: 'true',
           target_plan: targetPlan,
           user_id: user.id,
-          trial_price_id: targetPlan === 'pro' 
-            ? 'price_1SLgzML8Zm4LqDn46ajkeXnj'  // Pro €0.99/3 days
-            : 'price_1SLh0mL8Zm4LqDn47IgOIT5M', // Ultra €0.99/3 days
-          monthly_price_id: priceId
+          trial_price_id: actualPriceId, // The €0.99/3-day price being charged now
+          monthly_price_id: priceId // The monthly price to switch to after 3 days
         }
       };
-      logStep("Creating trial with schedule conversion", { targetPlan, priceId });
+      logStep("Creating trial with immediate €0.99 charge and schedule conversion", { 
+        targetPlan, 
+        trialPriceId: actualPriceId,
+        monthlyPriceId: priceId 
+      });
     }
     
     const session = await stripe.checkout.sessions.create(sessionConfig);
