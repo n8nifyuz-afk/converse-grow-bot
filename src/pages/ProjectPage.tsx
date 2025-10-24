@@ -231,6 +231,20 @@ export default function ProjectPage() {
         return chatgptLogoSrc;
     }
   };
+
+  // Helper function to get icon filter style for light mode
+  const getIconFilterStyle = (iconType: string) => {
+    if (actualTheme !== 'light') return {};
+    
+    switch (iconType) {
+      case 'deepseek':
+        return { filter: 'brightness(0) saturate(100%) invert(38%) sepia(98%) saturate(2618%) hue-rotate(221deg) brightness(98%) contrast(101%)' };
+      case 'grok':
+        return { filter: 'brightness(0)' };
+      default:
+        return {};
+    }
+  };
   
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -1145,9 +1159,14 @@ export default function ProjectPage() {
                         <div className="flex items-center w-full gap-3">
                           <div className="relative flex-shrink-0">
                             <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/20 backdrop-blur-sm rounded-xl flex items-center justify-center p-1.5">
-                              <img src={getModelIcon(modelData?.icon || 'openai')} alt={`${model.name} icon`} className="w-5 h-5 object-contain" />
+                              <img 
+                                src={getModelIcon(modelData?.icon || 'openai')} 
+                                alt={`${model.name} icon`} 
+                                className="w-5 h-5 object-contain"
+                                style={getIconFilterStyle(modelData?.icon || 'openai')}
+                              />
                             </div>
-                            {model.type === 'pro' && (
+                            {model.type === 'pro' && !subscriptionStatus.subscribed && (
                               <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
                                 PRO
                               </span>
@@ -1445,51 +1464,60 @@ export default function ProjectPage() {
                             <SelectValue>
                               <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg flex items-center justify-center">
-                                  <img src={getModelIcon(availableModels.find(m => m.id === selectedModel)?.icon || 'openai')} alt={`${models.find(m => m.id === selectedModel)?.name} icon`} className="w-4 h-4 object-contain" />
+                                  <img 
+                                    src={getModelIcon(availableModels.find(m => m.id === selectedModel)?.icon || 'openai')} 
+                                    alt={`${models.find(m => m.id === selectedModel)?.name} icon`} 
+                                    className="w-4 h-4 object-contain"
+                                    style={getIconFilterStyle(availableModels.find(m => m.id === selectedModel)?.icon || 'openai')}
+                                  />
                                 </div>
                                 <span className="font-medium truncate">{models.find(m => m.id === selectedModel)?.shortLabel}</span>
                               </div>
                             </SelectValue>
                           </SelectTrigger>
-                           <SelectContent className="z-[100] bg-background/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-2xl p-2 w-[calc(100vw-2rem)] max-w-[320px]">
+                          <SelectContent className="z-[100] bg-background/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-2xl p-2 w-[calc(100vw-2rem)] max-w-[320px]">
                             {availableModelsList.map(model => {
                               const modelData = availableModels.find(m => m.id === model.id);
+                              const isPro = model.type === 'pro';
+                              const isUltra = model.type === 'ultra';
+                              
                               // Check if user has Ultra subscription
                               const hasUltra = subscriptionStatus.plan === 'ultra_pro';
                               
-                              // Disable pro/ultra models for free users
-                              const isPro = model.type === 'pro';
-                              const isUltra = model.type === 'ultra';
-                              const isDisabled = (isPro && !subscriptionStatus.subscribed) || (isUltra && !hasUltra);
-                              
-                              return <SelectItem 
-                                key={model.id} 
-                                value={model.id}
-                                disabled={isDisabled}
-                                className={`rounded-xl px-3 py-3 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent/60 focus-visible:bg-accent/60 cursor-pointer'} transition-all duration-200`}
-                              >
-                                <div className="flex items-center w-full gap-3">
-                                  <div className="relative flex-shrink-0">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/20 backdrop-blur-sm rounded-xl flex items-center justify-center p-1.5">
-                                      <img src={getModelIcon(modelData?.icon || 'openai')} alt={`${model.name} icon`} className="w-5 h-5 object-contain" />
+                              return (
+                                <SelectItem 
+                                  key={model.id} 
+                                  value={model.id}
+                                  className="rounded-xl px-3 py-3 hover:bg-accent/60 focus-visible:bg-accent/60 cursor-pointer transition-all duration-200"
+                                >
+                                  <div className="flex items-center w-full gap-3">
+                                    <div className="relative flex-shrink-0">
+                                      <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/20 backdrop-blur-sm rounded-xl flex items-center justify-center p-1.5">
+                                        <img 
+                                          src={getModelIcon(modelData?.icon || 'openai')} 
+                                          alt={`${model.name} icon`} 
+                                          className="w-5 h-5 object-contain"
+                                          style={getIconFilterStyle(modelData?.icon || 'openai')}
+                                        />
+                                      </div>
+                                      {isPro && !subscriptionStatus.subscribed && (
+                                        <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
+                                          PRO
+                                        </span>
+                                      )}
+                                      {isUltra && !hasUltra && (
+                                        <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-purple-600 to-pink-600 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
+                                          ULTRA
+                                        </span>
+                                      )}
                                     </div>
-                                    {model.type === 'pro' && (
-                                      <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
-                                        PRO
-                                      </span>
-                                    )}
-                                    {model.type === 'ultra' && !hasUltra && (
-                                      <span className="absolute -top-1 -right-1 text-[8px] leading-none bg-gradient-to-r from-purple-600 to-pink-600 text-white px-1 py-0.5 rounded-full font-bold shadow-md">
-                                        ULTRA
-                                      </span>
-                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-semibold text-sm text-foreground truncate">{model.name}</div>
+                                      <div className="text-xs text-muted-foreground mt-0.5 truncate">{model.description}</div>
+                                    </div>
                                   </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-sm">{model.name}</div>
-                                    <div className="text-xs text-muted-foreground mt-0.5">{model.description}</div>
-                                  </div>
-                                </div>
-                              </SelectItem>;
+                                </SelectItem>
+                              );
                             })}
                           </SelectContent>
                         </Select>
