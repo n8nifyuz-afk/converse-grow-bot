@@ -85,6 +85,39 @@ export type Database = {
           },
         ]
       }
+      email_verifications: {
+        Row: {
+          code: string
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          password_hash: string
+          updated_at: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          password_hash: string
+          updated_at?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       image_analyses: {
         Row: {
           analysis: string
@@ -628,6 +661,7 @@ export type Database = {
           reset_date: string
         }[]
       }
+      cleanup_expired_verifications: { Args: never; Returns: undefined }
       delete_user_account: { Args: never; Returns: undefined }
       get_misplaced_generated_images: {
         Args: never

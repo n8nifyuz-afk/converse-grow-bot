@@ -68,4 +68,12 @@ verify_jwt = false
 [functions.send-welcome-email]
 verify_jwt = false
 
+# Verification code sender (public for signup flow)
+[functions.send-verification-code]
+verify_jwt = false
+
+# Email code verification (public for signup flow)
+[functions.verify-email-code]
+verify_jwt = false
+
 

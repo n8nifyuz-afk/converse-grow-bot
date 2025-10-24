@@ -24,7 +24,9 @@ export default function AuthModal({
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
-  const [mode, setMode] = useState<'signin' | 'signup' | 'reset' | 'phone' | 'verify'>('signin');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'reset' | 'phone' | 'verify' | 'verify-email'>('signin');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
@@ -136,68 +138,77 @@ export default function AuthModal({
     const now = Date.now();
     const timeSinceLastAttempt = now - lastSignupAttempt;
     if (timeSinceLastAttempt < 60000) {
-      // 60 seconds = 1 minute
       const remainingSeconds = Math.ceil((60000 - timeSinceLastAttempt) / 1000);
       setSignupCooldown(remainingSeconds);
       toast({
         title: "Please wait",
-        description: `You can request a new sign up link in ${remainingSeconds} seconds`,
+        description: `You can request a new verification code in ${remainingSeconds} seconds`,
         variant: "destructive"
       });
       return;
     }
+    
     setLoading(true);
     try {
-      const {
-        error
-      } = await signUp(email, password, '');
-      if (!error) {
+      // Call edge function to send verification code
+      const { error } = await supabase.functions.invoke('send-verification-code', {
+        body: { email, password }
+      });
+
+      if (error) {
+        toast({
+          title: "Sign up failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
         setLastSignupAttempt(now);
         setSignupCooldown(60);
-        
-        // Track registration complete in GTM
-        trackRegistrationComplete();
+        setPendingEmail(email);
+        setMode('verify-email');
         
         toast({
           title: "Check your email",
-          description: "We've sent you a confirmation link to complete your sign up. Please check your inbox.",
+          description: "We've sent a 6-digit verification code to your email.",
           duration: 8000
         });
+      }
+    } catch (error) {
+      toast({
+        title: "An error occurred",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyEmailCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingEmail || !verificationCode) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-email-code', {
+        body: { email: pendingEmail, code: verificationCode }
+      });
+
+      if (error) {
+        toast({
+          title: "Verification failed",
+          description: error.message,
+          variant: "destructive"
+        });
       } else {
-        // Check if password setup email was sent for OAuth account
-        if (error.code === 'password_setup_sent') {
-          toast({
-            title: "Check your email",
-            description: error.message,
-            duration: 10000
-          });
-          setEmail('');
-          setPassword('');
-          setMode('signin');
-        } else if (error.code === 'oauth_account_exists') {
-          toast({
-            title: "Account exists with different sign-in method",
-            description: error.message,
-            variant: "destructive",
-            duration: 10000
-          });
-          // Switch to sign in mode so they can see OAuth buttons
-          setMode('signin');
-        } else if (error.message?.toLowerCase().includes('already registered') || error.message?.toLowerCase().includes('user already registered')) {
-          toast({
-            title: "Account already exists",
-            description: "This email is already registered. Please sign in instead.",
-            variant: "destructive"
-          });
-          // Switch to sign in mode
-          setMode('signin');
-        } else {
-          toast({
-            title: "Sign up failed",
-            description: error.message,
-            variant: "destructive"
-          });
-        }
+        toast({
+          title: "Success!",
+          description: "Your email has been verified. Please sign in.",
+          duration: 5000
+        });
+        setMode('signin');
+        setVerificationCode('');
+        setPendingEmail('');
       }
     } catch (error) {
       toast({
@@ -508,6 +519,36 @@ export default function AuthModal({
                       Change number
                     </button>
                   </div>
+                </form> : mode === 'verify-email' ? <form onSubmit={handleVerifyEmailCode} className="space-y-4">
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Enter the 6-digit code sent to {pendingEmail}
+                  </div>
+                  <Input 
+                    type="text" 
+                    placeholder="000000" 
+                    value={verificationCode} 
+                    onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                    required 
+                    className="h-11 md:h-12 text-base text-center text-xl tracking-widest"
+                    maxLength={6}
+                  />
+                  {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                     {error}
+                   </div>}
+                  <Button type="submit" disabled={loading || verificationCode.length !== 6} className="w-full h-11 md:h-12 text-base">
+                    {loading ? <>
+                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                        Verifying...
+                      </> : 'Verify Email'}
+                  </Button>
+                  <button type="button" onClick={() => {
+            setMode('signup');
+            setVerificationCode('');
+            setPendingEmail('');
+            setError('');
+          }} className="text-sm text-primary hover:underline">
+                    ← Back to sign up
+                  </button>
                 </form> : <>
                   {!showPassword && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
