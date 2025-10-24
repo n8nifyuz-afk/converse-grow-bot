@@ -126,8 +126,8 @@ serve(async (req) => {
     // Determine target plan and actual price to charge
     const proPriceId = 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'; // €19.99/month
     const ultraPriceId = 'price_1SKJAxL8Zm4LqDn43kl9BRd8'; // €39.99/month
-    const proTrialPriceId = 'price_1SLgzML8Zm4LqDn46ajkeXnj'; // Pro €0.99/3 days
-    const ultraTrialPriceId = 'price_1SLh0mL8Zm4LqDn47IgOIT5M'; // Ultra €0.99/3 days
+    const proTrialPriceId = 'price_1SLk5dL8Zm4LqDn4OKp1TLLK'; // Pro €0.99 one-time
+    const ultraTrialPriceId = 'price_1SLk6lL8Zm4LqDn4KFf5jbPP'; // Ultra €0.99 one-time
     
     const targetPlan = priceId === proPriceId ? 'pro' : 'ultra_pro';
     
