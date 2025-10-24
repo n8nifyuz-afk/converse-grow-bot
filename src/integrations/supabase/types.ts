@@ -401,6 +401,42 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_conversions: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          paid_subscription_id: string | null
+          target_plan: string
+          trial_product_id: string
+          trial_subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          paid_subscription_id?: string | null
+          target_plan: string
+          trial_product_id: string
+          trial_subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          paid_subscription_id?: string | null
+          target_plan?: string
+          trial_product_id?: string
+          trial_subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_limits: {
         Row: {
           created_at: string

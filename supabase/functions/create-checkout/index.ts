@@ -123,6 +123,17 @@ serve(async (req) => {
       logStep("No existing customer, will create during checkout");
     }
 
+    // Check if this is a trial subscription
+    const priceDetails = await stripe.prices.retrieve(priceId);
+    const isTrial = priceDetails.product === 'prod_TIHYThP5XmWyWy' || priceDetails.product === 'prod_TIHZLvUNMqIiCj';
+    const targetPlan = priceDetails.product === 'prod_TIHYThP5XmWyWy' ? 'pro' : 'ultra_pro';
+    
+    logStep("Price details", { 
+      isTrial, 
+      targetPlan, 
+      productId: priceDetails.product 
+    });
+
     // Redirect to main site after payment
     const mainSite = "https://www.chatl.ai";
     
@@ -144,8 +155,17 @@ serve(async (req) => {
           request_three_d_secure: 'any',
         },
       },
+      // Add metadata to track trial subscriptions
+      subscription_data: isTrial ? {
+        metadata: {
+          is_trial: 'true',
+          target_plan: targetPlan,
+          user_id: user.id,
+          trial_product_id: priceDetails.product
+        }
+      } : undefined,
     });
-    logStep("Checkout session created", { sessionId: session.id });
+    logStep("Checkout session created", { sessionId: session.id, isTrial });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
