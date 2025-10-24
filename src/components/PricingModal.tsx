@@ -331,7 +331,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 gap-4 sm:gap-0">
               <div className="mb-2 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -420,7 +420,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-3 sm:mb-4"
+                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mt-auto mb-3 sm:mb-4"
               >
                 {isLoading ? (
                   <>
@@ -537,7 +537,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="max-h-[90vh] h-auto bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
+          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
             {modalContent}
           </DrawerContent>
         </Drawer>
