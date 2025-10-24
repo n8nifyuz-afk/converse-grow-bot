@@ -77,16 +77,22 @@ export default function ChatSidebar({
     subscriptionStatus
   } = useAuth();
   
-  // Product ID to plan name mapping
-  const productToPlanMap: { [key: string]: string } = {
-    'prod_TDSeCiQ2JEFnWB': 'Pro',
-    'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
+  // Get current plan name from subscription status
+  const getPlanDisplayName = () => {
+    if (!subscriptionStatus?.subscribed || !subscriptionStatus?.plan) {
+      return 'Free';
+    }
+    
+    // Map plan tier to display name
+    const planMap: { [key: string]: string } = {
+      'pro': 'Pro',
+      'ultra_pro': 'Ultra Pro'
+    };
+    
+    return planMap[subscriptionStatus.plan] || 'Pro';
   };
   
-  // Get current plan name
-  const currentPlan = subscriptionStatus?.subscribed && subscriptionStatus?.product_id
-    ? productToPlanMap[subscriptionStatus.product_id] || 'Pro'
-    : 'Free';
+  const currentPlan = getPlanDisplayName();
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;

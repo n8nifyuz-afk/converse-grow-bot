@@ -15,6 +15,8 @@ interface AuthContextType {
     subscribed: boolean;
     product_id: string | null;
     subscription_end: string | null;
+    plan: string | null;
+    plan_name: string | null;
   };
   showPricingModal: boolean;
   setShowPricingModal: (show: boolean) => void;
@@ -77,7 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [subscriptionStatus, setSubscriptionStatus] = useState(cachedStatus || {
     subscribed: false,
     product_id: null,
-    subscription_end: null
+    subscription_end: null,
+    plan: null,
+    plan_name: null
   });
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
@@ -302,7 +306,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSubscriptionStatus({
             subscribed: false,
             product_id: null,
-            subscription_end: null
+            subscription_end: null,
+            plan: null,
+            plan_name: null
           });
           clearCachedSubscription();
           
@@ -749,11 +755,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('status', 'active')
           .maybeSingle();
         
-        if (!dbError && dbSub) {
+        if (!dbError && dbSub && new Date(dbSub.current_period_end) > new Date()) {
           const newStatus = {
             subscribed: true,
             product_id: dbSub.product_id,
-            subscription_end: dbSub.current_period_end
+            subscription_end: dbSub.current_period_end,
+            plan: dbSub.plan,
+            plan_name: dbSub.plan_name
           };
           setSubscriptionStatus(newStatus);
           saveCachedSubscription(newStatus);
@@ -762,7 +770,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const resetStatus = {
             subscribed: false,
             product_id: null,
-            subscription_end: null
+            subscription_end: null,
+            plan: null,
+            plan_name: null
           };
           setSubscriptionStatus(resetStatus);
           clearCachedSubscription();
@@ -796,17 +806,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const resetStatus = {
           subscribed: false,
           product_id: null,
-          subscription_end: null
+          subscription_end: null,
+          plan: null,
+          plan_name: null
         };
         setSubscriptionStatus(resetStatus);
         clearCachedSubscription();
         checkAndShowPricingModal(resetStatus);
       } else if (data) {
+        // If Stripe check passed, get full details from database
+        const { data: dbSub } = await supabase
+          .from('user_subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+        
         const previousSubscribed = subscriptionStatus.subscribed;
         const newStatus = {
           subscribed: data.subscribed || false,
           product_id: data.product_id || null,
-          subscription_end: data.subscription_end || null
+          subscription_end: data.subscription_end || null,
+          plan: dbSub?.plan || null,
+          plan_name: dbSub?.plan_name || null
         };
         
         setSubscriptionStatus(newStatus);
@@ -879,7 +901,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const resetStatus = {
         subscribed: false,
         product_id: null,
-        subscription_end: null
+        subscription_end: null,
+        plan: null,
+        plan_name: null
       };
       setSubscriptionStatus(resetStatus);
       clearCachedSubscription();
@@ -897,7 +921,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const resetStatus = {
       subscribed: false,
       product_id: null,
-      subscription_end: null
+      subscription_end: null,
+      plan: null,
+      plan_name: null
     };
     setSubscriptionStatus(resetStatus);
     clearCachedSubscription();
