@@ -380,12 +380,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     }`}
                   >
                     <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access for €0.99</div>
-                        <div className="text-sm sm:text-xs text-zinc-500">
-                          Then €{selectedPlan === 'pro' ? '19.99' : '39.99'}/{t('pricingModal.perMonth').toLowerCase()}
-                        </div>
-                      </div>
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€0.99</div>
                     </div>
                   </button>
                   <div className="text-xs text-zinc-600 px-2">
