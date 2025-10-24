@@ -235,7 +235,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 
                 {/* Feature Rows */}
                 <div className="flex-1 space-y-0 overflow-y-auto">
-                  {allFeatures.map((feature, index) => (
+                  {allFeatures.filter(feature => selectedPlan === 'ultra' || !feature.ultraOnly).map((feature, index) => (
                     <div key={index} className="grid grid-cols-[2fr,0.8fr,2.5fr] gap-3 md:gap-4 py-2 md:py-2.5 px-2 md:px-3 rounded-lg hover:bg-zinc-100 transition-all duration-200 backdrop-blur-sm border border-transparent hover:border-zinc-300">
                       <div className="text-xs md:text-sm font-semibold text-zinc-900 flex items-center leading-tight">
                         {feature.name}
