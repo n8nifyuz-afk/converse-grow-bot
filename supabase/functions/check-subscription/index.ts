@@ -98,12 +98,25 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    // Fetch ALL active subscriptions to handle upgrade scenarios
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 10, // Get multiple subscriptions in case user upgraded
-    });
+    // Fetch ALL active and trialing subscriptions to handle upgrade scenarios
+    // IMPORTANT: Include "trialing" status to recognize trial subscriptions
+    const allSubscriptions = await Promise.all([
+      stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 10,
+      }),
+      stripe.subscriptions.list({
+        customer: customerId,
+        status: "trialing",
+        limit: 10,
+      })
+    ]);
+    
+    // Combine both active and trialing subscriptions
+    const subscriptions = {
+      data: [...allSubscriptions[0].data, ...allSubscriptions[1].data]
+    };
     
     logStep("Found active subscriptions", { count: subscriptions.data.length });
     
