@@ -372,25 +372,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
                 <button
                   onClick={() => setSelectedPeriod('trial')}
-                  className={`w-full p-3.5 sm:p-3 pt-5 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
+                  className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
                     selectedPeriod === 'trial'
                       ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
                       : 'border-zinc-200 hover:border-zinc-300 bg-white'
                   }`}
                 >
-                  <Badge className="absolute -top-2 right-2 sm:right-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md px-2 py-0.5 text-[10px] font-bold border-0">
-                    3-Day Trial
-                  </Badge>
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">Try 3 Days</div>
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access for €0.99</div>
                       <div className="text-sm sm:text-xs text-zinc-500">
-                        €0.99 then €{selectedPlan === 'pro' ? '19.99' : '39.99'}/{t('pricingModal.perMonth').toLowerCase()}
+                        Then €{selectedPlan === 'pro' ? '19.99' : '39.99'}/{t('pricingModal.perMonth').toLowerCase()}
                       </div>
-                    </div>
-                    <div className="text-right ml-3">
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].trial.perDay}</div>
-                      <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
                 </button>
@@ -400,7 +393,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-12 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-base sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-4 sm:mb-4"
+                className="w-full h-12 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-base sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-2"
               >
                 {isLoading ? (
                   <>
@@ -413,6 +406,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </>
                 )}
               </Button>
+              
+              {/* Trial auto-renewal notice */}
+              {selectedPeriod === 'trial' && (
+                <div className="text-xs text-center text-zinc-600 mb-4 px-2">
+                  After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
+                </div>
+              )}
 
               {/* Footer */}
               <div className="space-y-2 sm:space-y-1 flex-shrink-0">
