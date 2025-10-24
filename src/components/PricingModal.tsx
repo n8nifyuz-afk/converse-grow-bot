@@ -340,7 +340,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-2 sm:mb-2.5 flex-shrink-0">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-5 sm:mb-2.5 flex-shrink-0">
                 <TabsList className="grid w-full grid-cols-2 h-9 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
@@ -360,7 +360,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-2 sm:space-y-2 mb-3 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
+              <div className="space-y-4 sm:space-y-2 mb-5 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
@@ -420,7 +420,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-6 sm:mb-4"
+                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-8 sm:mb-4"
               >
                 {isLoading ? (
                   <>
