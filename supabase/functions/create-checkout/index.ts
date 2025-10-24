@@ -194,6 +194,9 @@ serve(async (req) => {
           request_three_d_secure: 'any',
         },
       },
+      automatic_tax: {
+        enabled: true,
+      },
       subscription_data: {
         metadata: {
           plan: targetPlan,
