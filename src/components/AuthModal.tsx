@@ -419,9 +419,6 @@ export default function AuthModal({
   const authContent = <div className="flex flex-col min-h-[320px] md:min-h-[420px]">
           {/* Auth Form */}
           <div className="w-full p-4 md:p-6 flex flex-col">
-            {/* Powered By */}
-            
-
             {/* Main Heading */}
             <div className="mb-6 md:mb-7 text-center">
               <h2 className="text-2xl md:text-3xl font-bold leading-tight">
@@ -519,34 +516,105 @@ export default function AuthModal({
                       Change number
                     </button>
                   </div>
-                </form> : mode === 'verify-email' ? <form onSubmit={handleVerifyEmailCode} className="space-y-4">
-                  <div className="text-sm text-muted-foreground mb-4">
-                    Enter the 6-digit code sent to {pendingEmail}
+                </form> : mode === 'verify-email' ? <form onSubmit={handleVerifyEmailCode} className="space-y-6">
+                  {/* Header with icon */}
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                      <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold mb-1">Verify Your Email</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Enter the 6-digit code sent to<br/>
+                        <span className="font-medium text-foreground">{pendingEmail}</span>
+                      </p>
+                    </div>
                   </div>
-                  <Input 
-                    type="text" 
-                    placeholder="000000" 
-                    value={verificationCode} 
-                    onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
-                    required 
-                    className="h-11 md:h-12 text-base text-center text-xl tracking-widest"
-                    maxLength={6}
-                  />
-                  {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+
+                  {/* 6-digit code input with individual boxes */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-center gap-2">
+                      {[0, 1, 2, 3, 4, 5].map((index) => (
+                        <input
+                          key={index}
+                          id={`code-${index}`}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={verificationCode[index] || ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            if (value) {
+                              const newCode = verificationCode.split('');
+                              newCode[index] = value;
+                              setVerificationCode(newCode.join(''));
+                              // Auto-focus next input
+                              if (index < 5) {
+                                document.getElementById(`code-${index + 1}`)?.focus();
+                              }
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
+                              document.getElementById(`code-${index - 1}`)?.focus();
+                            }
+                          }}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                            setVerificationCode(pastedData);
+                            if (pastedData.length === 6) {
+                              document.getElementById('code-5')?.focus();
+                            }
+                          }}
+                          className="w-12 h-14 text-center text-2xl font-bold rounded-lg border-2 border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                          required
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Resend code option */}
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (signupCooldown === 0) {
+                            handleSignUp(new Event('submit') as any);
+                          }
+                        }}
+                        disabled={signupCooldown > 0}
+                        className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+                      >
+                        {signupCooldown > 0 
+                          ? `Resend code in ${signupCooldown}s` 
+                          : "Didn't receive the code? Resend"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && <div className="text-sm text-destructive bg-destructive/10 px-4 py-3 rounded-lg border border-destructive/20">
                      {error}
                    </div>}
-                  <Button type="submit" disabled={loading || verificationCode.length !== 6} className="w-full h-11 md:h-12 text-base">
+                  
+                  <Button 
+                    type="submit" 
+                    disabled={loading || verificationCode.length !== 6} 
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all"
+                  >
                     {loading ? <>
                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                         Verifying...
                       </> : 'Verify Email'}
                   </Button>
+                  
                   <button type="button" onClick={() => {
             setMode('signup');
             setVerificationCode('');
             setPendingEmail('');
             setError('');
-          }} className="text-sm text-primary hover:underline">
+          }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
                     ← Back to sign up
                   </button>
                 </form> : <>
@@ -597,20 +665,6 @@ export default function AuthModal({
                             Continue with Microsoft
                           </>}
                       </Button>
-
-                      {/* Phone login temporarily disabled
-                      <Button 
-                        onClick={() => setMode('phone')} 
-                        disabled={googleLoading || appleLoading || microsoftLoading || loading}
-                        variant="outline" 
-                        className="w-full h-11 md:h-12 mb-4 border-2 border-gray-400 dark:border-gray-600 text-base"
-                      >
-                        <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                        </svg>
-                        Continue with Phone
-                      </Button>
-                      */}
 
                       <div className="relative my-4">
                         <div className="absolute inset-0 flex items-center">
