@@ -602,7 +602,7 @@ serve(async (req) => {
                 <html>
                   <head>
                     <meta charset="UTF-8">
-                    <title>Payment Confirmed - Chatl.ai</title>
+                    <title>Payment Confirmed - ChatLearn</title>
                   </head>
                   <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 40px;">
                     <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto;">
@@ -612,10 +612,10 @@ serve(async (req) => {
                         <td style="padding-bottom: 30px;">
                           <a href="https://www.chatl.ai" target="_blank" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center;">
                             <img src="https://chatl.ai/favicon.png"
-                                 alt="Chatl.ai Logo"
+                                 alt="ChatLearn Logo"
                                  width="40" height="40"
                                  style="display: inline-block; vertical-align: middle; margin-right: 10px;">
-                            <span style="font-size: 28px; font-weight: 700; vertical-align: middle;">Chatl.ai</span>
+                            <span style="font-size: 28px; font-weight: 700; vertical-align: middle;">ChatLearn</span>
                           </a>
                         </td>
                       </tr>
@@ -674,7 +674,7 @@ serve(async (req) => {
                                style="display: inline-block; background-color: #10a37f; color: #ffffff; 
                                       text-decoration: none; font-weight: 600; padding: 12px 24px; 
                                       border-radius: 6px;">
-                              Start Using ChatL Pro
+                              Start Using ChatLearn Pro
                             </a>
                           </p>
 
@@ -684,7 +684,7 @@ serve(async (req) => {
 
                           <p style="font-size: 15px; margin-top: 30px;">
                             Best,<br>
-                            The Chatl.ai Team
+                            The ChatLearn Team
                           </p>
                         </td>
                       </tr>
