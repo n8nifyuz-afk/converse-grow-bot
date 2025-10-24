@@ -384,6 +384,22 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 )}
 
+                {!isTrialEligible && !checkingEligibility && (
+                  <button
+                    onClick={() => setSelectedPeriod('monthly')}
+                    className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
+                      selectedPeriod === 'monthly'
+                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
+                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.monthly')}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].monthly.price}</div>
+                    </div>
+                  </button>
+                )}
+
                 <button
                   onClick={() => setSelectedPeriod('3month')}
                   className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
