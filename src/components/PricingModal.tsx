@@ -331,8 +331,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 gap-2 sm:gap-0">
-              <div className="mb-1.5 sm:mb-2.5 flex-shrink-0">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0">
+              <div className="mb-2 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
                 </h2>
@@ -340,7 +340,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-1.5 sm:mb-2.5 flex-shrink-0">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-2 sm:mb-2.5 flex-shrink-0">
                 <TabsList className="grid w-full grid-cols-2 h-9 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
@@ -360,7 +360,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-1.5 sm:space-y-2 mb-1.5 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
+              <div className="space-y-2 sm:space-y-2 mb-3 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
@@ -420,7 +420,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mt-auto mb-2 sm:mb-4"
+                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-3 sm:mb-4"
               >
                 {isLoading ? (
                   <>
@@ -435,7 +435,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Button>
 
               {/* Footer */}
-              <div className="space-y-1.5 sm:space-y-1 flex-shrink-0">
+              <div className="space-y-2 sm:space-y-1 flex-shrink-0">
                 {/* Pay Safe & Secure */}
                 <div className="flex items-center justify-center gap-2 sm:gap-1.5 py-2 sm:py-1">
                   <Shield className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-500" />
@@ -537,7 +537,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
+          <DrawerContent className="max-h-[90vh] h-auto bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
             {modalContent}
           </DrawerContent>
         </Drawer>
