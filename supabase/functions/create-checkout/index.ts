@@ -125,13 +125,14 @@ serve(async (req) => {
 
     // Check if this is a trial subscription
     const priceDetails = await stripe.prices.retrieve(priceId);
-    const isTrial = priceDetails.product === 'prod_TIHYThP5XmWyWy' || priceDetails.product === 'prod_TIHZLvUNMqIiCj';
-    const targetPlan = priceDetails.product === 'prod_TIHYThP5XmWyWy' ? 'pro' : 'ultra_pro';
+    const productId = typeof priceDetails.product === 'string' ? priceDetails.product : priceDetails.product?.id;
+    const isTrial = productId === 'prod_TIHYThP5XmWyWy' || productId === 'prod_TIHZLvUNMqIiCj';
+    const targetPlan = productId === 'prod_TIHYThP5XmWyWy' ? 'pro' : 'ultra_pro';
     
     logStep("Price details", { 
       isTrial, 
       targetPlan, 
-      productId: priceDetails.product 
+      productId: productId 
     });
 
     // Redirect to main site after payment
@@ -161,7 +162,7 @@ serve(async (req) => {
           is_trial: 'true',
           target_plan: targetPlan,
           user_id: user.id,
-          trial_product_id: priceDetails.product
+          trial_product_id: productId || ''
         }
       } : undefined,
     });
