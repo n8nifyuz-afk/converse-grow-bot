@@ -447,8 +447,14 @@ export default function Admin() {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TEfQwYT0W1U77Q': 'Pro',
-    'prod_TGqs5r2udThT0t': 'Ultra Pro',
+    'prod_TGsOnuDkIh9hVG': 'Pro',        // Pro Monthly
+    'prod_TGqo8h59qNKZ4m': 'Pro',        // Pro 3-Month
+    'prod_TGqqoPGWQJ0T4a': 'Pro',        // Pro Yearly
+    'prod_TIHYThP5XmWyWy': 'Pro',        // Pro 3-Day Trial
+    'prod_TGqs5r2udThT0t': 'Ultra Pro',  // Ultra Pro Monthly
+    'prod_TGquGexHO44m4T': 'Ultra Pro',  // Ultra Pro 3-Month
+    'prod_TGqwVIWObYLt6U': 'Ultra Pro',  // Ultra Pro Yearly
+    'prod_TIHZLvUNMqIiCj': 'Ultra Pro',  // Ultra Pro 3-Day Trial
   };
 
   // Get subscription plan for a user
@@ -467,8 +473,8 @@ export default function Admin() {
     
     // Fallback to product_id matching if plan is not set
     const productId = usage.subscription_status.product_id;
-    if (productId === 'prod_TEfQwYT0W1U77Q') return 'pro';
-    if (productId === 'prod_TGqs5r2udThT0t') return 'ultra';
+    if (['prod_TGsOnuDkIh9hVG', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a', 'prod_TIHYThP5XmWyWy'].includes(productId)) return 'pro';
+    if (['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U', 'prod_TIHZLvUNMqIiCj'].includes(productId)) return 'ultra';
     
     console.log('Unknown plan/product_id:', plan, productId);
     return 'free';

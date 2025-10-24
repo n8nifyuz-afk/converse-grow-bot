@@ -816,8 +816,10 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       <h3 className="font-semibold mb-1 text-sm md:text-base">{t('subscription.currentPlan')}</h3>
                       <p className="text-lg md:text-xl font-bold text-primary mb-2">
                         {subscriptionStatus.subscribed 
-                          ? (subscriptionStatus.product_id === 'prod_TEfQwYT0W1U77Q' ? t('subscription.proPlan')
-                              : subscriptionStatus.product_id === 'prod_TGqs5r2udThT0t' ? t('subscription.ultraProPlan')
+                          ? (['prod_TGsOnuDkIh9hVG', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a', 'prod_TIHYThP5XmWyWy'].includes(subscriptionStatus.product_id || '') 
+                              ? t('subscription.proPlan')
+                              : ['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U', 'prod_TIHZLvUNMqIiCj'].includes(subscriptionStatus.product_id || '')
+                              ? t('subscription.ultraProPlan')
                               : t('subscription.proPlan'))
                           : t('subscription.freePlan')}
                       </p>
@@ -869,7 +871,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         </div>
                         
                         {/* Upgrade suggestion for Pro users */}
-                        {subscriptionStatus.product_id === 'prod_TEfQwYT0W1U77Q' && usageLimits.remaining < 100 && (
+                        {['prod_TGsOnuDkIh9hVG', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a', 'prod_TIHYThP5XmWyWy'].includes(subscriptionStatus.product_id || '') && usageLimits.remaining < 100 && (
                           <div className="p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-primary/20 rounded-lg">
                             <p className="text-sm font-medium text-foreground mb-1">{t('subscription.runningLow')}</p>
                             <p className="text-xs text-muted-foreground mb-2">{t('subscription.upgradeUltraProDesc')}</p>

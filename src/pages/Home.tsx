@@ -429,7 +429,7 @@ const Home = () => {
                 <Button size="lg" className="w-full bg-black dark:bg-primary text-white dark:text-primary-foreground hover:bg-black/90 dark:hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2" onClick={() => navigate('/pricing')} aria-label="Subscribe to Pro plan">
                   {t('pricing.subscribeNow')}
                 </Button>
-              ) : ['prod_TGqk9k16XhvCIn', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a'].includes(subscriptionStatus.product_id || '') ? (
+              ) : ['prod_TGsOnuDkIh9hVG', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a'].includes(subscriptionStatus.product_id || '') ? (
                 <div className="w-full py-3 px-4 rounded-lg bg-primary/10 border-2 border-primary text-center">
                   <span className="text-sm font-semibold text-primary">{t('pricing.yourCurrentPlan')}</span>
                 </div>
