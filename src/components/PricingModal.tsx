@@ -301,25 +301,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Billing Period Options */}
               <div className="space-y-2.5 sm:space-y-2 mb-4 sm:mb-2.5 flex-1 flex flex-col justify-center md:flex-initial md:block">
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setSelectedPeriod('trial')}
-                    className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
-                      selectedPeriod === 'trial'
-                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
-                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access</div>
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€0.99</div>
-                    </div>
-                  </button>
-                  <div className="text-xs text-zinc-600 px-2">
-                    After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
-                  </div>
-                </div>
-
                 <button
                   onClick={() => setSelectedPeriod('3month')}
                   className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
@@ -366,6 +347,25 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     </div>
                   </div>
                 </button>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setSelectedPeriod('trial')}
+                    className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
+                      selectedPeriod === 'trial'
+                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
+                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€0.99</div>
+                    </div>
+                  </button>
+                  <div className="text-xs text-zinc-600 px-2">
+                    After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
+                  </div>
+                </div>
               </div>
 
               {/* Continue Button */}
