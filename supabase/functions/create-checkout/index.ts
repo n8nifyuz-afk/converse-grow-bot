@@ -205,24 +205,27 @@ serve(async (req) => {
       }
     };
     
-    // For trials: add €0.99 upfront + delayed first billing
+    // For trials: add 3-day trial period + €0.99 upfront charge
     if (isTrial) {
       // Calculate renewal date (3 days from now)
       const renewalDate = new Date();
       renewalDate.setDate(renewalDate.getDate() + 3);
       const renewalDateStr = renewalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      const billingAnchor = Math.floor(renewalDate.getTime() / 1000); // Unix timestamp
       
-      // Set first billing to occur in 3 days
-      sessionConfig.subscription_data.billing_cycle_anchor = billingAnchor;
+      sessionConfig.subscription_data.trial_period_days = 3;
+      sessionConfig.subscription_data.trial_settings = {
+        end_behavior: {
+          missing_payment_method: 'cancel', // Cancel if no payment method after trial
+        }
+      };
       
       // Add €0.99 as a separate one-time line item charged immediately
       sessionConfig.line_items.push({
         price_data: {
           currency: 'eur',
           product_data: {
-            name: '3-Day Trial Access (€0.99)',
-            description: `Full access for 3 days, then €${targetPlan === 'pro' ? '19.99' : '39.99'}/month starting ${renewalDateStr}`
+            name: '3-Day Trial Access',
+            description: `Trial access to ${targetPlan === 'pro' ? 'Pro' : 'Ultra Pro'} plan`
           },
           unit_amount: 99, // €0.99 in cents
         },
@@ -232,11 +235,11 @@ serve(async (req) => {
       sessionConfig.subscription_data.metadata.is_trial = 'true';
       sessionConfig.subscription_data.metadata.trial_end_date = renewalDateStr;
       
-      logStep("Creating trial subscription with delayed billing", { 
+      logStep("Creating subscription with 3-day trial", { 
         targetPlan, 
-        upfrontCharge: '€0.99',
-        firstBillingDate: renewalDateStr,
-        billingAnchor
+        trialCharge: '€0.99',
+        monthlyPrice: priceId,
+        renewalDate: renewalDateStr
       });
     } else {
       logStep("Creating regular subscription (no trial)", { 
