@@ -135,6 +135,54 @@ serve(async (req) => {
       productId: productId 
     });
 
+    // Check if user has already used a trial
+    if (isTrial) {
+      // Check trial_conversions table for any trial usage
+      const { data: existingTrial, error: trialCheckError } = await supabaseClient
+        .from('trial_conversions')
+        .select('id, created_at')
+        .eq('user_id', user.id)
+        .limit(1)
+        .single();
+
+      if (existingTrial) {
+        logStep("User already used trial - blocking access", { 
+          userId: user.id,
+          existingTrialDate: existingTrial.created_at 
+        });
+        throw new Error("You have already used your free trial. Please select a paid plan.");
+      }
+
+      // Also check user_subscriptions for any past trial subscriptions
+      const { data: pastTrialSubs, error: subCheckError } = await supabaseClient
+        .from('user_subscriptions')
+        .select('id, stripe_subscription_id')
+        .eq('user_id', user.id)
+        .not('stripe_subscription_id', 'is', null)
+        .limit(1);
+
+      if (pastTrialSubs && pastTrialSubs.length > 0) {
+        // Check if any of these subscriptions were trials via Stripe
+        for (const sub of pastTrialSubs) {
+          try {
+            const stripeSub = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+            if (stripeSub.metadata?.is_trial === 'true') {
+              logStep("User already used trial (found in Stripe) - blocking access", { 
+                userId: user.id,
+                subscriptionId: stripeSub.id 
+              });
+              throw new Error("You have already used your free trial. Please select a paid plan.");
+            }
+          } catch (e) {
+            // Subscription might be deleted, continue checking
+            logStep("Could not verify subscription in Stripe", { subId: sub.stripe_subscription_id });
+          }
+        }
+      }
+
+      logStep("Trial eligibility verified - user can proceed", { userId: user.id });
+    }
+
     // Redirect to main site after payment
     const mainSite = "https://www.chatl.ai";
     
