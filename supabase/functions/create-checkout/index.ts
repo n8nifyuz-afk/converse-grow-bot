@@ -205,7 +205,16 @@ serve(async (req) => {
     
     // Add metadata for trial conversion (NO trial_period_days - we charge €0.99 immediately)
     if (isTrial) {
+      // Calculate renewal date (3 days from now)
+      const renewalDate = new Date();
+      renewalDate.setDate(renewalDate.getDate() + 3);
+      const renewalDateStr = renewalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      
+      // Get the monthly price for display
+      const monthlyPrice = targetPlan === 'pro' ? '€19.99' : '€39.99';
+      
       sessionConfig.subscription_data = {
+        description: `Then ${monthlyPrice} per month starting ${renewalDateStr}`,
         metadata: {
           is_trial: 'true',
           needs_schedule_conversion: 'true',
