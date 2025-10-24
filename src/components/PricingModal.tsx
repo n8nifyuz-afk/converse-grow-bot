@@ -360,7 +360,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-2.5 sm:space-y-2 mb-4 sm:mb-2.5 flex-1 flex flex-col justify-center md:flex-initial md:block">
+              <div className="space-y-2.5 sm:space-y-2 mb-4 sm:mb-2.5 flex flex-col md:flex-1 md:flex-initial md:block">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
