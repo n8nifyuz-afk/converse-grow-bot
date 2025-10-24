@@ -876,7 +876,8 @@ serve(async (req) => {
         logStep("Checkout session completed", { 
           sessionId: session.id,
           paymentStatus: session.payment_status,
-          status: session.status
+          status: session.status,
+          mode: session.mode
         });
 
         // If payment failed or session expired, user should remain on free plan
@@ -916,89 +917,77 @@ serve(async (req) => {
           }
         }
         
-        // Handle trial subscription conversion to schedule
-        if (session.subscription && session.mode === 'subscription') {
+        // Handle one-off trial payment -> Create scheduled subscription
+        if (session.mode === 'payment' && session.payment_status === 'paid' && session.payment_intent) {
           try {
-            const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-            const needsSchedule = subscription.metadata?.needs_schedule_conversion === 'true';
+            const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent as string);
+            const isTrial = paymentIntent.metadata?.is_trial === 'true';
             
-            if (needsSchedule) {
-              const trialPriceId = subscription.metadata.trial_price_id;
-              const monthlyPriceId = subscription.metadata.monthly_price_id;
-              const targetPlan = subscription.metadata.target_plan;
-              const userId = subscription.metadata.user_id;
+            if (isTrial) {
+              const userId = paymentIntent.metadata.user_id;
+              const monthlyPriceId = paymentIntent.metadata.monthly_price_id;
+              const targetPlan = paymentIntent.metadata.target_plan;
               
-              logStep("Converting trial subscription to schedule", { 
-                subscriptionId: subscription.id,
-                targetPlan,
-                trialPriceId,
-                monthlyPriceId
+              logStep("Processing trial payment -> creating subscription", { 
+                userId,
+                monthlyPriceId,
+                targetPlan
               });
               
-              // Create subscription schedule with 2 phases
+              // Calculate start date (3 days from now)
+              const startDate = Math.floor(Date.now() / 1000) + (3 * 24 * 60 * 60);
+              
+              // Create subscription schedule starting in 3 days
               const schedule = await stripe.subscriptionSchedules.create({
-                from_subscription: subscription.id,
-              });
-              
-              // Calculate phase end dates
-              const now = Math.floor(Date.now() / 1000);
-              const threeDaysLater = now + (3 * 24 * 60 * 60);
-              
-              // Update schedule with trial and monthly phases
-              await stripe.subscriptionSchedules.update(schedule.id, {
+                customer: session.customer as string,
+                start_date: startDate,
+                end_behavior: 'release', // Convert to regular subscription after schedule
                 phases: [
                   {
-                    // Phase 1: €0.99 for 3 days
-                    start_date: now,
-                    end_date: threeDaysLater,
-                    items: [{
-                      price: trialPriceId,
-                      quantity: 1,
-                    }],
-                    iterations: 1, // Only bill once
-                    proration_behavior: 'none',
-                  },
-                  {
-                    // Phase 2: Monthly billing
-                    items: [{
-                      price: monthlyPriceId,
-                      quantity: 1,
-                    }],
+                    items: [
+                      {
+                        price: monthlyPriceId,
+                        quantity: 1,
+                      },
+                    ],
+                    metadata: {
+                      user_id: userId,
+                      plan: targetPlan,
+                      converted_from_trial: 'true'
+                    }
                   },
                 ],
               });
               
-              logStep("Subscription schedule created successfully", { 
+              logStep("Subscription schedule created for trial conversion", { 
                 scheduleId: schedule.id,
-                phase1End: new Date(threeDaysLater * 1000).toISOString()
+                startsAt: new Date(startDate * 1000).toISOString(),
+                userId
               });
               
               // Track trial conversion
-              if (userId) {
-                await supabaseClient
-                  .from('trial_conversions')
-                  .insert({
-                    user_id: userId,
-                    trial_subscription_id: subscription.id,
-                    trial_product_id: trialPriceId,
-                    target_plan: targetPlan,
-                    paid_subscription_id: subscription.id,
-                    converted_at: new Date().toISOString()
-                  });
-                
-                logStep("Trial conversion tracked", { userId, subscriptionId: subscription.id });
-              }
+              await supabaseClient
+                .from('trial_conversions')
+                .insert({
+                  user_id: userId,
+                  trial_subscription_id: schedule.id,
+                  trial_product_id: paymentIntent.metadata.monthly_price_id,
+                  target_plan: targetPlan,
+                  paid_subscription_id: schedule.subscription as string || schedule.id,
+                  converted_at: new Date().toISOString()
+                });
+              
+              logStep("Trial conversion tracked", { userId, scheduleId: schedule.id });
             }
-          } catch (scheduleError) {
-            logStep("ERROR: Failed to create subscription schedule", { 
-              error: scheduleError instanceof Error ? scheduleError.message : String(scheduleError),
+          } catch (trialError) {
+            logStep("ERROR: Failed to create subscription from trial payment", { 
+              error: trialError instanceof Error ? trialError.message : String(trialError),
               sessionId: session.id
             });
-            // Don't throw - let subscription.created handle the rest
           }
         }
         
-        // Success case is already handled by subscription.created webhook
+        // Success case for regular subscriptions is already handled by subscription.created webhook
         break;
       }
 

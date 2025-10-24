@@ -183,16 +183,17 @@ serve(async (req) => {
     // Redirect to main site after payment
     const mainSite = "https://www.chatl.ai";
     
+    // For trials: use payment mode (one-off), for regular: use subscription mode
     const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: actualPriceId, // Use €0.99/3-day price for trials, monthly price for regular
+          price: actualPriceId,
           quantity: 1,
         },
       ],
-      mode: "subscription",
+      mode: isTrial ? "payment" : "subscription", // One-off payment for trials
       success_url: `${mainSite}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${mainSite}`,
       payment_method_types: ['card'],
@@ -203,7 +204,7 @@ serve(async (req) => {
       },
     };
     
-    // Add metadata for trial conversion (NO trial_period_days - we charge €0.99 immediately)
+    // Add metadata for trial conversion
     if (isTrial) {
       // Calculate renewal date (3 days from now)
       const renewalDate = new Date();
@@ -213,21 +214,22 @@ serve(async (req) => {
       // Get the monthly price for display
       const monthlyPrice = targetPlan === 'pro' ? '€19.99' : '€39.99';
       
-      sessionConfig.subscription_data = {
-        description: `Then ${monthlyPrice} per month starting ${renewalDateStr}`,
+      // Add metadata to payment session
+      sessionConfig.payment_intent_data = {
         metadata: {
           is_trial: 'true',
-          needs_schedule_conversion: 'true',
           target_plan: targetPlan,
           user_id: user.id,
-          trial_price_id: actualPriceId, // The €0.99/3-day price being charged now
-          monthly_price_id: priceId // The monthly price to switch to after 3 days
+          monthly_price_id: priceId, // The monthly price to charge after 3 days
+          renewal_date: renewalDateStr
         }
       };
-      logStep("Creating trial with immediate €0.99 charge and schedule conversion", { 
+      
+      logStep("Creating one-off trial payment", { 
         targetPlan, 
         trialPriceId: actualPriceId,
-        monthlyPriceId: priceId 
+        monthlyPriceId: priceId,
+        renewalDate: renewalDateStr
       });
     }
     
