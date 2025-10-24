@@ -331,17 +331,17 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-4 sm:p-4 md:p-5 pb-6 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between">
-              <div className="mb-3 sm:mb-2.5 flex-shrink-0">
-                <h2 className="text-xl sm:text-xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0">
+              <div className="mb-2 sm:mb-2.5 flex-shrink-0">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
                 </h2>
-                <p className="text-zinc-600 text-sm sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
+                <p className="text-zinc-600 text-xs sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-3 sm:mb-2.5 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-11 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-2 sm:mb-2.5 flex-shrink-0">
+                <TabsList className="grid w-full grid-cols-2 h-9 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
                     className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
@@ -360,7 +360,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-2.5 sm:space-y-2 mb-4 sm:mb-2.5 flex flex-col md:flex-1 md:flex-initial md:block">
+              <div className="space-y-2 sm:space-y-2 mb-3 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
@@ -420,7 +420,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-12 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-base sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-4"
+                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-3 sm:mb-4"
               >
                 {isLoading ? (
                   <>
@@ -537,10 +537,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
-            <div className="overflow-y-auto flex-1">
-              {modalContent}
-            </div>
+          <DrawerContent className="max-h-[90vh] h-auto bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
+            {modalContent}
           </DrawerContent>
         </Drawer>
       ) : (
