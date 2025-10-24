@@ -698,7 +698,7 @@ serve(async (req) => {
               `;
 
               const emailResult = await resend.emails.send({
-                from: "no-reply@chatl.ai",
+                from: "ChatL <no-reply@chatl.ai>",
                 to: [user.email],
                 subject: `🎉 Payment Confirmed - Your ${planName} is Active!`,
                 html: htmlContent,
