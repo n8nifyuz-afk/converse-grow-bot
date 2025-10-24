@@ -601,97 +601,102 @@ serve(async (req) => {
                 <!DOCTYPE html>
                 <html>
                   <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Payment Confirmed - ChatL</title>
+                    <meta charset="UTF-8">
+                    <title>Payment Confirmed - Chatl.ai</title>
                   </head>
-                  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
-                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 0;">
+                  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 40px;">
+                    <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto;">
+                      
+                      <!-- Header with logo -->
                       <tr>
-                        <td align="center">
-                          <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
-                            <!-- Header -->
+                        <td style="padding-bottom: 30px;">
+                          <a href="https://www.chatl.ai" target="_blank" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center;">
+                            <img src="https://chatl.ai/favicon.png"
+                                 alt="Chatl.ai Logo"
+                                 width="40" height="40"
+                                 style="display: inline-block; vertical-align: middle; margin-right: 10px;">
+                            <span style="font-size: 28px; font-weight: 700; vertical-align: middle;">Chatl.ai</span>
+                          </a>
+                        </td>
+                      </tr>
+
+                      <!-- Body -->
+                      <tr>
+                        <td>
+                          <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 20px;">🎉 Payment Confirmed!</h2>
+                          
+                          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                            Hi ${userName},
+                          </p>
+
+                          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                            Congratulations! Your payment has been successfully processed and your <strong>${planName}</strong> subscription is now active.
+                          </p>
+
+                          <!-- Payment Details Box -->
+                          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
                             <tr>
-                              <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
-                                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700;">🎉 Payment Confirmed!</h1>
-                              </td>
-                            </tr>
-                            
-                            <!-- Content -->
-                            <tr>
-                              <td style="padding: 40px 30px;">
-                                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                                  Hi ${userName},
-                                </p>
-                                
-                                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                                  Congratulations! Your payment has been successfully processed and your <strong>${planName}</strong> subscription is now active.
-                                </p>
-                                
-                                <!-- Payment Details Box -->
-                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
+                              <td style="padding: 20px;">
+                                <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Subscription Details</h3>
+                                <table width="100%" cellpadding="8" cellspacing="0">
                                   <tr>
-                                    <td style="padding: 20px;">
-                                      <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Subscription Details</h3>
-                                      <table width="100%" cellpadding="8" cellspacing="0">
-                                        <tr>
-                                          <td style="color: #6b7280; font-size: 14px;">Plan:</td>
-                                          <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName}</td>
-                                        </tr>
-                                        <tr>
-                                          <td style="color: #6b7280; font-size: 14px;">Billing Period:</td>
-                                          <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${periodText}</td>
-                                        </tr>
-                                        <tr>
-                                          <td style="color: #6b7280; font-size: 14px;">Amount Paid:</td>
-                                          <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
-                                        </tr>
-                                      </table>
-                                    </td>
+                                    <td style="color: #6b7280; font-size: 14px;">Plan:</td>
+                                    <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #6b7280; font-size: 14px;">Billing Period:</td>
+                                    <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${periodText}</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="color: #6b7280; font-size: 14px;">Amount Paid:</td>
+                                    <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
                                   </tr>
                                 </table>
-                                
-                                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                                  You now have access to:
-                                </p>
-                                
-                                <ul style="color: #333333; font-size: 16px; line-height: 1.8; margin: 0 0 30px 0; padding-left: 20px;">
-                                  <li>✨ Unlimited AI conversations</li>
-                                  <li>🚀 Multiple AI models (GPT-4o, Gemini${planType === 'Ultra' ? ', Claude, DeepSeek, Grok' : ''})</li>
-                                  <li>🎨 AI image generation (${planType === 'Ultra' ? '2000' : '500'} images/month)</li>
-                                  <li>🎤 Voice mode</li>
-                                  <li>📄 PDF/Document analysis</li>
-                                  <li>💬 Priority support</li>
-                                </ul>
-                                
-                                <div style="text-align: center; margin: 40px 0;">
-                                  <a href="https://chatl.ai" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                                    Start Using ChatL Pro
-                                  </a>
-                                </div>
-                                
-                                <p style="color: #666666; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0; padding-top: 30px; border-top: 1px solid #eeeeee;">
-                                  Need help? Visit our <a href="https://chatl.ai/help" style="color: #10b981; text-decoration: none;">Help Center</a> or reply to this email.
-                                </p>
-                              </td>
-                            </tr>
-                            
-                            <!-- Footer -->
-                            <tr>
-                              <td style="background-color: #f9f9f9; padding: 30px; text-align: center; border-top: 1px solid #eeeeee;">
-                                <p style="color: #999999; font-size: 14px; margin: 0 0 10px 0;">
-                                  © ${new Date().getFullYear()} ChatL. All rights reserved.
-                                </p>
-                                <p style="color: #999999; font-size: 12px; margin: 0;">
-                                  <a href="https://chatl.ai" style="color: #10b981; text-decoration: none;">Visit Website</a> • 
-                                  <a href="https://chatl.ai/help" style="color: #10b981; text-decoration: none;">Help Center</a> • 
-                                  <a href="https://chatl.ai/pricing" style="color: #10b981; text-decoration: none;">Manage Subscription</a>
-                                </p>
                               </td>
                             </tr>
                           </table>
+                          
+                          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                            You now have access to:
+                          </p>
+                          
+                          <ul style="font-size: 16px; line-height: 1.8; margin: 0 0 30px 0; padding-left: 20px;">
+                            <li>✨ Unlimited AI conversations</li>
+                            <li>🚀 Multiple AI models (GPT-4o, Gemini${planType === 'Ultra' ? ', Claude, DeepSeek, Grok' : ''})</li>
+                            <li>🎨 AI image generation (${planType === 'Ultra' ? '2000' : '500'} images/month)</li>
+                            <li>🎤 Voice mode</li>
+                            <li>📄 PDF/Document analysis</li>
+                            <li>💬 Priority support</li>
+                          </ul>
+                          
+                          <p style="margin-bottom: 30px; text-align: center;">
+                            <a href="https://www.chatl.ai" 
+                               style="display: inline-block; background-color: #10a37f; color: #ffffff; 
+                                      text-decoration: none; font-weight: 600; padding: 12px 24px; 
+                                      border-radius: 6px;">
+                              Start Using ChatL Pro
+                            </a>
+                          </p>
+
+                          <p style="font-size: 15px; line-height: 1.6; color: #333;">
+                            If you have any questions, please contact us through our help center.
+                          </p>
+
+                          <p style="font-size: 15px; margin-top: 30px;">
+                            Best,<br>
+                            The Chatl.ai Team
+                          </p>
                         </td>
                       </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td style="border-top: 1px solid #eee; padding-top: 20px; font-size: 13px; color: #777;">
+                          If you have any questions, please contact us through our 
+                          <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>.
+                        </td>
+                      </tr>
+
                     </table>
                   </body>
                 </html>

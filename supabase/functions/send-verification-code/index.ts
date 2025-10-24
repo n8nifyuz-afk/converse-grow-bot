@@ -97,36 +97,68 @@ serve(async (req) => {
         <!DOCTYPE html>
         <html>
           <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Verify Your Email</title>
+            <meta charset="UTF-8">
+            <title>Verify your Chatl.ai account</title>
           </head>
-          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #ffffff;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 12px;">
-              <h1 style="color: #333; font-size: 24px; font-weight: bold; margin: 40px 0 20px 0; padding: 0; text-align: center;">Verify Your Email</h1>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 40px;">
+            <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto;">
               
-              <p style="color: #333; font-size: 14px; margin: 16px 0; line-height: 24px;">
-                Thank you for signing up! Please use the verification code below to complete your registration:
-              </p>
-              
-              <div style="background-color: #f4f4f4; border-radius: 8px; padding: 32px 20px; margin: 32px 0; text-align: center; border: 2px solid #e0e0e0;">
-                <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #333; margin: 0; font-family: monospace;">
-                  ${code}
-                </div>
-              </div>
-              
-              <p style="color: #333; font-size: 14px; margin: 16px 0; line-height: 24px;">
-                This code will expire in 10 minutes.
-              </p>
-              
-              <p style="color: #ababab; font-size: 14px; margin: 14px 0 16px 0; line-height: 24px;">
-                If you didn't create an account with ${email}, you can safely ignore this email.
-              </p>
-              
-              <p style="color: #898989; font-size: 12px; line-height: 22px; margin: 32px 0 24px 0; text-align: center;">
-                <a href="https://www.chatl.ai" target="_blank" style="color: #2754C5; text-decoration: underline;">ChatL.ai</a> - Your AI Assistant
-              </p>
-            </div>
+              <!-- Header with logo -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <a href="https://www.chatl.ai" target="_blank" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center;">
+                    <img src="https://chatl.ai/favicon.png"
+                         alt="Chatl.ai Logo"
+                         width="40" height="40"
+                         style="display: inline-block; vertical-align: middle; margin-right: 10px;">
+                    <span style="font-size: 28px; font-weight: 700; vertical-align: middle;">Chatl.ai</span>
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Body -->
+              <tr>
+                <td>
+                  <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 20px;">Verify your email address</h2>
+                  
+                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    Hi there,
+                  </p>
+
+                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    Please use the verification code below to complete your registration:
+                  </p>
+
+                  <div style="background-color: #f4f4f4; border-radius: 8px; padding: 32px 20px; margin: 32px 0; text-align: center; border: 2px solid #e0e0e0;">
+                    <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #333; margin: 0; font-family: monospace;">
+                      ${code}
+                    </div>
+                  </div>
+
+                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    This code will expire in 10 minutes.
+                  </p>
+
+                  <p style="font-size: 15px; line-height: 1.6; color: #333;">
+                    If you didn't sign up for Chatl.ai, you can safely ignore this message.
+                  </p>
+
+                  <p style="font-size: 15px; margin-top: 30px;">
+                    Best,<br>
+                    The Chatl.ai Team
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="border-top: 1px solid #eee; padding-top: 20px; font-size: 13px; color: #777;">
+                  If you have any questions, please contact us through our 
+                  <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>.
+                </td>
+              </tr>
+
+            </table>
           </body>
         </html>
       `,
