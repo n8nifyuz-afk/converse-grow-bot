@@ -107,13 +107,13 @@ const priceIds = {
     monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',   // €19.99/month
     '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',  // €39.99 for 3 months
     yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF',    // €59.99/year
-    trial: 'price_1SLgzML8Zm4LqDn46ajkeXnj'      // €0.99 for 3 days trial → €19.99/month
+    trial: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'      // Use monthly price, will be converted to schedule
   },
   ultra: {
     monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',   // €39.99/month
     '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',  // €79.99 for 3 months
     yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP',    // €119.99/year
-    trial: 'price_1SLh0mL8Zm4LqDn47IgOIT5M'      // €0.99 for 3 days trial → €39.99/month
+    trial: 'price_1SKJAxL8Zm4LqDn43kl9BRd8'      // Use monthly price, will be converted to schedule
   }
 };
 
@@ -157,9 +157,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     setIsLoading(true);
     try {
       const priceId = priceIds[selectedPlan][selectedPeriod];
+      const isTrial = selectedPeriod === 'trial';
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId }
+        body: { priceId, isTrial }
       });
 
       if (error) {

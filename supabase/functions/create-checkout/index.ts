@@ -40,9 +40,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId } = await req.json();
+    const { priceId, isTrial } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
-    logStep("Price ID received", { priceId });
+    logStep("Price ID received", { priceId, isTrial });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2025-08-27.basil" 
@@ -123,16 +123,15 @@ serve(async (req) => {
       logStep("No existing customer, will create during checkout");
     }
 
-    // Check if this is a trial subscription by checking product ID
-    const priceDetails = await stripe.prices.retrieve(priceId);
-    const productId = typeof priceDetails.product === 'string' ? priceDetails.product : priceDetails.product?.id;
-    const isTrial = productId === 'prod_TIHYThP5XmWyWy' || productId === 'prod_TIHZLvUNMqIiCj';
-    const targetPlan = productId === 'prod_TIHYThP5XmWyWy' ? 'pro' : 'ultra_pro';
+    // Determine target plan from price ID
+    const proPriceId = 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'; // €19.99/month
+    const ultraPriceId = 'price_1SKJAxL8Zm4LqDn43kl9BRd8'; // €39.99/month
+    const targetPlan = priceId === proPriceId ? 'pro' : 'ultra_pro';
     
     logStep("Price details", { 
       isTrial, 
       targetPlan, 
-      productId: productId 
+      priceId 
     });
 
     // Check if user has already used a trial
@@ -153,31 +152,20 @@ serve(async (req) => {
         throw new Error("You have already used your free trial. Please select a paid plan.");
       }
 
-      // Also check user_subscriptions for any past trial subscriptions
-      const { data: pastTrialSubs, error: subCheckError } = await supabaseClient
+      // Also check user_subscriptions for any past subscriptions (trial or paid)
+      const { data: pastSubs, error: subCheckError } = await supabaseClient
         .from('user_subscriptions')
         .select('id, stripe_subscription_id')
         .eq('user_id', user.id)
         .not('stripe_subscription_id', 'is', null)
         .limit(1);
 
-      if (pastTrialSubs && pastTrialSubs.length > 0) {
-        // Check if any of these subscriptions were trials via Stripe
-        for (const sub of pastTrialSubs) {
-          try {
-            const stripeSub = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
-            if (stripeSub.metadata?.is_trial === 'true') {
-              logStep("User already used trial (found in Stripe) - blocking access", { 
-                userId: user.id,
-                subscriptionId: stripeSub.id 
-              });
-              throw new Error("You have already used your free trial. Please select a paid plan.");
-            }
-          } catch (e) {
-            // Subscription might be deleted, continue checking
-            logStep("Could not verify subscription in Stripe", { subId: sub.stripe_subscription_id });
-          }
-        }
+      if (pastSubs && pastSubs.length > 0) {
+        logStep("User already has/had subscription - blocking trial access", { 
+          userId: user.id,
+          subscriptionCount: pastSubs.length 
+        });
+        throw new Error("You have already used your free trial. Please select a paid plan.");
       }
 
       logStep("Trial eligibility verified - user can proceed", { userId: user.id });
@@ -186,7 +174,7 @@ serve(async (req) => {
     // Redirect to main site after payment
     const mainSite = "https://www.chatl.ai";
     
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
@@ -204,18 +192,27 @@ serve(async (req) => {
           request_three_d_secure: 'any',
         },
       },
-      // Add metadata to track trial subscriptions
-      subscription_data: isTrial ? {
-        cancel_at_period_end: true, // Auto-cancel after first period ends
+    };
+    
+    // Add trial configuration for subscription schedules
+    if (isTrial) {
+      sessionConfig.subscription_data = {
+        trial_period_days: 3,
         metadata: {
           is_trial: 'true',
+          needs_schedule_conversion: 'true',
           target_plan: targetPlan,
           user_id: user.id,
-          trial_product_id: productId || '',
-          trial_end_date: new Date(Date.now() + (3 * 24 * 60 * 60 * 1000)).toISOString()
+          trial_price_id: targetPlan === 'pro' 
+            ? 'price_1SLgzML8Zm4LqDn46ajkeXnj'  // Pro €0.99/3 days
+            : 'price_1SLh0mL8Zm4LqDn47IgOIT5M', // Ultra €0.99/3 days
+          monthly_price_id: priceId
         }
-      } : undefined,
-    });
+      };
+      logStep("Creating trial with schedule conversion", { targetPlan, priceId });
+    }
+    
+    const session = await stripe.checkout.sessions.create(sessionConfig);
     logStep("Checkout session created", { sessionId: session.id, isTrial });
 
     return new Response(JSON.stringify({ url: session.url }), {
