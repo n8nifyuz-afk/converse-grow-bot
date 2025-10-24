@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,8 @@ const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 // Webhook signature verification timeout (5 minutes)
 const WEBHOOK_TIMEOUT_MS = 5 * 60 * 1000;
@@ -511,6 +514,140 @@ serve(async (req) => {
             planPrice,
             currency
           });
+
+          // Send payment confirmation email
+          try {
+            if (!user.email) {
+              logStep("No user email for payment confirmation");
+            } else {
+              const userName = user.email.split("@")[0] || "there";
+              const planName = subscription.plan_name || planType;
+              const periodText = planDuration === 'yearly' ? 'year' : planDuration === '3_months' ? '3 months' : 'month';
+              
+              const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Payment Confirmed - ChatL</title>
+                  </head>
+                  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 0;">
+                      <tr>
+                        <td align="center">
+                          <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                            <!-- Header -->
+                            <tr>
+                              <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700;">🎉 Payment Confirmed!</h1>
+                              </td>
+                            </tr>
+                            
+                            <!-- Content -->
+                            <tr>
+                              <td style="padding: 40px 30px;">
+                                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                                  Hi ${userName},
+                                </p>
+                                
+                                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                                  Congratulations! Your payment has been successfully processed and your <strong>${planName}</strong> subscription is now active.
+                                </p>
+                                
+                                <!-- Payment Details Box -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
+                                  <tr>
+                                    <td style="padding: 20px;">
+                                      <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Subscription Details</h3>
+                                      <table width="100%" cellpadding="8" cellspacing="0">
+                                        <tr>
+                                          <td style="color: #6b7280; font-size: 14px;">Plan:</td>
+                                          <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName}</td>
+                                        </tr>
+                                        <tr>
+                                          <td style="color: #6b7280; font-size: 14px;">Billing Period:</td>
+                                          <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${periodText}</td>
+                                        </tr>
+                                        <tr>
+                                          <td style="color: #6b7280; font-size: 14px;">Amount Paid:</td>
+                                          <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </table>
+                                
+                                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                                  You now have access to:
+                                </p>
+                                
+                                <ul style="color: #333333; font-size: 16px; line-height: 1.8; margin: 0 0 30px 0; padding-left: 20px;">
+                                  <li>✨ Unlimited AI conversations</li>
+                                  <li>🚀 Multiple AI models (GPT-4o, Gemini${planType === 'Ultra' ? ', Claude, DeepSeek, Grok' : ''})</li>
+                                  <li>🎨 AI image generation (${planType === 'Ultra' ? '2000' : '500'} images/month)</li>
+                                  <li>🎤 Voice mode</li>
+                                  <li>📄 PDF/Document analysis</li>
+                                  <li>💬 Priority support</li>
+                                </ul>
+                                
+                                <div style="text-align: center; margin: 40px 0;">
+                                  <a href="https://chatl.ai" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                                    Start Using ChatL Pro
+                                  </a>
+                                </div>
+                                
+                                <p style="color: #666666; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0; padding-top: 30px; border-top: 1px solid #eeeeee;">
+                                  Need help? Visit our <a href="https://chatl.ai/help" style="color: #10b981; text-decoration: none;">Help Center</a> or reply to this email.
+                                </p>
+                              </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                              <td style="background-color: #f9f9f9; padding: 30px; text-align: center; border-top: 1px solid #eeeeee;">
+                                <p style="color: #999999; font-size: 14px; margin: 0 0 10px 0;">
+                                  © ${new Date().getFullYear()} ChatL. All rights reserved.
+                                </p>
+                                <p style="color: #999999; font-size: 12px; margin: 0;">
+                                  <a href="https://chatl.ai" style="color: #10b981; text-decoration: none;">Visit Website</a> • 
+                                  <a href="https://chatl.ai/help" style="color: #10b981; text-decoration: none;">Help Center</a> • 
+                                  <a href="https://chatl.ai/pricing" style="color: #10b981; text-decoration: none;">Manage Subscription</a>
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </body>
+                </html>
+              `;
+
+              const emailResult = await resend.emails.send({
+                from: "no-reply@chatl.ai",
+                to: [user.email],
+                subject: `🎉 Payment Confirmed - Your ${planName} is Active!`,
+                html: htmlContent,
+              });
+
+              if (emailResult.error) {
+                logStep("ERROR: Failed to send payment confirmation email", { 
+                  error: emailResult.error 
+                });
+              } else {
+                logStep("Payment confirmation email sent", { 
+                  email: user.email,
+                  plan: planName 
+                });
+              }
+            }
+          } catch (emailError) {
+            logStep("ERROR: Exception sending payment email", { 
+              error: emailError instanceof Error ? emailError.message : String(emailError)
+            });
+            // Don't throw - email failure shouldn't block webhook processing
+          }
         }
         
         // CRITICAL FIX: Check updated_at to prevent double reset
