@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PricingModal } from './PricingModal';
 import { useTranslation } from 'react-i18next';
-import rocketIcon from '@/assets/rocket-icon.png';
+import { Gem } from 'lucide-react';
 
 export const GoProButton = () => {
   const { subscriptionStatus, loadingSubscription } = useAuth();
@@ -23,14 +23,11 @@ export const GoProButton = () => {
         className="flex items-center gap-1 px-1.5 py-1 sm:gap-2 sm:px-4 sm:py-2 rounded-[20px] bg-transparent border-2 hover:-translate-y-0.5 transition-transform duration-150"
         style={{ borderColor: '#b0851e' }}
       >
-        {/* Rocket Icon */}
-        <img 
-          src={rocketIcon} 
-          alt="Rocket" 
+        {/* Diamond Icon */}
+        <Gem 
           className="w-3.5 h-3.5 sm:w-5 sm:h-5"
-          style={{
-            filter: "brightness(0) saturate(100%) invert(49%) sepia(56%) saturate(475%) hue-rotate(7deg) brightness(95%) contrast(89%)"
-          }}
+          style={{ color: '#b0851e' }}
+          strokeWidth={2.5}
         />
 
         {/* Text with gold gradient */}
