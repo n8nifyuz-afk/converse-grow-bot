@@ -91,12 +91,14 @@ const pricingOptions = {
   pro: {
     monthly: { price: 19.99, perDay: 0.67 },     // €19.99/month
     '3month': { price: 39.99, perDay: 0.44 },    // €39.99 for 3 months
-    yearly: { price: 59.99, perDay: 0.16, savings: 75 } // €59.99/year (save 75%)
+    yearly: { price: 59.99, perDay: 0.16, savings: 75 }, // €59.99/year (save 75%)
+    trial: { price: 0.99, perDay: 0.33, trialDays: 3 }   // €0.99 for 3 days, then €19.99/month
   },
   ultra: {
     monthly: { price: 39.99, perDay: 1.33 },     // €39.99/month
     '3month': { price: 79.99, perDay: 0.89 },    // €79.99 for 3 months
-    yearly: { price: 119.99, perDay: 0.33, savings: 75 } // €119.99/year (save 75%)
+    yearly: { price: 119.99, perDay: 0.33, savings: 75 }, // €119.99/year (save 75%)
+    trial: { price: 0.99, perDay: 0.33, trialDays: 3 }    // €0.99 for 3 days, then €39.99/month
   }
 };
 
@@ -104,12 +106,14 @@ const priceIds = {
   pro: {
     monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',   // €19.99/month
     '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',  // €39.99 for 3 months
-    yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'     // €59.99/year
+    yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF',    // €59.99/year
+    trial: 'REPLACE_WITH_PRO_TRIAL_PRICE_ID'     // €0.99 for 3 days trial → €19.99/month
   },
   ultra: {
     monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',   // €39.99/month
     '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',  // €79.99 for 3 months
-    yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'     // €119.99/year
+    yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP',    // €119.99/year
+    trial: 'REPLACE_WITH_ULTRA_TRIAL_PRICE_ID'   // €0.99 for 3 days trial → €39.99/month
   }
 };
 
@@ -118,7 +122,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const isMobile = useIsMobile();
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | '3month' | 'yearly'>('yearly');
+  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | '3month' | 'yearly' | 'trial'>('yearly');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -361,6 +365,31 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     </div>
                     <div className="text-right ml-3">
                       <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].yearly.perDay}</div>
+                      <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setSelectedPeriod('trial')}
+                  className={`w-full p-3.5 sm:p-3 pt-5 sm:pt-5 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
+                    selectedPeriod === 'trial'
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
+                      : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                  }`}
+                >
+                  <Badge className="absolute -top-2 right-2 sm:right-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md px-2 py-0.5 text-[10px] font-bold border-0">
+                    3-Day Trial
+                  </Badge>
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">Try 3 Days</div>
+                      <div className="text-sm sm:text-xs text-zinc-500">
+                        €0.99 then €{selectedPlan === 'pro' ? '19.99' : '39.99'}/{t('pricingModal.perMonth').toLowerCase()}
+                      </div>
+                    </div>
+                    <div className="text-right ml-3">
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].trial.perDay}</div>
                       <div className="text-xs sm:text-[10px] text-zinc-500">{t('pricingModal.perDay')}</div>
                     </div>
                   </div>
