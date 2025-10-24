@@ -816,8 +816,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       <h3 className="font-semibold mb-1 text-sm md:text-base">{t('subscription.currentPlan')}</h3>
                       <p className="text-lg md:text-xl font-bold text-primary mb-2">
                         {subscriptionStatus.subscribed 
-                          ? (subscriptionStatus.product_id === 'prod_TDSeCiQ2JEFnWB' ? t('subscription.proPlan')
-                              : subscriptionStatus.product_id === 'prod_TDSfAtaWP5KbhM' ? t('subscription.ultraProPlan')
+                          ? (subscriptionStatus.product_id === 'prod_TEfQwYT0W1U77Q' ? t('subscription.proPlan')
+                              : subscriptionStatus.product_id === 'prod_TGqs5r2udThT0t' ? t('subscription.ultraProPlan')
                               : t('subscription.proPlan'))
                           : t('subscription.freePlan')}
                       </p>
@@ -869,7 +869,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         </div>
                         
                         {/* Upgrade suggestion for Pro users */}
-                        {subscriptionStatus.product_id === 'prod_TDSeCiQ2JEFnWB' && usageLimits.remaining < 100 && (
+                        {subscriptionStatus.product_id === 'prod_TEfQwYT0W1U77Q' && usageLimits.remaining < 100 && (
                           <div className="p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-primary/20 rounded-lg">
                             <p className="text-sm font-medium text-foreground mb-1">{t('subscription.runningLow')}</p>
                             <p className="text-xs text-muted-foreground mb-2">{t('subscription.upgradeUltraProDesc')}</p>

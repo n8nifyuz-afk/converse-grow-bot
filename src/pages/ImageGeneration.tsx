@@ -222,7 +222,7 @@ export default function ImageGeneration() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   You have {usageLimits.remaining} image generations remaining this month.
-                  {subscriptionStatus.product_id === 'prod_TDSeCiQ2JEFnWB' && (
+                  {subscriptionStatus.product_id === 'prod_TEfQwYT0W1U77Q' && (
                     <span> Upgrade to Ultra Pro for 2,000 generations/month!</span>
                   )}
                 </AlertDescription>

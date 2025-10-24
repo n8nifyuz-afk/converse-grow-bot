@@ -447,8 +447,8 @@ export default function Admin() {
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
-    'prod_TDSeCiQ2JEFnWB': 'Pro',
-    'prod_TDSfAtaWP5KbhM': 'Ultra Pro',
+    'prod_TEfQwYT0W1U77Q': 'Pro',
+    'prod_TGqs5r2udThT0t': 'Ultra Pro',
   };
 
   // Get subscription plan for a user
@@ -467,8 +467,8 @@ export default function Admin() {
     
     // Fallback to product_id matching if plan is not set
     const productId = usage.subscription_status.product_id;
-    if (productId === 'prod_TDSeCiQ2JEFnWB') return 'pro';
-    if (productId === 'prod_TDSfAtaWP5KbhM') return 'ultra';
+    if (productId === 'prod_TEfQwYT0W1U77Q') return 'pro';
+    if (productId === 'prod_TGqs5r2udThT0t') return 'ultra';
     
     console.log('Unknown plan/product_id:', plan, productId);
     return 'free';
