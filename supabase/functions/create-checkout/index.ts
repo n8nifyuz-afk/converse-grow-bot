@@ -215,7 +215,6 @@ serve(async (req) => {
       
       // Set billing cycle to start in 3 days
       sessionConfig.subscription_data.billing_cycle_anchor = billingAnchor;
-      sessionConfig.subscription_data.proration_behavior = 'none';
       
       // Add €0.99 as a separate one-time line item charged immediately
       sessionConfig.line_items.push({
