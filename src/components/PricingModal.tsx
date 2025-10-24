@@ -331,7 +331,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 gap-6 sm:gap-0">
+            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 gap-4 sm:gap-0">
               <div className="mb-2 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -360,7 +360,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-3 sm:space-y-2 mb-4 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
+              <div className="space-y-2 sm:space-y-2 mb-3 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
