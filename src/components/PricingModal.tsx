@@ -127,8 +127,67 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTrialEligible, setIsTrialEligible] = useState(true);
+  const [checkingEligibility, setCheckingEligibility] = useState(false);
   
   const allFeatures = getFeatures(t, selectedPlan);
+
+  // Check trial eligibility when modal opens
+  React.useEffect(() => {
+    const checkTrialEligibility = async () => {
+      if (!user) {
+        setIsTrialEligible(true);
+        return;
+      }
+
+      setCheckingEligibility(true);
+      try {
+        // Check trial_conversions table
+        const { data: trialData, error: trialError } = await supabase
+          .from('trial_conversions')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (trialError && trialError.code !== 'PGRST116') {
+          console.error('Error checking trial conversions:', trialError);
+          setIsTrialEligible(true);
+          return;
+        }
+
+        // Check user_subscriptions table for any past subscriptions
+        const { data: subData, error: subError } = await supabase
+          .from('user_subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (subError && subError.code !== 'PGRST116') {
+          console.error('Error checking subscriptions:', subError);
+          setIsTrialEligible(true);
+          return;
+        }
+
+        // User is NOT eligible if they have a trial conversion record OR any subscription history
+        const eligible = !trialData && !subData;
+        setIsTrialEligible(eligible);
+
+        // If not eligible and trial was selected, switch to 3month
+        if (!eligible && selectedPeriod === 'trial') {
+          setSelectedPeriod('3month');
+        }
+      } catch (error) {
+        console.error('Error checking trial eligibility:', error);
+        setIsTrialEligible(true);
+      } finally {
+        setCheckingEligibility(false);
+      }
+    };
+
+    if (open) {
+      checkTrialEligibility();
+    }
+  }, [open, user]);
 
   // Product ID to plan name mapping
   const productToPlanMap: { [key: string]: string } = {
@@ -302,26 +361,28 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
               {/* Billing Period Options */}
               <div className="space-y-2.5 sm:space-y-2 mb-4 sm:mb-2.5 flex-1 flex flex-col justify-center md:flex-initial md:block">
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setSelectedPeriod('trial')}
-                    className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
-                      selectedPeriod === 'trial'
-                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
-                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access</div>
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€0.99</div>
-                    </div>
-                  </button>
-                  {selectedPeriod === 'trial' && (
-                    <div className="text-xs text-zinc-600 px-2">
-                      After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
-                    </div>
-                  )}
-                </div>
+                {isTrialEligible && !checkingEligibility && (
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setSelectedPeriod('trial')}
+                      className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
+                        selectedPeriod === 'trial'
+                          ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
+                          : 'border-zinc-200 hover:border-zinc-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access</div>
+                        <div className="font-bold text-xl sm:text-xl text-zinc-900">€0.99</div>
+                      </div>
+                    </button>
+                    {selectedPeriod === 'trial' && (
+                      <div className="text-xs text-zinc-600 px-2">
+                        After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <button
                   onClick={() => setSelectedPeriod('3month')}
