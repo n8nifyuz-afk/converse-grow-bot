@@ -204,8 +204,9 @@ serve(async (req) => {
           request_three_d_secure: 'any',
         },
       },
-      // Add metadata to track trial subscriptions
+      // Add metadata to track trial subscriptions and schedule cancellation
       subscription_data: isTrial ? {
+        cancel_at: Math.floor(Date.now() / 1000) + (3 * 24 * 60 * 60), // Cancel after 3 days
         metadata: {
           is_trial: 'true',
           target_plan: targetPlan,
