@@ -537,7 +537,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="max-h-[90vh] h-auto bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
+          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
             {modalContent}
           </DrawerContent>
         </Drawer>
