@@ -1236,40 +1236,6 @@ export default function Admin() {
                             ))}
                           </select>
                         </div>
-
-                        {/* Subscription Status Filter */}
-                        <div className="space-y-2.5">
-                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                            <div className="w-1 h-3 bg-primary rounded-full" />
-                            Subscription Status
-                          </label>
-                          <div className="grid grid-cols-3 gap-2">
-                            <Button
-                              variant={subscriptionStatusFilter === 'all' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setSubscriptionStatusFilter('all')}
-                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                            >
-                              All
-                            </Button>
-                            <Button
-                              variant={subscriptionStatusFilter === 'subscribed' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setSubscriptionStatusFilter('subscribed')}
-                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                            >
-                              Paid
-                            </Button>
-                            <Button
-                              variant={subscriptionStatusFilter === 'free' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setSubscriptionStatusFilter('free')}
-                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                            >
-                              Free
-                            </Button>
-                          </div>
-                        </div>
                       </div>
 
                       {/* Results Count */}
