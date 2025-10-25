@@ -617,11 +617,31 @@ export default function ProjectPage() {
       }, 100);
 
       // NOW send to webhook in background - realtime subscription will catch the AI response
-      if (files.length > 0) {
-        // Send files to webhook in background
+      // For image generation or files, use webhook; for text use edge function
+      if (selectedModel === 'generate-image' || files.length > 0) {
+        // Send to webhook for image generation or file processing
         (async () => {
           try {
             const webhookUrl = 'https://adsgbt.app.n8n.cloud/webhook/adamGPT';
+
+            // For image generation without files, send the prompt
+            if (selectedModel === 'generate-image' && files.length === 0) {
+              await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  type: 'generate-image',
+                  message: userMessage,
+                  chatId: newChat.id,
+                  userId: user.id,
+                  model: selectedModel
+                })
+              });
+              console.log('[PROJECT-WEBHOOK] Image generation request sent to webhook');
+              return;
+            }
 
             // Convert first file to base64 for webhook
             const file = files[0];
