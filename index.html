@@ -31,6 +31,24 @@
       window.dataLayer = window.dataLayer || [];
     </script>
 
+    <!-- Google Consent Mode V2 - Set default consent states BEFORE any Google tags load -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      
+      // Set default consent to 'denied' for all categories (required for GDPR compliance)
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied',
+        'functionality_storage': 'denied',
+        'personalization_storage': 'denied',
+        'security_storage': 'granted', // Security storage is typically granted by default
+        'wait_for_update': 500 // Wait for Cookiebot to load
+      });
+    </script>
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636" data-cookieconsent="statistics"></script>
     <script data-cookieconsent="statistics">
