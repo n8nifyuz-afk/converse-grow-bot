@@ -76,4 +76,8 @@ verify_jwt = false
 [functions.verify-email-code]
 verify_jwt = false
 
+# Subscriber webhook notification (requires authentication)
+[functions.send-subscriber-webhook]
+verify_jwt = true
+
 
