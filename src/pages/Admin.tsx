@@ -512,6 +512,15 @@ export default function Admin() {
   // Get unique countries from users
   const uniqueCountries = Array.from(new Set(userUsages.map(u => u.country).filter(Boolean))).sort();
 
+  // Combine date and time into a single Date object
+  const getDateTimeFromFilter = (date: Date | undefined, time: string): Date | undefined => {
+    if (!date) return undefined;
+    const [hours, minutes] = time.split(':').map(Number);
+    const dateTime = new Date(date);
+    dateTime.setHours(hours, minutes, 0, 0);
+    return dateTime;
+  };
+
   // Filter users by multiple criteria
   const filteredUsers = userUsages.filter(usage => {
     // Filter by plan
@@ -650,15 +659,6 @@ export default function Admin() {
     setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setCountryFilter('all');
     setSubscriptionStatusFilter('all');
-  };
-
-  // Combine date and time into a single Date object
-  const getDateTimeFromFilter = (date: Date | undefined, time: string): Date | undefined => {
-    if (!date) return undefined;
-    const [hours, minutes] = time.split(':').map(Number);
-    const dateTime = new Date(date);
-    dateTime.setHours(hours, minutes, 0, 0);
-    return dateTime;
   };
 
   // Calculate stats based on date filter
