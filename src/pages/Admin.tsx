@@ -1422,10 +1422,12 @@ export default function Admin() {
                               <div className="pt-3 border-t border-border/50">
                                 <p className="text-xs text-muted-foreground mb-1">Registered</p>
                                 <p className="text-sm font-medium">
-                                  {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
+                                  {usage.created_at ? new Date(usage.created_at).toLocaleString('en-US', {
                                     month: 'short',
                                     day: 'numeric',
-                                    year: 'numeric'
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
                                   }) : 'Unknown'}
                                 </p>
                               </div>
@@ -1558,10 +1560,12 @@ export default function Admin() {
                               ${totalCost.toFixed(4)}
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                              {usage.created_at ? new Date(usage.created_at).toLocaleDateString('en-US', {
+                              {usage.created_at ? new Date(usage.created_at).toLocaleString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
-                                day: 'numeric'
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
                               }) : 'Unknown'}
                             </TableCell>
                             <TableCell>
