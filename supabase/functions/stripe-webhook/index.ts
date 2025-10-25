@@ -588,6 +588,44 @@ serve(async (req) => {
             currency
           });
 
+          // Send subscription purchase webhook
+          try {
+            const webhookPayload = {
+              plan_name: subscription.plan_name || planType,
+              user_id: user.id,
+              email: user.email,
+              price: planPrice,
+              currency: currency,
+              plan_duration: planDuration,
+              timestamp: new Date().toISOString()
+            };
+
+            logStep("Sending subscription webhook", webhookPayload);
+
+            const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/subscription', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(webhookPayload),
+            });
+
+            if (!webhookResponse.ok) {
+              logStep("Subscription webhook failed", { 
+                status: webhookResponse.status, 
+                statusText: webhookResponse.statusText 
+              });
+            } else {
+              const responseText = await webhookResponse.text();
+              logStep("Subscription webhook sent successfully", { response: responseText });
+            }
+          } catch (webhookError) {
+            logStep("Error sending subscription webhook", { 
+              error: webhookError instanceof Error ? webhookError.message : String(webhookError) 
+            });
+            // Don't throw - webhook failure shouldn't stop payment processing
+          }
+
           // Send payment confirmation email
           try {
             if (!user.email) {
