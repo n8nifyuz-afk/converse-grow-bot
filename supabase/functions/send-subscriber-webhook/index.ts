@@ -90,11 +90,11 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, email, username, ipAddress, country } = await req.json();
+    const { userId, email, username, ipAddress, country, signupMethod } = await req.json();
 
     console.log(`[SUBSCRIBER-WEBHOOK] Processing webhook for user: ${userId}`);
     console.log(`[SUBSCRIBER-WEBHOOK] Email: ${email}, Username: ${username}`);
-    console.log(`[SUBSCRIBER-WEBHOOK] IP: ${ipAddress}, Country: ${country}`);
+    console.log(`[SUBSCRIBER-WEBHOOK] IP: ${ipAddress}, Country: ${country}, Signup Method: ${signupMethod}`);
 
     // Prepare webhook payload
     const webhookPayload = {
@@ -103,6 +103,7 @@ serve(async (req) => {
       country: country || 'Unknown',
       ip_address: ipAddress || 'Unknown',
       user_id: userId,
+      signup_method: signupMethod || 'email',
       timestamp: new Date().toISOString(),
     };
     

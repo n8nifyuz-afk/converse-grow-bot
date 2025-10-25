@@ -311,6 +311,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     console.warn('Failed to get IP/country from Cloudflare:', traceError);
                   }
                   
+                  // Fetch signup method from profiles
+                  const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('signup_method')
+                    .eq('user_id', session.user.id)
+                    .single();
+
                   await supabase.functions.invoke('send-subscriber-webhook', {
                     body: {
                       userId: session.user.id,
@@ -318,6 +325,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       username: session.user.user_metadata?.name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
                       ipAddress,
                       country,
+                      signupMethod: profileData?.signup_method || 'email',
                     }
                   });
                 } catch (webhookError) {
