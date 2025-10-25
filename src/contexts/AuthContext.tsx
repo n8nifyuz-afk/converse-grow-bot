@@ -291,13 +291,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               if ((now - profileCreated) < 10000) {
                 trackRegistrationComplete();
                 
-                // Send subscriber webhook for new user (IP/country extracted server-side)
+                // Send subscriber webhook for new user with IP/country from client
                 try {
+                  // Get IP and country from Cloudflare trace
+                  let ipAddress = 'Unknown';
+                  let country = 'Unknown';
+                  
+                  try {
+                    const traceResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+                    if (traceResponse.ok) {
+                      const traceText = await traceResponse.text();
+                      const traceData = Object.fromEntries(
+                        traceText.split('\n').map(line => line.split('='))
+                      );
+                      ipAddress = traceData.ip || 'Unknown';
+                      country = traceData.loc || 'Unknown';
+                    }
+                  } catch (traceError) {
+                    console.warn('Failed to get IP/country from Cloudflare:', traceError);
+                  }
+                  
                   await supabase.functions.invoke('send-subscriber-webhook', {
                     body: {
                       userId: session.user.id,
                       email: session.user.email,
                       username: session.user.user_metadata?.name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
+                      ipAddress,
+                      country,
                     }
                   });
                 } catch (webhookError) {

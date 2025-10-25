@@ -90,23 +90,11 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, email, username } = await req.json();
+    const { userId, email, username, ipAddress, country } = await req.json();
 
     console.log(`[SUBSCRIBER-WEBHOOK] Processing webhook for user: ${userId}`);
     console.log(`[SUBSCRIBER-WEBHOOK] Email: ${email}, Username: ${username}`);
-
-    // Get IP from request headers
-    const ipAddress = getClientIP(req);
-    console.log(`[SUBSCRIBER-WEBHOOK] Extracted IP: ${ipAddress || 'NOT FOUND'}`);
-
-    // Fetch country based on IP
-    let country: string | null = null;
-    if (ipAddress) {
-      country = await getCountryFromIP(ipAddress);
-      console.log(`[SUBSCRIBER-WEBHOOK] Detected country: ${country || 'NOT FOUND'}`);
-    } else {
-      console.log(`[SUBSCRIBER-WEBHOOK] Skipping country detection - no IP available`);
-    }
+    console.log(`[SUBSCRIBER-WEBHOOK] IP: ${ipAddress}, Country: ${country}`);
 
     // Prepare webhook payload
     const webhookPayload = {
@@ -135,6 +123,8 @@ serve(async (req) => {
       throw new Error(`Webhook request failed: ${webhookResponse.statusText}`);
     }
 
+    const responseText = await webhookResponse.text();
+    console.log(`[SUBSCRIBER-WEBHOOK] ✅ Webhook response: ${responseText}`);
     console.log(`[SUBSCRIBER-WEBHOOK] ✅ Successfully sent data for user: ${userId}`);
 
     return new Response(
