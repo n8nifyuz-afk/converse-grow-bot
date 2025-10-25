@@ -693,61 +693,72 @@ serve(async (req) => {
                 <html>
                   <head>
                     <meta charset="UTF-8">
-                    <title>Payment Confirmed - ChatLearn</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Payment Receipt - ChatLearn</title>
                   </head>
-                  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 40px;">
-                    <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto;">
+                  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f9fafb; color: #111827; margin: 0; padding: 20px;">
+                    <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
                       
                       <!-- Header with logo -->
                       <tr>
-                        <td style="padding-bottom: 30px;">
-                          <a href="https://www.chatl.ai" target="_blank" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center;">
-                            <img src="https://chatl.ai/favicon.png"
-                                 alt="ChatLearn Logo"
-                                 width="40" height="40"
-                                 style="display: inline-block; vertical-align: middle; margin-right: 10px;">
-                            <span style="font-size: 28px; font-weight: 700; vertical-align: middle;">ChatLearn</span>
-                          </a>
+                        <td style="padding: 40px 40px 30px 40px; background-color: #ffffff;">
+                          <table width="100%" cellspacing="0" cellpadding="0">
+                            <tr>
+                              <td>
+                                <img src="https://chatl.ai/favicon.png"
+                                     alt="ChatLearn"
+                                     width="40" height="40"
+                                     style="display: block;">
+                                <h1 style="font-size: 24px; font-weight: 600; margin: 16px 0 0 0; color: #111827;">Payment Receipt</h1>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
 
                       <!-- Body -->
                       <tr>
-                        <td>
-                          <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 20px;">🎉 Payment Confirmed!</h2>
-                          
-                          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                            Hi ${userName},
+                        <td style="padding: 0 40px 40px 40px;">
+                          <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #374151;">
+                            Hello ${userName},
+                          </p>
+
+                          <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; color: #374151;">
+                            ${isTrial ? `Your ${planName} ${periodTextCapitalized} trial has been activated successfully.` : `Thank you for your payment. Your ${planName} ${periodTextCapitalized} subscription is now active.`}
                           </p>
 
                           ${paymentDetailsHtml}
                           
-                          <p style="margin-bottom: 30px; text-align: center;">
-                            <a href="https://www.chatl.ai" 
-                               style="display: inline-block; background-color: #10a37f; color: #ffffff; 
-                                      text-decoration: none; font-weight: 600; padding: 12px 24px; 
-                                      border-radius: 6px;">
-                              Start Using ChatLearn
-                            </a>
-                          </p>
+                          <table width="100%" cellspacing="0" cellpadding="0" style="margin: 32px 0;">
+                            <tr>
+                              <td style="text-align: center;">
+                                <a href="https://www.chatl.ai" 
+                                   style="display: inline-block; background-color: #10a37f; color: #ffffff; 
+                                          text-decoration: none; font-weight: 500; padding: 14px 28px; 
+                                          border-radius: 6px; font-size: 16px;">
+                                  Access Your Account
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
 
-                          <p style="font-size: 15px; line-height: 1.6; color: #333;">
-                            You can manage your subscription anytime from your account settings. If you have any questions, please contact us through our help center.
-                          </p>
-
-                          <p style="font-size: 15px; margin-top: 30px;">
-                            Best,<br>
-                            The ChatLearn Team
+                          <p style="font-size: 14px; line-height: 1.6; color: #6b7280; margin: 24px 0 0 0;">
+                            To manage your subscription or update payment details, visit your <a href="https://www.chatl.ai" style="color: #10a37f; text-decoration: none;">account settings</a>.
                           </p>
                         </td>
                       </tr>
 
                       <!-- Footer -->
                       <tr>
-                        <td style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; font-size: 13px; color: #777;">
-                          <p style="margin: 0;">
-                            Need help? Visit our <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>
-                            or manage your subscription in <a href="https://www.chatl.ai" style="color: #10a37f; text-decoration: none;">your account</a>.
+                        <td style="padding: 24px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                          <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280;">
+                            ChatLearn Support
+                          </p>
+                          <p style="margin: 0; font-size: 13px; color: #9ca3af;">
+                            If you have questions, visit our <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>.
+                          </p>
+                          <p style="margin: 16px 0 0 0; font-size: 12px; color: #9ca3af;">
+                            This is a transactional email receipt for your subscription.
                           </p>
                         </td>
                       </tr>
@@ -758,9 +769,9 @@ serve(async (req) => {
               `;
 
               const emailResult = await resend.emails.send({
-                from: "ChatL <no-reply@chatl.ai>",
+                from: "ChatLearn <no-reply@chatl.ai>",
                 to: [user.email],
-                subject: isTrial ? `🎉 Trial Started - Welcome to ${planName}!` : `🎉 Payment Confirmed - Your ${planName} is Active!`,
+                subject: isTrial ? `Your ${planName} Trial Has Started` : `Payment Receipt - ${planName} Subscription`,
                 html: htmlContent,
               });
 
