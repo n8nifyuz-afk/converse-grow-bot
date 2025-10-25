@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -641,6 +641,52 @@ export default function Admin() {
     setSubscriptionStatusFilter('all');
   };
 
+  // Calculate stats based on date filter
+  const statsFilteredUsers = userUsages.filter(usage => {
+    // Filter by date range
+    if (dateFilter.from || dateFilter.to) {
+      const userDate = new Date(usage.created_at);
+      if (dateFilter.from && dateFilter.to) {
+        const from = startOfDay(dateFilter.from);
+        const to = endOfDay(dateFilter.to);
+        if (!isWithinInterval(userDate, { start: from, end: to })) return false;
+      } else if (dateFilter.from) {
+        if (userDate < startOfDay(dateFilter.from)) return false;
+      } else if (dateFilter.to) {
+        if (userDate > endOfDay(dateFilter.to)) return false;
+      }
+    }
+    return true;
+  });
+
+  // Calculate filtered model usages based on date
+  const statsFilteredModelUsages = useMemo(() => {
+    if (!dateFilter.from && !dateFilter.to) {
+      return modelUsages;
+    }
+
+    const modelMap = new Map<string, TokenUsageByModel>();
+    
+    statsFilteredUsers.forEach(user => {
+      user.model_usages.forEach(usage => {
+        if (!modelMap.has(usage.model)) {
+          modelMap.set(usage.model, {
+            model: usage.model,
+            input_tokens: 0,
+            output_tokens: 0,
+            total_cost: 0
+          });
+        }
+        const modelUsage = modelMap.get(usage.model)!;
+        modelUsage.input_tokens += usage.input_tokens;
+        modelUsage.output_tokens += usage.output_tokens;
+        modelUsage.total_cost += usage.cost;
+      });
+    });
+
+    return Array.from(modelMap.values()).sort((a, b) => b.total_cost - a.total_cost);
+  }, [dateFilter, statsFilteredUsers, modelUsages]);
+
   // Reset to page 1 when filter, search, or sort changes
   useEffect(() => {
     setCurrentPage(1);
@@ -833,7 +879,7 @@ export default function Admin() {
               <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
-              <div className="text-3xl sm:text-4xl font-bold text-foreground">{userUsages.length}</div>
+              <div className="text-3xl sm:text-4xl font-bold text-foreground">{statsFilteredUsers.length}</div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">Registered users</p>
             </CardContent>
           </Card>
@@ -841,11 +887,11 @@ export default function Admin() {
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Free Users</CardTitle>
-              <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">{userUsages.filter(u => getUserPlan(u) === 'free').length}</Badge>
+              <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">{statsFilteredUsers.filter(u => getUserPlan(u) === 'free').length}</Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                {userUsages.filter(u => getUserPlan(u) === 'free').length}
+                {statsFilteredUsers.filter(u => getUserPlan(u) === 'free').length}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">On free plan</p>
             </CardContent>
@@ -855,12 +901,12 @@ export default function Admin() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Pro Users</CardTitle>
               <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30 text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
-                {userUsages.filter(u => getUserPlan(u) === 'pro').length}
+                {statsFilteredUsers.filter(u => getUserPlan(u) === 'pro').length}
               </Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                {userUsages.filter(u => getUserPlan(u) === 'pro').length}
+                {statsFilteredUsers.filter(u => getUserPlan(u) === 'pro').length}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">Pro subscribers</p>
             </CardContent>
@@ -870,12 +916,12 @@ export default function Admin() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Ultra Pro</CardTitle>
               <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30 text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
-                {userUsages.filter(u => getUserPlan(u) === 'ultra').length}
+                {statsFilteredUsers.filter(u => getUserPlan(u) === 'ultra').length}
               </Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                {userUsages.filter(u => getUserPlan(u) === 'ultra').length}
+                {statsFilteredUsers.filter(u => getUserPlan(u) === 'ultra').length}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">Ultra subscribers</p>
             </CardContent>
@@ -888,10 +934,10 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                ${modelUsages.reduce((sum, m) => sum + m.total_cost, 0).toFixed(2)}
+                ${statsFilteredModelUsages.reduce((sum, m) => sum + m.total_cost, 0).toFixed(2)}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-                {(modelUsages.reduce((sum, m) => sum + m.input_tokens + m.output_tokens, 0) / 1000000).toFixed(2)}M tokens
+                {(statsFilteredModelUsages.reduce((sum, m) => sum + m.input_tokens + m.output_tokens, 0) / 1000000).toFixed(2)}M tokens
               </p>
             </CardContent>
           </Card>
