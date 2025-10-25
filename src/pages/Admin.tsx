@@ -245,6 +245,7 @@ export default function Admin() {
   const [userActivityLogs, setUserActivityLogs] = useState<any[]>([]);
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
   const [dateFilter, setDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [timeFilter, setTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [countryFilter, setCountryFilter] = useState<string>('all');
@@ -526,17 +527,18 @@ export default function Admin() {
       if (!nameMatch && !emailMatch) return false;
     }
     
-    // Filter by date range
+    // Filter by date range with time
     if (dateFilter.from || dateFilter.to) {
       const userDate = new Date(usage.created_at);
-      if (dateFilter.from && dateFilter.to) {
-        const from = startOfDay(dateFilter.from);
-        const to = endOfDay(dateFilter.to);
-        if (!isWithinInterval(userDate, { start: from, end: to })) return false;
-      } else if (dateFilter.from) {
-        if (userDate < startOfDay(dateFilter.from)) return false;
-      } else if (dateFilter.to) {
-        if (userDate > endOfDay(dateFilter.to)) return false;
+      const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
+      const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
+      
+      if (fromDateTime && toDateTime) {
+        if (!isWithinInterval(userDate, { start: fromDateTime, end: toDateTime })) return false;
+      } else if (fromDateTime) {
+        if (userDate < fromDateTime) return false;
+      } else if (toDateTime) {
+        if (userDate > toDateTime) return false;
       }
     }
 
@@ -602,22 +604,30 @@ export default function Admin() {
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
     const today = startOfToday();
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
     switch (preset) {
       case 'today':
-        setDateFilter({ from: today, to: endOfToday() });
+        setDateFilter({ from: today, to: today });
+        setTimeFilter({ fromTime: '00:00', toTime: currentTime });
         break;
       case 'yesterday':
         const yesterday = subDays(today, 1);
-        setDateFilter({ from: yesterday, to: endOfDay(yesterday) });
+        setDateFilter({ from: yesterday, to: yesterday });
+        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'week':
         setDateFilter({ from: startOfWeek(today, { weekStartsOn: 1 }), to: endOfWeek(today, { weekStartsOn: 1 }) });
+        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'month':
         setDateFilter({ from: startOfMonth(today), to: endOfMonth(today) });
+        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'all':
         setDateFilter({ from: undefined, to: undefined });
+        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
     }
     setShowDatePicker(false);
@@ -637,23 +647,34 @@ export default function Admin() {
     setPlanFilter('all');
     setSearchQuery('');
     setDateFilter({ from: undefined, to: undefined });
+    setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setCountryFilter('all');
     setSubscriptionStatusFilter('all');
   };
 
+  // Combine date and time into a single Date object
+  const getDateTimeFromFilter = (date: Date | undefined, time: string): Date | undefined => {
+    if (!date) return undefined;
+    const [hours, minutes] = time.split(':').map(Number);
+    const dateTime = new Date(date);
+    dateTime.setHours(hours, minutes, 0, 0);
+    return dateTime;
+  };
+
   // Calculate stats based on date filter
   const statsFilteredUsers = userUsages.filter(usage => {
-    // Filter by date range
+    // Filter by date range with time
     if (dateFilter.from || dateFilter.to) {
       const userDate = new Date(usage.created_at);
-      if (dateFilter.from && dateFilter.to) {
-        const from = startOfDay(dateFilter.from);
-        const to = endOfDay(dateFilter.to);
-        if (!isWithinInterval(userDate, { start: from, end: to })) return false;
-      } else if (dateFilter.from) {
-        if (userDate < startOfDay(dateFilter.from)) return false;
-      } else if (dateFilter.to) {
-        if (userDate > endOfDay(dateFilter.to)) return false;
+      const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
+      const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
+      
+      if (fromDateTime && toDateTime) {
+        if (!isWithinInterval(userDate, { start: fromDateTime, end: toDateTime })) return false;
+      } else if (fromDateTime) {
+        if (userDate < fromDateTime) return false;
+      } else if (toDateTime) {
+        if (userDate > toDateTime) return false;
       }
     }
     return true;
@@ -690,7 +711,7 @@ export default function Admin() {
   // Reset to page 1 when filter, search, or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, countryFilter, subscriptionStatusFilter]);
+  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]);
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -1063,7 +1084,7 @@ export default function Admin() {
 
                       {/* Date Range Filter */}
                       <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Registration Date</label>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Registration Date & Time</label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
@@ -1075,80 +1096,110 @@ export default function Admin() {
                                 dateFilter.to ? (
                                   dateFilter.from.getTime() === dateFilter.to.getTime() ? (
                                     // Single day selected
-                                    format(dateFilter.from, 'MMM dd, yyyy')
+                                    <>
+                                      {format(dateFilter.from, 'MMM dd, yyyy')} {timeFilter.fromTime}
+                                      {timeFilter.fromTime !== timeFilter.toTime && ` - ${timeFilter.toTime}`}
+                                    </>
                                   ) : (
                                     // Date range selected
                                     <>
-                                      {format(dateFilter.from, 'MMM dd')} - {format(dateFilter.to, 'MMM dd, yyyy')}
+                                      {format(dateFilter.from, 'MMM dd')} {timeFilter.fromTime} - {format(dateFilter.to, 'MMM dd, yyyy')} {timeFilter.toTime}
                                     </>
                                   )
                                 ) : (
-                                  format(dateFilter.from, 'MMM dd, yyyy')
+                                  `${format(dateFilter.from, 'MMM dd, yyyy')} ${timeFilter.fromTime}`
                                 )
                               ) : (
-                                'Select date range'
+                                'Select date & time range'
                               )}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <div className="flex">
-                              <div className="border-r border-border/50 p-2 space-y-0.5 bg-muted/30 min-w-[110px]">
-                                <div className="px-2 py-1">
-                                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Quick</p>
+                            <div className="flex flex-col">
+                              <div className="flex">
+                                <div className="border-r border-border/50 p-2 space-y-0.5 bg-muted/30 min-w-[110px]">
+                                  <div className="px-2 py-1">
+                                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Quick</p>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start h-7 text-xs px-2"
+                                    onClick={() => setDatePreset('today')}
+                                  >
+                                    Today
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start h-7 text-xs px-2"
+                                    onClick={() => setDatePreset('yesterday')}
+                                  >
+                                    Yesterday
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start h-7 text-xs px-2"
+                                    onClick={() => setDatePreset('week')}
+                                  >
+                                    This Week
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start h-7 text-xs px-2"
+                                    onClick={() => setDatePreset('month')}
+                                  >
+                                    This Month
+                                  </Button>
+                                  <div className="border-t border-border/50 my-1" />
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start h-7 text-xs px-2 text-muted-foreground"
+                                    onClick={() => setDatePreset('all')}
+                                  >
+                                    Clear
+                                  </Button>
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start h-7 text-xs px-2"
-                                  onClick={() => setDatePreset('today')}
-                                >
-                                  Today
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start h-7 text-xs px-2"
-                                  onClick={() => setDatePreset('yesterday')}
-                                >
-                                  Yesterday
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start h-7 text-xs px-2"
-                                  onClick={() => setDatePreset('week')}
-                                >
-                                  This Week
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start h-7 text-xs px-2"
-                                  onClick={() => setDatePreset('month')}
-                                >
-                                  This Month
-                                </Button>
-                                <div className="border-t border-border/50 my-1" />
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start h-7 text-xs px-2 text-muted-foreground"
-                                  onClick={() => setDatePreset('all')}
-                                >
-                                  Clear
-                                </Button>
+                                <div className="p-3">
+                                  <Calendar
+                                    mode="range"
+                                    selected={{ from: dateFilter.from, to: dateFilter.to }}
+                                    onSelect={(range) => {
+                                      setDateFilter({ from: range?.from, to: range?.to });
+                                    }}
+                                    numberOfMonths={1}
+                                    className="pointer-events-auto"
+                                  />
+                                </div>
                               </div>
-                              <div className="p-3">
-                                <Calendar
-                                  mode="range"
-                                  selected={{ from: dateFilter.from, to: dateFilter.to }}
-                                  onSelect={(range) => {
-                                    setDateFilter({ from: range?.from, to: range?.to });
-                                  }}
-                                  numberOfMonths={1}
-                                  className="pointer-events-auto"
-                                />
-                              </div>
+                              {/* Time Selection */}
+                              {dateFilter.from && (
+                                <div className="border-t border-border/50 p-3 space-y-3 bg-muted/10">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1.5">
+                                      <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">From Time</label>
+                                      <Input
+                                        type="time"
+                                        value={timeFilter.fromTime}
+                                        onChange={(e) => setTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">To Time</label>
+                                      <Input
+                                        type="time"
+                                        value={timeFilter.toTime}
+                                        onChange={(e) => setTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </PopoverContent>
                         </Popover>
@@ -1235,17 +1286,25 @@ export default function Admin() {
                   {(dateFilter.from || dateFilter.to) && (
                     <Badge variant="secondary" className="gap-1 text-xs">
                       Date: {dateFilter.from && dateFilter.to && dateFilter.from.getTime() === dateFilter.to.getTime() 
-                        ? format(dateFilter.from, 'MMM dd, yyyy')
+                        ? (
+                          <>
+                            {format(dateFilter.from, 'MMM dd, yyyy')} {timeFilter.fromTime}
+                            {timeFilter.fromTime !== timeFilter.toTime && ` - ${timeFilter.toTime}`}
+                          </>
+                        )
                         : (
                           <>
-                            {dateFilter.from && format(dateFilter.from, 'MMM dd')}
-                            {dateFilter.to && dateFilter.from?.getTime() !== dateFilter.to?.getTime() && ` - ${format(dateFilter.to, 'MMM dd')}`}
+                            {dateFilter.from && `${format(dateFilter.from, 'MMM dd')} ${timeFilter.fromTime}`}
+                            {dateFilter.to && dateFilter.from?.getTime() !== dateFilter.to?.getTime() && ` - ${format(dateFilter.to, 'MMM dd')} ${timeFilter.toTime}`}
                           </>
                         )
                       }
                       <X 
                         className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                        onClick={() => setDateFilter({ from: undefined, to: undefined })}
+                        onClick={() => {
+                          setDateFilter({ from: undefined, to: undefined });
+                          setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+                        }}
                       />
                     </Badge>
                   )}
