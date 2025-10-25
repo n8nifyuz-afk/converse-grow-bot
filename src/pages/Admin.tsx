@@ -933,60 +933,54 @@ export default function Admin() {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <div className="flex">
+                    <div className="flex text-sm">
                       {/* Preset date ranges */}
-                      <div className="border-r p-3 space-y-1 min-w-[140px]">
-                        <div className="text-xs font-semibold mb-2 text-muted-foreground uppercase">Quick Select</div>
+                      <div className="border-r p-2 space-y-0.5 min-w-[120px]">
+                        <div className="text-xs font-semibold mb-1.5 text-muted-foreground uppercase px-2">Quick</div>
                         {datePresets.map((preset) => (
                           <Button
                             key={preset.label}
                             variant="ghost"
                             size="sm"
                             onClick={() => setDateRange(preset.range)}
-                            className="w-full justify-start text-left font-normal h-8 hover:bg-primary/10"
+                            className="w-full justify-start text-left font-normal h-7 text-xs hover:bg-primary/10 px-2"
                           >
                             {preset.label}
                           </Button>
                         ))}
                         {dateRange && (
                           <>
-                            <div className="border-t my-2" />
+                            <div className="border-t my-1.5" />
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setDateRange(undefined)}
-                              className="w-full justify-start text-left font-normal h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="w-full justify-start text-left font-normal h-7 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive px-2"
                             >
-                              <X className="h-3 w-3 mr-2" />
-                              Clear filter
+                              <X className="h-3 w-3 mr-1.5" />
+                              Clear
                             </Button>
                           </>
                         )}
                       </div>
                       
                       {/* Calendar */}
-                      <div className="p-3">
+                      <div className="p-2">
                         <Calendar
                           mode="range"
                           selected={dateRange}
                           onSelect={setDateRange}
                           numberOfMonths={1}
                           initialFocus
-                          className="pointer-events-auto"
+                          className="pointer-events-auto scale-90 origin-top-left"
                         />
-                        {dateRange?.from && (
-                          <div className="pt-3 border-t mt-3 text-sm text-center">
+                        {dateRange?.from && dateRange.to && (
+                          <div className="pt-2 border-t mt-1 text-xs text-center">
                             <div className="text-muted-foreground">
-                              {dateRange.to ? (
-                                <>
-                                  <span className="font-medium text-foreground">
-                                    {filteredUsers.length}
-                                  </span>
-                                  {' '}sign-ups in selected range
-                                </>
-                              ) : (
-                                'Select end date'
-                              )}
+                              <span className="font-medium text-foreground">
+                                {filteredUsers.length}
+                              </span>
+                              {' '}sign-ups
                             </div>
                           </div>
                         )}
