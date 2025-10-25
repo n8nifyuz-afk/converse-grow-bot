@@ -595,7 +595,118 @@ serve(async (req) => {
             } else {
               const userName = user.email.split("@")[0] || "there";
               const planName = subscription.plan_name || planType;
+              
+              // Check if this is a trial or first payment
+              const isFirstPayment = invoice.billing_reason === 'subscription_create';
+              const isTrial = invoice.amount_paid < 100; // Less than 1 EUR means trial
+              
+              // Get subscription details for trial end date
+              let trialEndDate = null;
+              let regularPrice = planPrice;
+              let nextBillingDate = null;
+              
+              if (invoice.lines.data.length > 0) {
+                const line = invoice.lines.data[0];
+                
+                // Get next billing date
+                if (line.period && line.period.end) {
+                  nextBillingDate = new Date(line.period.end * 1000).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  });
+                }
+                
+                // If trial, get the regular price from the line item
+                if (isTrial && line.plan && line.plan.amount) {
+                  regularPrice = line.plan.amount / 100;
+                }
+              }
+              
+              // Determine billing cycle text
               const periodText = planDuration === 'yearly' ? 'year' : planDuration === '3_months' ? '3 months' : 'month';
+              const periodTextCapitalized = planDuration === 'yearly' ? 'Yearly' : planDuration === '3_months' ? '3-Month' : 'Monthly';
+              
+              // Build dynamic email content
+              let paymentDetailsHtml = '';
+              
+              if (isTrial && isFirstPayment) {
+                // Trial payment
+                paymentDetailsHtml = `
+                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    Congratulations! You've successfully started your <strong>${planName} ${periodTextCapitalized}</strong> trial.
+                  </p>
+                  
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
+                    <tr>
+                      <td style="padding: 20px;">
+                        <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Trial Details</h3>
+                        <table width="100%" cellpadding="8" cellspacing="0">
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Plan:</td>
+                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName} ${periodTextCapitalized}</td>
+                          </tr>
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Trial Amount:</td>
+                            <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
+                          </tr>
+                          ${nextBillingDate ? `
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Trial Ends:</td>
+                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${nextBillingDate}</td>
+                          </tr>
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Then:</td>
+                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">€${regularPrice.toFixed(2)}/${periodText}</td>
+                          </tr>
+                          ` : ''}
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                    <p style="font-size: 14px; line-height: 1.6; margin: 0; color: #92400e;">
+                      <strong>📅 Important:</strong> Your trial will automatically convert to a full subscription on <strong>${nextBillingDate}</strong> at <strong>€${regularPrice.toFixed(2)}/${periodText}</strong>. You can cancel anytime before then.
+                    </p>
+                  </div>
+                `;
+              } else {
+                // Regular payment (no trial)
+                paymentDetailsHtml = `
+                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    Congratulations! Your payment has been successfully processed and your <strong>${planName} ${periodTextCapitalized}</strong> subscription is now active.
+                  </p>
+
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
+                    <tr>
+                      <td style="padding: 20px;">
+                        <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Subscription Details</h3>
+                        <table width="100%" cellpadding="8" cellspacing="0">
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Plan:</td>
+                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName} ${periodTextCapitalized}</td>
+                          </tr>
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Billing Cycle:</td>
+                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">€${planPrice.toFixed(2)}/${periodText}</td>
+                          </tr>
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Amount Paid:</td>
+                            <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
+                          </tr>
+                          ${nextBillingDate ? `
+                          <tr>
+                            <td style="color: #6b7280; font-size: 14px;">Next Billing Date:</td>
+                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${nextBillingDate}</td>
+                          </tr>
+                          ` : ''}
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                `;
+              }
               
               const htmlContent = `
                 <!DOCTYPE html>
@@ -629,57 +740,19 @@ serve(async (req) => {
                             Hi ${userName},
                           </p>
 
-                          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                            Congratulations! Your payment has been successfully processed and your <strong>${planName}</strong> subscription is now active.
-                          </p>
-
-                          <!-- Payment Details Box -->
-                          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
-                            <tr>
-                              <td style="padding: 20px;">
-                                <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Subscription Details</h3>
-                                <table width="100%" cellpadding="8" cellspacing="0">
-                                  <tr>
-                                    <td style="color: #6b7280; font-size: 14px;">Plan:</td>
-                                    <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName}</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="color: #6b7280; font-size: 14px;">Billing Period:</td>
-                                    <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${periodText}</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="color: #6b7280; font-size: 14px;">Amount Paid:</td>
-                                    <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
-                                  </tr>
-                                </table>
-                              </td>
-                            </tr>
-                          </table>
-                          
-                          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                            You now have access to:
-                          </p>
-                          
-                          <ul style="font-size: 16px; line-height: 1.8; margin: 0 0 30px 0; padding-left: 20px;">
-                            <li>✨ Unlimited AI conversations</li>
-                            <li>🚀 Multiple AI models (GPT-4o, Gemini${planType === 'Ultra' ? ', Claude, DeepSeek, Grok' : ''})</li>
-                            <li>🎨 AI image generation (${planType === 'Ultra' ? '2000' : '500'} images/month)</li>
-                            <li>🎤 Voice mode</li>
-                            <li>📄 PDF/Document analysis</li>
-                            <li>💬 Priority support</li>
-                          </ul>
+                          ${paymentDetailsHtml}
                           
                           <p style="margin-bottom: 30px; text-align: center;">
                             <a href="https://www.chatl.ai" 
                                style="display: inline-block; background-color: #10a37f; color: #ffffff; 
                                       text-decoration: none; font-weight: 600; padding: 12px 24px; 
                                       border-radius: 6px;">
-                              Start Using ChatLearn Pro
+                              Start Using ChatLearn
                             </a>
                           </p>
 
                           <p style="font-size: 15px; line-height: 1.6; color: #333;">
-                            If you have any questions, please contact us through our help center.
+                            You can manage your subscription anytime from your account settings. If you have any questions, please contact us through our help center.
                           </p>
 
                           <p style="font-size: 15px; margin-top: 30px;">
@@ -691,9 +764,11 @@ serve(async (req) => {
 
                       <!-- Footer -->
                       <tr>
-                        <td style="border-top: 1px solid #eee; padding-top: 20px; font-size: 13px; color: #777;">
-                          If you have any questions, please contact us through our 
-                          <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>.
+                        <td style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; font-size: 13px; color: #777;">
+                          <p style="margin: 0;">
+                            Need help? Visit our <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>
+                            or manage your subscription in <a href="https://www.chatl.ai" style="color: #10a37f; text-decoration: none;">your account</a>.
+                          </p>
                         </td>
                       </tr>
 
@@ -705,7 +780,7 @@ serve(async (req) => {
               const emailResult = await resend.emails.send({
                 from: "ChatL <no-reply@chatl.ai>",
                 to: [user.email],
-                subject: `🎉 Payment Confirmed - Your ${planName} is Active!`,
+                subject: isTrial ? `🎉 Trial Started - Welcome to ${planName}!` : `🎉 Payment Confirmed - Your ${planName} is Active!`,
                 html: htmlContent,
               });
 
@@ -716,7 +791,9 @@ serve(async (req) => {
               } else {
                 logStep("Payment confirmation email sent", { 
                   email: user.email,
-                  plan: planName 
+                  plan: planName,
+                  isTrial,
+                  amount: planPrice
                 });
               }
             }
