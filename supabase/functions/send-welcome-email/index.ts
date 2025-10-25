@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const resendApiKey = Deno.env.get("RESEND_API_KEY") as string;
-const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
+const webhookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,40 +21,25 @@ serve(async (req) => {
   try {
     console.log("[WELCOME-EMAIL] Function invoked");
 
-    const payload = await req.text();
-    const headers = Object.fromEntries(req.headers);
-    
-    console.log("[WELCOME-EMAIL] Verifying webhook signature");
-    
-    const wh = new Webhook(hookSecret);
-    let webhookData;
-    
-    try {
-      webhookData = wh.verify(payload, headers) as {
-        type: string;
-        record: {
-          id: string;
-          email: string;
-          raw_user_meta_data?: {
-            full_name?: string;
-            name?: string;
-          };
-        };
-      };
-      console.log("[WELCOME-EMAIL] Webhook verified successfully");
-      console.log("[WELCOME-EMAIL] Event type:", webhookData.type);
-    } catch (error) {
-      console.error("[WELCOME-EMAIL] Webhook verification failed:", error);
+    // Verify webhook secret from header
+    const secret = req.headers.get("webhook-secret");
+    if (webhookSecret && secret !== webhookSecret) {
+      console.error("[WELCOME-EMAIL] Invalid webhook secret");
       return new Response(
-        JSON.stringify({ error: "Invalid webhook signature" }),
+        JSON.stringify({ error: "Unauthorized" }),
         {
           status: 401,
           headers: { "Content-Type": "application/json", ...corsHeaders },
         }
       );
     }
+    console.log("[WELCOME-EMAIL] Webhook secret verified");
 
-    const user = webhookData.record;
+    const payload = await req.json();
+    console.log("[WELCOME-EMAIL] Received payload:", JSON.stringify(payload, null, 2));
+    
+    // Database webhook sends: { type: "INSERT", table: "users", record: {...}, old_record: null }
+    const user = payload.record;
     
     if (!user || !user.email) {
       console.error("[WELCOME-EMAIL] Missing user data in payload");
