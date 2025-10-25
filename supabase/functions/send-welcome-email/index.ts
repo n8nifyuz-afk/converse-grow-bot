@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const resendApiKey = Deno.env.get("RESEND_API_KEY") as string;
-const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,44 +20,23 @@ serve(async (req) => {
   try {
     console.log("[WELCOME-EMAIL] Function invoked");
 
-    const payload = await req.text();
-    const headers = Object.fromEntries(req.headers);
+    // Parse the request body
+    const body = await req.json();
+    console.log("[WELCOME-EMAIL] Received payload");
     
-    console.log("[WELCOME-EMAIL] Verifying webhook signature");
+    // For "Send Email" hooks, Supabase sends the user object directly
+    const user = body.user;
     
-    const wh = new Webhook(hookSecret);
-    let webhookData;
-    
-    try {
-      webhookData = wh.verify(payload, headers) as {
-        user: {
-          email: string;
-          id: string;
-          user_metadata?: {
-            full_name?: string;
-            name?: string;
-          };
-        };
-        email_data?: {
-          token?: string;
-          token_hash?: string;
-          redirect_to?: string;
-          email_action_type?: string;
-        };
-      };
-      console.log("[WELCOME-EMAIL] Webhook verified successfully");
-    } catch (error) {
-      console.error("[WELCOME-EMAIL] Webhook verification failed:", error);
+    if (!user || !user.email) {
+      console.error("[WELCOME-EMAIL] Missing user data in payload");
       return new Response(
-        JSON.stringify({ error: "Invalid webhook signature" }),
+        JSON.stringify({ error: "Missing user data" }),
         {
-          status: 401,
+          status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders },
         }
       );
     }
-
-    const { user } = webhookData;
     console.log(`[WELCOME-EMAIL] Sending welcome email to: ${user.email}`);
 
     const userName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
