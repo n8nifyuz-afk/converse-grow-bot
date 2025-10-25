@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@4.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const WEBHOOK_SECRET = Deno.env.get("SEND_EMAIL_HOOK_SECRET");
@@ -49,7 +49,8 @@ const verifyWebhookSignature = async (payload: string, signature: string | null)
     logStep("Signature verification", { isValid });
     return isValid;
   } catch (error) {
-    logStep("Signature verification error", { error: error.message });
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    logStep("Signature verification error", { error: errorMsg });
     return false;
   }
 };
@@ -135,12 +136,12 @@ serve(async (req) => {
       `,
     });
 
-    logStep("Email sent successfully", { emailId: emailResponse.id });
+    logStep("Email sent successfully", { data: emailResponse.data });
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        emailId: emailResponse.id 
+        data: emailResponse.data
       }),
       {
         status: 200,
