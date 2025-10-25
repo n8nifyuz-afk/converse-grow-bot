@@ -1027,9 +1027,15 @@ export default function Admin() {
                               <CalendarIcon className="h-3.5 w-3.5 mr-2" />
                               {dateFilter.from ? (
                                 dateFilter.to ? (
-                                  <>
-                                    {format(dateFilter.from, 'MMM dd')} - {format(dateFilter.to, 'MMM dd')}
-                                  </>
+                                  dateFilter.from.getTime() === dateFilter.to.getTime() ? (
+                                    // Single day selected
+                                    format(dateFilter.from, 'MMM dd, yyyy')
+                                  ) : (
+                                    // Date range selected
+                                    <>
+                                      {format(dateFilter.from, 'MMM dd')} - {format(dateFilter.to, 'MMM dd, yyyy')}
+                                    </>
+                                  )
                                 ) : (
                                   format(dateFilter.from, 'MMM dd, yyyy')
                                 )
@@ -1182,8 +1188,15 @@ export default function Admin() {
                   )}
                   {(dateFilter.from || dateFilter.to) && (
                     <Badge variant="secondary" className="gap-1 text-xs">
-                      Date: {dateFilter.from && format(dateFilter.from, 'MMM dd')}
-                      {dateFilter.to && ` - ${format(dateFilter.to, 'MMM dd')}`}
+                      Date: {dateFilter.from && dateFilter.to && dateFilter.from.getTime() === dateFilter.to.getTime() 
+                        ? format(dateFilter.from, 'MMM dd, yyyy')
+                        : (
+                          <>
+                            {dateFilter.from && format(dateFilter.from, 'MMM dd')}
+                            {dateFilter.to && dateFilter.from?.getTime() !== dateFilter.to?.getTime() && ` - ${format(dateFilter.to, 'MMM dd')}`}
+                          </>
+                        )
+                      }
                       <X 
                         className="h-3 w-3 cursor-pointer hover:text-foreground" 
                         onClick={() => setDateFilter({ from: undefined, to: undefined })}
