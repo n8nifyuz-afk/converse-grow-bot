@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import AuthModal from '@/components/AuthModal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 import { useTranslation } from 'react-i18next';
+import { detectUserCurrency, formatPrice, convertEurToGbp } from '@/utils/currencyDetection';
 
 interface PricingModalProps {
   open: boolean;
@@ -88,21 +89,38 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
 };
 
 const pricingOptions = {
-  pro: {
-    monthly: { price: 19.99, perDay: 0.67 },     // €19.99/month
-    '3month': { price: 39.99, perDay: 0.44 },    // €39.99 for 3 months
-    yearly: { price: 59.99, perDay: 0.16, savings: 75 }, // €59.99/year (save 75%)
-    trial: { price: 0.99, perDay: 0.33, trialDays: 3 }   // €0.99 for 3 days, then €19.99/month
+  eur: {
+    pro: {
+      monthly: { price: 19.99, perDay: 0.67 },
+      '3month': { price: 39.99, perDay: 0.44 },
+      yearly: { price: 59.99, perDay: 0.16, savings: 75 },
+      trial: { price: 0.99, perDay: 0.33, trialDays: 3 }
+    },
+    ultra: {
+      monthly: { price: 39.99, perDay: 1.33 },
+      '3month': { price: 79.99, perDay: 0.89 },
+      yearly: { price: 119.99, perDay: 0.33, savings: 75 },
+      trial: { price: 0.99, perDay: 0.33, trialDays: 3 }
+    }
   },
-  ultra: {
-    monthly: { price: 39.99, perDay: 1.33 },     // €39.99/month
-    '3month': { price: 79.99, perDay: 0.89 },    // €79.99 for 3 months
-    yearly: { price: 119.99, perDay: 0.33, savings: 75 }, // €119.99/year (save 75%)
-    trial: { price: 0.99, perDay: 0.33, trialDays: 3 }    // €0.99 for 3 days, then €39.99/month
+  gbp: {
+    pro: {
+      monthly: { price: 16.99, perDay: 0.57 },
+      '3month': { price: 33.99, perDay: 0.37 },
+      yearly: { price: 50.99, perDay: 0.14, savings: 75 },
+      trial: { price: 0.79, perDay: 0.26, trialDays: 3 }
+    },
+    ultra: {
+      monthly: { price: 33.99, perDay: 1.13 },
+      '3month': { price: 67.99, perDay: 0.76 },
+      yearly: { price: 101.99, perDay: 0.28, savings: 75 },
+      trial: { price: 0.79, perDay: 0.26, trialDays: 3 }
+    }
   }
 };
 
-const priceIds = {
+// EUR Price IDs
+const eurPriceIds = {
   pro: {
     monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',   // €19.99/month
     '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',  // €39.99 for 3 months
@@ -114,6 +132,22 @@ const priceIds = {
     '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',  // €79.99 for 3 months
     yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP',    // €119.99/year
     trial: 'price_1SKJAxL8Zm4LqDn43kl9BRd8'      // Use monthly price, will be converted to schedule
+  }
+};
+
+// GBP Price IDs - YOU NEED TO CREATE THESE IN STRIPE
+const gbpPriceIds = {
+  pro: {
+    monthly: 'price_GBP_PRO_MONTHLY',   // £16.99/month (you need to create this)
+    '3month': 'price_GBP_PRO_3MONTH',   // £33.99 for 3 months (you need to create this)
+    yearly: 'price_GBP_PRO_YEARLY',     // £50.99/year (you need to create this)
+    trial: 'price_GBP_PRO_MONTHLY'      // Use monthly price
+  },
+  ultra: {
+    monthly: 'price_GBP_ULTRA_MONTHLY', // £33.99/month (you need to create this)
+    '3month': 'price_GBP_ULTRA_3MONTH', // £67.99 for 3 months (you need to create this)
+    yearly: 'price_GBP_ULTRA_YEARLY',   // £101.99/year (you need to create this)
+    trial: 'price_GBP_ULTRA_MONTHLY'    // Use monthly price
   }
 };
 
@@ -129,8 +163,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isLoading, setIsLoading] = useState(false);
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
+  const [currency, setCurrency] = useState<'eur' | 'gbp'>('eur');
   
   const allFeatures = getFeatures(t, selectedPlan);
+
+  // Detect user's currency on mount
+  useEffect(() => {
+    detectUserCurrency().then(setCurrency);
+  }, []);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
@@ -215,11 +255,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
     setIsLoading(true);
     try {
+      const priceIds = currency === 'gbp' ? gbpPriceIds : eurPriceIds;
       const priceId = priceIds[selectedPlan][selectedPeriod];
       const isTrial = selectedPeriod === 'trial';
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId, isTrial }
+        body: { priceId, isTrial, currency }
       });
 
       if (error) {
@@ -260,10 +301,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     }
   };
 
-  const currentPrice = pricingOptions[selectedPlan][selectedPeriod];
-  const savings = selectedPeriod === 'yearly' && 'savings' in pricingOptions[selectedPlan][selectedPeriod]
-    ? pricingOptions[selectedPlan][selectedPeriod].savings 
+  const currentPrice = pricingOptions[currency][selectedPlan][selectedPeriod];
+  const savings = selectedPeriod === 'yearly' && 'savings' in pricingOptions[currency][selectedPlan][selectedPeriod]
+    ? pricingOptions[currency][selectedPlan][selectedPeriod].savings 
     : 0;
+  const currencySymbol = currency === 'gbp' ? '£' : '€';
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full">
@@ -373,7 +415,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     >
                       <div className="flex justify-between items-center">
                         <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access</div>
-                        <div className="font-bold text-xl sm:text-xl text-zinc-900">€0.99</div>
+                        <div className="font-bold text-xl sm:text-xl text-zinc-900">{currencySymbol}{pricingOptions[currency][selectedPlan].trial.price}</div>
                       </div>
                     </button>
                   </div>
@@ -390,7 +432,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   >
                     <div className="flex justify-between items-center">
                       <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.monthly')}</div>
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan].monthly.price}</div>
+                      <div className="font-bold text-xl sm:text-xl text-zinc-900">{currencySymbol}{pricingOptions[currency][selectedPlan].monthly.price}</div>
                     </div>
                   </button>
                 )}
@@ -405,12 +447,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 >
                   <div className="flex justify-between items-center">
                     <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.threeMonths')}</div>
-                    <div className="font-bold text-xl sm:text-xl text-zinc-900">€{pricingOptions[selectedPlan]['3month'].price}</div>
+                    <div className="font-bold text-xl sm:text-xl text-zinc-900">{currencySymbol}{pricingOptions[currency][selectedPlan]['3month'].price}</div>
                   </div>
                 </button>
                 {selectedPeriod === 'trial' && (
                   <div className="text-xs text-zinc-600 px-2">
-                    After 3 days, your plan renews automatically at €{selectedPlan === 'pro' ? '19.99' : '39.99'}/month — cancel anytime.
+                    After 3 days, your plan renews automatically at {currencySymbol}{pricingOptions[currency][selectedPlan].monthly.price}/month — cancel anytime.
                   </div>
                 )}
 
