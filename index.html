@@ -23,10 +23,7 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Cookiebot CMP -->
-    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
-
-    <!-- Initialize Data Layer -->
+    <!-- Initialize Data Layer (before Cookiebot) -->
     <script>
       window.dataLayer = window.dataLayer || [];
     </script>
@@ -47,6 +44,9 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-NMLGMTL5');</script>
     <!-- End Google Tag Manager -->
+
+    <!-- Cookiebot CMP (load after other scripts to avoid blocking issues) -->
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" type="text/javascript" async></script>
   </head>
 
   <body>
@@ -55,6 +55,6 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx" data-cookieconsent="ignore"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
