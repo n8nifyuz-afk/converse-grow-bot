@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const resendApiKey = Deno.env.get("RESEND_API_KEY") as string;
+const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,12 +22,40 @@ serve(async (req) => {
   try {
     console.log("[WELCOME-EMAIL] Function invoked");
 
-    // Parse the request body
-    const body = await req.json();
-    console.log("[WELCOME-EMAIL] Received payload");
+    const payload = await req.text();
+    const headers = Object.fromEntries(req.headers);
     
-    // For "Send Email" hooks, Supabase sends the user object directly
-    const user = body.user;
+    console.log("[WELCOME-EMAIL] Verifying webhook signature");
+    
+    const wh = new Webhook(hookSecret);
+    let webhookData;
+    
+    try {
+      webhookData = wh.verify(payload, headers) as {
+        type: string;
+        record: {
+          id: string;
+          email: string;
+          raw_user_meta_data?: {
+            full_name?: string;
+            name?: string;
+          };
+        };
+      };
+      console.log("[WELCOME-EMAIL] Webhook verified successfully");
+      console.log("[WELCOME-EMAIL] Event type:", webhookData.type);
+    } catch (error) {
+      console.error("[WELCOME-EMAIL] Webhook verification failed:", error);
+      return new Response(
+        JSON.stringify({ error: "Invalid webhook signature" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    const user = webhookData.record;
     
     if (!user || !user.email) {
       console.error("[WELCOME-EMAIL] Missing user data in payload");
@@ -39,7 +69,7 @@ serve(async (req) => {
     }
     console.log(`[WELCOME-EMAIL] Sending welcome email to: ${user.email}`);
 
-    const userName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+    const userName = user.raw_user_meta_data?.full_name || user.raw_user_meta_data?.name || user.email.split('@')[0];
 
     // Send email using Resend API directly
     const emailResponse = await fetch("https://api.resend.com/emails", {
