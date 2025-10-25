@@ -1009,25 +1009,25 @@ export default function Admin() {
                     value="all" 
                     className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
-                    All ({userUsages.length})
+                    All ({filteredUsers.length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="free"
                     className="data-[state=active]:bg-muted data-[state=active]:text-foreground border-b-2 border-transparent data-[state=active]:border-muted-foreground rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
-                    Free ({userUsages.filter(u => getUserPlan(u) === 'free').length})
+                    Free ({filteredUsers.filter(u => getUserPlan(u) === 'free').length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="pro"
                     className="data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-600 border-b-2 border-transparent data-[state=active]:border-blue-500 rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
-                    Pro ({userUsages.filter(u => getUserPlan(u) === 'pro').length})
+                    Pro ({filteredUsers.filter(u => getUserPlan(u) === 'pro').length})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra"
                     className="data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-600 border-b-2 border-transparent data-[state=active]:border-purple-500 rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
                   >
-                    Ultra ({userUsages.filter(u => getUserPlan(u) === 'ultra').length})
+                    Ultra ({filteredUsers.filter(u => getUserPlan(u) === 'ultra').length})
                   </TabsTrigger>
                 </TabsList>
               </div>
