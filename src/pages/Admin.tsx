@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin, DollarSign } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -249,7 +249,6 @@ export default function Admin() {
   const [showFilters, setShowFilters] = useState(false);
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<'all' | 'subscribed' | 'free'>('all');
-  const [costRangeFilter, setCostRangeFilter] = useState<{ min: number; max: number }>({ min: 0, max: Infinity });
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -552,12 +551,6 @@ export default function Admin() {
       if (subscriptionStatusFilter === 'subscribed' && !isSubscribed) return false;
       if (subscriptionStatusFilter === 'free' && isSubscribed) return false;
     }
-
-    // Filter by cost range
-    const totalCost = usage.model_usages.reduce((sum, m) => sum + m.cost, 0);
-    if (totalCost < costRangeFilter.min || totalCost > costRangeFilter.max) {
-      return false;
-    }
     
     return true;
   });
@@ -636,8 +629,7 @@ export default function Admin() {
     searchQuery.trim() !== '',
     dateFilter.from || dateFilter.to,
     countryFilter !== 'all',
-    subscriptionStatusFilter !== 'all',
-    costRangeFilter.min > 0 || costRangeFilter.max < Infinity
+    subscriptionStatusFilter !== 'all'
   ].filter(Boolean).length;
 
   // Clear all filters
@@ -647,13 +639,12 @@ export default function Admin() {
     setDateFilter({ from: undefined, to: undefined });
     setCountryFilter('all');
     setSubscriptionStatusFilter('all');
-    setCostRangeFilter({ min: 0, max: Infinity });
   };
 
   // Reset to page 1 when filter, search, or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, countryFilter, subscriptionStatusFilter, costRangeFilter]);
+  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, countryFilter, subscriptionStatusFilter]);
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -1162,36 +1153,6 @@ export default function Admin() {
                         </div>
                       </div>
 
-                      {/* Cost Range Filter */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" />
-                          Cost Range
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            type="number"
-                            placeholder="Min"
-                            value={costRangeFilter.min === 0 ? '' : costRangeFilter.min}
-                            onChange={(e) => setCostRangeFilter(prev => ({ 
-                              ...prev, 
-                              min: e.target.value ? parseFloat(e.target.value) : 0 
-                            }))}
-                            className="h-9 text-xs"
-                          />
-                          <Input
-                            type="number"
-                            placeholder="Max"
-                            value={costRangeFilter.max === Infinity ? '' : costRangeFilter.max}
-                            onChange={(e) => setCostRangeFilter(prev => ({ 
-                              ...prev, 
-                              max: e.target.value ? parseFloat(e.target.value) : Infinity 
-                            }))}
-                            className="h-9 text-xs"
-                          />
-                        </div>
-                      </div>
-
                       {/* Results Count */}
                       <div className="pt-2 border-t">
                         <div className="flex items-center justify-between text-xs">
@@ -1244,15 +1205,6 @@ export default function Admin() {
                       <X 
                         className="h-3 w-3 cursor-pointer hover:text-foreground" 
                         onClick={() => setSubscriptionStatusFilter('all')}
-                      />
-                    </Badge>
-                  )}
-                  {(costRangeFilter.min > 0 || costRangeFilter.max < Infinity) && (
-                    <Badge variant="secondary" className="gap-1 text-xs">
-                      Cost: ${costRangeFilter.min} - ${costRangeFilter.max === Infinity ? '∞' : costRangeFilter.max}
-                      <X 
-                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                        onClick={() => setCostRangeFilter({ min: 0, max: Infinity })}
                       />
                     </Badge>
                   )}
