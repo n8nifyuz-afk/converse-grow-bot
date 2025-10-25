@@ -687,8 +687,9 @@ export default function ProjectPage() {
             await supabase.functions.invoke('chat-with-ai-optimized', {
               body: {
                 message: userMessage,
-                chatId: newChat.id,
-                userId: user.id
+                chat_id: newChat.id,
+                user_id: user.id,
+                model: selectedModel
               }
             });
             console.log('[PROJECT-AI] Text message sent to AI, response will arrive via realtime');
