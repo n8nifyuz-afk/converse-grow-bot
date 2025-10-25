@@ -612,27 +612,17 @@ serve(async (req) => {
                     invoice.subscription as string
                   );
                   
-                  logStep("Fetched subscription for trial price", {
-                    subscriptionId: stripeSubscription.id,
-                    itemsCount: stripeSubscription.items.data.length,
-                    priceId: stripeSubscription.items.data[0]?.price?.id,
-                    unitAmount: stripeSubscription.items.data[0]?.price?.unit_amount
-                  });
-                  
                   // Get the actual subscription price (not the trial price)
                   if (stripeSubscription.items.data.length > 0) {
                     const subscriptionPrice = stripeSubscription.items.data[0].price;
                     if (subscriptionPrice.unit_amount) {
                       regularPrice = subscriptionPrice.unit_amount / 100;
-                      logStep("Set regularPrice from subscription", { regularPrice });
                     }
                   }
                 } catch (stripeError) {
                   logStep("Error fetching subscription for price", { error: stripeError });
                 }
               }
-              
-              logStep("Final prices for email", { planPrice, regularPrice, isTrial });
               
               if (invoice.lines.data.length > 0) {
                 const line = invoice.lines.data[0];
