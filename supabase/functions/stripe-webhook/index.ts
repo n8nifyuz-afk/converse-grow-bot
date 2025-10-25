@@ -600,10 +600,29 @@ serve(async (req) => {
               const isFirstPayment = invoice.billing_reason === 'subscription_create';
               const isTrial = invoice.amount_paid < 100; // Less than 1 EUR means trial
               
-              // Get subscription details for trial end date
+              // Get subscription details for trial end date and actual price
               let trialEndDate = null;
               let regularPrice = planPrice;
               let nextBillingDate = null;
+              
+              // Fetch the full subscription from Stripe to get the actual price
+              if (invoice.subscription && isTrial) {
+                try {
+                  const stripeSubscription = await stripe.subscriptions.retrieve(
+                    invoice.subscription as string
+                  );
+                  
+                  // Get the actual subscription price (not the trial price)
+                  if (stripeSubscription.items.data.length > 0) {
+                    const subscriptionPrice = stripeSubscription.items.data[0].price;
+                    if (subscriptionPrice.unit_amount) {
+                      regularPrice = subscriptionPrice.unit_amount / 100;
+                    }
+                  }
+                } catch (stripeError) {
+                  logStep("Error fetching subscription for price", { error: stripeError });
+                }
+              }
               
               if (invoice.lines.data.length > 0) {
                 const line = invoice.lines.data[0];
@@ -615,11 +634,6 @@ serve(async (req) => {
                     month: 'long',
                     day: 'numeric'
                   });
-                }
-                
-                // If trial, get the regular price from the line item
-                if (isTrial && line.plan && line.plan.amount) {
-                  regularPrice = line.plan.amount / 100;
                 }
               }
               
@@ -660,17 +674,11 @@ serve(async (req) => {
                             <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">€${regularPrice.toFixed(2)}/${periodText}</td>
                           </tr>
                           ` : ''}
-                        </table>
-                      </td>
-                    </tr>
                   </table>
-                  
-                  <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0;">
-                    <p style="font-size: 14px; line-height: 1.6; margin: 0; color: #92400e;">
-                      <strong>📅 Important:</strong> Your trial will automatically convert to a full subscription on <strong>${nextBillingDate}</strong> at <strong>€${regularPrice.toFixed(2)}/${periodText}</strong>. You can cancel anytime before then.
-                    </p>
-                  </div>
-                `;
+                </td>
+              </tr>
+            </table>
+          `;
               } else {
                 // Regular payment (no trial)
                 paymentDetailsHtml = `
