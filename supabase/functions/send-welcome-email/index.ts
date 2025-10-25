@@ -21,27 +21,23 @@ serve(async (req) => {
   try {
     console.log("[WELCOME-EMAIL] Function invoked");
 
-    // Verify webhook secret from header
-    const secret = req.headers.get("webhook-secret");
-    if (webhookSecret && secret !== webhookSecret) {
-      console.error("[WELCOME-EMAIL] Invalid webhook secret");
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
-    console.log("[WELCOME-EMAIL] Webhook secret verified");
-
     const payload = await req.json();
     console.log("[WELCOME-EMAIL] Received payload:", JSON.stringify(payload, null, 2));
     
-    // Database webhook sends: { type: "INSERT", table: "users", record: {...}, old_record: null }
-    const user = payload.record;
+    // Handle both formats: database trigger and webhook
+    let userEmail: string;
+    let userName: string;
     
-    if (!user || !user.email) {
+    if (payload.record) {
+      // Webhook format: { type: "INSERT", table: "users", record: {...} }
+      const user = payload.record;
+      userEmail = user.email;
+      userName = user.raw_user_meta_data?.full_name || user.raw_user_meta_data?.name || user.email.split('@')[0];
+    } else if (payload.email) {
+      // Database trigger format: { email, user_id, display_name }
+      userEmail = payload.email;
+      userName = payload.display_name || payload.email.split('@')[0];
+    } else {
       console.error("[WELCOME-EMAIL] Missing user data in payload");
       return new Response(
         JSON.stringify({ error: "Missing user data" }),
@@ -51,9 +47,8 @@ serve(async (req) => {
         }
       );
     }
-    console.log(`[WELCOME-EMAIL] Sending welcome email to: ${user.email}`);
-
-    const userName = user.raw_user_meta_data?.full_name || user.raw_user_meta_data?.name || user.email.split('@')[0];
+    
+    console.log(`[WELCOME-EMAIL] Sending welcome email to: ${userEmail}`);
 
     // Send email using Resend API directly
     const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -63,8 +58,8 @@ serve(async (req) => {
         "Authorization": `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: "ChatL <no-reply@chatl.ai>",
-        to: [user.email],
+        from: "ChatL <onboarding@resend.dev>",
+        to: [userEmail],
         subject: "Welcome to ChatL! 🎉",
         html: `
           <!DOCTYPE html>
