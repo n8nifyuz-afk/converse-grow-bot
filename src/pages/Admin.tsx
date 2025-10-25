@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -246,6 +246,10 @@ export default function Admin() {
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
   const [dateFilter, setDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<'all' | 'subscribed' | 'free'>('all');
+  const [costRangeFilter, setCostRangeFilter] = useState<{ min: number; max: number }>({ min: 0, max: Infinity });
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -505,7 +509,10 @@ export default function Admin() {
       : <ArrowDown className="h-3 w-3 sm:h-4 sm:w-4" />;
   };
 
-  // Filter users by plan and date
+  // Get unique countries from users
+  const uniqueCountries = Array.from(new Set(userUsages.map(u => u.country).filter(Boolean))).sort();
+
+  // Filter users by multiple criteria
   const filteredUsers = userUsages.filter(usage => {
     // Filter by plan
     if (planFilter !== 'all' && getUserPlan(usage) !== planFilter) {
@@ -526,12 +533,30 @@ export default function Admin() {
       if (dateFilter.from && dateFilter.to) {
         const from = startOfDay(dateFilter.from);
         const to = endOfDay(dateFilter.to);
-        return isWithinInterval(userDate, { start: from, end: to });
+        if (!isWithinInterval(userDate, { start: from, end: to })) return false;
       } else if (dateFilter.from) {
-        return userDate >= startOfDay(dateFilter.from);
+        if (userDate < startOfDay(dateFilter.from)) return false;
       } else if (dateFilter.to) {
-        return userDate <= endOfDay(dateFilter.to);
+        if (userDate > endOfDay(dateFilter.to)) return false;
       }
+    }
+
+    // Filter by country
+    if (countryFilter !== 'all' && usage.country !== countryFilter) {
+      return false;
+    }
+
+    // Filter by subscription status
+    if (subscriptionStatusFilter !== 'all') {
+      const isSubscribed = usage.subscription_status?.subscribed;
+      if (subscriptionStatusFilter === 'subscribed' && !isSubscribed) return false;
+      if (subscriptionStatusFilter === 'free' && isSubscribed) return false;
+    }
+
+    // Filter by cost range
+    const totalCost = usage.model_usages.reduce((sum, m) => sum + m.cost, 0);
+    if (totalCost < costRangeFilter.min || totalCost > costRangeFilter.max) {
+      return false;
     }
     
     return true;
@@ -605,10 +630,30 @@ export default function Admin() {
     setShowDatePicker(false);
   };
 
+  // Count active filters
+  const activeFiltersCount = [
+    planFilter !== 'all',
+    searchQuery.trim() !== '',
+    dateFilter.from || dateFilter.to,
+    countryFilter !== 'all',
+    subscriptionStatusFilter !== 'all',
+    costRangeFilter.min > 0 || costRangeFilter.max < Infinity
+  ].filter(Boolean).length;
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setPlanFilter('all');
+    setSearchQuery('');
+    setDateFilter({ from: undefined, to: undefined });
+    setCountryFilter('all');
+    setSubscriptionStatusFilter('all');
+    setCostRangeFilter({ min: 0, max: Infinity });
+  };
+
   // Reset to page 1 when filter, search, or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter]);
+  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, countryFilter, subscriptionStatusFilter, costRangeFilter]);
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -877,7 +922,7 @@ export default function Admin() {
                 </div>
               </div>
               
-              {/* Search and Date Filter */}
+              {/* Search and Advanced Filters */}
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <div className="relative flex-1 max-w-full sm:max-w-80 md:max-w-96">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
@@ -892,7 +937,7 @@ export default function Admin() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted"
                       onClick={() => setSearchQuery('')}
                     >
                       <X className="h-3 w-3" />
@@ -900,141 +945,332 @@ export default function Admin() {
                   )}
                 </div>
 
-                {/* Date Filter */}
-                <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                {/* Advanced Filters Button */}
+                <Popover open={showFilters} onOpenChange={setShowFilters}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`h-11 justify-start text-left font-normal gap-2 ${
-                        (dateFilter.from || dateFilter.to) 
+                      className={`h-11 gap-2 ${
+                        activeFiltersCount > 0 
                           ? 'border-primary/50 bg-primary/5' 
                           : ''
                       }`}
                     >
-                      <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-                      <span className="text-sm">
-                        {dateFilter.from ? (
-                          dateFilter.to ? (
-                            <>
-                              {format(dateFilter.from, 'MMM dd')} - {format(dateFilter.to, 'MMM dd')}
-                            </>
-                          ) : (
-                            format(dateFilter.from, 'MMM dd, yyyy')
-                          )
-                        ) : (
-                          'Filter by date'
-                        )}
-                      </span>
-                      {(dateFilter.from || dateFilter.to) && (
-                        <Badge variant="secondary" className="ml-auto text-xs animate-scale-in">
-                          {filteredUsers.length}
+                      <Filter className="h-4 w-4" />
+                      <span className="hidden sm:inline">Filters</span>
+                      {activeFiltersCount > 0 && (
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                          {activeFiltersCount}
                         </Badge>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 animate-scale-in" align="start">
-                    <div className="flex">
-                      {/* Quick Presets */}
-                      <div className="border-r border-border/50 p-2 space-y-0.5 bg-muted/30 min-w-[110px]">
-                        <div className="px-2 py-1">
-                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Quick</p>
+                  <PopoverContent className="w-[320px] p-4 animate-scale-in" align="end">
+                    <div className="space-y-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between pb-2 border-b">
+                        <div className="flex items-center gap-2">
+                          <Filter className="h-4 w-4 text-primary" />
+                          <h4 className="font-semibold text-sm">Advanced Filters</h4>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-7 text-xs px-2"
-                          onClick={() => setDatePreset('today')}
-                        >
-                          Today
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-7 text-xs px-2"
-                          onClick={() => setDatePreset('yesterday')}
-                        >
-                          Yesterday
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-7 text-xs px-2"
-                          onClick={() => setDatePreset('week')}
-                        >
-                          This Week
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-7 text-xs px-2"
-                          onClick={() => setDatePreset('month')}
-                        >
-                          This Month
-                        </Button>
-                        <div className="border-t border-border/50 my-1" />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-7 text-xs px-2 text-muted-foreground"
-                          onClick={() => setDatePreset('all')}
-                        >
-                          Clear
-                        </Button>
+                        {activeFiltersCount > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={clearAllFilters}
+                            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                          >
+                            Clear all
+                          </Button>
+                        )}
                       </div>
-                      
-                      {/* Calendar */}
-                      <div className="p-3">
-                        <Calendar
-                          mode="range"
-                          selected={{ from: dateFilter.from, to: dateFilter.to }}
-                          onSelect={(range) => {
-                            setDateFilter({ from: range?.from, to: range?.to });
-                          }}
-                          numberOfMonths={1}
-                          className="pointer-events-auto"
-                        />
+
+                      {/* Plan Filter */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Plan Type</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant={planFilter === 'all' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setPlanFilter('all')}
+                            className="h-8 text-xs"
+                          >
+                            All
+                          </Button>
+                          <Button
+                            variant={planFilter === 'free' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setPlanFilter('free')}
+                            className="h-8 text-xs"
+                          >
+                            Free
+                          </Button>
+                          <Button
+                            variant={planFilter === 'pro' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setPlanFilter('pro')}
+                            className="h-8 text-xs"
+                          >
+                            Pro
+                          </Button>
+                          <Button
+                            variant={planFilter === 'ultra' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setPlanFilter('ultra')}
+                            className="h-8 text-xs"
+                          >
+                            Ultra
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Date Range Filter */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Registration Date</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full h-9 justify-start text-left font-normal text-xs"
+                            >
+                              <CalendarIcon className="h-3.5 w-3.5 mr-2" />
+                              {dateFilter.from ? (
+                                dateFilter.to ? (
+                                  <>
+                                    {format(dateFilter.from, 'MMM dd')} - {format(dateFilter.to, 'MMM dd')}
+                                  </>
+                                ) : (
+                                  format(dateFilter.from, 'MMM dd, yyyy')
+                                )
+                              ) : (
+                                'Select date range'
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <div className="flex">
+                              <div className="border-r border-border/50 p-2 space-y-0.5 bg-muted/30 min-w-[110px]">
+                                <div className="px-2 py-1">
+                                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Quick</p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-7 text-xs px-2"
+                                  onClick={() => setDatePreset('today')}
+                                >
+                                  Today
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-7 text-xs px-2"
+                                  onClick={() => setDatePreset('yesterday')}
+                                >
+                                  Yesterday
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-7 text-xs px-2"
+                                  onClick={() => setDatePreset('week')}
+                                >
+                                  This Week
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-7 text-xs px-2"
+                                  onClick={() => setDatePreset('month')}
+                                >
+                                  This Month
+                                </Button>
+                                <div className="border-t border-border/50 my-1" />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-7 text-xs px-2 text-muted-foreground"
+                                  onClick={() => setDatePreset('all')}
+                                >
+                                  Clear
+                                </Button>
+                              </div>
+                              <div className="p-3">
+                                <Calendar
+                                  mode="range"
+                                  selected={{ from: dateFilter.from, to: dateFilter.to }}
+                                  onSelect={(range) => {
+                                    setDateFilter({ from: range?.from, to: range?.to });
+                                  }}
+                                  numberOfMonths={1}
+                                  className="pointer-events-auto"
+                                />
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* Country Filter */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          Country
+                        </label>
+                        <select
+                          value={countryFilter}
+                          onChange={(e) => setCountryFilter(e.target.value)}
+                          className="w-full h-9 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                        >
+                          <option value="all">All Countries</option>
+                          {uniqueCountries.map((country) => (
+                            <option key={country} value={country}>
+                              {getCountryName(country)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Subscription Status Filter */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Subscription Status</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Button
+                            variant={subscriptionStatusFilter === 'all' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSubscriptionStatusFilter('all')}
+                            className="h-8 text-xs"
+                          >
+                            All
+                          </Button>
+                          <Button
+                            variant={subscriptionStatusFilter === 'subscribed' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSubscriptionStatusFilter('subscribed')}
+                            className="h-8 text-xs"
+                          >
+                            Paid
+                          </Button>
+                          <Button
+                            variant={subscriptionStatusFilter === 'free' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSubscriptionStatusFilter('free')}
+                            className="h-8 text-xs"
+                          >
+                            Free
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Cost Range Filter */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                          <DollarSign className="h-3 w-3" />
+                          Cost Range
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            type="number"
+                            placeholder="Min"
+                            value={costRangeFilter.min === 0 ? '' : costRangeFilter.min}
+                            onChange={(e) => setCostRangeFilter(prev => ({ 
+                              ...prev, 
+                              min: e.target.value ? parseFloat(e.target.value) : 0 
+                            }))}
+                            className="h-9 text-xs"
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Max"
+                            value={costRangeFilter.max === Infinity ? '' : costRangeFilter.max}
+                            onChange={(e) => setCostRangeFilter(prev => ({ 
+                              ...prev, 
+                              max: e.target.value ? parseFloat(e.target.value) : Infinity 
+                            }))}
+                            className="h-9 text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Results Count */}
+                      <div className="pt-2 border-t">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Results:</span>
+                          <Badge variant="secondary" className="font-mono">
+                            {filteredUsers.length} users
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </PopoverContent>
                 </Popover>
               </div>
+
+              {/* Active Filters Summary */}
+              {activeFiltersCount > 0 && (
+                <div className="flex flex-wrap items-center gap-2 animate-fade-in">
+                  <span className="text-xs text-muted-foreground">Active filters:</span>
+                  {planFilter !== 'all' && (
+                    <Badge variant="secondary" className="gap-1 text-xs">
+                      Plan: {planFilter}
+                      <X 
+                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                        onClick={() => setPlanFilter('all')}
+                      />
+                    </Badge>
+                  )}
+                  {(dateFilter.from || dateFilter.to) && (
+                    <Badge variant="secondary" className="gap-1 text-xs">
+                      Date: {dateFilter.from && format(dateFilter.from, 'MMM dd')}
+                      {dateFilter.to && ` - ${format(dateFilter.to, 'MMM dd')}`}
+                      <X 
+                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                        onClick={() => setDateFilter({ from: undefined, to: undefined })}
+                      />
+                    </Badge>
+                  )}
+                  {countryFilter !== 'all' && (
+                    <Badge variant="secondary" className="gap-1 text-xs">
+                      Country: {getCountryName(countryFilter)}
+                      <X 
+                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                        onClick={() => setCountryFilter('all')}
+                      />
+                    </Badge>
+                  )}
+                  {subscriptionStatusFilter !== 'all' && (
+                    <Badge variant="secondary" className="gap-1 text-xs">
+                      Status: {subscriptionStatusFilter}
+                      <X 
+                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                        onClick={() => setSubscriptionStatusFilter('all')}
+                      />
+                    </Badge>
+                  )}
+                  {(costRangeFilter.min > 0 || costRangeFilter.max < Infinity) && (
+                    <Badge variant="secondary" className="gap-1 text-xs">
+                      Cost: ${costRangeFilter.min} - ${costRangeFilter.max === Infinity ? '∞' : costRangeFilter.max}
+                      <X 
+                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                        onClick={() => setCostRangeFilter({ min: 0, max: Infinity })}
+                      />
+                    </Badge>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear all
+                  </Button>
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-0 w-full overflow-hidden">
-            {/* Filter Tabs */}
-            <Tabs value={planFilter} onValueChange={(v) => setPlanFilter(v as any)} className="w-full">
-              <div className="border-b border-border/50 px-4 sm:px-5 md:px-6 overflow-x-auto">
-                <TabsList className="bg-transparent border-0 h-auto p-0 gap-1 sm:gap-2 w-full sm:w-auto justify-start">
-                  <TabsTrigger 
-                    value="all" 
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
-                  >
-                    All ({filteredUsers.length})
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="free"
-                    className="data-[state=active]:bg-muted data-[state=active]:text-foreground border-b-2 border-transparent data-[state=active]:border-muted-foreground rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
-                  >
-                    Free ({filteredUsers.filter(u => getUserPlan(u) === 'free').length})
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="pro"
-                    className="data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-600 border-b-2 border-transparent data-[state=active]:border-blue-500 rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
-                  >
-                    Pro ({filteredUsers.filter(u => getUserPlan(u) === 'pro').length})
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="ultra"
-                    className="data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-600 border-b-2 border-transparent data-[state=active]:border-purple-500 rounded-none px-3 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap"
-                  >
-                    Ultra ({filteredUsers.filter(u => getUserPlan(u) === 'ultra').length})
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value={planFilter} className="m-0">
-                {/* Mobile/Tablet Card Layout */}
-                <div className="lg:hidden">
+            {/* Mobile/Tablet Card Layout */}
+            <div className="lg:hidden">
                   {/* Mobile Sort Controls */}
                   <div className="border-b border-border/50 p-4 bg-muted/20">
                     <p className="text-xs font-medium text-muted-foreground mb-3">Sort by:</p>
@@ -1170,12 +1406,12 @@ export default function Admin() {
                           </Card>
                         );
                       })}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Desktop Table Layout */}
-                <div className="hidden lg:block overflow-x-auto">
+              {/* Desktop Table Layout */}
+              <div className="hidden lg:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -1408,8 +1644,6 @@ export default function Admin() {
                     </div>
                   </div>
                 )}
-              </TabsContent>
-            </Tabs>
           </CardContent>
         </Card>
 
