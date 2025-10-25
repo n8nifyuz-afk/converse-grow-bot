@@ -732,22 +732,30 @@ serve(async (req) => {
                   <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
                     <title>Payment Receipt - ChatLearn</title>
                   </head>
                   <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f9fafb; color: #111827; margin: 0; padding: 20px;">
-                    <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+                    <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
                       
                       <!-- Header with logo -->
                       <tr>
-                        <td style="padding: 40px 40px 30px 40px; background-color: #ffffff;">
+                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                           <table width="100%" cellspacing="0" cellpadding="0">
                             <tr>
                               <td>
-                                <img src="https://chatl.ai/favicon.png"
-                                     alt="ChatLearn"
-                                     width="40" height="40"
-                                     style="display: block;">
-                                <h1 style="font-size: 24px; font-weight: 600; margin: 16px 0 0 0; color: #111827;">Payment Receipt</h1>
+                                <table cellspacing="0" cellpadding="0" style="margin: 0;">
+                                  <tr>
+                                    <td style="background-color: #ffffff; border-radius: 8px; padding: 8px; display: inline-block;">
+                                      <img src="https://www.chatl.ai/favicon.png"
+                                           alt="ChatLearn Logo"
+                                           width="40" 
+                                           height="40"
+                                           style="display: block; border: none;">
+                                    </td>
+                                  </tr>
+                                </table>
+                                <h1 style="font-size: 28px; font-weight: 700; margin: 20px 0 0 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Payment Receipt</h1>
                               </td>
                             </tr>
                           </table>
@@ -807,10 +815,22 @@ serve(async (req) => {
               `;
 
               const emailResult = await resend.emails.send({
-                from: "ChatLearn <no-reply@chatl.ai>",
+                from: "ChatLearn Support <support@chatl.ai>",
                 to: [user.email],
-                subject: isTrial ? `Your ${planName} Trial Has Started` : `Payment Receipt - ${planName} Subscription`,
+                subject: isTrial ? `✨ Your ${planName} Trial Has Started` : `✅ Payment Receipt - ${planName} Subscription`,
                 html: htmlContent,
+                headers: {
+                  'X-Entity-Ref-ID': `payment-${invoice.id}`,
+                  'List-Unsubscribe': '<https://www.chatl.ai/account>',
+                  'Precedence': 'bulk',
+                  'X-Auto-Response-Suppress': 'OOF, AutoReply',
+                },
+                tags: [
+                  {
+                    name: 'category',
+                    value: isTrial ? 'trial-started' : 'payment-receipt'
+                  }
+                ],
               });
 
               if (emailResult.error) {
