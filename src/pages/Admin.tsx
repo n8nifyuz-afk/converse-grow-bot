@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,9 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { UserInformationModal } from '@/components/UserInformationModal';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, isWithinInterval, eachDayOfInterval, startOfToday, endOfToday } from 'date-fns';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -241,6 +244,8 @@ export default function Admin() {
   const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null);
   const [userActivityLogs, setUserActivityLogs] = useState<any[]>([]);
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
+  const [dateFilter, setDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -500,7 +505,7 @@ export default function Admin() {
       : <ArrowDown className="h-3 w-3 sm:h-4 sm:w-4" />;
   };
 
-  // Filter users by plan
+  // Filter users by plan and date
   const filteredUsers = userUsages.filter(usage => {
     // Filter by plan
     if (planFilter !== 'all' && getUserPlan(usage) !== planFilter) {
@@ -512,7 +517,21 @@ export default function Admin() {
       const query = searchQuery.toLowerCase().trim();
       const nameMatch = usage.display_name?.toLowerCase().includes(query);
       const emailMatch = usage.email?.toLowerCase().includes(query);
-      return nameMatch || emailMatch;
+      if (!nameMatch && !emailMatch) return false;
+    }
+    
+    // Filter by date range
+    if (dateFilter.from || dateFilter.to) {
+      const userDate = new Date(usage.created_at);
+      if (dateFilter.from && dateFilter.to) {
+        const from = startOfDay(dateFilter.from);
+        const to = endOfDay(dateFilter.to);
+        return isWithinInterval(userDate, { start: from, end: to });
+      } else if (dateFilter.from) {
+        return userDate >= startOfDay(dateFilter.from);
+      } else if (dateFilter.to) {
+        return userDate <= endOfDay(dateFilter.to);
+      }
     }
     
     return true;
@@ -562,10 +581,52 @@ export default function Admin() {
   const endIndex = startIndex + usersPerPage;
   const paginatedUsers = sortedUsers.slice(startIndex, endIndex);
 
+  // Calculate daily signup stats
+  const getDailySignupStats = () => {
+    if (!dateFilter.from || !dateFilter.to) return [];
+    
+    const days = eachDayOfInterval({ start: dateFilter.from, end: dateFilter.to });
+    return days.map(day => {
+      const dayStart = startOfDay(day);
+      const dayEnd = endOfDay(day);
+      const count = userUsages.filter(user => {
+        const userDate = new Date(user.created_at);
+        return isWithinInterval(userDate, { start: dayStart, end: dayEnd });
+      }).length;
+      return { date: format(day, 'MMM dd'), count };
+    });
+  };
+
+  const dailyStats = getDailySignupStats();
+
+  // Quick date presets
+  const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
+    const today = startOfToday();
+    switch (preset) {
+      case 'today':
+        setDateFilter({ from: today, to: endOfToday() });
+        break;
+      case 'yesterday':
+        const yesterday = subDays(today, 1);
+        setDateFilter({ from: yesterday, to: endOfDay(yesterday) });
+        break;
+      case 'week':
+        setDateFilter({ from: startOfWeek(today, { weekStartsOn: 1 }), to: endOfWeek(today, { weekStartsOn: 1 }) });
+        break;
+      case 'month':
+        setDateFilter({ from: startOfMonth(today), to: endOfMonth(today) });
+        break;
+      case 'all':
+        setDateFilter({ from: undefined, to: undefined });
+        break;
+    }
+    setShowDatePicker(false);
+  };
+
   // Reset to page 1 when filter, search, or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [planFilter, searchQuery, sortField, sortDirection]);
+  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter]);
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -748,10 +809,10 @@ export default function Admin() {
 
         {/* Stats Cards */}
         <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5 w-full">
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Total Users</CardTitle>
-              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-3xl sm:text-4xl font-bold text-foreground">{userUsages.length}</div>
@@ -759,10 +820,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Free Users</CardTitle>
-              <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0">{userUsages.filter(u => getUserPlan(u) === 'free').length}</Badge>
+              <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">{userUsages.filter(u => getUserPlan(u) === 'free').length}</Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -772,10 +833,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Pro Users</CardTitle>
-              <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30 text-xs sm:text-sm flex-shrink-0">
+              <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30 text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
                 {userUsages.filter(u => getUserPlan(u) === 'pro').length}
               </Badge>
             </CardHeader>
@@ -787,10 +848,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Ultra Pro</CardTitle>
-              <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30 text-xs sm:text-sm flex-shrink-0">
+              <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30 text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
                 {userUsages.filter(u => getUserPlan(u) === 'ultra').length}
               </Badge>
             </CardHeader>
@@ -802,10 +863,10 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden">
+          <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Total Usage</CardTitle>
-              <Badge className="bg-green-500/10 text-green-600 border-green-500/30 text-xs sm:text-sm flex-shrink-0">Cost</Badge>
+              <Badge className="bg-green-500/10 text-green-600 border-green-500/30 text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">Cost</Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-3xl sm:text-4xl font-bold text-foreground">
@@ -817,6 +878,39 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Daily Signup Stats - Show when date filter is active */}
+        {dateFilter.from && dateFilter.to && dailyStats.length > 0 && (
+          <Card className="border-border/50 overflow-hidden animate-fade-in">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border/50 p-4 sm:p-5 md:p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg sm:text-xl">Daily Signups</CardTitle>
+                </div>
+                <Badge variant="outline" className="gap-1">
+                  {filteredUsers.length} signups
+                </Badge>
+              </div>
+              <CardDescription className="text-xs sm:text-sm mt-2">
+                {format(dateFilter.from, 'MMM dd, yyyy')} - {format(dateFilter.to, 'MMM dd, yyyy')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-5 md:p-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                {dailyStats.map((stat, index) => (
+                  <div 
+                    key={index} 
+                    className="flex flex-col items-center justify-center p-3 rounded-lg border border-border/50 hover:border-primary/30 transition-all hover:shadow-md bg-gradient-to-br from-background to-muted/20"
+                  >
+                    <div className="text-2xl font-bold text-foreground">{stat.count}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{stat.date}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* User Token Usage Table with Tabs */}
         <Card className="border-border/50 overflow-hidden w-full">
@@ -834,16 +928,126 @@ export default function Admin() {
                 </div>
               </div>
               
-              {/* Search Input */}
-              <div className="relative w-full max-w-full sm:max-w-80 md:max-w-96">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
-                <Input
-                  type="text"
-                  placeholder="Search by name or email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 text-sm sm:text-base w-full"
-                />
+              {/* Search and Date Filter */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <div className="relative flex-1 max-w-full sm:max-w-80 md:max-w-96">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
+                  <Input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-9 h-11 text-sm sm:text-base w-full"
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                      onClick={() => setSearchQuery('')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+
+                {/* Date Filter */}
+                <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`h-11 justify-start text-left font-normal gap-2 ${
+                        (dateFilter.from || dateFilter.to) 
+                          ? 'border-primary/50 bg-primary/5' 
+                          : ''
+                      }`}
+                    >
+                      <CalendarIcon className="h-4 w-4 flex-shrink-0" />
+                      <span className="text-sm">
+                        {dateFilter.from ? (
+                          dateFilter.to ? (
+                            <>
+                              {format(dateFilter.from, 'MMM dd')} - {format(dateFilter.to, 'MMM dd')}
+                            </>
+                          ) : (
+                            format(dateFilter.from, 'MMM dd, yyyy')
+                          )
+                        ) : (
+                          'Filter by date'
+                        )}
+                      </span>
+                      {(dateFilter.from || dateFilter.to) && (
+                        <Badge variant="secondary" className="ml-auto text-xs animate-scale-in">
+                          {filteredUsers.length}
+                        </Badge>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 animate-scale-in" align="start">
+                    <div className="flex">
+                      {/* Quick Presets */}
+                      <div className="border-r border-border/50 p-2 space-y-0.5 bg-muted/30 min-w-[110px]">
+                        <div className="px-2 py-1">
+                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Quick</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-7 text-xs px-2"
+                          onClick={() => setDatePreset('today')}
+                        >
+                          Today
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-7 text-xs px-2"
+                          onClick={() => setDatePreset('yesterday')}
+                        >
+                          Yesterday
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-7 text-xs px-2"
+                          onClick={() => setDatePreset('week')}
+                        >
+                          This Week
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-7 text-xs px-2"
+                          onClick={() => setDatePreset('month')}
+                        >
+                          This Month
+                        </Button>
+                        <div className="border-t border-border/50 my-1" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-7 text-xs px-2 text-muted-foreground"
+                          onClick={() => setDatePreset('all')}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                      
+                      {/* Calendar */}
+                      <div className="p-3">
+                        <Calendar
+                          mode="range"
+                          selected={{ from: dateFilter.from, to: dateFilter.to }}
+                          onSelect={(range) => {
+                            setDateFilter({ from: range?.from, to: range?.to });
+                          }}
+                          numberOfMonths={1}
+                          className="pointer-events-auto"
+                        />
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </CardHeader>
