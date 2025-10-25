@@ -650,34 +650,6 @@ serve(async (req) => {
                   <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
                     Congratulations! You've successfully started your <strong>${planName} ${periodTextCapitalized}</strong> trial.
                   </p>
-                  
-                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
-                    <tr>
-                      <td style="padding: 20px;">
-                        <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Trial Details</h3>
-                        <table width="100%" cellpadding="8" cellspacing="0">
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Plan:</td>
-                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName} ${periodTextCapitalized}</td>
-                          </tr>
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Trial Amount:</td>
-                            <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
-                          </tr>
-                          ${nextBillingDate ? `
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Trial Ends:</td>
-                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${nextBillingDate}</td>
-                          </tr>
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Then:</td>
-                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">€${regularPrice.toFixed(2)}/${periodText}</td>
-                          </tr>
-                          ` : ''}
-                  </table>
-                </td>
-              </tr>
-            </table>
           `;
               } else {
                 // Regular payment (no trial)
