@@ -291,18 +291,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               if ((now - profileCreated) < 10000) {
                 trackRegistrationComplete();
                 
-                // Send subscriber webhook for new user
+                // Send subscriber webhook for new user (IP/country extracted server-side)
                 try {
-                  const { getWebhookMetadata } = await import('@/utils/webhookMetadata');
-                  const metadata = await getWebhookMetadata();
-                  
                   await supabase.functions.invoke('send-subscriber-webhook', {
                     body: {
                       userId: session.user.id,
                       email: session.user.email,
                       username: session.user.user_metadata?.name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
-                      country: metadata.countryCode,
-                      ipAddress: metadata.userIP,
                     }
                   });
                 } catch (webhookError) {
