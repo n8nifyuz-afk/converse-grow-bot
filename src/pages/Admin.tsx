@@ -15,8 +15,7 @@ import { Input } from '@/components/ui/input';
 import { UserInformationModal } from '@/components/UserInformationModal';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format, startOfDay, endOfDay, isWithinInterval, subDays, startOfWeek, startOfMonth, endOfWeek, endOfMonth } from 'date-fns';
-import type { DateRange } from 'react-day-picker';
+import { format, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -245,36 +244,11 @@ export default function Admin() {
   const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null);
   const [userActivityLogs, setUserActivityLogs] = useState<any[]>([]);
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [dateFilter, setDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
   const usersPerPage = 15;
-
-  // Preset date range filters
-  const datePresets = [
-    {
-      label: 'Today',
-      range: { from: startOfDay(new Date()), to: endOfDay(new Date()) }
-    },
-    {
-      label: 'Yesterday',
-      range: { from: startOfDay(subDays(new Date(), 1)), to: endOfDay(subDays(new Date(), 1)) }
-    },
-    {
-      label: 'Last 7 days',
-      range: { from: startOfDay(subDays(new Date(), 7)), to: endOfDay(new Date()) }
-    },
-    {
-      label: 'Last 30 days',
-      range: { from: startOfDay(subDays(new Date(), 30)), to: endOfDay(new Date()) }
-    },
-    {
-      label: 'This week',
-      range: { from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: endOfWeek(new Date(), { weekStartsOn: 1 }) }
-    },
-    {
-      label: 'This month',
-      range: { from: startOfMonth(new Date()), to: endOfMonth(new Date()) }
-    }
-  ];
   useEffect(() => {
     checkAdminAccess();
   }, [user]);
@@ -551,20 +525,20 @@ export default function Admin() {
     }
     
     // Filter by date range
-    if (dateRange?.from || dateRange?.to) {
+    if (dateFilter.from || dateFilter.to) {
       const userCreatedAt = new Date(usage.created_at);
       
-      if (dateRange.from && dateRange.to) {
+      if (dateFilter.from && dateFilter.to) {
         // Both dates selected - check if within range
-        const fromDate = startOfDay(dateRange.from);
-        const toDate = endOfDay(dateRange.to);
+        const fromDate = startOfDay(dateFilter.from);
+        const toDate = endOfDay(dateFilter.to);
         return isWithinInterval(userCreatedAt, { start: fromDate, end: toDate });
-      } else if (dateRange.from) {
+      } else if (dateFilter.from) {
         // Only start date - show signups from this date onwards
-        return userCreatedAt >= startOfDay(dateRange.from);
-      } else if (dateRange.to) {
+        return userCreatedAt >= startOfDay(dateFilter.from);
+      } else if (dateFilter.to) {
         // Only end date - show signups up to this date
-        return userCreatedAt <= endOfDay(dateRange.to);
+        return userCreatedAt <= endOfDay(dateFilter.to);
       }
     }
     
@@ -618,7 +592,7 @@ export default function Admin() {
   // Reset to page 1 when filter, search, sort, or date changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [planFilter, searchQuery, sortField, sortDirection, dateRange]);
+  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter]);
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -889,14 +863,14 @@ export default function Admin() {
               
               {/* Search Input and Date Filter */}
               <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <div className="relative flex-1 w-full sm:max-w-80 md:max-w-96">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0 transition-colors" />
+                <div className="relative w-full sm:max-w-80 md:max-w-96">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
                   <Input
                     type="text"
                     placeholder="Search by name or email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-11 text-sm sm:text-base w-full transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                    className="pl-10 h-11 text-sm sm:text-base w-full"
                   />
                 </div>
                 
@@ -905,119 +879,63 @@ export default function Admin() {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`h-11 justify-start text-left font-normal w-full sm:w-auto min-w-[220px] transition-all duration-200 ${
-                        dateRange?.from 
-                          ? 'border-primary bg-primary/5 shadow-sm hover:bg-primary/10 hover:shadow-md' 
-                          : 'hover:border-primary/50 hover:bg-accent/50'
+                      className={`h-11 justify-start text-left font-normal w-full sm:w-auto ${
+                        (dateFilter.from || dateFilter.to) ? 'border-primary' : ''
                       }`}
                     >
-                      <CalendarIcon className={`mr-2 h-4 w-4 flex-shrink-0 transition-colors ${
-                        dateRange?.from ? 'text-primary' : ''
-                      }`} />
-                      {dateRange?.from ? (
-                        dateRange.to ? (
-                          <span className="truncate font-medium">
-                            {format(dateRange.from, 'MMM d')} - {format(dateRange.to, 'MMM d, yyyy')}
-                          </span>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateFilter.from ? (
+                        dateFilter.to ? (
+                          <>
+                            {format(dateFilter.from, 'MMM d')} - {format(dateFilter.to, 'MMM d, yyyy')}
+                          </>
                         ) : (
-                          <span className="truncate font-medium">{format(dateRange.from, 'MMM d, yyyy')}</span>
+                          format(dateFilter.from, 'MMM d, yyyy')
                         )
                       ) : (
-                        <span className="text-muted-foreground">Filter by signup date</span>
-                      )}
-                      {dateRange?.from && (
-                        <X 
-                          className="ml-auto h-4 w-4 flex-shrink-0 transition-colors hover:text-destructive hover:scale-110" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDateRange(undefined);
-                          }}
-                        />
+                        <span>Filter by signup date</span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 animate-in fade-in-0 zoom-in-95" align="start">
-                    <div className="flex text-sm">
-                      {/* Preset date ranges */}
-                      <div className="border-r bg-muted/30 p-2 space-y-0.5 min-w-[130px]">
-                        <div className="text-[10px] font-bold mb-2 text-muted-foreground uppercase tracking-wider px-2">Quick Select</div>
-                        {datePresets.map((preset, index) => {
-                          const isSelected = dateRange?.from && dateRange?.to && 
-                            preset.range.from.getTime() === dateRange.from.getTime() && 
-                            preset.range.to.getTime() === dateRange.to.getTime();
-                          
-                          return (
-                            <Button
-                              key={preset.label}
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setDateRange(preset.range)}
-                              className={`w-full justify-start text-left font-medium h-8 text-xs transition-all duration-200 ${
-                                isSelected 
-                                  ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-                                  : 'hover:bg-primary/10 hover:translate-x-0.5'
-                              }`}
-                              style={{ animationDelay: `${index * 30}ms` }}
-                            >
-                              <span className="truncate">{preset.label}</span>
-                            </Button>
-                          );
-                        })}
-                        {dateRange?.from && (
-                          <>
-                            <div className="border-t border-border/50 my-2" />
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setDateRange(undefined)}
-                              className="w-full justify-start text-left font-medium h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200 hover:translate-x-0.5"
-                            >
-                              <X className="h-3 w-3 mr-1.5" />
-                              Clear filter
-                            </Button>
-                          </>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <div className="p-3 border-b">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Select Date Range</span>
+                        {(dateFilter.from || dateFilter.to) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDateFilter({ from: undefined, to: undefined })}
+                            className="h-8 px-2"
+                          >
+                            <X className="h-4 w-4" />
+                            Clear
+                          </Button>
                         )}
                       </div>
-                      
-                      {/* Calendar */}
-                      <div className="p-3 bg-background">
+                    </div>
+                    <div className="flex flex-col sm:flex-row">
+                      <div className="p-3 border-b sm:border-b-0 sm:border-r">
+                        <div className="text-xs font-medium mb-2 text-muted-foreground">From Date</div>
                         <Calendar
-                          mode="range"
-                          selected={dateRange}
-                          onSelect={setDateRange}
-                          numberOfMonths={1}
+                          mode="single"
+                          selected={dateFilter.from}
+                          onSelect={(date) => setDateFilter(prev => ({ ...prev, from: date }))}
                           initialFocus
-                          className="pointer-events-auto"
                         />
-                        {dateRange?.from && dateRange.to && (
-                          <div className="pt-3 border-t mt-2 text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                              <Users className="h-3 w-3 text-primary" />
-                              <span className="text-xs">
-                                <span className="font-bold text-primary text-sm">
-                                  {filteredUsers.length}
-                                </span>
-                                <span className="text-muted-foreground ml-1">sign-ups</span>
-                              </span>
-                            </div>
-                          </div>
-                        )}
+                      </div>
+                      <div className="p-3">
+                        <div className="text-xs font-medium mb-2 text-muted-foreground">To Date</div>
+                        <Calendar
+                          mode="single"
+                          selected={dateFilter.to}
+                          onSelect={(date) => setDateFilter(prev => ({ ...prev, to: date }))}
+                          disabled={(date) => dateFilter.from ? date < dateFilter.from : false}
+                        />
                       </div>
                     </div>
                   </PopoverContent>
                 </Popover>
-                
-                {/* Active filter indicator */}
-                {dateRange?.from && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground animate-in fade-in slide-in-from-left-2 duration-300">
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/5 border border-primary/20">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                      <span className="font-medium">
-                        Showing {filteredUsers.length} of {userUsages.length} users
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </CardHeader>
