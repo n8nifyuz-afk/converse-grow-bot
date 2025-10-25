@@ -63,7 +63,7 @@ serve(async (req) => {
         "Authorization": `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: "ChatL <onboarding@resend.dev>",
+        from: "ChatL <no-reply@chatl.ai>",
         to: [user.email],
         subject: "Welcome to ChatL! 🎉",
         html: `
