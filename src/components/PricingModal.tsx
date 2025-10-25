@@ -343,41 +343,41 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-3 sm:p-4 md:p-5 pb-4 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0">
-              <div className="mb-5 sm:mb-2.5 flex-shrink-0">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
+            <div className="w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0">
+              <div className="mb-6 sm:mb-2.5 flex-shrink-0">
+                <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
                 </h2>
-                <p className="text-zinc-600 text-xs sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
+                <p className="text-zinc-600 text-sm sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
               </div>
 
               {/* Plan Tabs */}
-              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-5 sm:mb-2.5 flex-shrink-0">
-                <TabsList className="grid w-full grid-cols-2 h-9 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
+              <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'pro' | 'ultra')} className="mb-6 sm:mb-2.5 flex-shrink-0">
+                <TabsList className="grid w-full grid-cols-2 h-11 sm:h-9 md:h-10 bg-zinc-200 p-1 sm:p-1 border border-zinc-300 rounded-lg">
                   <TabsTrigger 
                     value="pro" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-sm sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
-                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <Zap className="w-4 h-4 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                     {t('pricingModal.pro')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ultra" 
-                    className="text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
+                    className="text-sm sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg rounded-md sm:rounded-lg transition-all"
                   >
-                    <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <Crown className="w-4 h-4 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                     {t('pricingModal.ultraPro')}
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-4 sm:space-y-2 mb-5 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
+              <div className="space-y-4 sm:space-y-2 mb-6 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
                       onClick={() => setSelectedPeriod('trial')}
-                      className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
+                      className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-visible ${
                         selectedPeriod === 'trial'
                           ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
                           : 'border-zinc-200 hover:border-zinc-300 bg-white'
@@ -396,7 +396,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 {!isTrialEligible && !checkingEligibility && (
                   <button
                     onClick={() => setSelectedPeriod('monthly')}
-                    className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
+                    className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
                       selectedPeriod === 'monthly'
                         ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
                         : 'border-zinc-200 hover:border-zinc-300 bg-white'
@@ -413,7 +413,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
                 <button
                   onClick={() => setSelectedPeriod('3month')}
-                  className={`w-full p-3.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
+                  className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
                     selectedPeriod === '3month'
                       ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
                       : 'border-zinc-200 hover:border-zinc-300 bg-white'
@@ -427,7 +427,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 </button>
                 {selectedPeriod === 'trial' && (
-                  <div className="text-xs text-zinc-600 px-2">
+                  <div className="text-sm text-zinc-600 px-2">
                     After 3 days, your plan renews automatically at {currencySymbol}{(currency === 'gbp' ? convertEurToGbp(pricingOptions[selectedPlan].monthly.price) : pricingOptions[selectedPlan].monthly.price).toFixed(2)}/month — cancel anytime.
                   </div>
                 )}
@@ -438,7 +438,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <Button 
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className="w-full h-11 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-sm sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-8 sm:mb-4"
+                className="w-full h-12 sm:h-11 bg-black hover:bg-zinc-800 text-white font-bold text-base sm:text-sm shadow-lg hover:shadow-black/30 transition-all rounded-lg border-0 flex-shrink-0 mb-6 sm:mb-4"
               >
                 {isLoading ? (
                   <>
@@ -455,9 +455,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               {/* Footer */}
               <div className="space-y-2 sm:space-y-1 flex-shrink-0">
                 {/* Pay Safe & Secure */}
-                <div className="flex items-center justify-center gap-2 sm:gap-1.5 py-2 sm:py-1">
+                <div className="flex items-center justify-center gap-2 sm:gap-1.5 py-2.5 sm:py-1">
                   <Shield className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-500" />
-                  <span className="text-sm sm:text-sm font-medium text-emerald-500">{t('pricingModal.paySafeSecure')}</span>
+                  <span className="text-base sm:text-sm font-medium text-emerald-500">{t('pricingModal.paySafeSecure')}</span>
                 </div>
                 
                 {/* Payment Cards */}
@@ -555,7 +555,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="max-h-[90vh] h-auto bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
+          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
             {modalContent}
           </DrawerContent>
         </Drawer>
