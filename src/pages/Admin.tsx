@@ -1008,27 +1008,29 @@ export default function Admin() {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`h-11 gap-2 ${
+                      className={`h-11 gap-2.5 transition-all duration-300 ${
                         activeFiltersCount > 0 
-                          ? 'border-primary/50 bg-primary/5' 
-                          : ''
+                          ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 shadow-sm' 
+                          : 'hover:border-primary/30'
                       }`}
                     >
-                      <Filter className="h-4 w-4" />
-                      <span className="hidden sm:inline">Filters</span>
+                      <Filter className={`h-4 w-4 transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`} />
+                      <span className="hidden sm:inline font-medium">Filters</span>
                       {activeFiltersCount > 0 && (
-                        <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                        <Badge variant="secondary" className="ml-0.5 h-5 w-5 p-0 flex items-center justify-center rounded-full animate-scale-in font-semibold">
                           {activeFiltersCount}
                         </Badge>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[320px] p-4 animate-scale-in" align="end">
-                    <div className="space-y-4">
+                  <PopoverContent className="w-[360px] p-0 animate-scale-in shadow-xl border-border/50" align="end">
+                    <div className="space-y-0">
                       {/* Header */}
-                      <div className="flex items-center justify-between pb-2 border-b">
-                        <div className="flex items-center gap-2">
-                          <Filter className="h-4 w-4 text-primary" />
+                      <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-gradient-to-r from-background to-muted/20">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-md bg-primary/10">
+                            <Filter className="h-3.5 w-3.5 text-primary" />
+                          </div>
                           <h4 className="font-semibold text-sm">Advanced Filters</h4>
                         </div>
                         {activeFiltersCount > 0 && (
@@ -1036,231 +1038,245 @@ export default function Admin() {
                             variant="ghost"
                             size="sm"
                             onClick={clearAllFilters}
-                            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                            className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground transition-colors duration-200 hover:bg-muted/50"
                           >
                             Clear all
                           </Button>
                         )}
                       </div>
 
-                      {/* Plan Filter */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Plan Type</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            variant={planFilter === 'all' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPlanFilter('all')}
-                            className="h-8 text-xs"
-                          >
-                            All
-                          </Button>
-                          <Button
-                            variant={planFilter === 'free' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPlanFilter('free')}
-                            className="h-8 text-xs"
-                          >
-                            Free
-                          </Button>
-                          <Button
-                            variant={planFilter === 'pro' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPlanFilter('pro')}
-                            className="h-8 text-xs"
-                          >
-                            Pro
-                          </Button>
-                          <Button
-                            variant={planFilter === 'ultra' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPlanFilter('ultra')}
-                            className="h-8 text-xs"
-                          >
-                            Ultra
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Date Range Filter */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Registration Date & Time</label>
-                        <Popover>
-                          <PopoverTrigger asChild>
+                      <div className="px-5 py-4 space-y-5">
+                        {/* Plan Filter */}
+                        <div className="space-y-2.5">
+                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                            <div className="w-1 h-3 bg-primary rounded-full" />
+                            Plan Type
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
                             <Button
-                              variant="outline"
-                              className="w-full h-9 justify-start text-left font-normal text-xs"
+                              variant={planFilter === 'all' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setPlanFilter('all')}
+                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
                             >
-                              <CalendarIcon className="h-3.5 w-3.5 mr-2" />
-                              {dateFilter.from ? (
-                                dateFilter.to ? (
-                                  dateFilter.from.getTime() === dateFilter.to.getTime() ? (
-                                    // Single day selected
-                                    <>
-                                      {format(dateFilter.from, 'MMM dd, yyyy')} {timeFilter.fromTime}
-                                      {timeFilter.fromTime !== timeFilter.toTime && ` - ${timeFilter.toTime}`}
-                                    </>
-                                  ) : (
-                                    // Date range selected
-                                    <>
-                                      {format(dateFilter.from, 'MMM dd')} {timeFilter.fromTime} - {format(dateFilter.to, 'MMM dd, yyyy')} {timeFilter.toTime}
-                                    </>
-                                  )
-                                ) : (
-                                  `${format(dateFilter.from, 'MMM dd, yyyy')} ${timeFilter.fromTime}`
-                                )
-                              ) : (
-                                'Select date & time range'
-                              )}
+                              All
                             </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <div className="flex flex-col">
-                              <div className="flex">
-                                <div className="border-r border-border/50 p-2 space-y-0.5 bg-muted/30 min-w-[110px]">
-                                  <div className="px-2 py-1">
-                                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Quick</p>
+                            <Button
+                              variant={planFilter === 'free' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setPlanFilter('free')}
+                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                            >
+                              Free
+                            </Button>
+                            <Button
+                              variant={planFilter === 'pro' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setPlanFilter('pro')}
+                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                            >
+                              Pro
+                            </Button>
+                            <Button
+                              variant={planFilter === 'ultra' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setPlanFilter('ultra')}
+                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                            >
+                              Ultra
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Date Range Filter */}
+                        <div className="space-y-2.5">
+                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                            <div className="w-1 h-3 bg-primary rounded-full" />
+                            Registration Date & Time
+                          </label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full h-10 justify-start text-left font-normal text-xs transition-all duration-200 hover:bg-muted/50 hover:border-primary/30"
+                              >
+                                <CalendarIcon className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                                <span className="truncate">
+                                  {dateFilter.from ? (
+                                    dateFilter.to ? (
+                                      dateFilter.from.getTime() === dateFilter.to.getTime() ? (
+                                        // Single day selected
+                                        <>
+                                          {format(dateFilter.from, 'MMM dd, yyyy')} {timeFilter.fromTime}
+                                          {timeFilter.fromTime !== timeFilter.toTime && ` - ${timeFilter.toTime}`}
+                                        </>
+                                      ) : (
+                                        // Date range selected
+                                        <>
+                                          {format(dateFilter.from, 'MMM dd')} {timeFilter.fromTime} - {format(dateFilter.to, 'MMM dd, yyyy')} {timeFilter.toTime}
+                                        </>
+                                      )
+                                    ) : (
+                                      `${format(dateFilter.from, 'MMM dd, yyyy')} ${timeFilter.fromTime}`
+                                    )
+                                  ) : (
+                                    'Select date & time range'
+                                  )}
+                                </span>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 shadow-xl animate-scale-in" align="start">
+                              <div className="flex flex-col">
+                                <div className="flex">
+                                  <div className="border-r border-border/50 p-2 space-y-1 bg-gradient-to-b from-muted/30 to-muted/10 min-w-[120px]">
+                                    <div className="px-2 py-1.5">
+                                      <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">Quick Select</p>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                      onClick={() => setDatePreset('today')}
+                                    >
+                                      Today
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                      onClick={() => setDatePreset('yesterday')}
+                                    >
+                                      Yesterday
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                      onClick={() => setDatePreset('week')}
+                                    >
+                                      This Week
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                      onClick={() => setDatePreset('month')}
+                                    >
+                                      This Month
+                                    </Button>
+                                    <div className="border-t border-border/50 my-2" />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start h-8 text-xs px-2.5 text-muted-foreground hover:text-foreground transition-all duration-200"
+                                      onClick={() => setDatePreset('all')}
+                                    >
+                                      Clear
+                                    </Button>
                                   </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-start h-7 text-xs px-2"
-                                    onClick={() => setDatePreset('today')}
-                                  >
-                                    Today
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-start h-7 text-xs px-2"
-                                    onClick={() => setDatePreset('yesterday')}
-                                  >
-                                    Yesterday
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-start h-7 text-xs px-2"
-                                    onClick={() => setDatePreset('week')}
-                                  >
-                                    This Week
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-start h-7 text-xs px-2"
-                                    onClick={() => setDatePreset('month')}
-                                  >
-                                    This Month
-                                  </Button>
-                                  <div className="border-t border-border/50 my-1" />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-start h-7 text-xs px-2 text-muted-foreground"
-                                    onClick={() => setDatePreset('all')}
-                                  >
-                                    Clear
-                                  </Button>
+                                  <div className="p-3">
+                                    <Calendar
+                                      mode="range"
+                                      selected={{ from: dateFilter.from, to: dateFilter.to }}
+                                      onSelect={(range) => {
+                                        setDateFilter({ from: range?.from, to: range?.to });
+                                      }}
+                                      numberOfMonths={1}
+                                      className="pointer-events-auto"
+                                    />
+                                  </div>
                                 </div>
-                                <div className="p-3">
-                                  <Calendar
-                                    mode="range"
-                                    selected={{ from: dateFilter.from, to: dateFilter.to }}
-                                    onSelect={(range) => {
-                                      setDateFilter({ from: range?.from, to: range?.to });
-                                    }}
-                                    numberOfMonths={1}
-                                    className="pointer-events-auto"
-                                  />
-                                </div>
+                                {/* Time Selection */}
+                                {dateFilter.from && (
+                                  <div className="border-t border-border/50 p-4 space-y-3 bg-gradient-to-b from-muted/10 to-background animate-fade-in">
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="space-y-2">
+                                        <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">From Time</label>
+                                        <Input
+                                          type="time"
+                                          value={timeFilter.fromTime}
+                                          onChange={(e) => setTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
+                                          className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                        />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">To Time</label>
+                                        <Input
+                                          type="time"
+                                          value={timeFilter.toTime}
+                                          onChange={(e) => setTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
+                                          className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                              {/* Time Selection */}
-                              {dateFilter.from && (
-                                <div className="border-t border-border/50 p-3 space-y-3 bg-muted/10">
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-1.5">
-                                      <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">From Time</label>
-                                      <Input
-                                        type="time"
-                                        value={timeFilter.fromTime}
-                                        onChange={(e) => setTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
-                                        className="h-8 text-xs"
-                                      />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                      <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">To Time</label>
-                                      <Input
-                                        type="time"
-                                        value={timeFilter.toTime}
-                                        onChange={(e) => setTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
-                                        className="h-8 text-xs"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
 
-                      {/* Country Filter */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          Country
-                        </label>
-                        <select
-                          value={countryFilter}
-                          onChange={(e) => setCountryFilter(e.target.value)}
-                          className="w-full h-9 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                        >
-                          <option value="all">All Countries</option>
-                          {uniqueCountries.map((country) => (
-                            <option key={country} value={country}>
-                              {getCountryName(country)}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        {/* Country Filter */}
+                        <div className="space-y-2.5">
+                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                            <div className="w-1 h-3 bg-primary rounded-full" />
+                            <MapPin className="h-3.5 w-3.5" />
+                            Country
+                          </label>
+                          <select
+                            value={countryFilter}
+                            onChange={(e) => setCountryFilter(e.target.value)}
+                            className="w-full h-10 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 cursor-pointer"
+                          >
+                            <option value="all">All Countries</option>
+                            {uniqueCountries.map((country) => (
+                              <option key={country} value={country}>
+                                {getCountryName(country)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                      {/* Subscription Status Filter */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Subscription Status</label>
-                        <div className="grid grid-cols-3 gap-2">
-                          <Button
-                            variant={subscriptionStatusFilter === 'all' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSubscriptionStatusFilter('all')}
-                            className="h-8 text-xs"
-                          >
-                            All
-                          </Button>
-                          <Button
-                            variant={subscriptionStatusFilter === 'subscribed' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSubscriptionStatusFilter('subscribed')}
-                            className="h-8 text-xs"
-                          >
-                            Paid
-                          </Button>
-                          <Button
-                            variant={subscriptionStatusFilter === 'free' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSubscriptionStatusFilter('free')}
-                            className="h-8 text-xs"
-                          >
-                            Free
-                          </Button>
+                        {/* Subscription Status Filter */}
+                        <div className="space-y-2.5">
+                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                            <div className="w-1 h-3 bg-primary rounded-full" />
+                            Subscription Status
+                          </label>
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button
+                              variant={subscriptionStatusFilter === 'all' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setSubscriptionStatusFilter('all')}
+                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                            >
+                              All
+                            </Button>
+                            <Button
+                              variant={subscriptionStatusFilter === 'subscribed' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setSubscriptionStatusFilter('subscribed')}
+                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                            >
+                              Paid
+                            </Button>
+                            <Button
+                              variant={subscriptionStatusFilter === 'free' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setSubscriptionStatusFilter('free')}
+                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                            >
+                              Free
+                            </Button>
+                          </div>
                         </div>
                       </div>
 
                       {/* Results Count */}
-                      <div className="pt-2 border-t">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Results:</span>
-                          <Badge variant="secondary" className="font-mono">
+                      <div className="px-5 py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-muted-foreground">Filtered Results</span>
+                          <Badge variant="secondary" className="font-mono text-xs px-2.5 py-1 transition-all duration-200 hover:scale-105">
                             {filteredUsers.length} users
                           </Badge>
                         </div>
