@@ -2,15 +2,56 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const WEBHOOK_SECRET = Deno.env.get("SEND_EMAIL_HOOK_SECRET");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-signature",
 };
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[SEND-WELCOME-EMAIL] ${step}${detailsStr}`);
+};
+
+// Verify webhook signature using Web Crypto API
+const verifyWebhookSignature = async (payload: string, signature: string | null): Promise<boolean> => {
+  if (!signature || !WEBHOOK_SECRET) {
+    logStep("WARNING: Missing signature or webhook secret");
+    return false;
+  }
+
+  try {
+    // Extract the secret from the v1,whsec_ format
+    const secret = WEBHOOK_SECRET.replace(/^v1,whsec_/, '');
+    
+    // Import the key for HMAC
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyData,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    
+    // Create HMAC-SHA256 signature
+    const payloadData = encoder.encode(payload);
+    const signatureBuffer = await crypto.subtle.sign("HMAC", key, payloadData);
+    
+    // Convert to base64
+    const signatureArray = new Uint8Array(signatureBuffer);
+    const expectedSignature = btoa(String.fromCharCode(...signatureArray));
+    
+    // Compare signatures
+    const isValid = signature === expectedSignature;
+    logStep("Signature verification", { isValid });
+    return isValid;
+  } catch (error) {
+    logStep("Signature verification error", { error: error.message });
+    return false;
+  }
 };
 
 serve(async (req) => {
@@ -21,20 +62,30 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const payload = await req.json();
-    logStep("Received payload", { type: payload.type, record: payload.record?.email });
-
-    // This function is triggered by Supabase Auth webhook
-    // Expected payload: { type: "INSERT", record: { id, email, ... } }
-    if (payload.type !== "INSERT") {
-      logStep("Ignoring non-INSERT event");
-      return new Response(JSON.stringify({ message: "Not an INSERT event" }), {
-        status: 200,
+    // Get the raw body for signature verification
+    const rawBody = await req.text();
+    const signature = req.headers.get("x-webhook-signature");
+    
+    // Verify webhook signature
+    const isValidSignature = await verifyWebhookSignature(rawBody, signature);
+    if (!isValidSignature) {
+      logStep("Invalid webhook signature");
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { email, id } = payload.record;
+    const payload = JSON.parse(rawBody);
+    logStep("Received payload", { type: payload.type, user: payload.user?.email });
+
+    // Get user data from Auth webhook payload
+    const user = payload.user;
+    if (!user || !user.email) {
+      throw new Error("No user email found in payload");
+    }
+
+    const { email, id } = user;
     
     if (!email) {
       throw new Error("No email found in payload");
