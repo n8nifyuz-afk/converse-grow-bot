@@ -278,7 +278,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const currencySymbol = currency === 'gbp' ? '£' : '€';
 
   const modalContent = (
-    <div className="light flex flex-col md:flex-row h-full">
+    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent">
             {/* Mobile/Tablet Close Button */}
             {isMobile && (
               <button
