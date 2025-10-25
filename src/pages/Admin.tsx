@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, TrendingUp } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { UserInformationModal } from '@/components/UserInformationModal';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, isWithinInterval, eachDayOfInterval, startOfToday, endOfToday } from 'date-fns';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, isWithinInterval, startOfToday, endOfToday } from 'date-fns';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -581,24 +581,6 @@ export default function Admin() {
   const endIndex = startIndex + usersPerPage;
   const paginatedUsers = sortedUsers.slice(startIndex, endIndex);
 
-  // Calculate daily signup stats
-  const getDailySignupStats = () => {
-    if (!dateFilter.from || !dateFilter.to) return [];
-    
-    const days = eachDayOfInterval({ start: dateFilter.from, end: dateFilter.to });
-    return days.map(day => {
-      const dayStart = startOfDay(day);
-      const dayEnd = endOfDay(day);
-      const count = userUsages.filter(user => {
-        const userDate = new Date(user.created_at);
-        return isWithinInterval(userDate, { start: dayStart, end: dayEnd });
-      }).length;
-      return { date: format(day, 'MMM dd'), count };
-    });
-  };
-
-  const dailyStats = getDailySignupStats();
-
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
     const today = startOfToday();
@@ -878,39 +860,6 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Daily Signup Stats - Show when date filter is active */}
-        {dateFilter.from && dateFilter.to && dailyStats.length > 0 && (
-          <Card className="border-border/50 overflow-hidden animate-fade-in">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border/50 p-4 sm:p-5 md:p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg sm:text-xl">Daily Signups</CardTitle>
-                </div>
-                <Badge variant="outline" className="gap-1">
-                  {filteredUsers.length} signups
-                </Badge>
-              </div>
-              <CardDescription className="text-xs sm:text-sm mt-2">
-                {format(dateFilter.from, 'MMM dd, yyyy')} - {format(dateFilter.to, 'MMM dd, yyyy')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-5 md:p-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                {dailyStats.map((stat, index) => (
-                  <div 
-                    key={index} 
-                    className="flex flex-col items-center justify-center p-3 rounded-lg border border-border/50 hover:border-primary/30 transition-all hover:shadow-md bg-gradient-to-br from-background to-muted/20"
-                  >
-                    <div className="text-2xl font-bold text-foreground">{stat.count}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{stat.date}</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* User Token Usage Table with Tabs */}
         <Card className="border-border/50 overflow-hidden w-full">
