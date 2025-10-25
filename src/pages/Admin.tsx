@@ -947,9 +947,9 @@ export default function Admin() {
                   <PopoverContent className="w-auto p-0 shadow-xl border-border/50" align="start">
                     <div className="flex animate-fade-in">
                       {/* Preset date ranges */}
-                      <div className="border-r border-border/50 bg-muted/30 p-3 space-y-1 min-w-[150px]">
-                        <div className="text-xs font-semibold mb-3 text-muted-foreground uppercase tracking-wider px-2">
-                          Quick Select
+                      <div className="border-r border-border/50 bg-muted/30 p-2 space-y-0.5 min-w-[110px]">
+                        <div className="text-[10px] font-semibold mb-2 text-muted-foreground uppercase tracking-wide px-1">
+                          Quick
                         </div>
                         {datePresets.map((preset, index) => {
                           const isActive = dateRange?.from && dateRange?.to && 
@@ -962,10 +962,10 @@ export default function Admin() {
                               variant="ghost"
                               size="sm"
                               onClick={() => setDateRange(preset.range)}
-                              className={`w-full justify-start text-left font-normal h-9 text-sm transition-all duration-200 ${
+                              className={`w-full justify-start text-left font-normal h-7 text-xs px-2 transition-all duration-200 ${
                                 isActive 
                                   ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground shadow-sm' 
-                                  : 'hover:bg-primary/10 hover:translate-x-1'
+                                  : 'hover:bg-primary/10 hover:translate-x-0.5'
                               }`}
                               style={{ animationDelay: `${index * 30}ms` }}
                             >
@@ -975,15 +975,15 @@ export default function Admin() {
                         })}
                         {dateRange && (
                           <div className="animate-fade-in">
-                            <div className="border-t border-border/50 my-2" />
+                            <div className="border-t border-border/50 my-1.5" />
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setDateRange(undefined)}
-                              className="w-full justify-start text-left font-normal h-9 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+                              className="w-full justify-start text-left font-normal h-7 text-xs px-2 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
                             >
-                              <X className="h-3.5 w-3.5 mr-2" />
-                              Clear filter
+                              <X className="h-3 w-3 mr-1.5" />
+                              Clear
                             </Button>
                           </div>
                         )}
