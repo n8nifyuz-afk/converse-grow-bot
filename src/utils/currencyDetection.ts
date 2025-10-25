@@ -1,23 +1,57 @@
 // Detect user's currency based on location
 export const detectUserCurrency = async (): Promise<'eur' | 'gbp'> => {
   try {
-    // Try to get country from IP geolocation API
-    const response = await fetch('https://ipapi.co/json/');
-    const data = await response.json();
+    // Method 1: Try CloudFlare trace (more reliable)
+    try {
+      const cfResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+      const cfText = await cfResponse.text();
+      const cfCountry = cfText.match(/loc=([A-Z]+)/)?.[1];
+      
+      if (cfCountry) {
+        const gbpCountries = ['GB', 'UK', 'IE'];
+        if (gbpCountries.includes(cfCountry)) {
+          console.log('Currency detected via CloudFlare:', 'GBP');
+          return 'gbp';
+        }
+        console.log('Currency detected via CloudFlare:', 'EUR');
+        return 'eur';
+      }
+    } catch (cfError) {
+      console.log('CloudFlare detection failed, trying fallback...');
+    }
+
+    // Method 2: Try ipapi.co as fallback
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      if (response.ok) {
+        const data = await response.json();
+        const country = data.country_code?.toUpperCase();
+        
+        const gbpCountries = ['GB', 'UK', 'IE'];
+        if (gbpCountries.includes(country)) {
+          console.log('Currency detected via ipapi:', 'GBP');
+          return 'gbp';
+        }
+        console.log('Currency detected via ipapi:', 'EUR');
+        return 'eur';
+      }
+    } catch (ipapiError) {
+      console.log('ipapi.co detection failed, using timezone fallback...');
+    }
+
+    // Method 3: Timezone-based detection as last resort
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const ukTimezones = ['Europe/London', 'Europe/Belfast', 'Europe/Dublin', 'Europe/Guernsey', 'Europe/Isle_of_Man', 'Europe/Jersey'];
     
-    const country = data.country_code?.toUpperCase();
-    
-    // UK countries that should use GBP
-    const gbpCountries = ['GB', 'UK', 'IE']; // Great Britain, United Kingdom, Ireland
-    
-    if (gbpCountries.includes(country)) {
+    if (ukTimezones.includes(timezone)) {
+      console.log('Currency detected via timezone:', 'GBP');
       return 'gbp';
     }
     
+    console.log('Defaulting to EUR');
     return 'eur';
   } catch (error) {
     console.error('Error detecting currency:', error);
-    // Default to EUR if detection fails
     return 'eur';
   }
 };
