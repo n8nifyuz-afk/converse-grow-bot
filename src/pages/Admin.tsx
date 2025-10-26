@@ -334,16 +334,35 @@ export default function Admin() {
     try {
       setLoading(true);
 
-      // Fetch ALL profiles (which represents ALL auth.users via trigger)
-      // Order by created_at DESC to show newest users first
-      const {
-        data: allProfilesData,
-        error: allProfilesError
-      } = await supabase
-        .from('profiles')
-        .select('user_id, email, display_name, signup_method, created_at, ip_address, country, avatar_url, oauth_provider, phone_number, gender, date_of_birth, locale, timezone, oauth_metadata')
-        .order('created_at', { ascending: false });
-      if (allProfilesError) throw allProfilesError;
+      // Fetch ALL profiles in batches (Supabase default limit is 1000)
+      let allProfilesData: any[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMore = true;
+
+      console.log('Fetching all user profiles...');
+      while (hasMore) {
+        const {
+          data: batchData,
+          error: batchError
+        } = await supabase
+          .from('profiles')
+          .select('user_id, email, display_name, signup_method, created_at, ip_address, country, avatar_url, oauth_provider, phone_number, gender, date_of_birth, locale, timezone, oauth_metadata')
+          .order('created_at', { ascending: false })
+          .range(from, from + batchSize - 1);
+        
+        if (batchError) throw batchError;
+        
+        if (batchData && batchData.length > 0) {
+          allProfilesData = [...allProfilesData, ...batchData];
+          console.log(`Fetched ${batchData.length} profiles (total so far: ${allProfilesData.length})`);
+          from += batchSize;
+          hasMore = batchData.length === batchSize; // Continue if we got a full batch
+        } else {
+          hasMore = false;
+        }
+      }
+      
       console.log('Total profiles (auth.users):', allProfilesData?.length);
 
       // Fetch ALL subscriptions (active and inactive)
