@@ -11,14 +11,10 @@ declare global {
       show: () => void;
       hide: () => void;
       consent?: {
-        necessary: boolean;
         statistics: boolean;
         marketing: boolean;
         preferences: boolean;
-        stamp?: string;
-        method?: string;
       };
-      hasResponse?: boolean;
     };
     CookieConsent?: {
       submitConsent: (options: any) => void;
@@ -37,120 +33,29 @@ export const CookieBanner = () => {
   });
 
   useEffect(() => {
-    // Force hide Cookiebot's default banner IMMEDIATELY
-    const hideCookiebotBanner = () => {
-      const cookiebotDialog = document.getElementById('CybotCookiebotDialog');
-      if (cookiebotDialog) {
-        cookiebotDialog.style.display = 'none';
-      }
-      // Also hide by class
-      document.querySelectorAll('[id^="CybotCookiebot"]').forEach(el => {
-        (el as HTMLElement).style.display = 'none';
-      });
-    };
-
-    // Hide immediately on mount
-    hideCookiebotBanner();
-    
-    // Keep checking aggressively
-    const aggressiveInterval = setInterval(hideCookiebotBanner, 100);
-    setTimeout(() => clearInterval(aggressiveInterval), 10000);
-
-    // Check for ?resetCookies query parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('resetCookies') === 'true') {
-      // Clear all cookie consent data
-      localStorage.removeItem('cookieConsent');
-      document.cookie = 'CookieConsent=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.chatl.ai';
-      document.cookie = 'CookieConsent=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      
-      // Remove query param and reload
-      window.history.replaceState({}, '', window.location.pathname);
-      setTimeout(() => window.location.reload(), 100);
-      return;
+    // Check if user has already responded
+    const consent = localStorage.getItem('cookieConsent');
+    if (!consent) {
+      // Small delay to ensure page loads first
+      setTimeout(() => setShowBanner(true), 1000);
     }
-
-    // Wait for Cookiebot to load
-    const checkCookiebot = () => {
-      // Always hide Cookiebot's default banner
-      hideCookiebotBanner();
-      if (window.Cookiebot) {
-        // Check if Cookiebot already has consent using hasResponse
-        const hasConsent = window.Cookiebot.hasResponse || 
-                          (window.Cookiebot.consent && window.Cookiebot.consent.stamp);
-        
-        if (hasConsent) {
-          // User already responded through Cookiebot
-          console.log('Cookiebot consent already exists');
-          setShowBanner(false);
-          
-          // Sync preferences with Cookiebot if consent object exists
-          if (window.Cookiebot.consent) {
-            setPreferences({
-              analytics: window.Cookiebot.consent.statistics || false,
-              marketing: window.Cookiebot.consent.marketing || false,
-              preferences: window.Cookiebot.consent.preferences || false,
-            });
-          }
-        } else {
-          // No consent yet, show our banner
-          setTimeout(() => setShowBanner(true), 1000);
-        }
-      } else {
-        // Fallback: Check localStorage if Cookiebot not available
-        const localConsent = localStorage.getItem('cookieConsent');
-        if (!localConsent) {
-          setTimeout(() => setShowBanner(true), 1000);
-        }
-      }
-    };
 
     // Listen for Cookiebot events
     const handleCookiebotLoad = () => {
       console.log('Cookiebot loaded');
-      hideCookiebotBanner();
-      checkCookiebot();
-    };
-
-    const handleCookiebotAccept = () => {
-      console.log('Cookiebot consent accepted');
-      hideCookiebotBanner();
       setShowBanner(false);
     };
 
     const handleCookiebotDecline = () => {
-      console.log('Cookiebot consent declined');
-      hideCookiebotBanner();
       setShowBanner(false);
     };
 
-    const handleCookiebotConsentUpdated = () => {
-      console.log('Cookiebot consent updated');
-      hideCookiebotBanner();
-      checkCookiebot();
-    };
-
-    // Initial check
-    if (window.Cookiebot) {
-      checkCookiebot();
-    } else {
-      // Wait for Cookiebot to load
-      window.addEventListener('CookiebotOnLoad', handleCookiebotLoad);
-    }
-
-    window.addEventListener('CookiebotOnAccept', handleCookiebotAccept);
+    window.addEventListener('CookiebotOnLoad', handleCookiebotLoad);
     window.addEventListener('CookiebotOnDecline', handleCookiebotDecline);
-    window.addEventListener('CookiebotOnDialogDisplay', () => {
-      hideCookiebotBanner();
-      setShowBanner(false);
-    });
-    window.addEventListener('CookiebotOnConsentReady', handleCookiebotConsentUpdated);
 
     return () => {
       window.removeEventListener('CookiebotOnLoad', handleCookiebotLoad);
-      window.removeEventListener('CookiebotOnAccept', handleCookiebotAccept);
       window.removeEventListener('CookiebotOnDecline', handleCookiebotDecline);
-      window.removeEventListener('CookiebotOnConsentReady', handleCookiebotConsentUpdated);
     };
   }, []);
 
