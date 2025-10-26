@@ -37,8 +37,22 @@ export const CookieBanner = () => {
   });
 
   useEffect(() => {
+    // Force hide Cookiebot's default banner
+    const hideCookiebotBanner = () => {
+      const cookiebotDialog = document.getElementById('CybotCookiebotDialog');
+      if (cookiebotDialog) {
+        cookiebotDialog.style.display = 'none';
+      }
+    };
+
     // Wait for Cookiebot to load
     const checkCookiebot = () => {
+      // Always hide Cookiebot's default banner
+      hideCookiebotBanner();
+      
+      // Also check periodically in case it appears later
+      const interval = setInterval(hideCookiebotBanner, 500);
+      setTimeout(() => clearInterval(interval), 5000);
       if (window.Cookiebot) {
         // Check if Cookiebot already has consent using hasResponse
         const hasConsent = window.Cookiebot.hasResponse || 
@@ -73,21 +87,25 @@ export const CookieBanner = () => {
     // Listen for Cookiebot events
     const handleCookiebotLoad = () => {
       console.log('Cookiebot loaded');
+      hideCookiebotBanner();
       checkCookiebot();
     };
 
     const handleCookiebotAccept = () => {
       console.log('Cookiebot consent accepted');
+      hideCookiebotBanner();
       setShowBanner(false);
     };
 
     const handleCookiebotDecline = () => {
       console.log('Cookiebot consent declined');
+      hideCookiebotBanner();
       setShowBanner(false);
     };
 
     const handleCookiebotConsentUpdated = () => {
       console.log('Cookiebot consent updated');
+      hideCookiebotBanner();
       checkCookiebot();
     };
 
@@ -101,7 +119,10 @@ export const CookieBanner = () => {
 
     window.addEventListener('CookiebotOnAccept', handleCookiebotAccept);
     window.addEventListener('CookiebotOnDecline', handleCookiebotDecline);
-    window.addEventListener('CookiebotOnDialogDisplay', () => setShowBanner(false));
+    window.addEventListener('CookiebotOnDialogDisplay', () => {
+      hideCookiebotBanner();
+      setShowBanner(false);
+    });
     window.addEventListener('CookiebotOnConsentReady', handleCookiebotConsentUpdated);
 
     return () => {
