@@ -37,22 +37,43 @@ export const CookieBanner = () => {
   });
 
   useEffect(() => {
-    // Force hide Cookiebot's default banner
+    // Force hide Cookiebot's default banner IMMEDIATELY
     const hideCookiebotBanner = () => {
       const cookiebotDialog = document.getElementById('CybotCookiebotDialog');
       if (cookiebotDialog) {
         cookiebotDialog.style.display = 'none';
       }
+      // Also hide by class
+      document.querySelectorAll('[id^="CybotCookiebot"]').forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
     };
+
+    // Hide immediately on mount
+    hideCookiebotBanner();
+    
+    // Keep checking aggressively
+    const aggressiveInterval = setInterval(hideCookiebotBanner, 100);
+    setTimeout(() => clearInterval(aggressiveInterval), 10000);
+
+    // Check for ?resetCookies query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('resetCookies') === 'true') {
+      // Clear all cookie consent data
+      localStorage.removeItem('cookieConsent');
+      document.cookie = 'CookieConsent=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.chatl.ai';
+      document.cookie = 'CookieConsent=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
+      // Remove query param and reload
+      window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => window.location.reload(), 100);
+      return;
+    }
 
     // Wait for Cookiebot to load
     const checkCookiebot = () => {
       // Always hide Cookiebot's default banner
       hideCookiebotBanner();
-      
-      // Also check periodically in case it appears later
-      const interval = setInterval(hideCookiebotBanner, 500);
-      setTimeout(() => clearInterval(interval), 5000);
       if (window.Cookiebot) {
         // Check if Cookiebot already has consent using hasResponse
         const hasConsent = window.Cookiebot.hasResponse || 
