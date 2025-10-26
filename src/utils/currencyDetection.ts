@@ -1,11 +1,14 @@
 // Detect user's currency based on location
 export const detectUserCurrency = async (): Promise<'eur' | 'gbp'> => {
   try {
-    // Try to get country from IP geolocation API
-    const response = await fetch('https://ipapi.co/json/');
-    const data = await response.json();
+    // Try to get country from Cloudflare trace API (supports CORS)
+    const response = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+    const text = await response.text();
+    const data = Object.fromEntries(
+      text.trim().split('\n').map(line => line.split('='))
+    );
     
-    const country = data.country_code?.toUpperCase();
+    const country = data.loc?.toUpperCase();
     
     // UK countries that should use GBP
     const gbpCountries = ['GB', 'UK', 'IE']; // Great Britain, United Kingdom, Ireland

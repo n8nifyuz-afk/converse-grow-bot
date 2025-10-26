@@ -545,16 +545,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Continue with signup if check fails
     }
     
-    // Get IP address and country
+    // Get IP address and country using Cloudflare trace (supports CORS)
     let ipAddress: string | undefined;
     let country: string | undefined;
     
     try {
-      const geoResponse = await fetch('https://ipapi.co/json/');
+      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
       if (geoResponse.ok) {
-        const geoData = await geoResponse.json();
+        const text = await geoResponse.text();
+        const geoData = Object.fromEntries(
+          text.trim().split('\n').map(line => line.split('='))
+        );
         ipAddress = geoData.ip;
-        country = geoData.country_name;
+        country = geoData.loc;
       }
     } catch (geoError) {
       // Silently fail - continue signup without geo data

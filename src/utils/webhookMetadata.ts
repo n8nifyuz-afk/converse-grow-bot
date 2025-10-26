@@ -43,12 +43,15 @@ async function getIPMetadata(): Promise<{ ip: string | null; country: string | n
   }
 
   try {
-    const response = await fetch('https://ipapi.co/json/');
+    const response = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
     if (response.ok) {
-      const data = await response.json();
+      const text = await response.text();
+      const data = Object.fromEntries(
+        text.trim().split('\n').map(line => line.split('='))
+      );
       cachedMetadata = {
         ip: data.ip || null,
-        country: data.country_code || null,
+        country: data.loc || null,
       };
       return cachedMetadata;
     }
