@@ -11,10 +11,14 @@ declare global {
       show: () => void;
       hide: () => void;
       consent?: {
+        necessary: boolean;
         statistics: boolean;
         marketing: boolean;
         preferences: boolean;
+        stamp?: string;
+        method?: string;
       };
+      hasResponse?: boolean;
     };
     CookieConsent?: {
       submitConsent: (options: any) => void;
@@ -33,29 +37,78 @@ export const CookieBanner = () => {
   });
 
   useEffect(() => {
-    // Check if user has already responded
-    const consent = localStorage.getItem('cookieConsent');
-    if (!consent) {
-      // Small delay to ensure page loads first
-      setTimeout(() => setShowBanner(true), 1000);
-    }
+    // Wait for Cookiebot to load
+    const checkCookiebot = () => {
+      if (window.Cookiebot) {
+        // Check if Cookiebot already has consent using hasResponse
+        const hasConsent = window.Cookiebot.hasResponse || 
+                          (window.Cookiebot.consent && window.Cookiebot.consent.stamp);
+        
+        if (hasConsent) {
+          // User already responded through Cookiebot
+          console.log('Cookiebot consent already exists');
+          setShowBanner(false);
+          
+          // Sync preferences with Cookiebot if consent object exists
+          if (window.Cookiebot.consent) {
+            setPreferences({
+              analytics: window.Cookiebot.consent.statistics || false,
+              marketing: window.Cookiebot.consent.marketing || false,
+              preferences: window.Cookiebot.consent.preferences || false,
+            });
+          }
+        } else {
+          // No consent yet, show our banner
+          setTimeout(() => setShowBanner(true), 1000);
+        }
+      } else {
+        // Fallback: Check localStorage if Cookiebot not available
+        const localConsent = localStorage.getItem('cookieConsent');
+        if (!localConsent) {
+          setTimeout(() => setShowBanner(true), 1000);
+        }
+      }
+    };
 
     // Listen for Cookiebot events
     const handleCookiebotLoad = () => {
       console.log('Cookiebot loaded');
+      checkCookiebot();
+    };
+
+    const handleCookiebotAccept = () => {
+      console.log('Cookiebot consent accepted');
       setShowBanner(false);
     };
 
     const handleCookiebotDecline = () => {
+      console.log('Cookiebot consent declined');
       setShowBanner(false);
     };
 
-    window.addEventListener('CookiebotOnLoad', handleCookiebotLoad);
+    const handleCookiebotConsentUpdated = () => {
+      console.log('Cookiebot consent updated');
+      checkCookiebot();
+    };
+
+    // Initial check
+    if (window.Cookiebot) {
+      checkCookiebot();
+    } else {
+      // Wait for Cookiebot to load
+      window.addEventListener('CookiebotOnLoad', handleCookiebotLoad);
+    }
+
+    window.addEventListener('CookiebotOnAccept', handleCookiebotAccept);
     window.addEventListener('CookiebotOnDecline', handleCookiebotDecline);
+    window.addEventListener('CookiebotOnDialogDisplay', () => setShowBanner(false));
+    window.addEventListener('CookiebotOnConsentReady', handleCookiebotConsentUpdated);
 
     return () => {
       window.removeEventListener('CookiebotOnLoad', handleCookiebotLoad);
+      window.removeEventListener('CookiebotOnAccept', handleCookiebotAccept);
       window.removeEventListener('CookiebotOnDecline', handleCookiebotDecline);
+      window.removeEventListener('CookiebotOnConsentReady', handleCookiebotConsentUpdated);
     };
   }, []);
 
