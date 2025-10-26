@@ -17,7 +17,6 @@ const Pricing = () => {
   const location = useLocation();
   const { user, subscriptionStatus, checkSubscription } = useAuth();
   const { t } = useTranslation();
-  const [isYearly, setIsYearly] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -56,7 +55,6 @@ const Pricing = () => {
     name: t('pricingPage.free'),
     emoji: "🆓",
     price: 0,
-    yearlyPrice: 0,
     icon: Zap,
     description: t('pricingPage.freeDesc'),
     popular: false,
@@ -82,7 +80,6 @@ const Pricing = () => {
     name: t('pricingPage.pro'),
     emoji: "⭐",
     price: 19.99,
-    yearlyPrice: 59.99,
     icon: Star,
     description: t('pricingPage.proDesc'),
     popular: true,
@@ -120,7 +117,6 @@ const Pricing = () => {
     name: t('pricingPage.ultraPro'),
     emoji: "🚀",
     price: 39.99,
-    yearlyPrice: 119.99,
     icon: Crown,
     description: t('pricingPage.ultraProDesc'),
     popular: false,
@@ -155,14 +151,6 @@ const Pricing = () => {
     buttonText: t('pricingPage.subscribeNow'),
     buttonVariant: "outline" as const
   }];
-  const getPrice = (plan: typeof plans[0]) => {
-    return isYearly ? plan.yearlyPrice : plan.price;
-  };
-  const getSavings = (plan: typeof plans[0]) => {
-    if (plan.price === 0 || plan.yearlyPrice === 0) return 0;
-    const monthlyCostOfYearly = plan.yearlyPrice / 12;
-    return Math.round((plan.price - monthlyCostOfYearly) / plan.price * 100);
-  };
 
   const handleSubscribe = async (plan: typeof plans[0]) => {
     if (plan.price === 0) {
@@ -185,20 +173,13 @@ const Pricing = () => {
     }
     
     try {
-      // Map plan to price ID based on billing period
+      // Map plan to price ID (monthly only)
       const priceIds = {
-        'Pro': {
-          monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq', // €19.99
-          yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF'   // €59.99
-        },
-        'Ultra Pro': {
-          monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8', // €39.99
-          yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP'   // €119.99
-        }
+        'Pro': 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',       // €19.99/month
+        'Ultra Pro': 'price_1SKJAxL8Zm4LqDn43kl9BRd8'  // €39.99/month
       };
       
-      const planPrices = priceIds[plan.name as keyof typeof priceIds];
-      const priceId = planPrices ? (isYearly ? planPrices.yearly : planPrices.monthly) : null;
+      const priceId = priceIds[plan.name as keyof typeof priceIds] || null;
       
       if (!priceId) {
         toast.error('Invalid plan selected');
@@ -290,21 +271,6 @@ const Pricing = () => {
         }}>
             {t('pricingPage.startFreeScale')}
           </p>
-
-          {/* Billing Toggle */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 animate-fade-in" style={{
-          animationDelay: '0.2s'
-        }}>
-            <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
-              {t('pricingPage.monthly')}
-            </span>
-            <button onClick={() => setIsYearly(!isYearly)} className={`relative w-14 h-7 sm:w-16 sm:h-8 rounded-full transition-colors duration-300 ${isYearly ? 'bg-primary' : 'bg-muted'}`}>
-              <div className={`absolute top-1 left-1 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${isYearly ? 'translate-x-7 sm:translate-x-8' : 'translate-x-0'}`}></div>
-            </button>
-            <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-primary' : 'text-muted-foreground'}`}>
-              {t('pricingPage.yearly')}
-            </span>
-          </div>
         </div>
       </section>
 
@@ -314,8 +280,6 @@ const Pricing = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-12 sm:mb-16 md:mb-20">
             {plans.map((plan, index) => {
             const IconComponent = plan.icon;
-            const currentPrice = getPrice(plan);
-            const savings = getSavings(plan);
             return <div key={plan.name} className={`group relative p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-500 hover:scale-105 animate-fade-in ${plan.popular ? 'bg-gradient-to-b from-primary/5 to-primary/10 border-2 border-primary shadow-2xl shadow-primary/20' : 'bg-card border border-border hover:border-primary/30 hover:shadow-xl'}`} style={{
               animationDelay: `${index * 0.1}s`
             }}>
@@ -329,10 +293,10 @@ const Pricing = () => {
                     <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">{plan.emoji} {plan.name}</h3>
                     <div className="flex items-baseline gap-1 sm:gap-2 mb-1 sm:mb-2">
                       <span className="text-2xl sm:text-3xl md:text-4xl font-bold">
-                        €{currentPrice}
+                        €{plan.price}
                       </span>
                       <span className="text-muted-foreground text-sm sm:text-base md:text-lg">
-                        / {isYearly ? t('pricingPage.year') : t('pricingPage.month')}
+                        / {t('pricingPage.month')}
                       </span>
                     </div>
                     
