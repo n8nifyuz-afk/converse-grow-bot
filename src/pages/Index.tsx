@@ -1140,7 +1140,7 @@ export default function Index() {
 
             <div className="flex flex-col gap-3">
             {/* File upload controls row */}
-            <div className="flex items-center justify-between flex-wrap gap-2 md:gap-0">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {!isMobile && <>
                     <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full border border-border/50 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" onClick={handleFileUpload} aria-label="Upload file">
@@ -1189,7 +1189,7 @@ export default function Index() {
               </div>
 
               {/* Desktop model selector and voice controls */}
-              {!isMobile && <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+              {!isMobile && <div className="flex items-center gap-2">
                   <Select value={selectedModel} onValueChange={handleModelSelect}>
                     <SelectTrigger className="w-[200px] h-10 bg-background/80 backdrop-blur-sm border border-border/50 rounded-xl focus-visible:ring-2 focus-visible:ring-primary text-sm shadow-sm hover:bg-accent/50 transition-all duration-200" aria-label="Select AI model">
                       <SelectValue>
