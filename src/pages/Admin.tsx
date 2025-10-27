@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -933,15 +933,26 @@ export default function Admin() {
             <SidebarTrigger className="h-9 w-9 p-0 bg-transparent hover:bg-sidebar-accent text-sidebar-foreground rounded-lg flex-shrink-0" />
             <h2 className="text-lg sm:text-xl font-bold truncate">Admin Dashboard</h2>
           </div>
-          <Button 
-            onClick={handleDownloadUserList}
-            size="sm"
-            variant="outline"
-            className="h-9 gap-2 flex-shrink-0"
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Download</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={fetchTokenUsageData}
+              size="sm"
+              variant="outline"
+              className="h-9 p-2 flex-shrink-0"
+              disabled={loading}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button 
+              onClick={handleDownloadUserList}
+              size="sm"
+              variant="outline"
+              className="h-9 gap-2 flex-shrink-0"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Download</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -952,14 +963,25 @@ export default function Admin() {
             <h1 className="text-3xl xl:text-4xl font-bold text-foreground">Admin Dashboard</h1>
             <p className="text-sm text-muted-foreground mt-2">Manage users and monitor system usage</p>
           </div>
-          <Button 
-            onClick={handleDownloadUserList}
-            className="gap-2 h-10"
-            variant="outline"
-          >
-            <Download className="w-4 h-4" />
-            Download User List
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={fetchTokenUsageData}
+              className="gap-2 h-10"
+              variant="outline"
+              disabled={loading}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button 
+              onClick={handleDownloadUserList}
+              className="gap-2 h-10"
+              variant="outline"
+            >
+              <Download className="w-4 h-4" />
+              Download User List
+            </Button>
+          </div>
         </div>
 
         {/* Filters Section */}
