@@ -221,6 +221,7 @@ export default function Admin() {
   } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userUsages, setUserUsages] = useState<UserTokenUsage[]>([]);
   const [modelUsages, setModelUsages] = useState<TokenUsageByModel[]>([]);
@@ -339,9 +340,13 @@ export default function Admin() {
       toast.error('Failed to download user list');
     }
   };
-  const fetchTokenUsageData = async () => {
+  const fetchTokenUsageData = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
 
       // Fetch ALL profiles in batches (Supabase default limit is 1000)
       let allProfilesData: any[] = [];
@@ -479,6 +484,7 @@ export default function Admin() {
       toast.error('Failed to load token usage data');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -957,14 +963,14 @@ export default function Admin() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                fetchTokenUsageData();
+                fetchTokenUsageData(true);
               }}
               type="button"
               className="gap-2 h-10"
               variant="outline"
-              disabled={loading}
+              disabled={refreshing}
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
             <Button 
@@ -986,14 +992,14 @@ export default function Admin() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                fetchTokenUsageData();
+                fetchTokenUsageData(true);
               }}
               type="button"
               variant="outline"
               className="lg:hidden h-11 gap-2 transition-all duration-300 flex-shrink-0"
-              disabled={loading}
+              disabled={refreshing}
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline font-medium">Refresh</span>
             </Button>
             <Popover open={showFilters} onOpenChange={setShowFilters}>
