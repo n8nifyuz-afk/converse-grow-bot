@@ -24,7 +24,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { showPricingModal, setShowPricingModal } = useAuth();
   const location = useLocation();
-  const isAdminPage = location.pathname === '/admin';
+  const isAdminPage = location.pathname === '/admin' || location.pathname === '/admin/';
   
   // For admin page, don't use sidebar at all
   if (isAdminPage) {
