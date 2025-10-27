@@ -557,7 +557,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   return (
     <>
       {isMobile ? (
-        <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
+        <Drawer open={open} onOpenChange={onOpenChange} snapPoints={[1, 0.5]} dismissible={true}>
           <DrawerContent className="h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300">
             <div className="h-full overflow-y-auto overscroll-contain">
               {modalContent}
