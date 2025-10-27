@@ -134,6 +134,16 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [snapPoint, setSnapPoint] = useState<number | string | null>(1);
   
   const allFeatures = getFeatures(t, selectedPlan);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom on mobile when modal opens
+  React.useEffect(() => {
+    if (open && isMobile && scrollRef.current) {
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+      }, 100);
+    }
+  }, [open, isMobile]);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
@@ -567,7 +577,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
           <DrawerContent 
             className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl flex flex-col overflow-hidden"
           >
-            <div className="flex-1 overflow-y-scroll overscroll-contain touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div ref={scrollRef} className="flex-1 overflow-y-scroll overscroll-contain touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
               {modalContent}
             </div>
           </DrawerContent>
