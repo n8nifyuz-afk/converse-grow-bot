@@ -26,10 +26,26 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation();
   const isAdminPage = location.pathname === '/admin';
   
+  // For admin page, don't use sidebar at all
+  if (isAdminPage) {
+    return (
+      <>
+        <div className="flex min-h-screen w-full bg-background">
+          <MainContent>{children}</MainContent>
+        </div>
+        
+        <PricingModal 
+          open={showPricingModal} 
+          onOpenChange={setShowPricingModal} 
+        />
+      </>
+    );
+  }
+  
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex min-h-screen w-full bg-background">
-        {!isAdminPage && <ChatSidebar isOpen={true} onClose={() => {}} />}
+        <ChatSidebar isOpen={true} onClose={() => {}} />
         <MainContent>{children}</MainContent>
       </div>
       
