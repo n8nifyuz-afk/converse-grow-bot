@@ -215,9 +215,13 @@ serve(async (req) => {
       sessionConfig.subscription_data.trial_period_days = 3;
       sessionConfig.subscription_data.trial_settings = {
         end_behavior: {
-          missing_payment_method: 'cancel', // Cancel if no payment method after trial
+          missing_payment_method: 'create_invoice', // Create invoice and attempt payment when trial ends
         }
       };
+      
+      // CRITICAL: Ensure payment method is saved for future billing
+      sessionConfig.payment_method_collection = 'always';
+      sessionConfig.subscription_data.payment_behavior = 'default_incomplete'; // Create subscription immediately, charge after trial
       
       // Add trial fee as a separate one-time line item charged immediately (EUR only)
       const trialAmount = 99; // €0.99 in cents

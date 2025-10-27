@@ -485,14 +485,22 @@ serve(async (req) => {
         if (invoice.subscription) {
           const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
           
-          // Check if subscription metadata indicates it was a trial
-          if (subscription.metadata?.is_trial === 'true' && subscription.metadata?.target_plan) {
-            logStep("Trial conversion detected via first invoice", { 
+          // CRITICAL: Detect trial conversion properly
+          // Trial has 2 charges: €0.99 upfront (trial fee) + full price after 3 days (conversion)
+          // Only mark as converted when the FULL PRICE is charged (not the €0.99 trial fee)
+          const isTrialFee = invoice.amount_paid === 99; // €0.99 in cents
+          const isTrialSubscription = subscription.metadata?.is_trial === 'true';
+          const hasTrialEnded = subscription.trial_end && (subscription.trial_end * 1000) < Date.now();
+          
+          if (isTrialSubscription && !isTrialFee && hasTrialEnded && subscription.metadata?.target_plan) {
+            logStep("Trial conversion detected - first full payment after trial", { 
               subscriptionId: subscription.id,
-              targetPlan: subscription.metadata.target_plan 
+              targetPlan: subscription.metadata.target_plan,
+              amountPaid: invoice.amount_paid / 100,
+              currency: invoice.currency
             });
 
-            // Update trial_conversions record
+            // Update trial_conversions record - mark as converted
             const { error: conversionError } = await supabaseClient
               .from('trial_conversions')
               .update({
@@ -506,7 +514,7 @@ serve(async (req) => {
             if (conversionError) {
               logStep("WARNING: Failed to update trial conversion", { error: conversionError.message });
             } else {
-              logStep("Trial conversion tracked successfully", { userId: user.id });
+              logStep("✅ Trial converted to paid subscription successfully", { userId: user.id });
             }
 
             // Remove trial metadata from subscription
@@ -514,9 +522,24 @@ serve(async (req) => {
               metadata: {
                 ...subscription.metadata,
                 is_trial: 'false',
-                trial_converted: 'true'
+                trial_converted: 'true',
+                conversion_date: new Date().toISOString()
               }
             });
+          } else if (isTrialSubscription && isTrialFee) {
+            logStep("Trial fee payment received (€0.99) - trial period started", {
+              subscriptionId: subscription.id,
+              trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : 'unknown'
+            });
+            
+            // Update trial_conversions with subscription ID
+            await supabaseClient
+              .from('trial_conversions')
+              .update({
+                trial_subscription_id: subscription.id
+              })
+              .eq('user_id', user.id)
+              .is('converted_at', null);
           }
         }
 
@@ -859,7 +882,7 @@ serve(async (req) => {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        logStep("Payment failed", { invoiceId: invoice.id });
+        logStep("Payment failed", { invoiceId: invoice.id, amountDue: invoice.amount_due / 100 });
 
         if (!invoice.customer_email) {
           logStep("No customer email for payment failure");
@@ -884,6 +907,33 @@ serve(async (req) => {
           break;
         }
         const user = userData.user;
+
+        // CRITICAL: Check if this is a trial conversion failure
+        if (invoice.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+          const isTrialConversionFailure = subscription.metadata?.is_trial === 'true' && 
+                                           subscription.trial_end && 
+                                           (subscription.trial_end * 1000) < Date.now();
+          
+          if (isTrialConversionFailure) {
+            logStep("❌ Trial conversion payment FAILED", {
+              subscriptionId: subscription.id,
+              targetPlan: subscription.metadata?.target_plan,
+              amountAttempted: invoice.amount_due / 100
+            });
+            
+            // Mark trial as failed (not converted)
+            await supabaseClient
+              .from('trial_conversions')
+              .update({
+                trial_subscription_id: subscription.id,
+                converted_at: null // Keep null to indicate failed conversion
+              })
+              .eq('user_id', user.id);
+            
+            logStep("Trial marked as failed - user can potentially retry", { userId: user.id });
+          }
+        }
 
         // Revert to free plan and clean up limits (downgrade)
         await supabaseClient
