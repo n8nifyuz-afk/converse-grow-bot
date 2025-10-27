@@ -1761,7 +1761,7 @@ export default function Admin() {
                                         : 'User deleted successfully';
                                       
                                       toast.success(successMsg);
-                                      await fetchTokenUsageData();
+                                      await fetchTokenUsageData(true);
                                     } catch (error) {
                                       console.error('Error deleting user:', error);
                                       toast.error('Failed to delete user');
@@ -2007,7 +2007,7 @@ export default function Admin() {
                       
                       toast.success(successMsg);
                       setIsModalOpen(false);
-                      await fetchTokenUsageData();
+                      await fetchTokenUsageData(true);
                     } catch (error) {
                       console.error('Error deleting user:', error);
                       toast.error('Failed to delete user');
