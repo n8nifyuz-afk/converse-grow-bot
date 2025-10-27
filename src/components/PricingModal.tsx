@@ -131,6 +131,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isLoading, setIsLoading] = useState(false);
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
+  const [snapPoint, setSnapPoint] = useState<number | string | null>(1);
   
   const allFeatures = getFeatures(t, selectedPlan);
 
@@ -271,10 +272,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile Close Button - Always visible */}
+            {/* Mobile Close Button - Scrolls with content */}
             {isMobile && (
               <div 
-                className="sticky top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-sm border-b border-zinc-200 flex justify-end px-4 py-3"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0"
                 style={{ 
                   paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
                   paddingBottom: '0.75rem'
@@ -558,13 +559,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
           open={open} 
           onOpenChange={onOpenChange} 
           dismissible={true}
-          snapPoints={[1]}
-          activeSnapPoint={1}
+          snapPoints={[1, 0.5]}
+          activeSnapPoint={snapPoint}
+          setActiveSnapPoint={setSnapPoint}
+          modal={true}
         >
           <DrawerContent 
-            className="h-screen max-h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-none"
+            className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl flex flex-col"
           >
-            <div className="h-full overflow-y-auto overscroll-contain">
+            <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
               {modalContent}
             </div>
           </DrawerContent>
