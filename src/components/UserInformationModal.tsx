@@ -19,6 +19,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 interface UserInformationModalProps {
   open: boolean;
@@ -67,6 +68,12 @@ const COUNTRY_NAMES: Record<string, string> = {
 const getCountryName = (code: string | null) => {
   if (!code) return 'Unknown';
   return COUNTRY_NAMES[code.toUpperCase()] || code;
+};
+
+const formatInCyprusTime = (date: string | Date, formatStr: string) => {
+  const cyprusTimeZone = 'Europe/Nicosia';
+  const zonedDate = toZonedTime(new Date(date), cyprusTimeZone);
+  return format(zonedDate, formatStr);
 };
 
 export const UserInformationModal: React.FC<UserInformationModalProps> = ({
@@ -256,7 +263,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                         Account Created
                       </p>
                       <p className="text-xs sm:text-sm font-semibold">
-                        {userInfo.created_at ? format(new Date(userInfo.created_at), 'PP p') : 'Unknown'}
+                        {userInfo.created_at ? formatInCyprusTime(userInfo.created_at, 'PP p') : 'Unknown'}
                       </p>
                       <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                         {userInfo.created_at && `(${Math.floor((Date.now() - new Date(userInfo.created_at).getTime()) / (1000 * 60 * 60 * 24))} days ago)`}
@@ -265,7 +272,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                     <div>
                       <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Last Login</p>
                       <p className="text-xs sm:text-sm font-semibold">
-                        {userInfo.last_login_at ? format(new Date(userInfo.last_login_at), 'PP p') : 'No login recorded'}
+                        {userInfo.last_login_at ? formatInCyprusTime(userInfo.last_login_at, 'PP p') : 'No login recorded'}
                       </p>
                       <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                         {userInfo.last_login_at && `(${Math.floor((Date.now() - new Date(userInfo.last_login_at).getTime()) / (1000 * 60 * 60))} hours ago)`}
@@ -413,7 +420,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                             <Badge variant="outline" className="text-xs w-fit">{log.activity_type}</Badge>
                             <span className="text-[10px] sm:text-xs text-muted-foreground">
-                              {format(new Date(log.created_at), 'PP p')}
+                              {formatInCyprusTime(log.created_at, 'PP p')}
                             </span>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
