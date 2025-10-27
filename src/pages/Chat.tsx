@@ -1044,6 +1044,19 @@ export default function Chat() {
         console.error('[REGENERATE] Error checking first message:', error);
       }
       
+      // Fetch user's external_id from profiles
+      let externalId = null;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('external_id')
+          .eq('user_id', user.id)
+          .single();
+        externalId = profile?.external_id;
+      } catch (error) {
+        console.error('[REGENERATE] Error fetching external_id:', error);
+      }
+      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
@@ -1052,6 +1065,7 @@ export default function Chat() {
         body: JSON.stringify({
           ...payload,
           isFirstMessage,
+          externalId,
           ...metadata
         })
       });
@@ -1262,6 +1276,19 @@ export default function Chat() {
         console.error('[AI-RESPONSE] Error checking first message:', error);
       }
       
+      // Fetch user's external_id from profiles
+      let externalId = null;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('external_id')
+          .eq('user_id', user.id)
+          .single();
+        externalId = profile?.external_id;
+      } catch (error) {
+        console.error('[AI-RESPONSE] Error fetching external_id:', error);
+      }
+      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
@@ -1274,6 +1301,7 @@ export default function Chat() {
           chatId: originalChatId,
           model: selectedModel,
           isFirstMessage,
+          externalId,
           ...metadata
         })
       });
@@ -1996,6 +2024,19 @@ export default function Chat() {
           console.error('[IMAGE-GEN] Error checking first message:', error);
         }
         
+        // Fetch user's external_id from profiles
+        let externalId = null;
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('external_id')
+            .eq('user_id', user.id)
+            .single();
+          externalId = profile?.external_id;
+        } catch (error) {
+          console.error('[IMAGE-GEN] Error fetching external_id:', error);
+        }
+        
         const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
           method: 'POST',
           headers: {
@@ -2008,6 +2049,7 @@ export default function Chat() {
             chatId: chatId,
             model: 'generate-image',
             isFirstMessage,
+            externalId,
             ...metadata
           })
         });

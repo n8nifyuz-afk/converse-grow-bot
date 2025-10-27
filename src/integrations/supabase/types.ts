@@ -261,6 +261,7 @@ export type Database = {
           device_info: Json | null
           display_name: string | null
           email: string | null
+          external_id: string | null
           gender: string | null
           id: string
           ip_address: string | null
@@ -284,6 +285,7 @@ export type Database = {
           device_info?: Json | null
           display_name?: string | null
           email?: string | null
+          external_id?: string | null
           gender?: string | null
           id?: string
           ip_address?: string | null
@@ -307,6 +309,7 @@ export type Database = {
           device_info?: Json | null
           display_name?: string | null
           email?: string | null
+          external_id?: string | null
           gender?: string | null
           id?: string
           ip_address?: string | null
