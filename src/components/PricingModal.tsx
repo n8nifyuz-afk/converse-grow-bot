@@ -139,18 +139,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   // Scroll to show terms text and subscribe button on mobile when modal opens
   React.useEffect(() => {
     if (open && isMobile && scrollRef.current) {
-      // Use multiple attempts to ensure scroll happens after content renders
-      const scrollToBottom = () => {
+      // Single scroll to bottom without smooth animation to prevent bouncing
+      setTimeout(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-      };
-      
-      // Immediate scroll
-      setTimeout(scrollToBottom, 100);
-      // Backup scroll in case content is still rendering
-      setTimeout(scrollToBottom, 300);
-      setTimeout(scrollToBottom, 500);
+      }, 300);
     }
   }, [open, isMobile]);
 
@@ -363,7 +357,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className={`w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible ${isMobile ? 'pb-16' : 'pb-5 sm:pb-6'}`}>
+            <div className={`w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible ${isMobile ? 'pb-32' : 'pb-5 sm:pb-6'}`}>
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
