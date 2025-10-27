@@ -136,13 +136,21 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const allFeatures = getFeatures(t, selectedPlan);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // Scroll to show terms text on mobile when modal opens
+  // Scroll to show terms text and subscribe button on mobile when modal opens
   React.useEffect(() => {
     if (open && isMobile && scrollRef.current) {
-      setTimeout(() => {
-        // Scroll to bottom to show "by continuing an account, you agree to our terms" text
-        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-      }, 200);
+      // Use multiple attempts to ensure scroll happens after content renders
+      const scrollToBottom = () => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      };
+      
+      // Immediate scroll
+      setTimeout(scrollToBottom, 100);
+      // Backup scroll in case content is still rendering
+      setTimeout(scrollToBottom, 300);
+      setTimeout(scrollToBottom, 500);
     }
   }, [open, isMobile]);
 
