@@ -97,6 +97,11 @@ export default function AuthModal({
       setShowPassword(false);
     }
   }, [isOpen]);
+
+  // Clear error when switching modes
+  useEffect(() => {
+    setError('');
+  }, [mode]);
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;

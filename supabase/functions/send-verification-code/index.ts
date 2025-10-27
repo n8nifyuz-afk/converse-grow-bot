@@ -97,11 +97,12 @@ serve(async (req) => {
       }
     }
 
-    // Send verification email
+    // Send verification email with improved deliverability settings
     const { error: emailError } = await resend.emails.send({
-      from: "ChatL <no-reply@chatl.ai>",
+      from: "ChatLearn <hello@chatl.ai>",
       to: [email],
-      subject: "Verify Your Email - ChatLearn",
+      subject: "Your ChatLearn Verification Code",
+      reply_to: "support@chatl.ai",
       html: `
         <!DOCTYPE html>
         <html>
