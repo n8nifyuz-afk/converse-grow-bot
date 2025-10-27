@@ -935,7 +935,11 @@ export default function Admin() {
           </div>
           <div className="flex gap-2">
             <Button 
-              onClick={fetchTokenUsageData}
+              onClick={(e) => {
+                e.preventDefault();
+                fetchTokenUsageData();
+              }}
+              type="button"
               size="sm"
               variant="outline"
               className="h-9 p-2 flex-shrink-0"
@@ -965,7 +969,11 @@ export default function Admin() {
           </div>
           <div className="flex gap-2">
             <Button 
-              onClick={fetchTokenUsageData}
+              onClick={(e) => {
+                e.preventDefault();
+                fetchTokenUsageData();
+              }}
+              type="button"
               className="gap-2 h-10"
               variant="outline"
               disabled={loading}
