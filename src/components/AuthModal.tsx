@@ -705,16 +705,25 @@ export default function AuthModal({
                   <div className="mt-4 text-center space-x-2 text-sm">
                     {mode === 'signin' ? <>
                         <span className="text-muted-foreground">{t('authModal.dontHaveAccount')}</span>
-                        <button onClick={() => setMode('signup')} className="text-primary hover:underline font-medium">
+                        <button onClick={() => {
+                          setMode('signup');
+                          setError('');
+                        }} className="text-primary hover:underline font-medium">
                           {t('authModal.signUp')}
                         </button>
                         <span className="text-muted-foreground">|</span>
-                        <button onClick={() => setMode('reset')} className="text-primary hover:underline">
+                        <button onClick={() => {
+                          setMode('reset');
+                          setError('');
+                        }} className="text-primary hover:underline">
                           {t('authModal.forgotPassword')}
                         </button>
                       </> : <>
                         <span className="text-muted-foreground">{t('authModal.alreadyHaveAccount')}</span>
-                        <button onClick={() => setMode('signin')} className="text-primary hover:underline font-medium">
+                        <button onClick={() => {
+                          setMode('signin');
+                          setError('');
+                        }} className="text-primary hover:underline font-medium">
                           {t('authModal.signIn')}
                         </button>
                       </>}
