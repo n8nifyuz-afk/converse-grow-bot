@@ -234,7 +234,15 @@ serve(async (req) => {
         quantity: 1,
       });
       
+      // Get product ID from the price
+      const priceDetails = await stripe.prices.retrieve(priceId);
+      const trialProductId = typeof priceDetails.product === 'string' 
+        ? priceDetails.product 
+        : priceDetails.product.id;
+      
       sessionConfig.subscription_data.metadata.is_trial = 'true';
+      sessionConfig.subscription_data.metadata.target_plan = targetPlan;
+      sessionConfig.subscription_data.metadata.trial_product_id = trialProductId;
       sessionConfig.subscription_data.metadata.trial_end_date = renewalDateStr;
       
       logStep("Creating subscription with 3-day trial", { 
@@ -252,6 +260,34 @@ serve(async (req) => {
     
     const session = await stripe.checkout.sessions.create(sessionConfig);
     logStep("Checkout session created", { sessionId: session.id, isTrial });
+
+    // CRITICAL: Track trial immediately to prevent re-use
+    if (isTrial) {
+      try {
+        const priceDetails = await stripe.prices.retrieve(priceId);
+        const trialProductId = typeof priceDetails.product === 'string' 
+          ? priceDetails.product 
+          : priceDetails.product.id;
+        
+        const { error: trialError } = await supabaseClient
+          .from('trial_conversions')
+          .insert({
+            user_id: user.id,
+            trial_subscription_id: '', // Will be updated by webhook
+            trial_product_id: trialProductId,
+            target_plan: targetPlan,
+            converted_at: null // Not converted yet
+          });
+        
+        if (trialError) {
+          logStep("WARNING: Failed to track trial immediately", { error: trialError.message });
+        } else {
+          logStep("Trial tracked immediately to prevent re-use", { userId: user.id });
+        }
+      } catch (trackError) {
+        logStep("ERROR: Trial tracking failed", { error: trackError instanceof Error ? trackError.message : String(trackError) });
+      }
+    }
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

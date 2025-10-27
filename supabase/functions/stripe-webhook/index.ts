@@ -418,66 +418,6 @@ serve(async (req) => {
           break;
         }
 
-        // Check if this is a trial subscription
-        const isTrial = subscription.metadata?.is_trial === 'true';
-        const targetPlan = subscription.metadata?.target_plan;
-        const userId = subscription.metadata?.user_id;
-        const trialProductId = subscription.metadata?.trial_product_id;
-
-        logStep("Trial check", { isTrial, targetPlan, userId, trialProductId });
-
-        // If trial ended, create monthly subscription
-        if (isTrial && targetPlan && userId) {
-          logStep("Trial ended - creating monthly subscription", { targetPlan, userId });
-
-          try {
-            // Get monthly price ID based on target plan
-            const monthlyPriceId = targetPlan === 'pro' 
-              ? 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'  // Pro Monthly €19.99
-              : 'price_1SKJAxL8Zm4LqDn43kl9BRd8'; // Ultra Pro Monthly €39.99
-
-            // Create new monthly subscription
-            const newSubscription = await stripe.subscriptions.create({
-              customer: subscription.customer as string,
-              items: [{ price: monthlyPriceId }],
-              metadata: {
-                upgraded_from_trial: 'true',
-                trial_subscription_id: subscription.id,
-                user_id: userId
-              }
-            });
-
-            logStep("Monthly subscription created after trial", { 
-              newSubscriptionId: newSubscription.id,
-              plan: targetPlan 
-            });
-
-            // Track conversion
-            await supabaseClient
-              .from('trial_conversions')
-              .insert({
-                user_id: userId,
-                trial_subscription_id: subscription.id,
-                trial_product_id: trialProductId || '',
-                target_plan: targetPlan,
-                paid_subscription_id: newSubscription.id,
-                converted_at: new Date().toISOString()
-              });
-
-            logStep("Trial conversion tracked", { userId, trialSubscriptionId: subscription.id });
-
-            // Don't delete user subscription - the new subscription webhook will update it
-            break;
-          } catch (conversionError) {
-            logStep("ERROR: Failed to convert trial to paid", { 
-              error: conversionError instanceof Error ? conversionError.message : String(conversionError),
-              userId,
-              targetPlan
-            });
-            // Continue to delete logic if conversion fails
-          }
-        }
-
         // Lookup user via profiles
         const { data: profile } = await supabaseClient
           .from('profiles')
@@ -540,6 +480,45 @@ serve(async (req) => {
           break;
         }
         const user = userData.user;
+
+        // Check if this is the first invoice after trial (trial conversion)
+        if (invoice.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+          
+          // Check if subscription metadata indicates it was a trial
+          if (subscription.metadata?.is_trial === 'true' && subscription.metadata?.target_plan) {
+            logStep("Trial conversion detected via first invoice", { 
+              subscriptionId: subscription.id,
+              targetPlan: subscription.metadata.target_plan 
+            });
+
+            // Update trial_conversions record
+            const { error: conversionError } = await supabaseClient
+              .from('trial_conversions')
+              .update({
+                trial_subscription_id: subscription.id,
+                paid_subscription_id: subscription.id,
+                converted_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id)
+              .is('converted_at', null);
+            
+            if (conversionError) {
+              logStep("WARNING: Failed to update trial conversion", { error: conversionError.message });
+            } else {
+              logStep("Trial conversion tracked successfully", { userId: user.id });
+            }
+
+            // Remove trial metadata from subscription
+            await stripe.subscriptions.update(subscription.id, {
+              metadata: {
+                ...subscription.metadata,
+                is_trial: 'false',
+                trial_converted: 'true'
+              }
+            });
+          }
+        }
 
         // Activate subscription
         const { error } = await supabaseClient
