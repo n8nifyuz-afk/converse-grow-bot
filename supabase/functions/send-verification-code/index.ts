@@ -45,13 +45,22 @@ serve(async (req) => {
     // Check if user already exists
     const { data: existingUser } = await supabaseAdmin
       .from('profiles')
-      .select('email')
+      .select('email, signup_method')
       .eq('email', email)
       .single();
 
     if (existingUser) {
-      logStep("User already exists", { email });
-      throw new Error("An account with this email already exists. Please sign in instead.");
+      // If user signed up with email/password, they can't sign up again
+      if (existingUser.signup_method === 'email') {
+        logStep("User already exists with email", { email });
+        throw new Error("An account with this email already exists. Please sign in instead.");
+      }
+      
+      // If user signed up with OAuth (Google/Apple), allow them to add a password
+      if (existingUser.signup_method === 'google' || existingUser.signup_method === 'apple') {
+        logStep("OAuth user adding password", { email, method: existingUser.signup_method });
+        // Continue with verification code flow to add password to their account
+      }
     }
 
     // Generate 6-digit verification code
