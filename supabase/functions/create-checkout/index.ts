@@ -40,9 +40,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId, isTrial, currency = 'eur' } = await req.json();
+    const { priceId, isTrial } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
-    logStep("Price ID received", { priceId, isTrial, currency });
+    logStep("Price ID received", { priceId, isTrial });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2025-08-27.basil" 
@@ -219,13 +219,12 @@ serve(async (req) => {
         }
       };
       
-      // Add trial fee as a separate one-time line item charged immediately
-      const trialAmount = currency === 'gbp' ? 79 : 99; // £0.79 or €0.99 in cents
-      const currencySymbol = currency === 'gbp' ? '£' : '€';
+      // Add trial fee as a separate one-time line item charged immediately (EUR only)
+      const trialAmount = 99; // €0.99 in cents
       
       sessionConfig.line_items.push({
         price_data: {
-          currency: currency,
+          currency: 'eur',
           product_data: {
             name: '3-Day Trial Access',
             description: `Trial access to ${targetPlan === 'pro' ? 'Pro' : 'Ultra Pro'} plan`

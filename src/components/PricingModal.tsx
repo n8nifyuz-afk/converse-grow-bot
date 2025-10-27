@@ -228,7 +228,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
       const isTrial = selectedPeriod === 'trial';
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId, isTrial, currency }
+        body: { priceId, isTrial }
       });
 
       if (error) {
