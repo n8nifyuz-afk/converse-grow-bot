@@ -283,10 +283,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             {isMobile && (
               <button
                 onClick={() => onOpenChange(false)}
-                className="absolute top-4 right-4 transition-all hover:scale-110 focus:outline-none z-50"
+                className="absolute top-4 right-4 transition-all hover:scale-110 focus:outline-none z-50 opacity-40 hover:opacity-70"
                 aria-label="Close"
               >
-                <X className="h-6 w-6 text-zinc-700 hover:text-zinc-900" />
+                <X className="h-5 w-5 text-zinc-400 hover:text-zinc-600" />
                 <span className="sr-only">Close</span>
               </button>
             )}
