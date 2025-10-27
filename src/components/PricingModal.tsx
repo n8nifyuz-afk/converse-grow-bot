@@ -141,19 +141,21 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     if (open && isMobile && scrollRef.current) {
       // Immediate scroll to bottom
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      // Backup scroll after render and after any state changes
-      setTimeout(() => {
+      
+      // Multiple aggressive scroll attempts to ensure bottom stays visible
+      const scrollToBottom = () => {
         if (scrollRef.current) {
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-      }, 0);
-      setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-      }, 100);
+      };
+      
+      // Rapid scroll attempts
+      const timeouts = [0, 50, 100, 200, 300, 500, 800];
+      timeouts.forEach(delay => {
+        setTimeout(scrollToBottom, delay);
+      });
     }
-  }, [open, isMobile, checkingEligibility, isTrialEligible]);
+  }, [open, isMobile, checkingEligibility, isTrialEligible, selectedPeriod]);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
