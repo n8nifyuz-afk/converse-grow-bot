@@ -271,21 +271,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile Close Button - Always visible */}
+            {/* Mobile Close Button - Scrolls with content */}
             {isMobile && (
-              <div 
-                className="sticky top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-sm border-b border-zinc-200 flex justify-end px-4 py-3"
-                style={{ 
-                  paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
-                  paddingBottom: '0.75rem'
-                }}
-              >
+              <div className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 safe-top">
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
+                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation"
                   aria-label="Close"
                 >
-                  <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
+                  <X className="h-6 w-6 text-zinc-600" />
                   <span className="sr-only">Close</span>
                 </button>
               </div>
@@ -558,13 +552,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
           open={open} 
           onOpenChange={onOpenChange} 
           dismissible={true}
-          snapPoints={[1]}
-          activeSnapPoint={1}
+          modal={true}
         >
-          <DrawerContent 
-            className="h-screen max-h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-none"
-          >
-            <div className="h-full overflow-y-auto overscroll-contain">
+          <DrawerContent className="h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-none">
+            <div className="h-full overflow-y-scroll overscroll-contain -webkit-overflow-scrolling-touch">
               {modalContent}
             </div>
           </DrawerContent>
