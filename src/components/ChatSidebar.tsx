@@ -110,9 +110,13 @@ export default function ChatSidebar({
   } = useParams();
   const location = useLocation();
   const {
-    state: sidebarState
+    state: sidebarState,
+    setOpen
   } = useSidebar();
   const collapsed = sidebarState === 'collapsed';
+  
+  // Check if we're on the admin page
+  const isAdminPage = location.pathname === '/admin';
 
   // Fetch functions
   const fetchChats = async () => {
@@ -160,6 +164,13 @@ export default function ChatSidebar({
       fetchProjects();
     }
   }, [user]);
+  
+  // Auto-collapse sidebar on admin page
+  useEffect(() => {
+    if (isAdminPage && !collapsed) {
+      setOpen(false);
+    }
+  }, [isAdminPage]);
 
   // Listen for chat refresh events
   useEffect(() => {
@@ -363,7 +374,7 @@ export default function ChatSidebar({
             )}
           </div>
 
-          {collapsed ? <div className="flex flex-col gap-2 items-center">
+          {!isAdminPage && (collapsed ? <div className="flex flex-col gap-2 items-center">
               <Button onClick={handleNewChat} className="h-12 w-12 p-0 rounded-full bg-transparent hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200" size="sm" variant="ghost" title={t('chat.newChat')}>
                 <Plus className="h-5 w-5 flex-shrink-0" />
               </Button>
@@ -392,12 +403,12 @@ export default function ChatSidebar({
                   <FolderPlus className="h-4 w-4 flex-shrink-0" />
                   <span className="font-medium">{t('chat.newProject')}</span>
                 </Button>}
-            </div>}
+            </div>)}
         </SidebarHeader>
 
         <SidebarContent>
           {/* Projects */}
-          {!collapsed && projects.length > 0 && <SidebarGroup>
+          {!isAdminPage && !collapsed && projects.length > 0 && <SidebarGroup>
               <SidebarGroupLabel className="px-3 text-xs text-sidebar-foreground/60 font-medium">
                 {t('chat.projects')}
               </SidebarGroupLabel>
@@ -460,7 +471,7 @@ export default function ChatSidebar({
             </SidebarGroup>}
 
           {/* Unorganized Chats */}
-          {!collapsed && unorganizedChats.length > 0 && <SidebarGroup>
+          {!isAdminPage && !collapsed && unorganizedChats.length > 0 && <SidebarGroup>
               <SidebarGroupLabel className="px-3 text-xs text-sidebar-foreground/60 font-medium">
                 {t('chat.recentChats')}
               </SidebarGroupLabel>
