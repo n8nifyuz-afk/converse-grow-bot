@@ -283,10 +283,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             {isMobile && (
               <button
                 onClick={() => onOpenChange(false)}
-                className="absolute top-4 right-4 transition-all hover:scale-110 focus:outline-none z-50 opacity-40 hover:opacity-70"
+                className="absolute top-4 right-4 transition-all hover:scale-110 focus:outline-none z-[100] opacity-40 hover:opacity-70 touch-manipulation cursor-pointer"
                 aria-label="Close"
+                style={{ pointerEvents: 'auto' }}
               >
-                <X className="h-5 w-5 text-zinc-400 hover:text-zinc-600" />
+                <X className="h-6 w-6 text-zinc-400 hover:text-zinc-600" />
                 <span className="sr-only">Close</span>
               </button>
             )}
@@ -555,8 +556,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
+          <DrawerContent className="h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300">
+            <div className="h-full overflow-y-auto overscroll-contain">
               {modalContent}
             </div>
           </DrawerContent>
