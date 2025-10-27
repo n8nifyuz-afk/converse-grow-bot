@@ -1026,6 +1026,24 @@ export default function Chat() {
       // Get webhook metadata
       const metadata = await getWebhookMetadata();
       
+      // Check if this is the user's first message
+      let isFirstMessage = false;
+      try {
+        const response = await fetch(
+          `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/messages?user_id=eq.${user.id}&select=id&limit=1`,
+          {
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjaWFpdW56YWNndnZidmNzaGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Nzc3NjQsImV4cCI6MjA3MzI1Mzc2NH0.zpQgi6gkTSfP-znoV6u_YiyzKRp8fklxrz_xszGtPLI',
+              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            }
+          }
+        );
+        const existingMessages = await response.json();
+        isFirstMessage = !existingMessages || existingMessages.length === 0;
+      } catch (error) {
+        console.error('[REGENERATE] Error checking first message:', error);
+      }
+      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
@@ -1033,6 +1051,7 @@ export default function Chat() {
         },
         body: JSON.stringify({
           ...payload,
+          isFirstMessage,
           ...metadata
         })
       });
@@ -1223,6 +1242,26 @@ export default function Chat() {
       // Get webhook metadata
       const metadata = await getWebhookMetadata();
       
+      // Check if this is the user's first message
+      let isFirstMessage = false;
+      try {
+        // Use direct REST API call to avoid TS type inference issues
+        const response = await fetch(
+          `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/messages?user_id=eq.${user.id}&select=id&limit=1`,
+          {
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjaWFpdW56YWNndnZidmNzaGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Nzc3NjQsImV4cCI6MjA3MzI1Mzc2NH0.zpQgi6gkTSfP-znoV6u_YiyzKRp8fklxrz_xszGtPLI',
+              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            }
+          }
+        );
+        const existingMessages = await response.json();
+        isFirstMessage = !existingMessages || existingMessages.length === 0;
+        console.log('[AI-RESPONSE] First time user:', isFirstMessage);
+      } catch (error) {
+        console.error('[AI-RESPONSE] Error checking first message:', error);
+      }
+      
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
         method: 'POST',
         headers: {
@@ -1234,6 +1273,7 @@ export default function Chat() {
           userId: user.id,
           chatId: originalChatId,
           model: selectedModel,
+          isFirstMessage,
           ...metadata
         })
       });
@@ -1938,6 +1978,24 @@ export default function Chat() {
         // Get webhook metadata
         const metadata = await getWebhookMetadata();
         
+        // Check if this is the user's first message
+        let isFirstMessage = false;
+        try {
+          const response = await fetch(
+            `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/messages?user_id=eq.${user.id}&select=id&limit=1`,
+            {
+              headers: {
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjaWFpdW56YWNndnZidmNzaGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Nzc3NjQsImV4cCI6MjA3MzI1Mzc2NH0.zpQgi6gkTSfP-znoV6u_YiyzKRp8fklxrz_xszGtPLI',
+                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+              }
+            }
+          );
+          const existingMessages = await response.json();
+          isFirstMessage = !existingMessages || existingMessages.length === 0;
+        } catch (error) {
+          console.error('[IMAGE-GEN] Error checking first message:', error);
+        }
+        
         const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
           method: 'POST',
           headers: {
@@ -1949,6 +2007,7 @@ export default function Chat() {
             userId: user.id,
             chatId: chatId,
             model: 'generate-image',
+            isFirstMessage,
             ...metadata
           })
         });
