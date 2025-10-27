@@ -12,7 +12,6 @@ import AuthModal from '@/components/AuthModal';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 import { useTranslation } from 'react-i18next';
-import { detectUserCurrency, formatPrice, convertEurToGbp } from '@/utils/currencyDetection';
 
 interface PricingModalProps {
   open: boolean;
@@ -132,14 +131,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isLoading, setIsLoading] = useState(false);
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
-  const [currency, setCurrency] = useState<'eur' | 'gbp'>('eur');
   
   const allFeatures = getFeatures(t, selectedPlan);
-
-  // Detect user's currency on mount
-  useEffect(() => {
-    detectUserCurrency().then(setCurrency);
-  }, []);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
@@ -269,13 +262,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     }
   };
 
-  // Get base EUR price and convert for display if needed
+  // Always show EUR prices
   const basePricing = pricingOptions[selectedPlan][selectedPeriod];
-  const displayPrice = currency === 'gbp' ? convertEurToGbp(basePricing.price) : basePricing.price;
-  const displayPerDay = currency === 'gbp' ? convertEurToGbp(basePricing.perDay) : basePricing.perDay;
+  const displayPrice = basePricing.price;
+  const displayPerDay = basePricing.perDay;
   
   const savings = selectedPeriod === 'yearly' && 'savings' in basePricing ? basePricing.savings : 0;
-  const currencySymbol = currency === 'gbp' ? '£' : '€';
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
@@ -389,7 +381,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                       <div className="flex justify-between items-center">
                         <div className="font-semibold text-base sm:text-sm text-zinc-900">3-Day Full Access</div>
                         <div className="font-bold text-xl sm:text-xl text-zinc-900">
-                          {currencySymbol}{(currency === 'gbp' ? convertEurToGbp(pricingOptions[selectedPlan].trial.price) : pricingOptions[selectedPlan].trial.price).toFixed(2)}
+                          €{pricingOptions[selectedPlan].trial.price.toFixed(2)}
                         </div>
                       </div>
                     </button>
@@ -408,7 +400,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     <div className="flex justify-between items-center">
                       <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.monthly')}</div>
                       <div className="font-bold text-xl sm:text-xl text-zinc-900">
-                        {currencySymbol}{(currency === 'gbp' ? convertEurToGbp(pricingOptions[selectedPlan].monthly.price) : pricingOptions[selectedPlan].monthly.price).toFixed(2)}
+                        €{pricingOptions[selectedPlan].monthly.price.toFixed(2)}
                       </div>
                     </div>
                   </button>
@@ -425,13 +417,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   <div className="flex justify-between items-center">
                     <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.threeMonths')}</div>
                     <div className="font-bold text-xl sm:text-xl text-zinc-900">
-                      {currencySymbol}{(currency === 'gbp' ? convertEurToGbp(pricingOptions[selectedPlan]['3month'].price) : pricingOptions[selectedPlan]['3month'].price).toFixed(2)}
+                      €{pricingOptions[selectedPlan]['3month'].price.toFixed(2)}
                     </div>
                   </div>
                 </button>
                 {selectedPeriod === 'trial' && (
                   <div className="text-sm text-zinc-600 px-2">
-                    After 3 days, your plan renews automatically at {currencySymbol}{(currency === 'gbp' ? convertEurToGbp(pricingOptions[selectedPlan].monthly.price) : pricingOptions[selectedPlan].monthly.price).toFixed(2)}/month — cancel anytime.
+                    After 3 days, your plan renews automatically at €{pricingOptions[selectedPlan].monthly.price.toFixed(2)}/month — cancel anytime.
                   </div>
                 )}
 
