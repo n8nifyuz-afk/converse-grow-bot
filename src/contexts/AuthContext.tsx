@@ -744,9 +744,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    // Use current domain dynamically to ensure it matches Supabase settings
-    const currentOrigin = window.location.origin;
-    const redirectUrl = `${currentOrigin}/reset-password`;
+    // Use production domain for password reset
+    const redirectUrl = 'https://www.chatl.ai/reset-password';
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl
