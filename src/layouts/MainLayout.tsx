@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import ChatSidebar from "@/components/ChatSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -22,11 +23,13 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const { showPricingModal, setShowPricingModal } = useAuth();
+  const location = useLocation();
+  const isAdminPage = location.pathname === '/admin';
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex min-h-screen w-full bg-background">
-        <ChatSidebar isOpen={true} onClose={() => {}} />
+        {!isAdminPage && <ChatSidebar isOpen={true} onClose={() => {}} />}
         <MainContent>{children}</MainContent>
       </div>
       
