@@ -228,6 +228,21 @@ serve(async (req) => {
 
     console.log('[WEBHOOK-HANDLER] ===== SAVING TO DATABASE =====');
 
+    // Check if this is the user's first message
+    let isFirstMessage = false;
+    if (user_id) {
+      const { data: existingMessages, error: checkError } = await supabaseClient
+        .from('messages')
+        .select('id')
+        .eq('chat_id', chat_id)
+        .limit(1);
+      
+      if (!checkError && (!existingMessages || existingMessages.length === 0)) {
+        isFirstMessage = true;
+        console.log('[WEBHOOK-HANDLER] First message detected for user:', user_id);
+      }
+    }
+
     // Save the assistant message to the database
     // If only image without text, provide default message
     const messageContent = responseContent || (imageUrl ? '' : '');
@@ -269,9 +284,15 @@ serve(async (req) => {
     console.log('[WEBHOOK-HANDLER] ===== SUCCESS =====');
     console.log('[WEBHOOK-HANDLER] Message saved successfully!');
     console.log('[WEBHOOK-HANDLER] Message ID:', data.id);
+    console.log('[WEBHOOK-HANDLER] First time user:', isFirstMessage);
 
     return new Response(
-      JSON.stringify({ success: true, message_id: data.id }),
+      JSON.stringify({ 
+        success: true, 
+        message_id: data.id,
+        is_first_message: isFirstMessage,
+        user_id: user_id
+      }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
