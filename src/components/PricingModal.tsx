@@ -271,11 +271,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const savings = selectedPeriod === 'yearly' && 'savings' in basePricing ? basePricing.savings : 0;
 
   const modalContent = (
-    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
+    <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative ${isMobile ? 'py-8' : ''}`}>
             {/* Mobile Close Button - Scrolls with content */}
             {isMobile && (
               <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0 mb-4"
                 style={{ 
                   paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
                   paddingBottom: '0.75rem'
@@ -344,7 +344,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible">
+            <div className={`w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible ${isMobile ? 'pb-20' : 'pb-5 sm:pb-6'}`}>
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -565,9 +565,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
           modal={true}
         >
           <DrawerContent 
-            className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl flex flex-col"
+            className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl flex flex-col overflow-hidden"
           >
-            <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex-1 overflow-y-scroll overscroll-contain touch-pan-y pb-8" style={{ WebkitOverflowScrolling: 'touch' }}>
               {modalContent}
             </div>
           </DrawerContent>
