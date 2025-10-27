@@ -1141,10 +1141,10 @@ export default function Index() {
             <div className="flex flex-col gap-3">
             {/* File upload controls row */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 md:gap-2">
                 {!isMobile && <>
-                    <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full border border-border/50 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" onClick={handleFileUpload} aria-label="Upload file">
-                      <Paperclip className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className="h-8 w-8 md:h-9 md:w-9 rounded-full border border-border/50 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary flex-shrink-0" onClick={handleFileUpload} aria-label="Upload file">
+                      <Paperclip className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     </Button>
                     
                     {isImageMode && !selectedStyle ? <div className="flex items-center gap-2">
@@ -1181,17 +1181,18 @@ export default function Index() {
                             </div>
                           </PopoverContent>
                         </Popover>
-                      </div> : <Button variant="ghost" size="sm" className="h-9 px-3 rounded-full border border-border/50 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary text-xs" onClick={handleCreateImageClick} aria-label="Create an image">
-                        <ImageIcon className="h-4 w-4 mr-2" />
-                        <span>Generate an image</span>
+                      </div> : <Button variant="ghost" size="sm" className="h-8 md:h-9 px-2 md:px-3 rounded-full border border-border/50 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary text-xs" onClick={handleCreateImageClick} aria-label="Create an image">
+                        <ImageIcon className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1.5 md:mr-2" />
+                        <span className="hidden lg:inline">Generate an image</span>
+                        <span className="lg:hidden">Image</span>
                       </Button>}
                   </>}
               </div>
 
               {/* Desktop model selector and voice controls */}
-              {!isMobile && <div className="flex items-center gap-2">
+              {!isMobile && <div className="flex items-center gap-1.5 md:gap-2">
                   <Select value={selectedModel} onValueChange={handleModelSelect}>
-                    <SelectTrigger className="w-[200px] h-10 bg-background/80 backdrop-blur-sm border border-border/50 rounded-xl focus-visible:ring-2 focus-visible:ring-primary text-sm shadow-sm hover:bg-accent/50 transition-all duration-200" aria-label="Select AI model">
+                    <SelectTrigger className="w-[140px] md:w-[160px] lg:w-[200px] h-9 md:h-10 bg-background/80 backdrop-blur-sm border border-border/50 rounded-xl focus-visible:ring-2 focus-visible:ring-primary text-xs md:text-sm shadow-sm hover:bg-accent/50 transition-all duration-200" aria-label="Select AI model">
                       <SelectValue>
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg flex items-center justify-center">
@@ -1250,13 +1251,13 @@ export default function Index() {
                   
                   <Button 
                     size="sm" 
-                    className={`h-9 w-9 rounded-full border border-border/50 focus-visible:ring-2 focus-visible:ring-offset-2 flex-shrink-0 ${
+                    className={`h-8 w-8 md:h-9 md:w-9 rounded-full border border-border/50 focus-visible:ring-2 focus-visible:ring-offset-2 flex-shrink-0 ${
                       message.trim().length > 0 || selectedFiles.length > 0
                         ? 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
                         : isRecording 
                           ? 'bg-red-500 hover:bg-red-600 focus-visible:ring-red-300 text-background' 
                           : 'bg-foreground hover:bg-foreground/90 focus-visible:ring-primary text-background'
-                    }`} 
+                    }`}
                     onClick={message.trim().length > 0 || selectedFiles.length > 0 ? handleStartChat : (isRecording ? stopRecording : startRecording)} 
                     aria-label={message.trim().length > 0 || selectedFiles.length > 0 ? "Send message" : (isRecording ? "Stop recording" : "Start voice recording")} 
                     aria-pressed={isRecording}
