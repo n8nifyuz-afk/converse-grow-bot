@@ -956,6 +956,7 @@ export default function Admin() {
             <Button 
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 fetchTokenUsageData();
               }}
               type="button"
@@ -984,6 +985,7 @@ export default function Admin() {
             <Button 
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 fetchTokenUsageData();
               }}
               type="button"
