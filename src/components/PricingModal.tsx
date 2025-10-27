@@ -278,12 +278,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const currencySymbol = currency === 'gbp' ? '£' : '€';
 
   const modalContent = (
-    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent">
+    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent overflow-y-auto md:overflow-hidden">
             {/* Mobile/Tablet Close Button */}
             {isMobile && (
               <button
                 onClick={() => onOpenChange(false)}
-                className="absolute right-4 top-4 transition-all hover:scale-110 focus:outline-none z-50"
+                className="sticky top-0 right-0 ml-auto mr-4 mt-4 mb-2 transition-all hover:scale-110 focus:outline-none z-50 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg"
                 aria-label="Close"
               >
                 <X className="h-5 w-5 text-zinc-700 hover:text-zinc-900" />
@@ -555,14 +555,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} dismissible={false}>
-          <DrawerContent className="h-[85vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col">
-            {modalContent}
+          <DrawerContent className="h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
+              {modalContent}
+            </div>
           </DrawerContent>
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-[90vh] sm:h-[85vh] md:h-[85vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white border border-zinc-300 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
-            {modalContent}
+          <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full h-screen sm:h-screen md:h-[85vh] lg:h-[85vh] p-0 bg-gradient-to-br from-white via-zinc-50/50 to-white border border-zinc-300 overflow-hidden flex flex-col shadow-2xl [&>button]:hidden md:[&>button]:flex">
+            <div className="flex-1 overflow-y-auto md:overflow-hidden">
+              {modalContent}
+            </div>
           </DialogContent>
         </Dialog>
       )}
