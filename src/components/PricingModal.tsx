@@ -13,7 +13,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
 import { useTranslation } from 'react-i18next';
 import { detectUserCurrency, formatPrice, convertEurToGbp } from '@/utils/currencyDetection';
-import { cn } from '@/lib/utils';
 
 interface PricingModalProps {
   open: boolean;
@@ -280,26 +279,23 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile/Tablet Close Button - Fixed Header */}
+            {/* Mobile/Tablet Close Button - Sticky */}
             {isMobile && (
-              <div className="absolute top-0 left-0 right-0 z-[100] bg-white border-b border-zinc-200 flex justify-end px-4 py-3 shrink-0">
+              <div className="sticky top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-sm border-b border-zinc-200 flex justify-end px-4 py-3">
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="transition-all hover:scale-110 focus:outline-none touch-manipulation cursor-pointer p-1"
+                  className="transition-all hover:scale-110 focus:outline-none opacity-40 hover:opacity-70 touch-manipulation cursor-pointer"
                   aria-label="Close"
                   style={{ pointerEvents: 'auto' }}
                 >
-                  <X className="h-6 w-6 text-zinc-800" strokeWidth={2} />
+                  <X className="h-6 w-6 text-zinc-400 hover:text-zinc-600" />
                   <span className="sr-only">Close</span>
                 </button>
               </div>
             )}
             
             {/* Left Panel - Features Comparison */}
-            <div className={cn(
-              "hidden md:flex md:w-7/12 bg-gradient-to-br from-white via-zinc-50/50 to-white p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-200 flex-col relative",
-              isMobile && "pt-16"
-            )}>
+            <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-white via-zinc-50/50 to-white p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-200 flex-col relative">
               {/* Decorative gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-zinc-100/30 via-transparent to-zinc-50/20 pointer-events-none"></div>
               
@@ -350,10 +346,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className={cn(
-              "w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 md:overflow-visible",
-              isMobile && "pt-16 overflow-y-auto"
-            )}>
+            <div className="w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible">
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -382,7 +375,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-4 sm:space-y-2 mb-6 sm:mb-2.5 flex flex-col flex-1 md:flex-initial md:block md:overflow-visible">
+              <div className="space-y-4 sm:space-y-2 mb-6 sm:mb-2.5 flex flex-col flex-1 overflow-y-auto md:flex-initial md:block md:overflow-visible">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
