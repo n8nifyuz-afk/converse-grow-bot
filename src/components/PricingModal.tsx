@@ -550,7 +550,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange} snapPoints={[1, 0.5]} activeSnapPoint={1}>
-          <DrawerContent className="h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300">
+          <DrawerContent className="h-[90vh] mt-[10vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 rounded-t-2xl">
             <div className="flex-1 overflow-y-auto">
               {modalContent}
             </div>
