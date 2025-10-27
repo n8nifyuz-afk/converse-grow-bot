@@ -259,6 +259,10 @@ export default function Admin() {
   const [pendingCountryFilter, setPendingCountryFilter] = useState<string>('all');
   const [pendingSubscriptionStatusFilter, setPendingSubscriptionStatusFilter] = useState<'all' | 'subscribed' | 'free'>('all');
   const [pendingTimezone, setPendingTimezone] = useState<string>('Europe/Nicosia');
+  
+  // Temp state for date picker (before applying within the date picker popover)
+  const [tempDateFilter, setTempDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [tempTimeFilter, setTempTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -646,29 +650,43 @@ export default function Admin() {
     
     switch (preset) {
       case 'today':
-        setPendingDateFilter({ from: today, to: today });
-        setPendingTimeFilter({ fromTime: '00:00', toTime: currentTime });
+        setTempDateFilter({ from: today, to: today });
+        setTempTimeFilter({ fromTime: '00:00', toTime: currentTime });
         break;
       case 'yesterday':
         const yesterday = subDays(today, 1);
-        setPendingDateFilter({ from: yesterday, to: yesterday });
-        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setTempDateFilter({ from: yesterday, to: yesterday });
+        setTempTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'week':
-        setPendingDateFilter({ from: startOfWeek(today, { weekStartsOn: 1 }), to: endOfWeek(today, { weekStartsOn: 1 }) });
-        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setTempDateFilter({ from: startOfWeek(today, { weekStartsOn: 1 }), to: endOfWeek(today, { weekStartsOn: 1 }) });
+        setTempTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'month':
-        setPendingDateFilter({ from: startOfMonth(today), to: endOfMonth(today) });
-        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setTempDateFilter({ from: startOfMonth(today), to: endOfMonth(today) });
+        setTempTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'all':
-        setPendingDateFilter({ from: undefined, to: undefined });
-        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setTempDateFilter({ from: undefined, to: undefined });
+        setTempTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
     }
+  };
+  
+  // Apply date picker selection
+  const applyDatePicker = () => {
+    setPendingDateFilter(tempDateFilter);
+    setPendingTimeFilter(tempTimeFilter);
     setShowDatePicker(false);
   };
+  
+  // Initialize temp values when date picker opens
+  useEffect(() => {
+    if (showDatePicker) {
+      setTempDateFilter(pendingDateFilter);
+      setTempTimeFilter(pendingTimeFilter);
+    }
+  }, [showDatePicker]);
   
   // Apply filters function
   const applyFilters = () => {
@@ -1042,7 +1060,7 @@ export default function Admin() {
                         <div className="w-1 h-3 bg-primary rounded-full" />
                         Registration Date & Time
                       </label>
-                      <Popover>
+                      <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
@@ -1125,9 +1143,9 @@ export default function Admin() {
                               <div className="p-3">
                                 <Calendar
                                   mode="range"
-                                  selected={{ from: pendingDateFilter.from, to: pendingDateFilter.to }}
+                                  selected={{ from: tempDateFilter.from, to: tempDateFilter.to }}
                                   onSelect={(range) => {
-                                    setPendingDateFilter({ from: range?.from, to: range?.to });
+                                    setTempDateFilter({ from: range?.from, to: range?.to });
                                   }}
                                   numberOfMonths={1}
                                   className="pointer-events-auto"
@@ -1135,15 +1153,15 @@ export default function Admin() {
                               </div>
                             </div>
                             {/* Time Selection */}
-                            {pendingDateFilter.from && (
+                            {tempDateFilter.from && (
                               <div className="border-t border-border/50 p-4 space-y-3 bg-gradient-to-b from-muted/10 to-background animate-fade-in">
                                 <div className="grid grid-cols-2 gap-3">
                                   <div className="space-y-2">
                                     <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">From Time</label>
                                     <Input
                                       type="time"
-                                      value={pendingTimeFilter.fromTime}
-                                      onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
+                                      value={tempTimeFilter.fromTime}
+                                      onChange={(e) => setTempTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
                                       className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                     />
                                   </div>
@@ -1151,14 +1169,23 @@ export default function Admin() {
                                     <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">To Time</label>
                                     <Input
                                       type="time"
-                                      value={pendingTimeFilter.toTime}
-                                      onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
+                                      value={tempTimeFilter.toTime}
+                                      onChange={(e) => setTempTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
                                       className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                     />
                                   </div>
                                 </div>
                               </div>
                             )}
+                            {/* Apply Button for Date Picker */}
+                            <div className="px-4 py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
+                              <Button 
+                                onClick={applyDatePicker} 
+                                className="w-full h-9 font-semibold text-xs"
+                              >
+                                Apply Date & Time
+                              </Button>
+                            </div>
                           </div>
                         </PopoverContent>
                       </Popover>
