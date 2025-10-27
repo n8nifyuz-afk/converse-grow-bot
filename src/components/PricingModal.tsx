@@ -282,7 +282,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const savings = selectedPeriod === 'yearly' && 'savings' in basePricing ? basePricing.savings : 0;
 
   const modalContent = (
-    <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative ${isMobile ? 'pt-16' : ''}`}>
+    <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative ${isMobile ? 'pt-8 pb-6' : ''}`}>
             {/* Mobile Close Button - Scrolls with content */}
             {isMobile && (
               <div 
