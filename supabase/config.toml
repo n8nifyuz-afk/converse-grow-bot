@@ -80,4 +80,8 @@ verify_jwt = false
 [functions.send-subscriber-webhook]
 verify_jwt = true
 
+# Update external ID from n8n (public webhook)
+[functions.update-external-id]
+verify_jwt = false
+
 
