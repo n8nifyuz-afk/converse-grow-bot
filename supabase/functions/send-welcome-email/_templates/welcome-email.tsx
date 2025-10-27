@@ -26,14 +26,14 @@ export const WelcomeEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Welcome to ChatL - Your AI Assistant is Ready!</Preview>
+      <Preview>Welcome to Chat Learn - Your AI Assistant is Ready!</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Logo Section */}
           <Section style={logoSection}>
             <Img
-              src="https://ca628ceb-cafa-46f2-baa6-f19a2ece14d7.lovableproject.com/chatl-logo-black.png"
-              alt="ChatL Logo"
+              src="https://www.chatl.ai/favicon.png"
+              alt="Chat Learn Logo"
               width="120"
               height="auto"
               style={logo}
@@ -41,14 +41,14 @@ export const WelcomeEmail = ({
           </Section>
 
           {/* Main Content */}
-          <Heading style={h1}>Welcome to ChatL! 🎉</Heading>
+          <Heading style={h1}>Welcome to Chat Learn! 🎉</Heading>
           
           <Text style={text}>
             Hi {displayName},
           </Text>
           
           <Text style={text}>
-            Thank you for joining ChatL! We're excited to have you on board. 
+            Thank you for joining Chat Learn! We're excited to have you on board. 
             Your account has been successfully created and you're ready to start 
             exploring the power of AI.
           </Text>
@@ -79,6 +79,29 @@ export const WelcomeEmail = ({
             </Link>
           </Section>
 
+          {/* Pricing Section */}
+          <Section style={pricingSection}>
+            <Heading style={h2}>Upgrade Your Experience:</Heading>
+            
+            <Section style={pricingCard}>
+              <Heading style={planName}>Pro Plan</Heading>
+              <Text style={planPrice}>Try 3 days free, then $9.99/month</Text>
+              <Text style={planPrice}>Or save with 3 months for $24.99</Text>
+              <Text style={planFeature}>✓ 500 image generations/month</Text>
+              <Text style={planFeature}>✓ Priority support</Text>
+              <Text style={planFeature}>✓ Advanced AI models</Text>
+            </Section>
+
+            <Section style={pricingCard}>
+              <Heading style={planName}>Ultra Pro Plan</Heading>
+              <Text style={planPrice}>Try 3 days free, then $19.99/month</Text>
+              <Text style={planPrice}>Or save with 3 months for $49.99</Text>
+              <Text style={planFeature}>✓ 2,000 image generations/month</Text>
+              <Text style={planFeature}>✓ Premium support</Text>
+              <Text style={planFeature}>✓ All AI models & features</Text>
+            </Section>
+          </Section>
+
           <Text style={text}>
             Need help getting started? Check out our{' '}
             <Link href="https://chatl.ai/help" style={link}>
@@ -90,7 +113,7 @@ export const WelcomeEmail = ({
           {/* Footer */}
           <Section style={footer}>
             <Text style={footerText}>
-              © {new Date().getFullYear()} ChatL. All rights reserved.
+              © {new Date().getFullYear()} Chat Learn. All rights reserved.
             </Text>
             <Text style={footerText}>
               <Link href="https://chatl.ai/privacy" style={footerLink}>
@@ -102,7 +125,7 @@ export const WelcomeEmail = ({
               </Link>
             </Text>
             <Text style={footerText}>
-              You received this email because you created an account at ChatL.
+              You received this email because you created an account at Chat Learn.
             </Text>
           </Section>
         </Container>
@@ -218,4 +241,40 @@ const footerText = {
 const footerLink = {
   color: '#8898aa',
   textDecoration: 'underline',
+};
+
+const pricingSection = {
+  padding: '32px 20px',
+  margin: '32px 0',
+  backgroundColor: '#f8f9fa',
+  borderRadius: '8px',
+};
+
+const pricingCard = {
+  backgroundColor: '#ffffff',
+  borderRadius: '8px',
+  padding: '20px',
+  marginBottom: '16px',
+  border: '1px solid #e6ebf1',
+};
+
+const planName = {
+  color: '#1a1a1a',
+  fontSize: '18px',
+  fontWeight: '700',
+  margin: '0 0 12px',
+};
+
+const planPrice = {
+  color: '#484848',
+  fontSize: '14px',
+  fontWeight: '600',
+  margin: '0 0 8px',
+};
+
+const planFeature = {
+  color: '#484848',
+  fontSize: '13px',
+  lineHeight: '20px',
+  margin: '0 0 6px',
 };
