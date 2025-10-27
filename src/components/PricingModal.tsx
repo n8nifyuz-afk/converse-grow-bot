@@ -351,7 +351,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
             {/* Right Panel - Pricing */}
             <div className={cn(
-              "w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 md:overflow-visible",
+              "w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between overflow-y-auto md:overflow-visible",
               isMobile && "pt-16"
             )}>
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
