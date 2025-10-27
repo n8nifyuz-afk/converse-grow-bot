@@ -948,6 +948,354 @@ export default function Admin() {
           </Button>
         </div>
 
+        {/* Filters Section */}
+        <div className="flex flex-col gap-3">
+          {/* Filter Button */}
+          <div className="flex justify-end">
+            <Popover open={showFilters} onOpenChange={setShowFilters}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`h-11 gap-2.5 transition-all duration-300 flex-shrink-0 ${
+                    activeFiltersCount > 0 
+                      ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 shadow-sm' 
+                      : 'hover:border-primary/30'
+                  }`}
+                >
+                  <Filter className={`h-4 w-4 transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`} />
+                  <span className="hidden sm:inline font-medium">Filters</span>
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="secondary" className="ml-0.5 h-5 w-5 p-0 flex items-center justify-center rounded-full animate-scale-in font-semibold">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full sm:w-[400px] md:w-[440px] p-0 animate-scale-in shadow-xl border-border/50" align="end">
+                <div className="space-y-0">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-gradient-to-r from-background to-muted/20">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-md bg-primary/10">
+                        <Filter className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <h4 className="font-semibold text-sm">Advanced Filters</h4>
+                    </div>
+                    {activeFiltersCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearAllFilters}
+                        className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground transition-colors duration-200 hover:bg-muted/50"
+                      >
+                        Clear all
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="px-5 py-4 space-y-5">
+                    {/* Plan Filter */}
+                    <div className="space-y-2.5">
+                      <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <div className="w-1 h-3 bg-primary rounded-full" />
+                        Plan Type
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant={pendingPlanFilter === 'all' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setPendingPlanFilter('all')}
+                          className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                        >
+                          All
+                        </Button>
+                        <Button
+                          variant={pendingPlanFilter === 'free' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setPendingPlanFilter('free')}
+                          className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                        >
+                          Free
+                        </Button>
+                        <Button
+                          variant={pendingPlanFilter === 'pro' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setPendingPlanFilter('pro')}
+                          className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                        >
+                          Pro
+                        </Button>
+                        <Button
+                          variant={pendingPlanFilter === 'ultra' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setPendingPlanFilter('ultra')}
+                          className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                        >
+                          Ultra
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Date Range Filter */}
+                    <div className="space-y-2.5">
+                      <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <div className="w-1 h-3 bg-primary rounded-full" />
+                        Registration Date & Time
+                      </label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 justify-start text-left font-normal text-xs transition-all duration-200 hover:bg-muted/50 hover:border-primary/30"
+                          >
+                            <CalendarIcon className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                            <span className="truncate">
+                              {pendingDateFilter.from ? (
+                                pendingDateFilter.to ? (
+                                  pendingDateFilter.from.getTime() === pendingDateFilter.to.getTime() ? (
+                                    // Single day selected
+                                    <>
+                                      {format(pendingDateFilter.from, 'MMM dd, yyyy')} {pendingTimeFilter.fromTime}
+                                      {pendingTimeFilter.fromTime !== pendingTimeFilter.toTime && ` - ${pendingTimeFilter.toTime}`}
+                                    </>
+                                  ) : (
+                                    // Date range selected
+                                    <>
+                                      {format(pendingDateFilter.from, 'MMM dd')} {pendingTimeFilter.fromTime} - {format(pendingDateFilter.to, 'MMM dd, yyyy')} {pendingTimeFilter.toTime}
+                                    </>
+                                  )
+                                ) : (
+                                  `${format(pendingDateFilter.from, 'MMM dd, yyyy')} ${pendingTimeFilter.fromTime}`
+                                )
+                              ) : (
+                                'Select date & time range'
+                              )}
+                            </span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 shadow-xl animate-scale-in" align="start">
+                          <div className="flex flex-col">
+                            <div className="flex">
+                              <div className="border-r border-border/50 p-2 space-y-1 bg-gradient-to-b from-muted/30 to-muted/10 min-w-[120px]">
+                                <div className="px-2 py-1.5">
+                                  <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">Quick Select</p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                  onClick={() => setDatePreset('today')}
+                                >
+                                  Today
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                  onClick={() => setDatePreset('yesterday')}
+                                >
+                                  Yesterday
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                  onClick={() => setDatePreset('week')}
+                                >
+                                  This Week
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                                  onClick={() => setDatePreset('month')}
+                                >
+                                  This Month
+                                </Button>
+                                <div className="border-t border-border/50 my-2" />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full justify-start h-8 text-xs px-2.5 text-muted-foreground hover:text-foreground transition-all duration-200"
+                                  onClick={() => setDatePreset('all')}
+                                >
+                                  Clear
+                                </Button>
+                              </div>
+                              <div className="p-3">
+                                <Calendar
+                                  mode="range"
+                                  selected={{ from: pendingDateFilter.from, to: pendingDateFilter.to }}
+                                  onSelect={(range) => {
+                                    setPendingDateFilter({ from: range?.from, to: range?.to });
+                                  }}
+                                  numberOfMonths={1}
+                                  className="pointer-events-auto"
+                                />
+                              </div>
+                            </div>
+                            {/* Time Selection */}
+                            {pendingDateFilter.from && (
+                              <div className="border-t border-border/50 p-4 space-y-3 bg-gradient-to-b from-muted/10 to-background animate-fade-in">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">From Time</label>
+                                    <Input
+                                      type="time"
+                                      value={pendingTimeFilter.fromTime}
+                                      onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
+                                      className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">To Time</label>
+                                    <Input
+                                      type="time"
+                                      value={pendingTimeFilter.toTime}
+                                      onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
+                                      className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* Timezone Filter */}
+                    <div className="space-y-2.5">
+                      <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <div className="w-1 h-3 bg-primary rounded-full" />
+                        Timezone
+                      </label>
+                      <select
+                        value={pendingTimezone}
+                        onChange={(e) => setPendingTimezone(e.target.value)}
+                        className="w-full h-10 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 cursor-pointer"
+                      >
+                        <option value="UTC">UTC</option>
+                        <option value="Europe/Nicosia">Europe/Nicosia (Cyprus)</option>
+                        <option value="America/New_York">America/New York</option>
+                        <option value="America/Los_Angeles">America/Los Angeles</option>
+                        <option value="America/Chicago">America/Chicago</option>
+                        <option value="Europe/London">Europe/London</option>
+                        <option value="Europe/Paris">Europe/Paris</option>
+                        <option value="Europe/Berlin">Europe/Berlin</option>
+                        <option value="Europe/Moscow">Europe/Moscow</option>
+                        <option value="Asia/Dubai">Asia/Dubai</option>
+                        <option value="Asia/Kolkata">Asia/Kolkata</option>
+                        <option value="Asia/Shanghai">Asia/Shanghai</option>
+                        <option value="Asia/Tokyo">Asia/Tokyo</option>
+                        <option value="Australia/Sydney">Australia/Sydney</option>
+                      </select>
+                    </div>
+                    
+                    {/* Country Filter */}
+                    <div className="space-y-2.5">
+                      <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <div className="w-1 h-3 bg-primary rounded-full" />
+                        <MapPin className="h-3.5 w-3.5" />
+                        Country
+                      </label>
+                      <select
+                        value={pendingCountryFilter}
+                        onChange={(e) => setPendingCountryFilter(e.target.value)}
+                        className="w-full h-10 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 cursor-pointer"
+                      >
+                        <option value="all">All Countries</option>
+                        {uniqueCountries.map((country) => (
+                          <option key={country} value={country}>
+                            {getCountryName(country)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Apply Button */}
+                  <div className="px-5 py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
+                    <Button 
+                      onClick={applyFilters} 
+                      className="w-full h-10 font-semibold"
+                    >
+                      Apply Filters
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Active Filters Summary */}
+          {activeFiltersCount > 0 && (
+            <div className="flex flex-wrap items-center gap-2 animate-fade-in">
+              <span className="text-xs text-muted-foreground">Active filters:</span>
+              {planFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  Plan: {planFilter}
+                  <X 
+                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                    onClick={() => setPlanFilter('all')}
+                  />
+                </Badge>
+              )}
+              {(dateFilter.from || dateFilter.to) && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  Date: {dateFilter.from && dateFilter.to && dateFilter.from.getTime() === dateFilter.to.getTime() 
+                    ? (
+                      <>
+                        {format(dateFilter.from, 'MMM dd, yyyy')} {timeFilter.fromTime}
+                        {timeFilter.fromTime !== timeFilter.toTime && ` - ${timeFilter.toTime}`}
+                      </>
+                    )
+                    : (
+                      <>
+                        {dateFilter.from && `${format(dateFilter.from, 'MMM dd')} ${timeFilter.fromTime}`}
+                        {dateFilter.to && dateFilter.from?.getTime() !== dateFilter.to?.getTime() && ` - ${format(dateFilter.to, 'MMM dd')} ${timeFilter.toTime}`}
+                      </>
+                    )
+                  }
+                  <X 
+                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                    onClick={() => {
+                      setDateFilter({ from: undefined, to: undefined });
+                      setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+                    }}
+                  />
+                </Badge>
+              )}
+              {countryFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  Country: {getCountryName(countryFilter)}
+                  <X 
+                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                    onClick={() => setCountryFilter('all')}
+                  />
+                </Badge>
+              )}
+              {subscriptionStatusFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  Status: {subscriptionStatusFilter}
+                  <X 
+                    className="h-3 w-3 cursor-pointer hover:text-foreground" 
+                    onClick={() => setSubscriptionStatusFilter('all')}
+                  />
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
+        </div>
+
         {/* Stats Cards */}
         <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5 w-full">
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden group">
@@ -1036,9 +1384,8 @@ export default function Admin() {
                 </div>
               </div>
               
-              {/* Search and Advanced Filters */}
+              {/* Search */}
               <div className="flex flex-col gap-3 w-full">
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between w-full">
                 <div className="relative flex-1 max-w-full sm:max-w-md md:max-w-lg">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
                   <Input
@@ -1059,351 +1406,7 @@ export default function Admin() {
                     </Button>
                   )}
                 </div>
-
-                {/* Advanced Filters Button */}
-                <Popover open={showFilters} onOpenChange={setShowFilters}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={`h-11 gap-2.5 transition-all duration-300 flex-shrink-0 ${
-                        activeFiltersCount > 0 
-                          ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 shadow-sm' 
-                          : 'hover:border-primary/30'
-                      }`}
-                    >
-                      <Filter className={`h-4 w-4 transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`} />
-                      <span className="hidden sm:inline font-medium">Filters</span>
-                      {activeFiltersCount > 0 && (
-                        <Badge variant="secondary" className="ml-0.5 h-5 w-5 p-0 flex items-center justify-center rounded-full animate-scale-in font-semibold">
-                          {activeFiltersCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full sm:w-[400px] md:w-[440px] p-0 animate-scale-in shadow-xl border-border/50" align="end">
-                    <div className="space-y-0">
-                      {/* Header */}
-                      <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-gradient-to-r from-background to-muted/20">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 rounded-md bg-primary/10">
-                            <Filter className="h-3.5 w-3.5 text-primary" />
-                          </div>
-                          <h4 className="font-semibold text-sm">Advanced Filters</h4>
-                        </div>
-                        {activeFiltersCount > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={clearAllFilters}
-                            className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground transition-colors duration-200 hover:bg-muted/50"
-                          >
-                            Clear all
-                          </Button>
-                        )}
-                      </div>
-
-                      <div className="px-5 py-4 space-y-5">
-                        {/* Plan Filter */}
-                        <div className="space-y-2.5">
-                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                            <div className="w-1 h-3 bg-primary rounded-full" />
-                            Plan Type
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Button
-                              variant={pendingPlanFilter === 'all' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPendingPlanFilter('all')}
-                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                            >
-                              All
-                            </Button>
-                            <Button
-                              variant={pendingPlanFilter === 'free' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPendingPlanFilter('free')}
-                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                            >
-                              Free
-                            </Button>
-                            <Button
-                              variant={pendingPlanFilter === 'pro' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPendingPlanFilter('pro')}
-                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                            >
-                              Pro
-                            </Button>
-                            <Button
-                              variant={pendingPlanFilter === 'ultra' ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPendingPlanFilter('ultra')}
-                              className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                            >
-                              Ultra
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Date Range Filter */}
-                        <div className="space-y-2.5">
-                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                            <div className="w-1 h-3 bg-primary rounded-full" />
-                            Registration Date & Time
-                          </label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full h-10 justify-start text-left font-normal text-xs transition-all duration-200 hover:bg-muted/50 hover:border-primary/30"
-                              >
-                                <CalendarIcon className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-                                <span className="truncate">
-                                  {pendingDateFilter.from ? (
-                                    pendingDateFilter.to ? (
-                                      pendingDateFilter.from.getTime() === pendingDateFilter.to.getTime() ? (
-                                        // Single day selected
-                                        <>
-                                          {format(pendingDateFilter.from, 'MMM dd, yyyy')} {pendingTimeFilter.fromTime}
-                                          {pendingTimeFilter.fromTime !== pendingTimeFilter.toTime && ` - ${pendingTimeFilter.toTime}`}
-                                        </>
-                                      ) : (
-                                        // Date range selected
-                                        <>
-                                          {format(pendingDateFilter.from, 'MMM dd')} {pendingTimeFilter.fromTime} - {format(pendingDateFilter.to, 'MMM dd, yyyy')} {pendingTimeFilter.toTime}
-                                        </>
-                                      )
-                                    ) : (
-                                      `${format(pendingDateFilter.from, 'MMM dd, yyyy')} ${pendingTimeFilter.fromTime}`
-                                    )
-                                  ) : (
-                                    'Select date & time range'
-                                  )}
-                                </span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 shadow-xl animate-scale-in" align="start">
-                              <div className="flex flex-col">
-                                <div className="flex">
-                                  <div className="border-r border-border/50 p-2 space-y-1 bg-gradient-to-b from-muted/30 to-muted/10 min-w-[120px]">
-                                    <div className="px-2 py-1.5">
-                                      <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">Quick Select</p>
-                                    </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                      onClick={() => setDatePreset('today')}
-                                    >
-                                      Today
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                      onClick={() => setDatePreset('yesterday')}
-                                    >
-                                      Yesterday
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                      onClick={() => setDatePreset('week')}
-                                    >
-                                      This Week
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="w-full justify-start h-8 text-xs px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                      onClick={() => setDatePreset('month')}
-                                    >
-                                      This Month
-                                    </Button>
-                                    <div className="border-t border-border/50 my-2" />
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="w-full justify-start h-8 text-xs px-2.5 text-muted-foreground hover:text-foreground transition-all duration-200"
-                                      onClick={() => setDatePreset('all')}
-                                    >
-                                      Clear
-                                    </Button>
-                                  </div>
-                                  <div className="p-3">
-                                    <Calendar
-                                      mode="range"
-                                      selected={{ from: pendingDateFilter.from, to: pendingDateFilter.to }}
-                                      onSelect={(range) => {
-                                        setPendingDateFilter({ from: range?.from, to: range?.to });
-                                      }}
-                                      numberOfMonths={1}
-                                      className="pointer-events-auto"
-                                    />
-                                  </div>
-                                </div>
-                                {/* Time Selection */}
-                                {pendingDateFilter.from && (
-                                  <div className="border-t border-border/50 p-4 space-y-3 bg-gradient-to-b from-muted/10 to-background animate-fade-in">
-                                    <div className="grid grid-cols-2 gap-3">
-                                      <div className="space-y-2">
-                                        <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">From Time</label>
-                                        <Input
-                                          type="time"
-                                          value={pendingTimeFilter.fromTime}
-                                          onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
-                                          className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                        />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">To Time</label>
-                                        <Input
-                                          type="time"
-                                          value={pendingTimeFilter.toTime}
-                                          onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
-                                          className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-
-                        {/* Timezone Filter */}
-                        <div className="space-y-2.5">
-                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                            <div className="w-1 h-3 bg-primary rounded-full" />
-                            Timezone
-                          </label>
-                          <select
-                            value={pendingTimezone}
-                            onChange={(e) => setPendingTimezone(e.target.value)}
-                            className="w-full h-10 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 cursor-pointer"
-                          >
-                            <option value="UTC">UTC</option>
-                            <option value="Europe/Nicosia">Europe/Nicosia (Cyprus)</option>
-                            <option value="America/New_York">America/New York</option>
-                            <option value="America/Los_Angeles">America/Los Angeles</option>
-                            <option value="America/Chicago">America/Chicago</option>
-                            <option value="Europe/London">Europe/London</option>
-                            <option value="Europe/Paris">Europe/Paris</option>
-                            <option value="Europe/Berlin">Europe/Berlin</option>
-                            <option value="Europe/Moscow">Europe/Moscow</option>
-                            <option value="Asia/Dubai">Asia/Dubai</option>
-                            <option value="Asia/Kolkata">Asia/Kolkata</option>
-                            <option value="Asia/Shanghai">Asia/Shanghai</option>
-                            <option value="Asia/Tokyo">Asia/Tokyo</option>
-                            <option value="Australia/Sydney">Australia/Sydney</option>
-                          </select>
-                        </div>
-                        
-                        {/* Country Filter */}
-                        <div className="space-y-2.5">
-                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                            <div className="w-1 h-3 bg-primary rounded-full" />
-                            <MapPin className="h-3.5 w-3.5" />
-                            Country
-                          </label>
-                          <select
-                            value={pendingCountryFilter}
-                            onChange={(e) => setPendingCountryFilter(e.target.value)}
-                            className="w-full h-10 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 cursor-pointer"
-                          >
-                            <option value="all">All Countries</option>
-                            {uniqueCountries.map((country) => (
-                              <option key={country} value={country}>
-                                {getCountryName(country)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Apply Button */}
-                      <div className="px-5 py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
-                        <Button 
-                          onClick={applyFilters} 
-                          className="w-full h-10 font-semibold"
-                        >
-                          Apply Filters
-                        </Button>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                </div>
               </div>
-
-              {/* Active Filters Summary */}
-              {activeFiltersCount > 0 && (
-                <div className="flex flex-wrap items-center gap-2 animate-fade-in">
-                  <span className="text-xs text-muted-foreground">Active filters:</span>
-                  {planFilter !== 'all' && (
-                    <Badge variant="secondary" className="gap-1 text-xs">
-                      Plan: {planFilter}
-                      <X 
-                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                        onClick={() => setPlanFilter('all')}
-                      />
-                    </Badge>
-                  )}
-                  {(dateFilter.from || dateFilter.to) && (
-                    <Badge variant="secondary" className="gap-1 text-xs">
-                      Date: {dateFilter.from && dateFilter.to && dateFilter.from.getTime() === dateFilter.to.getTime() 
-                        ? (
-                          <>
-                            {format(dateFilter.from, 'MMM dd, yyyy')} {timeFilter.fromTime}
-                            {timeFilter.fromTime !== timeFilter.toTime && ` - ${timeFilter.toTime}`}
-                          </>
-                        )
-                        : (
-                          <>
-                            {dateFilter.from && `${format(dateFilter.from, 'MMM dd')} ${timeFilter.fromTime}`}
-                            {dateFilter.to && dateFilter.from?.getTime() !== dateFilter.to?.getTime() && ` - ${format(dateFilter.to, 'MMM dd')} ${timeFilter.toTime}`}
-                          </>
-                        )
-                      }
-                      <X 
-                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                        onClick={() => {
-                          setDateFilter({ from: undefined, to: undefined });
-                          setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
-                        }}
-                      />
-                    </Badge>
-                  )}
-                  {countryFilter !== 'all' && (
-                    <Badge variant="secondary" className="gap-1 text-xs">
-                      Country: {getCountryName(countryFilter)}
-                      <X 
-                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                        onClick={() => setCountryFilter('all')}
-                      />
-                    </Badge>
-                  )}
-                  {subscriptionStatusFilter !== 'all' && (
-                    <Badge variant="secondary" className="gap-1 text-xs">
-                      Status: {subscriptionStatusFilter}
-                      <X 
-                        className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                        onClick={() => setSubscriptionStatusFilter('all')}
-                      />
-                    </Badge>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearAllFilters}
-                    className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    Clear all
-                  </Button>
-                </div>
-              )}
             </div>
           </CardHeader>
           <CardContent className="p-0 w-full overflow-hidden">
