@@ -250,6 +250,15 @@ export default function Admin() {
   const [showFilters, setShowFilters] = useState(false);
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<'all' | 'subscribed' | 'free'>('all');
+  const [timezone, setTimezone] = useState<string>('Europe/Nicosia');
+  
+  // Pending filter states (not applied until user clicks Apply)
+  const [pendingPlanFilter, setPendingPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
+  const [pendingDateFilter, setPendingDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [pendingTimeFilter, setPendingTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
+  const [pendingCountryFilter, setPendingCountryFilter] = useState<string>('all');
+  const [pendingSubscriptionStatusFilter, setPendingSubscriptionStatusFilter] = useState<'all' | 'subscribed' | 'free'>('all');
+  const [pendingTimezone, setPendingTimezone] = useState<string>('Europe/Nicosia');
   const usersPerPage = 15;
   useEffect(() => {
     checkAdminAccess();
@@ -637,29 +646,52 @@ export default function Admin() {
     
     switch (preset) {
       case 'today':
-        setDateFilter({ from: today, to: today });
-        setTimeFilter({ fromTime: '00:00', toTime: currentTime });
+        setPendingDateFilter({ from: today, to: today });
+        setPendingTimeFilter({ fromTime: '00:00', toTime: currentTime });
         break;
       case 'yesterday':
         const yesterday = subDays(today, 1);
-        setDateFilter({ from: yesterday, to: yesterday });
-        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setPendingDateFilter({ from: yesterday, to: yesterday });
+        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'week':
-        setDateFilter({ from: startOfWeek(today, { weekStartsOn: 1 }), to: endOfWeek(today, { weekStartsOn: 1 }) });
-        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setPendingDateFilter({ from: startOfWeek(today, { weekStartsOn: 1 }), to: endOfWeek(today, { weekStartsOn: 1 }) });
+        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'month':
-        setDateFilter({ from: startOfMonth(today), to: endOfMonth(today) });
-        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setPendingDateFilter({ from: startOfMonth(today), to: endOfMonth(today) });
+        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'all':
-        setDateFilter({ from: undefined, to: undefined });
-        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setPendingDateFilter({ from: undefined, to: undefined });
+        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
     }
     setShowDatePicker(false);
   };
+  
+  // Apply filters function
+  const applyFilters = () => {
+    setPlanFilter(pendingPlanFilter);
+    setDateFilter(pendingDateFilter);
+    setTimeFilter(pendingTimeFilter);
+    setCountryFilter(pendingCountryFilter);
+    setSubscriptionStatusFilter(pendingSubscriptionStatusFilter);
+    setTimezone(pendingTimezone);
+    setShowFilters(false);
+  };
+  
+  // Sync pending filters when opening the filter panel
+  useEffect(() => {
+    if (showFilters) {
+      setPendingPlanFilter(planFilter);
+      setPendingDateFilter(dateFilter);
+      setPendingTimeFilter(timeFilter);
+      setPendingCountryFilter(countryFilter);
+      setPendingSubscriptionStatusFilter(subscriptionStatusFilter);
+      setPendingTimezone(timezone);
+    }
+  }, [showFilters]);
 
   // Count active filters
   const activeFiltersCount = [
@@ -678,6 +710,11 @@ export default function Admin() {
     setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setCountryFilter('all');
     setSubscriptionStatusFilter('all');
+    setPendingPlanFilter('all');
+    setPendingDateFilter({ from: undefined, to: undefined });
+    setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+    setPendingCountryFilter('all');
+    setPendingSubscriptionStatusFilter('all');
   };
 
   // Calculate stats based on date filter
@@ -1000,8 +1037,9 @@ export default function Admin() {
               </div>
               
               {/* Search and Advanced Filters */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <div className="relative flex-1 max-w-full sm:max-w-80 md:max-w-96">
+              <div className="flex flex-col gap-3 w-full">
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between w-full">
+                <div className="relative flex-1 max-w-full sm:max-w-md md:max-w-lg">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
                   <Input
                     type="text"
@@ -1027,7 +1065,7 @@ export default function Admin() {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`h-11 gap-2.5 transition-all duration-300 ${
+                      className={`h-11 gap-2.5 transition-all duration-300 flex-shrink-0 ${
                         activeFiltersCount > 0 
                           ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 shadow-sm' 
                           : 'hover:border-primary/30'
@@ -1042,7 +1080,7 @@ export default function Admin() {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[360px] p-0 animate-scale-in shadow-xl border-border/50" align="end">
+                  <PopoverContent className="w-full sm:w-[400px] md:w-[440px] p-0 animate-scale-in shadow-xl border-border/50" align="end">
                     <div className="space-y-0">
                       {/* Header */}
                       <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-gradient-to-r from-background to-muted/20">
@@ -1073,33 +1111,33 @@ export default function Admin() {
                           </label>
                           <div className="grid grid-cols-2 gap-2">
                             <Button
-                              variant={planFilter === 'all' ? 'default' : 'outline'}
+                              variant={pendingPlanFilter === 'all' ? 'default' : 'outline'}
                               size="sm"
-                              onClick={() => setPlanFilter('all')}
+                              onClick={() => setPendingPlanFilter('all')}
                               className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
                             >
                               All
                             </Button>
                             <Button
-                              variant={planFilter === 'free' ? 'default' : 'outline'}
+                              variant={pendingPlanFilter === 'free' ? 'default' : 'outline'}
                               size="sm"
-                              onClick={() => setPlanFilter('free')}
+                              onClick={() => setPendingPlanFilter('free')}
                               className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
                             >
                               Free
                             </Button>
                             <Button
-                              variant={planFilter === 'pro' ? 'default' : 'outline'}
+                              variant={pendingPlanFilter === 'pro' ? 'default' : 'outline'}
                               size="sm"
-                              onClick={() => setPlanFilter('pro')}
+                              onClick={() => setPendingPlanFilter('pro')}
                               className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
                             >
                               Pro
                             </Button>
                             <Button
-                              variant={planFilter === 'ultra' ? 'default' : 'outline'}
+                              variant={pendingPlanFilter === 'ultra' ? 'default' : 'outline'}
                               size="sm"
-                              onClick={() => setPlanFilter('ultra')}
+                              onClick={() => setPendingPlanFilter('ultra')}
                               className="h-9 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95"
                             >
                               Ultra
@@ -1121,22 +1159,22 @@ export default function Admin() {
                               >
                                 <CalendarIcon className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
                                 <span className="truncate">
-                                  {dateFilter.from ? (
-                                    dateFilter.to ? (
-                                      dateFilter.from.getTime() === dateFilter.to.getTime() ? (
+                                  {pendingDateFilter.from ? (
+                                    pendingDateFilter.to ? (
+                                      pendingDateFilter.from.getTime() === pendingDateFilter.to.getTime() ? (
                                         // Single day selected
                                         <>
-                                          {format(dateFilter.from, 'MMM dd, yyyy')} {timeFilter.fromTime}
-                                          {timeFilter.fromTime !== timeFilter.toTime && ` - ${timeFilter.toTime}`}
+                                          {format(pendingDateFilter.from, 'MMM dd, yyyy')} {pendingTimeFilter.fromTime}
+                                          {pendingTimeFilter.fromTime !== pendingTimeFilter.toTime && ` - ${pendingTimeFilter.toTime}`}
                                         </>
                                       ) : (
                                         // Date range selected
                                         <>
-                                          {format(dateFilter.from, 'MMM dd')} {timeFilter.fromTime} - {format(dateFilter.to, 'MMM dd, yyyy')} {timeFilter.toTime}
+                                          {format(pendingDateFilter.from, 'MMM dd')} {pendingTimeFilter.fromTime} - {format(pendingDateFilter.to, 'MMM dd, yyyy')} {pendingTimeFilter.toTime}
                                         </>
                                       )
                                     ) : (
-                                      `${format(dateFilter.from, 'MMM dd, yyyy')} ${timeFilter.fromTime}`
+                                      `${format(pendingDateFilter.from, 'MMM dd, yyyy')} ${pendingTimeFilter.fromTime}`
                                     )
                                   ) : (
                                     'Select date & time range'
@@ -1196,9 +1234,9 @@ export default function Admin() {
                                   <div className="p-3">
                                     <Calendar
                                       mode="range"
-                                      selected={{ from: dateFilter.from, to: dateFilter.to }}
+                                      selected={{ from: pendingDateFilter.from, to: pendingDateFilter.to }}
                                       onSelect={(range) => {
-                                        setDateFilter({ from: range?.from, to: range?.to });
+                                        setPendingDateFilter({ from: range?.from, to: range?.to });
                                       }}
                                       numberOfMonths={1}
                                       className="pointer-events-auto"
@@ -1206,15 +1244,15 @@ export default function Admin() {
                                   </div>
                                 </div>
                                 {/* Time Selection */}
-                                {dateFilter.from && (
+                                {pendingDateFilter.from && (
                                   <div className="border-t border-border/50 p-4 space-y-3 bg-gradient-to-b from-muted/10 to-background animate-fade-in">
                                     <div className="grid grid-cols-2 gap-3">
                                       <div className="space-y-2">
                                         <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">From Time</label>
                                         <Input
                                           type="time"
-                                          value={timeFilter.fromTime}
-                                          onChange={(e) => setTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
+                                          value={pendingTimeFilter.fromTime}
+                                          onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
                                           className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                         />
                                       </div>
@@ -1222,8 +1260,8 @@ export default function Admin() {
                                         <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">To Time</label>
                                         <Input
                                           type="time"
-                                          value={timeFilter.toTime}
-                                          onChange={(e) => setTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
+                                          value={pendingTimeFilter.toTime}
+                                          onChange={(e) => setPendingTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
                                           className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                         />
                                       </div>
@@ -1235,6 +1273,34 @@ export default function Admin() {
                           </Popover>
                         </div>
 
+                        {/* Timezone Filter */}
+                        <div className="space-y-2.5">
+                          <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                            <div className="w-1 h-3 bg-primary rounded-full" />
+                            Timezone
+                          </label>
+                          <select
+                            value={pendingTimezone}
+                            onChange={(e) => setPendingTimezone(e.target.value)}
+                            className="w-full h-10 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 cursor-pointer"
+                          >
+                            <option value="UTC">UTC</option>
+                            <option value="Europe/Nicosia">Europe/Nicosia (Cyprus)</option>
+                            <option value="America/New_York">America/New York</option>
+                            <option value="America/Los_Angeles">America/Los Angeles</option>
+                            <option value="America/Chicago">America/Chicago</option>
+                            <option value="Europe/London">Europe/London</option>
+                            <option value="Europe/Paris">Europe/Paris</option>
+                            <option value="Europe/Berlin">Europe/Berlin</option>
+                            <option value="Europe/Moscow">Europe/Moscow</option>
+                            <option value="Asia/Dubai">Asia/Dubai</option>
+                            <option value="Asia/Kolkata">Asia/Kolkata</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo</option>
+                            <option value="Australia/Sydney">Australia/Sydney</option>
+                          </select>
+                        </div>
+                        
                         {/* Country Filter */}
                         <div className="space-y-2.5">
                           <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -1243,8 +1309,8 @@ export default function Admin() {
                             Country
                           </label>
                           <select
-                            value={countryFilter}
-                            onChange={(e) => setCountryFilter(e.target.value)}
+                            value={pendingCountryFilter}
+                            onChange={(e) => setPendingCountryFilter(e.target.value)}
                             className="w-full h-10 px-3 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 hover:border-primary/30 cursor-pointer"
                           >
                             <option value="all">All Countries</option>
@@ -1257,18 +1323,19 @@ export default function Admin() {
                         </div>
                       </div>
 
-                      {/* Results Count */}
+                      {/* Apply Button */}
                       <div className="px-5 py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-muted-foreground">Filtered Results</span>
-                          <Badge variant="secondary" className="font-mono text-xs px-2.5 py-1 transition-all duration-200 hover:scale-105">
-                            {filteredUsers.length} users
-                          </Badge>
-                        </div>
+                        <Button 
+                          onClick={applyFilters} 
+                          className="w-full h-10 font-semibold"
+                        >
+                          Apply Filters
+                        </Button>
                       </div>
                     </div>
                   </PopoverContent>
                 </Popover>
+                </div>
               </div>
 
               {/* Active Filters Summary */}
@@ -1421,7 +1488,7 @@ export default function Admin() {
 
                               {/* Stats */}
                               <div className="pt-3 border-t border-border/50">
-                                <p className="text-xs text-muted-foreground mb-1">Registered (Cyprus Time)</p>
+                                <p className="text-xs text-muted-foreground mb-1">Registered</p>
                                 <p className="text-sm font-medium">
                                   {usage.created_at ? new Date(usage.created_at).toLocaleString('en-US', {
                                     month: 'short',
@@ -1429,7 +1496,7 @@ export default function Admin() {
                                     year: 'numeric',
                                     hour: '2-digit',
                                     minute: '2-digit',
-                                    timeZone: 'Europe/Nicosia'
+                                    timeZone: timezone
                                   }) : 'Unknown'}
                                 </p>
                               </div>
@@ -1530,7 +1597,7 @@ export default function Admin() {
                           onClick={() => handleSort('registered')}
                         >
                           <div className="flex items-center gap-1">
-                            Registered (Cyprus)
+                            Registered
                             {getSortIcon('registered')}
                           </div>
                         </TableHead>
@@ -1568,7 +1635,7 @@ export default function Admin() {
                                 day: 'numeric',
                                 hour: '2-digit',
                                 minute: '2-digit',
-                                timeZone: 'Europe/Nicosia'
+                                timeZone: timezone
                               }) : 'Unknown'}
                             </TableCell>
                             <TableCell>
