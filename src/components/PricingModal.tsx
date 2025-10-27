@@ -278,18 +278,20 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const currencySymbol = currency === 'gbp' ? '£' : '€';
 
   const modalContent = (
-    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent overflow-y-auto md:overflow-hidden relative">
-            {/* Mobile/Tablet Close Button */}
+    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
+            {/* Mobile/Tablet Close Button - Sticky */}
             {isMobile && (
-              <button
-                onClick={() => onOpenChange(false)}
-                className="absolute top-4 right-4 transition-all hover:scale-110 focus:outline-none z-[100] opacity-40 hover:opacity-70 touch-manipulation cursor-pointer"
-                aria-label="Close"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <X className="h-6 w-6 text-zinc-400 hover:text-zinc-600" />
-                <span className="sr-only">Close</span>
-              </button>
+              <div className="sticky top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-sm border-b border-zinc-200 flex justify-end px-4 py-3">
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="transition-all hover:scale-110 focus:outline-none opacity-40 hover:opacity-70 touch-manipulation cursor-pointer"
+                  aria-label="Close"
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <X className="h-6 w-6 text-zinc-400 hover:text-zinc-600" />
+                  <span className="sr-only">Close</span>
+                </button>
+              </div>
             )}
             
             {/* Left Panel - Features Comparison */}
@@ -344,7 +346,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div className="w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0">
+            <div className="w-full md:w-5/12 p-4 sm:p-5 md:p-5 pb-5 sm:pb-6 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible">
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
