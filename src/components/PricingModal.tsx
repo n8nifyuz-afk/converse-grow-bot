@@ -131,7 +131,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isLoading, setIsLoading] = useState(false);
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
-  const [snapPoint, setSnapPoint] = useState<number | string | null>(1);
+  const [snapPoint, setSnapPoint] = useState<number | string | null>(0.5);
   
   const allFeatures = getFeatures(t, selectedPlan);
 
