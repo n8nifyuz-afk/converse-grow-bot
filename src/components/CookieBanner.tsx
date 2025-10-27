@@ -6,19 +6,6 @@ import { Label } from './ui/label';
 
 declare global {
   interface Window {
-    Cookiebot?: {
-      submitConsent: (necessary: boolean, statistics: boolean, preferences: boolean, marketing: boolean) => void;
-      show: () => void;
-      hide: () => void;
-      consent?: {
-        statistics: boolean;
-        marketing: boolean;
-        preferences: boolean;
-      };
-    };
-    CookieConsent?: {
-      submitConsent: (options: any) => void;
-    };
     gtag?: (...args: any[]) => void;
   }
 }
@@ -39,24 +26,6 @@ export const CookieBanner = () => {
       // Small delay to ensure page loads first
       setTimeout(() => setShowBanner(true), 1000);
     }
-
-    // Listen for Cookiebot events
-    const handleCookiebotLoad = () => {
-      console.log('Cookiebot loaded');
-      setShowBanner(false);
-    };
-
-    const handleCookiebotDecline = () => {
-      setShowBanner(false);
-    };
-
-    window.addEventListener('CookiebotOnLoad', handleCookiebotLoad);
-    window.addEventListener('CookiebotOnDecline', handleCookiebotDecline);
-
-    return () => {
-      window.removeEventListener('CookiebotOnLoad', handleCookiebotLoad);
-      window.removeEventListener('CookiebotOnDecline', handleCookiebotDecline);
-    };
   }, []);
 
   const trackConsent = (action: string, details: any) => {
@@ -80,18 +49,6 @@ export const CookieBanner = () => {
 
     // Save to localStorage
     localStorage.setItem('cookieConsent', JSON.stringify(consentData));
-
-    // Submit to Cookiebot if available
-    if (window.Cookiebot) {
-      window.Cookiebot.submitConsent(true, statistics, prefs, marketing);
-    } else if (window.CookieConsent) {
-      window.CookieConsent.submitConsent({
-        level: ['necessary'],
-        statistics,
-        marketing,
-        preferences: prefs,
-      });
-    }
 
     // Track consent
     trackConsent('consent_given', consentData);
@@ -127,25 +84,30 @@ export const CookieBanner = () => {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-gradient-to-r from-[#1a1a2e] to-[#16213e] text-white shadow-[0_-4px_20px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom duration-400">
+      <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-muted/95 backdrop-blur-sm border-t border-border text-foreground shadow-[0_-4px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom duration-400">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-center">
             {/* Logo */}
             <div className="flex-shrink-0">
               <img 
+                src="/chatl-logo-black.png" 
+                alt="ChatL" 
+                className="h-12 w-auto dark:hidden"
+              />
+              <img 
                 src="/chatl-logo-white.png" 
                 alt="ChatL" 
-                className="h-12 w-auto"
+                className="h-12 w-auto hidden dark:block"
               />
             </div>
 
             {/* Text */}
             <div>
               <h3 className="text-base font-semibold mb-2">We use cookies</h3>
-              <p className="text-sm opacity-90">
+              <p className="text-sm text-muted-foreground">
                 We use cookies to enhance your experience, analyze traffic, and for marketing. 
                 By clicking "Accept All", you consent to our use of cookies.{' '}
-                <a href="/cookie-policy" className="underline hover:opacity-80">
+                <a href="/cookie-policy" className="underline hover:opacity-70">
                   Learn more
                 </a>
               </p>
@@ -154,22 +116,20 @@ export const CookieBanner = () => {
             {/* Actions */}
             <div className="flex gap-3 flex-wrap md:flex-nowrap">
               <Button
-                variant="ghost"
+                variant="outline"
                 onClick={() => setShowSettings(true)}
-                className="bg-white/5 border border-white/20 hover:bg-white/10 text-white"
               >
                 Settings
               </Button>
               <Button
                 variant="outline"
                 onClick={handleRejectAll}
-                className="bg-white/10 border border-white/30 hover:bg-white/15 hover:border-white/50 text-white"
               >
                 Reject
               </Button>
               <Button
+                variant="default"
                 onClick={handleAcceptAll}
-                className="bg-white text-[#1a1a2e] hover:bg-gray-100"
               >
                 Accept All
               </Button>
