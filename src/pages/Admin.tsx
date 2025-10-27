@@ -9,7 +9,6 @@ import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, Arrow
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { UserInformationModal } from '@/components/UserInformationModal';
@@ -936,7 +935,6 @@ export default function Admin() {
       <div className="lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-sm">
         <div className="flex items-center justify-between h-16 px-4 max-w-full">
           <div className="flex items-center gap-3 min-w-0">
-            <SidebarTrigger className="h-9 w-9 p-0 bg-transparent hover:bg-sidebar-accent text-sidebar-foreground rounded-lg flex-shrink-0" />
             <h2 className="text-lg sm:text-xl font-bold truncate">Admin Dashboard</h2>
           </div>
           <Button 
