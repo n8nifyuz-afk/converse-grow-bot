@@ -131,6 +131,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isLoading, setIsLoading] = useState(false);
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
   
   const allFeatures = getFeatures(t, selectedPlan);
 
@@ -269,18 +270,45 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   
   const savings = selectedPeriod === 'yearly' && 'savings' in basePricing ? basePricing.savings : 0;
 
+  // Scroll detection for mobile
+  useEffect(() => {
+    if (!isMobile || !open) return;
+
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target && target.scrollTop > 50) {
+        setShowCloseButton(true);
+      } else {
+        setShowCloseButton(false);
+      }
+    };
+
+    // Find the scrollable container
+    const scrollContainer = document.querySelector('[data-vaul-drawer-wrapper] > div > div');
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+      return () => scrollContainer.removeEventListener('scroll', handleScroll);
+    }
+  }, [isMobile, open]);
+
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile/Tablet Close Button - Sticky */}
-            {isMobile && (
-              <div className="sticky top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-sm border-b border-zinc-200 flex justify-end px-4 py-3">
+            {/* Mobile/Tablet Close Button - Shows on scroll */}
+            {isMobile && showCloseButton && (
+              <div 
+                className="fixed top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-sm border-b border-zinc-200 flex justify-end px-4 transition-all duration-300"
+                style={{ 
+                  paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
+                  paddingBottom: '0.75rem'
+                }}
+              >
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="transition-all hover:scale-110 focus:outline-none opacity-40 hover:opacity-70 touch-manipulation cursor-pointer"
+                  className="transition-all hover:scale-110 focus:outline-none opacity-60 hover:opacity-100 touch-manipulation cursor-pointer"
                   aria-label="Close"
                   style={{ pointerEvents: 'auto' }}
                 >
-                  <X className="h-6 w-6 text-zinc-400 hover:text-zinc-600" />
+                  <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
                   <span className="sr-only">Close</span>
                 </button>
               </div>
@@ -549,8 +577,20 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   return (
     <>
       {isMobile ? (
-        <Drawer open={open} onOpenChange={onOpenChange} snapPoints={[1, 0.5]} activeSnapPoint={1}>
-          <DrawerContent className="h-[90vh] mt-[10vh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-t border-zinc-300 rounded-t-2xl">
+        <Drawer 
+          open={open} 
+          onOpenChange={onOpenChange} 
+          dismissible={true}
+          snapPoints={[0.98]}
+          activeSnapPoint={0.98}
+        >
+          <DrawerContent 
+            className="h-screen bg-gradient-to-br from-white via-zinc-50/50 to-white"
+            style={{
+              paddingTop: 'env(safe-area-inset-top)',
+              paddingBottom: 'env(safe-area-inset-bottom)'
+            }}
+          >
             <div className="flex-1 overflow-y-auto">
               {modalContent}
             </div>
