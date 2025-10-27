@@ -63,18 +63,50 @@ serve(async (req) => {
       throw new Error("This code has already been used");
     }
 
-    logStep("Code verified, creating user", { email });
+    logStep("Code verified, checking if user exists", { email });
 
-    // Create the user account with Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password: verification.password_hash,
-      email_confirm: true, // Mark email as confirmed
-    });
+    // Check if user already exists (OAuth user)
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = existingUsers?.users.find(u => u.email === email);
 
-    if (authError) {
-      logStep("Error creating user", { error: authError.message });
-      throw new Error(`Failed to create account: ${authError.message}`);
+    let userId: string;
+
+    if (existingUser) {
+      // User exists (OAuth user), update their password
+      logStep("Updating existing OAuth user with password", { userId: existingUser.id });
+      
+      const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        existingUser.id,
+        {
+          password: verification.password_hash,
+          email_confirm: true
+        }
+      );
+
+      if (updateError) {
+        logStep("Error updating user password", { error: updateError.message });
+        throw new Error(`Failed to update account: ${updateError.message}`);
+      }
+
+      userId = existingUser.id;
+      logStep("Password added to existing user successfully", { userId });
+    } else {
+      // Create new user
+      logStep("Creating new user", { email });
+      
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: verification.password_hash,
+        email_confirm: true,
+      });
+
+      if (authError) {
+        logStep("Error creating user", { error: authError.message });
+        throw new Error(`Failed to create account: ${authError.message}`);
+      }
+
+      userId = authData.user?.id || '';
+      logStep("New user created successfully", { userId });
     }
 
     // Mark verification as used
@@ -83,7 +115,7 @@ serve(async (req) => {
       .update({ verified: true })
       .eq('email', email);
 
-    logStep("User created successfully", { userId: authData.user?.id });
+    logStep("User setup completed", { userId });
 
     // Send welcome email
     try {
