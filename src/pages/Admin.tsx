@@ -933,30 +933,15 @@ export default function Admin() {
             <SidebarTrigger className="h-9 w-9 p-0 bg-transparent hover:bg-sidebar-accent text-sidebar-foreground rounded-lg flex-shrink-0" />
             <h2 className="text-lg sm:text-xl font-bold truncate">Admin Dashboard</h2>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              onClick={(e) => {
-                e.preventDefault();
-                fetchTokenUsageData();
-              }}
-              type="button"
-              size="sm"
-              variant="outline"
-              className="h-9 p-2 flex-shrink-0"
-              disabled={loading}
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Button 
-              onClick={handleDownloadUserList}
-              size="sm"
-              variant="outline"
-              className="h-9 gap-2 flex-shrink-0"
-            >
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Download</span>
-            </Button>
-          </div>
+          <Button 
+            onClick={handleDownloadUserList}
+            size="sm"
+            variant="outline"
+            className="h-9 gap-2 flex-shrink-0"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Download</span>
+          </Button>
         </div>
       </div>
 
@@ -995,7 +980,20 @@ export default function Admin() {
         {/* Filters Section */}
         <div className="flex flex-col gap-3">
           {/* Filter Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button 
+              onClick={(e) => {
+                e.preventDefault();
+                fetchTokenUsageData();
+              }}
+              type="button"
+              variant="outline"
+              className="lg:hidden h-11 gap-2 transition-all duration-300 flex-shrink-0"
+              disabled={loading}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline font-medium">Refresh</span>
+            </Button>
             <Popover open={showFilters} onOpenChange={setShowFilters}>
               <PopoverTrigger asChild>
                 <Button
