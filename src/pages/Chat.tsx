@@ -2333,6 +2333,9 @@ export default function Chat() {
           try {
             console.log('[WEBHOOK] Sending file to webhook:', attachment.name);
             
+            // Get webhook metadata
+            const metadata = await getWebhookMetadata();
+            
             // Build webhook body conditionally based on model
             const webhookBody: any = {
               fileName: attachment.name,
@@ -2342,7 +2345,8 @@ export default function Chat() {
               userId: user.id,
               chatId: chatId,
               message: userMessage,
-              model: selectedModel
+              model: selectedModel,
+              ...metadata
             };
             
             // Only add type field if not edit-image model
