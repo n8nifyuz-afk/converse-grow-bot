@@ -274,7 +274,6 @@ export default function Admin() {
   }, [isAdmin]);
   const checkAdminAccess = async () => {
     if (!user) {
-      toast.error('Please log in to access admin panel');
       navigate('/');
       return;
     }
@@ -285,14 +284,11 @@ export default function Admin() {
       } = await supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
       if (error) throw error;
       if (!data) {
-        toast.error('Access denied: Admin privileges required');
         navigate('/');
         return;
       }
       setIsAdmin(true);
     } catch (error) {
-      console.error('Error checking admin access:', error);
-      toast.error('Failed to verify admin access');
       navigate('/');
     }
   };
