@@ -79,29 +79,6 @@ export const WelcomeEmail = ({
             </Link>
           </Section>
 
-          {/* Pricing Section */}
-          <Section style={pricingSection}>
-            <Heading style={h2}>Upgrade Your Experience:</Heading>
-            
-            <Section style={pricingCard}>
-              <Heading style={planName}>Pro Plan</Heading>
-              <Text style={planPrice}>Try 3 days free, then $9.99/month</Text>
-              <Text style={planPrice}>Or save with 3 months for $24.99</Text>
-              <Text style={planFeature}>✓ 500 image generations/month</Text>
-              <Text style={planFeature}>✓ Priority support</Text>
-              <Text style={planFeature}>✓ Advanced AI models</Text>
-            </Section>
-
-            <Section style={pricingCard}>
-              <Heading style={planName}>Ultra Pro Plan</Heading>
-              <Text style={planPrice}>Try 3 days free, then $19.99/month</Text>
-              <Text style={planPrice}>Or save with 3 months for $49.99</Text>
-              <Text style={planFeature}>✓ 2,000 image generations/month</Text>
-              <Text style={planFeature}>✓ Premium support</Text>
-              <Text style={planFeature}>✓ All AI models & features</Text>
-            </Section>
-          </Section>
-
           <Text style={text}>
             Need help getting started? Check out our{' '}
             <Link href="https://chatl.ai/help" style={link}>
@@ -241,40 +218,4 @@ const footerText = {
 const footerLink = {
   color: '#8898aa',
   textDecoration: 'underline',
-};
-
-const pricingSection = {
-  padding: '32px 20px',
-  margin: '32px 0',
-  backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
-};
-
-const pricingCard = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  padding: '20px',
-  marginBottom: '16px',
-  border: '1px solid #e6ebf1',
-};
-
-const planName = {
-  color: '#1a1a1a',
-  fontSize: '18px',
-  fontWeight: '700',
-  margin: '0 0 12px',
-};
-
-const planPrice = {
-  color: '#484848',
-  fontSize: '14px',
-  fontWeight: '600',
-  margin: '0 0 8px',
-};
-
-const planFeature = {
-  color: '#484848',
-  fontSize: '13px',
-  lineHeight: '20px',
-  margin: '0 0 6px',
 };
