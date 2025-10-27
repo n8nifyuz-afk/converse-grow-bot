@@ -278,12 +278,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const currencySymbol = currency === 'gbp' ? '£' : '€';
 
   const modalContent = (
-    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent overflow-y-auto md:overflow-hidden">
+    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent overflow-y-auto md:overflow-hidden relative">
             {/* Mobile/Tablet Close Button */}
             {isMobile && (
               <button
                 onClick={() => onOpenChange(false)}
-                className="sticky top-0 right-0 ml-auto mr-4 mt-4 mb-2 transition-all hover:scale-110 focus:outline-none z-50 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg"
+                className="absolute top-4 right-4 transition-all hover:scale-110 focus:outline-none z-50 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg"
                 aria-label="Close"
               >
                 <X className="h-5 w-5 text-zinc-700 hover:text-zinc-900" />
@@ -453,15 +453,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Button>
 
               {/* Footer */}
-              <div className="space-y-2 sm:space-y-1 flex-shrink-0 mt-auto md:mt-0">
+              <div className="space-y-2 sm:space-y-1 flex-shrink-0 mt-auto md:mt-0 pt-6 md:pt-0">
                 {/* Pay Safe & Secure */}
-                <div className="flex items-center justify-center gap-2 sm:gap-1.5 py-2.5 sm:py-1">
+                <div className="flex items-center justify-center gap-2 sm:gap-1.5 py-3 sm:py-1">
                   <Shield className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-500" />
                   <span className="text-base sm:text-sm font-medium text-emerald-500">{t('pricingModal.paySafeSecure')}</span>
                 </div>
                 
                 {/* Payment Cards */}
-                <div className="flex items-center justify-center gap-2 sm:gap-2 py-1 sm:py-0.5">
+                <div className="flex items-center justify-center gap-2 sm:gap-2 py-2 sm:py-0.5 pb-4 md:pb-0">
                   {/* Visa */}
                   <div className="w-9 h-6 sm:w-10 sm:h-7 flex items-center justify-center">
                     <svg className="w-full h-full" viewBox="0 0 750 471" fill="none">
