@@ -136,11 +136,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const allFeatures = getFeatures(t, selectedPlan);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom on mobile when modal opens
+  // Scroll to show footer on mobile when modal opens
   React.useEffect(() => {
     if (open && isMobile && scrollRef.current) {
       setTimeout(() => {
-        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+        const scrollHeight = scrollRef.current.scrollHeight;
+        const clientHeight = scrollRef.current.clientHeight;
+        // Scroll to show the footer section (about 300px from bottom)
+        scrollRef.current?.scrollTo({ top: scrollHeight - clientHeight - 300, behavior: 'smooth' });
       }, 100);
     }
   }, [open, isMobile]);
