@@ -1421,14 +1421,15 @@ export default function Admin() {
 
                               {/* Stats */}
                               <div className="pt-3 border-t border-border/50">
-                                <p className="text-xs text-muted-foreground mb-1">Registered</p>
+                                <p className="text-xs text-muted-foreground mb-1">Registered (Cyprus Time)</p>
                                 <p className="text-sm font-medium">
                                   {usage.created_at ? new Date(usage.created_at).toLocaleString('en-US', {
                                     month: 'short',
                                     day: 'numeric',
                                     year: 'numeric',
                                     hour: '2-digit',
-                                    minute: '2-digit'
+                                    minute: '2-digit',
+                                    timeZone: 'Europe/Nicosia'
                                   }) : 'Unknown'}
                                 </p>
                               </div>
@@ -1529,7 +1530,7 @@ export default function Admin() {
                           onClick={() => handleSort('registered')}
                         >
                           <div className="flex items-center gap-1">
-                            Registered
+                            Registered (Cyprus)
                             {getSortIcon('registered')}
                           </div>
                         </TableHead>
@@ -1566,7 +1567,8 @@ export default function Admin() {
                                 month: 'short',
                                 day: 'numeric',
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
+                                timeZone: 'Europe/Nicosia'
                               }) : 'Unknown'}
                             </TableCell>
                             <TableCell>
