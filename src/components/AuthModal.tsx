@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslation } from 'react-i18next';
 import { trackRegistrationComplete } from '@/utils/gtmTracking';
+import { CountryPhoneInput } from '@/components/CountryPhoneInput';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -447,16 +448,13 @@ export default function AuthModal({
                   </button>
                  </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-5">
                   <div className="text-sm md:text-base text-muted-foreground mb-2">
-                    Enter your phone number with country code (e.g., +1234567890)
+                    Enter your phone number to receive a verification code.
                   </div>
-                  <Input
-                    type="tel"
-                    placeholder="+1234567890"
+                  <CountryPhoneInput
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    className="h-12 md:h-13 text-base md:text-lg border-2 border-gray-400 dark:border-gray-600"
-                    pattern="^\+[1-9]\d{1,14}$"
+                    onChange={setPhone}
+                    className="w-full"
+                    disabled={phoneLoading}
                   />
                   {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
                      {error}
