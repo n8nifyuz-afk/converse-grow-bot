@@ -643,99 +643,6 @@ serve(async (req) => {
               logStep("No user email for payment confirmation");
             } else {
               const userName = user.email.split("@")[0] || "there";
-              const planName = subscription.plan_name || planType;
-              
-              // Check if this is a trial or first payment
-              const isFirstPayment = invoice.billing_reason === 'subscription_create';
-              const isTrial = invoice.amount_paid < 100; // Less than 1 EUR means trial
-              
-              // Get subscription details for trial end date and actual price
-              let trialEndDate = null;
-              let regularPrice = planPrice;
-              let nextBillingDate = null;
-              
-              // Fetch the full subscription from Stripe to get the actual price
-              if (invoice.subscription && isTrial) {
-                try {
-                  const stripeSubscription = await stripe.subscriptions.retrieve(
-                    invoice.subscription as string
-                  );
-                  
-                  // Get the actual subscription price (not the trial price)
-                  if (stripeSubscription.items.data.length > 0) {
-                    const subscriptionPrice = stripeSubscription.items.data[0].price;
-                    if (subscriptionPrice.unit_amount) {
-                      regularPrice = subscriptionPrice.unit_amount / 100;
-                    }
-                  }
-                } catch (stripeError) {
-                  logStep("Error fetching subscription for price", { error: stripeError });
-                }
-              }
-              
-              if (invoice.lines.data.length > 0) {
-                const line = invoice.lines.data[0];
-                
-                // Get next billing date
-                if (line.period && line.period.end) {
-                  nextBillingDate = new Date(line.period.end * 1000).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  });
-                }
-              }
-              
-              // Determine billing cycle text
-              const periodText = planDuration === 'yearly' ? 'year' : planDuration === '3_months' ? '3 months' : 'month';
-              const periodTextCapitalized = planDuration === 'yearly' ? 'Yearly' : planDuration === '3_months' ? '3-Month' : 'Monthly';
-              
-              // Build dynamic email content
-              let paymentDetailsHtml = '';
-              
-              if (isTrial && isFirstPayment) {
-                // Trial payment
-                paymentDetailsHtml = `
-                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                    Congratulations! You've successfully started your <strong>${planName} ${periodTextCapitalized}</strong> trial.
-                  </p>
-          `;
-              } else {
-                // Regular payment (no trial)
-                paymentDetailsHtml = `
-                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                    Congratulations! Your payment has been successfully processed and your <strong>${planName} ${periodTextCapitalized}</strong> subscription is now active.
-                  </p>
-
-                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; margin: 30px 0; border: 1px solid #e5e7eb;">
-                    <tr>
-                      <td style="padding: 20px;">
-                        <h3 style="color: #111827; font-size: 18px; margin: 0 0 15px 0;">Subscription Details</h3>
-                        <table width="100%" cellpadding="8" cellspacing="0">
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Plan:</td>
-                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${planName} ${periodTextCapitalized}</td>
-                          </tr>
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Billing Cycle:</td>
-                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">€${planPrice.toFixed(2)}/${periodText}</td>
-                          </tr>
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Amount Paid:</td>
-                            <td style="color: #10b981; font-size: 16px; font-weight: 700; text-align: right;">€${planPrice.toFixed(2)}</td>
-                          </tr>
-                          ${nextBillingDate ? `
-                          <tr>
-                            <td style="color: #6b7280; font-size: 14px;">Next Billing Date:</td>
-                            <td style="color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${nextBillingDate}</td>
-                          </tr>
-                          ` : ''}
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                `;
-              }
               
               const htmlContent = `
                 <!DOCTYPE html>
@@ -743,92 +650,101 @@ serve(async (req) => {
                   <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                    <title>Payment Receipt - ChatLearn</title>
+                    <title>Your ChatLearn Account is Now Active</title>
                   </head>
-                  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f9fafb; color: #111827; margin: 0; padding: 20px;">
-                    <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-                      
-                      <!-- Header with logo -->
+                  <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
                       <tr>
-                        <td style="padding: 40px 40px 30px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                          <table width="100%" cellspacing="0" cellpadding="0">
+                        <td align="center">
+                          <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; max-width: 600px;">
+                            
+                            <!-- Logo -->
                             <tr>
-                              <td>
-                                <table cellspacing="0" cellpadding="0" style="margin: 0;">
+                              <td align="center" style="padding: 40px 40px 30px 40px;">
+                                <img src="https://www.chatl.ai/favicon.png" 
+                                     alt="ChatLearn" 
+                                     width="96" 
+                                     height="96" 
+                                     style="display: block; border: none;">
+                              </td>
+                            </tr>
+
+                            <!-- Content -->
+                            <tr>
+                              <td style="padding: 0 40px 40px 40px;">
+                                <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  Hi ${userName},
+                                </p>
+
+                                <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333; font-weight: 600;">
+                                  Welcome to ChatLearn.<br>
+                                  We're delighted to have you with us.
+                                </p>
+
+                                <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  Your account is now active, and your personal AI workspace is ready.
+                                </p>
+
+                                <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  Take a moment to explore, ask your first question, and experience how effortless intelligent work can feel.
+                                </p>
+
+                                <p style="margin: 0 0 32px 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  There's nothing you need to set up – just start, and everything else happens naturally.
+                                </p>
+
+                                <!-- CTA Button -->
+                                <table width="100%" cellpadding="0" cellspacing="0">
                                   <tr>
-                                    <td style="background-color: #ffffff; border-radius: 8px; padding: 8px; display: inline-block;">
-                                      <img src="https://www.chatl.ai/favicon.png"
-                                           alt="ChatLearn Logo"
-                                           width="40" 
-                                           height="40"
-                                           style="display: block; border: none;">
+                                    <td align="center" style="padding: 0 0 32px 0;">
+                                      <a href="https://www.chatl.ai" 
+                                         style="display: inline-block; padding: 14px 32px; background-color: #000000; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 500;">
+                                        Start Chatting
+                                      </a>
                                     </td>
                                   </tr>
                                 </table>
-                                <h1 style="font-size: 28px; font-weight: 700; margin: 20px 0 0 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Payment Receipt</h1>
+
+                                <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  If you ever need us, we're here <a href="mailto:support@chatl.ai" style="color: #000000; text-decoration: underline;">support@chatl.ai</a>.
+                                </p>
+
+                                <p style="margin: 0 0 8px 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  Thank you for joining ChatLearn.
+                                </p>
+
+                                <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  We're looking forward to being part of your everyday workflow.
+                                </p>
+
+                                <p style="margin: 0; font-size: 16px; line-height: 24px; color: #333333;">
+                                  Best,<br>
+                                  The ChatLearn Team
+                                </p>
                               </td>
                             </tr>
-                          </table>
-                        </td>
-                      </tr>
 
-                      <!-- Body -->
-                      <tr>
-                        <td style="padding: 0 40px 40px 40px;">
-                          <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #374151;">
-                            Hello ${userName},
-                          </p>
-
-                          <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; color: #374151;">
-                            ${isTrial ? `Your ${planName} ${periodTextCapitalized} trial has been activated successfully.` : `Thank you for your payment. Your ${planName} ${periodTextCapitalized} subscription is now active.`}
-                          </p>
-
-                          ${paymentDetailsHtml}
-                          
-                          <table width="100%" cellspacing="0" cellpadding="0" style="margin: 32px 0;">
+                            <!-- Footer -->
                             <tr>
-                              <td style="text-align: center;">
-                                <a href="https://www.chatl.ai" 
-                                   style="display: inline-block; background-color: #10a37f; color: #ffffff; 
-                                          text-decoration: none; font-weight: 500; padding: 14px 28px; 
-                                          border-radius: 6px; font-size: 16px;">
-                                  Access Your Account
-                                </a>
+                              <td style="padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+                                <p style="margin: 0; font-size: 13px; line-height: 20px; color: #666666;">
+                                  If you have any questions, please contact us through our <a href="https://www.chatl.ai/help-center/" style="color: #000000; text-decoration: underline;">help center</a>.
+                                </p>
                               </td>
                             </tr>
+
                           </table>
-
-                          <p style="font-size: 14px; line-height: 1.6; color: #6b7280; margin: 24px 0 0 0;">
-                            To manage your subscription or update payment details, visit your <a href="https://www.chatl.ai" style="color: #10a37f; text-decoration: none;">account settings</a>.
-                          </p>
                         </td>
                       </tr>
-
-                      <!-- Footer -->
-                      <tr>
-                        <td style="padding: 24px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-                          <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280;">
-                            ChatLearn Support
-                          </p>
-                          <p style="margin: 0; font-size: 13px; color: #9ca3af;">
-                            If you have questions, visit our <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>.
-                          </p>
-                          <p style="margin: 16px 0 0 0; font-size: 12px; color: #9ca3af;">
-                            This is a transactional email receipt for your subscription.
-                          </p>
-                        </td>
-                      </tr>
-
                     </table>
                   </body>
                 </html>
               `;
 
               const emailResult = await resend.emails.send({
-                from: "ChatLearn Support <support@chatl.ai>",
+                from: "ChatLearn <no-reply@chatl.ai>",
                 to: [user.email],
-                subject: isTrial ? `✨ Your ${planName} Trial Has Started` : `✅ Payment Receipt - ${planName} Subscription`,
+                subject: "Your ChatLearn account is now active",
                 html: htmlContent,
                 headers: {
                   'X-Entity-Ref-ID': `payment-${invoice.id}`,
@@ -839,21 +755,18 @@ serve(async (req) => {
                 tags: [
                   {
                     name: 'category',
-                    value: isTrial ? 'trial-started' : 'payment-receipt'
+                    value: 'subscription-activated'
                   }
                 ],
               });
 
               if (emailResult.error) {
-                logStep("ERROR: Failed to send payment confirmation email", { 
+                logStep("ERROR: Failed to send subscription activation email", { 
                   error: emailResult.error 
                 });
               } else {
-                logStep("Payment confirmation email sent", { 
-                  email: user.email,
-                  plan: planName,
-                  isTrial,
-                  amount: planPrice
+                logStep("Subscription activation email sent", { 
+                  email: user.email
                 });
               }
             }
