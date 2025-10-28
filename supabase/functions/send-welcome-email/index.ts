@@ -49,14 +49,8 @@ const handler = async (req: Request): Promise<Response> => {
                   <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; border: 1px solid #e6ebf1;">
                     <!-- Logo Section -->
                     <tr>
-                      <td style="padding: 40px 40px 20px; text-align: center;">
-                        <img src="https://www.chatl.ai/favicon.png" alt="ChatLearn Logo" width="64" height="64" style="display: block; margin: 0 auto;">
-                      </td>
-                    </tr>
-                    <!-- Brand Name -->
-                    <tr>
-                      <td style="padding: 0 40px 30px; text-align: center;">
-                        <h2 style="margin: 0; color: #1a1a1a; font-size: 20px; font-weight: 600;">ChatLearn</h2>
+                      <td style="padding: 40px 40px 30px; text-align: center;">
+                        <img src="https://www.chatl.ai/favicon.png" alt="ChatLearn Logo" width="96" height="96" style="display: block; margin: 0 auto;">
                       </td>
                     </tr>
                     <!-- Title -->
