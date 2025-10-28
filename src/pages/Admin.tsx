@@ -224,6 +224,17 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userUsages, setUserUsages] = useState<UserTokenUsage[]>([]);
   const [modelUsages, setModelUsages] = useState<TokenUsageByModel[]>([]);
+  
+  // Aggregate statistics state (fetched separately for performance)
+  const [aggregateStats, setAggregateStats] = useState({
+    totalUsers: 0,
+    freeUsers: 0,
+    proUsers: 0,
+    ultraProUsers: 0,
+    totalCost: 0,
+    totalTokens: 0
+  });
+  
   const [selectedUser, setSelectedUser] = useState<UserTokenUsage | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
@@ -271,7 +282,12 @@ export default function Admin() {
   // Fetch data when page changes
   useEffect(() => {
     if (isAdmin) {
-      fetchTokenUsageData();
+      setLoading(true);
+      // Fetch both user data and aggregate stats
+      Promise.all([
+        fetchTokenUsageData(),
+        fetchAggregateStats()
+      ]);
     }
   }, [isAdmin, currentPage]); // Re-fetch when page changes
   const checkAdminAccess = async () => {
@@ -344,6 +360,73 @@ export default function Admin() {
       toast.error('Failed to download user list');
     }
   };
+  
+  // Fetch aggregate statistics (counts and totals) - optimized query
+  const fetchAggregateStats = async () => {
+    try {
+      console.log('Fetching aggregate statistics...');
+      
+      // 1. Get total count of profiles
+      const { count: totalCount, error: countError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) throw countError;
+      
+      // 2. Get count of users with active subscriptions by plan
+      const { data: subscriptionCounts, error: subCountError } = await supabase
+        .from('user_subscriptions')
+        .select('plan')
+        .eq('status', 'active');
+      
+      if (subCountError) throw subCountError;
+      
+      // Count by plan type
+      const proCount = subscriptionCounts?.filter(s => s.plan === 'pro').length || 0;
+      const ultraProCount = subscriptionCounts?.filter(s => s.plan === 'ultra_pro').length || 0;
+      const subscribedCount = proCount + ultraProCount;
+      const freeCount = (totalCount || 0) - subscribedCount;
+      
+      // 3. Get total cost from token_usage (aggregate sum)
+      const { data: costData, error: costError } = await supabase
+        .from('token_usage')
+        .select('model, input_tokens, output_tokens');
+      
+      if (costError) throw costError;
+      
+      // Calculate total cost
+      let totalCost = 0;
+      let totalTokens = 0;
+      
+      costData?.forEach(usage => {
+        const cost = calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0);
+        totalCost += cost;
+        totalTokens += (usage.input_tokens || 0) + (usage.output_tokens || 0);
+      });
+      
+      // Update aggregate stats
+      setAggregateStats({
+        totalUsers: totalCount || 0,
+        freeUsers: freeCount,
+        proUsers: proCount,
+        ultraProUsers: ultraProCount,
+        totalCost,
+        totalTokens
+      });
+      
+      console.log('Aggregate stats loaded:', {
+        totalUsers: totalCount,
+        freeUsers: freeCount,
+        proUsers: proCount,
+        ultraProUsers: ultraProCount,
+        totalCost: totalCost.toFixed(2)
+      });
+    } catch (error) {
+      console.error('Error fetching aggregate stats:', error);
+      toast.error('Failed to load statistics');
+    }
+  };
+  
   const fetchTokenUsageData = async (isRefresh = false) => {
     try {
       if (isRefresh) {
@@ -957,7 +1040,11 @@ export default function Admin() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                fetchTokenUsageData(true);
+                setRefreshing(true);
+                Promise.all([
+                  fetchTokenUsageData(true),
+                  fetchAggregateStats()
+                ]);
               }}
               type="button"
               className="gap-2 h-10"
@@ -986,7 +1073,11 @@ export default function Admin() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                fetchTokenUsageData(true);
+                setRefreshing(true);
+                Promise.all([
+                  fetchTokenUsageData(true),
+                  fetchAggregateStats()
+                ]);
               }}
               type="button"
               variant="outline"
@@ -1377,7 +1468,7 @@ export default function Admin() {
               <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
-              <div className="text-3xl sm:text-4xl font-bold text-foreground">{statsFilteredUsers.length}</div>
+              <div className="text-3xl sm:text-4xl font-bold text-foreground">{aggregateStats.totalUsers}</div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">Registered users</p>
             </CardContent>
           </Card>
@@ -1385,11 +1476,11 @@ export default function Admin() {
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Free Users</CardTitle>
-              <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">{statsFilteredUsers.filter(u => getUserPlan(u) === 'free').length}</Badge>
+              <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">{aggregateStats.freeUsers}</Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                {statsFilteredUsers.filter(u => getUserPlan(u) === 'free').length}
+                {aggregateStats.freeUsers}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">On free plan</p>
             </CardContent>
@@ -1399,12 +1490,12 @@ export default function Admin() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Pro Users</CardTitle>
               <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/30 text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
-                {statsFilteredUsers.filter(u => getUserPlan(u) === 'pro').length}
+                {aggregateStats.proUsers}
               </Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                {statsFilteredUsers.filter(u => getUserPlan(u) === 'pro').length}
+                {aggregateStats.proUsers}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">Pro subscribers</p>
             </CardContent>
@@ -1414,12 +1505,12 @@ export default function Admin() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Ultra Pro</CardTitle>
               <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/30 text-xs sm:text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
-                {statsFilteredUsers.filter(u => getUserPlan(u) === 'ultra').length}
+                {aggregateStats.ultraProUsers}
               </Badge>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                {statsFilteredUsers.filter(u => getUserPlan(u) === 'ultra').length}
+                {aggregateStats.ultraProUsers}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">Ultra subscribers</p>
             </CardContent>
@@ -1432,10 +1523,10 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0 md:p-6 md:pt-0">
               <div className="text-3xl sm:text-4xl font-bold text-foreground">
-                ${statsFilteredModelUsages.reduce((sum, m) => sum + m.total_cost, 0).toFixed(2)}
+                ${aggregateStats.totalCost.toFixed(2)}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-                {(statsFilteredModelUsages.reduce((sum, m) => sum + m.input_tokens + m.output_tokens, 0) / 1000000).toFixed(2)}M tokens
+                {(aggregateStats.totalTokens / 1000000).toFixed(2)}M tokens
               </p>
             </CardContent>
           </Card>
