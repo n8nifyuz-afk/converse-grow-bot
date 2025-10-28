@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { formatIpForDisplay } from '@/utils/ipFormatter';
 
 interface UserInformationModalProps {
   open: boolean;
@@ -87,6 +88,19 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
   const browserInfo = userInfo.browser_info || {};
   const deviceInfo = userInfo.device_info || {};
   const oauthMetadata = userInfo.oauth_metadata || {};
+
+  // Filter activity logs to show only unique login/register events
+  // Remove duplicates within 5 minutes
+  const uniqueActivityLogs = activityLogs.filter((log, index, array) => {
+    if (index === 0) return true;
+    
+    const currentTime = new Date(log.created_at).getTime();
+    const prevTime = new Date(array[index - 1].created_at).getTime();
+    const timeDiff = currentTime - prevTime;
+    
+    // Only keep if more than 5 minutes apart OR different activity type
+    return timeDiff > 5 * 60 * 1000 || log.activity_type !== array[index - 1].activity_type;
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -215,7 +229,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">IP Address</p>
-                      <p className="text-xs sm:text-sm font-mono font-semibold truncate">{userInfo.ip_address || 'Unknown'}</p>
+                      <p className="text-xs sm:text-sm font-mono font-semibold truncate">{formatIpForDisplay(userInfo.ip_address)}</p>
                     </div>
                     <div>
                       <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
@@ -406,16 +420,16 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                       <Activity className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                       Recent Activity
                     </CardTitle>
-                    <Badge variant="secondary" className="text-xs w-fit">{activityLogs.length} events</Badge>
+                    <Badge variant="secondary" className="text-xs w-fit">{uniqueActivityLogs.length} events</Badge>
                   </div>
                   <CardDescription className="text-xs sm:text-sm mt-2">
-                    Track of user's actions and system events
+                    Track of user's login and registration events
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 md:p-6 pt-0 sm:pt-0 md:pt-0">
-                  {activityLogs.length > 0 ? (
+                  {uniqueActivityLogs.length > 0 ? (
                     <div className="space-y-2 sm:space-y-3">
-                      {activityLogs.map((log, idx) => (
+                      {uniqueActivityLogs.map((log, idx) => (
                         <div key={idx} className="p-2.5 sm:p-3 border rounded-lg">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                             <Badge variant="outline" className="text-xs w-fit">{log.activity_type}</Badge>
@@ -426,7 +440,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
                             {log.ip_address && (
                               <div>
-                                <span className="font-medium">IP:</span> {log.ip_address}
+                                <span className="font-medium">IP:</span> {formatIpForDisplay(log.ip_address)}
                               </div>
                             )}
                             {log.country && (

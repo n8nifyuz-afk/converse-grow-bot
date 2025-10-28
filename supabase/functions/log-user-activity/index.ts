@@ -18,15 +18,18 @@ serve(async (req) => {
 
     const { userId, activityType, browserInfo, deviceInfo, referrer, metadata } = await req.json()
 
-    // Get IP address from request headers
-    const ipAddress = req.headers.get('x-forwarded-for') || 
-                     req.headers.get('x-real-ip') || 
-                     'unknown'
+    // Get IP address from request headers and clean it
+    const rawIpAddress = req.headers.get('x-forwarded-for') || 
+                         req.headers.get('x-real-ip') || 
+                         'unknown'
+    
+    // Clean IP: take first IP from comma-separated list (real client IP)
+    const ipAddress = rawIpAddress.split(',')[0].trim()
 
     // Fetch country from IP
     let country = null
     try {
-      const ipResponse = await fetch(`https://ipapi.co/${ipAddress.split(',')[0]}/json/`)
+      const ipResponse = await fetch(`https://ipapi.co/${ipAddress}/json/`)
       if (ipResponse.ok) {
         const ipData = await ipResponse.json()
         country = ipData.country_code || null
