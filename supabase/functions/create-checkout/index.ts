@@ -205,6 +205,10 @@ serve(async (req) => {
       customer_email: customerId ? undefined : (user.email || undefined),
       // For phone-only users without existing customer, we already created one above
       customer_creation: customerId ? undefined : 'always',
+      // Automatically collect and save address during checkout for tax calculation
+      customer_update: {
+        address: 'auto'
+      },
       // Add metadata for the session
       metadata: {
         user_id: user.id,
