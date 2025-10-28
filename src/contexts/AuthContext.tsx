@@ -20,8 +20,6 @@ interface AuthContextType {
   };
   showPricingModal: boolean;
   setShowPricingModal: (show: boolean) => void;
-  showEmailLinkModal: boolean;
-  setShowEmailLinkModal: (show: boolean) => void;
   checkSubscription: () => Promise<void>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
@@ -75,7 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loadingSubscription, setLoadingSubscription] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showPricingModal, setShowPricingModal] = useState(false);
-  const [showEmailLinkModal, setShowEmailLinkModal] = useState(false);
   
   // Try to load cached subscription status on mount
   const cachedStatus = loadCachedSubscription();
@@ -743,20 +740,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       type: 'sms'
     });
     
-    // Check if user has email - if not, show email link modal
-    if (!error && data.user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email, phone_number')
-        .eq('user_id', data.user.id)
-        .maybeSingle();
-      
-      // User signed up with phone but has no email
-      if (profile && !profile.email && profile.phone_number) {
-        setTimeout(() => setShowEmailLinkModal(true), 500);
-      }
-    }
-    
     return { error };
   };
 
@@ -1001,8 +984,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     subscriptionStatus,
     showPricingModal,
     setShowPricingModal,
-    showEmailLinkModal,
-    setShowEmailLinkModal,
     checkSubscription,
     signUp,
     signIn,

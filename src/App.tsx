@@ -7,7 +7,6 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CookieBanner } from '@/components/CookieBanner';
-import { EmailLinkModal } from '@/components/EmailLinkModal';
 import MainLayout from '@/layouts/MainLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -35,21 +34,11 @@ import { SubscriptionCheckingOverlay } from '@/components/SubscriptionCheckingOv
 const queryClient = new QueryClient();
 
 function AppContent() {
-  const { user, showEmailLinkModal, setShowEmailLinkModal } = useAuth();
+  const { user } = useAuth();
 
   return (
     <>
       <SubscriptionCheckingOverlay />
-      {user && (
-        <EmailLinkModal
-          open={showEmailLinkModal}
-          onOpenChange={setShowEmailLinkModal}
-          userId={user.id}
-          onSuccess={() => {
-            setShowEmailLinkModal(false);
-          }}
-        />
-      )}
       <Router>
         <Routes>
           {/* Root route - shows Chat */}
