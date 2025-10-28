@@ -117,8 +117,9 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   };
 
   const handleInputFocus = () => {
-    // Close dropdown when focusing input to prevent conflicts
+    // Close dropdown immediately when focusing input on mobile
     setIsDropdownOpen(false);
+    setSearchQuery('');
   };
 
   const handleCountrySelect = (country: Country) => {
