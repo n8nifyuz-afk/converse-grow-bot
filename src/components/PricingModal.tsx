@@ -136,24 +136,31 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const allFeatures = getFeatures(t, selectedPlan);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // Scroll to show terms text and subscribe button on mobile when modal opens
+  // Scroll to show the bottom of the modal (hide X button) on mobile when modal opens
   React.useEffect(() => {
     if (open && isMobile && scrollRef.current) {
-      // Immediate scroll to bottom
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      
-      // Multiple aggressive scroll attempts to ensure bottom stays visible
       const scrollToBottom = () => {
         if (scrollRef.current) {
+          // Force scroll to the absolute bottom
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
       };
       
-      // Rapid scroll attempts
-      const timeouts = [0, 50, 100, 200, 300, 500, 800];
+      // Immediate scroll
+      scrollToBottom();
+      
+      // Multiple aggressive scroll attempts with longer delays to ensure bottom stays visible
+      const timeouts = [0, 10, 50, 100, 150, 200, 300, 400, 500, 700, 1000];
+      const intervals: NodeJS.Timeout[] = [];
+      
       timeouts.forEach(delay => {
-        setTimeout(scrollToBottom, delay);
+        intervals.push(setTimeout(scrollToBottom, delay));
       });
+      
+      // Cleanup timeouts
+      return () => {
+        intervals.forEach(interval => clearTimeout(interval));
+      };
     }
   }, [open, isMobile, checkingEligibility, isTrialEligible, selectedPeriod]);
 
@@ -293,14 +300,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const savings = selectedPeriod === 'yearly' && 'savings' in basePricing ? basePricing.savings : 0;
 
   const modalContent = (
-    <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative ${isMobile ? 'pt-16' : ''}`}>
-            {/* Mobile Close Button - Scrolls with content */}
+    <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative`}>
+            {/* Mobile Close Button - Positioned at top to scroll out of view */}
             {isMobile && (
               <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0 mb-4"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-16 flex-shrink-0"
                 style={{ 
-                  paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
-                  paddingBottom: '0.75rem'
+                  paddingTop: 'max(4rem, env(safe-area-inset-top))',
+                  paddingBottom: '1rem'
                 }}
               >
                 <button
