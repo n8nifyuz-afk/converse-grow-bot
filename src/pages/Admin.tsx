@@ -1088,7 +1088,7 @@ export default function Admin() {
                     <div className="space-y-2.5">
                       <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
                         <div className="w-1 h-3 bg-primary rounded-full" />
-                        Registration Date & Time
+                        Date & Time
                       </label>
                       <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                         <PopoverTrigger asChild>
@@ -1589,7 +1589,7 @@ export default function Admin() {
                                   }}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
-                                  View
+                                  Cost View
                                 </Button>
                                 <Button 
                                   variant="outline" 
@@ -1798,7 +1798,7 @@ export default function Admin() {
                                   }}
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
-                                  View
+                                  Cost View
                                 </Button>
                               </div>
                             </TableCell>
