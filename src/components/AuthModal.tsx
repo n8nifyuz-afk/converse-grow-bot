@@ -417,7 +417,7 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className="flex flex-col min-h-[320px] md:min-h-[420px]">
+  const authContent = <div className="flex flex-col min-h-0 md:min-h-[420px]">
           {/* Auth Form */}
           <div className="w-full p-4 md:p-6 flex flex-col">
             {/* Main Heading */}
@@ -764,7 +764,7 @@ export default function AuthModal({
         </div>;
   if (isMobile) {
     return <Drawer open={isOpen} onOpenChange={onClose} dismissible={mode !== 'phone' && mode !== 'verify'}>
-        <DrawerContent className="max-h-[90vh] p-0">
+        <DrawerContent className="max-h-[85vh] p-0 overflow-y-auto">
           <DrawerHeader className="sr-only">
             <DrawerTitle>ChatLearn Authentication</DrawerTitle>
             <DrawerDescription>

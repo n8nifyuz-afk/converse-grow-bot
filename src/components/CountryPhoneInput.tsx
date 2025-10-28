@@ -54,6 +54,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Parse initial value if provided
@@ -96,6 +97,19 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     onValidation?.(valid);
   };
 
+  const handleInputFocus = () => {
+    // Close dropdown when focusing input on mobile to prevent conflicts
+    setIsDropdownOpen(false);
+    
+    // Scroll input into view on mobile after a short delay
+    setTimeout(() => {
+      inputRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center'
+      });
+    }, 300);
+  };
+
   const handleCountrySelect = (country: Country) => {
     setSelectedCountry(country);
     setIsDropdownOpen(false);
@@ -131,9 +145,11 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
         {/* Phone Number Input */}
         <input
+          ref={inputRef}
           type="tel"
           value={phoneNumber}
           onChange={handlePhoneChange}
+          onFocus={handleInputFocus}
           placeholder={selectedCountry.placeholder}
           disabled={disabled}
           className={`phone-input ${isValid === false ? 'invalid' : ''} ${isValid === true ? 'valid' : ''}`}
