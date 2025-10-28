@@ -203,12 +203,6 @@ serve(async (req) => {
     const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : (user.email || undefined),
-      // CRITICAL: customer_creation is NOT allowed in subscription mode
-      // Stripe will auto-create customer from customer_email if needed
-      // Automatically collect and save address during checkout for tax calculation
-      customer_update: {
-        address: 'auto'
-      },
       // Add metadata for the session
       metadata: {
         user_id: user.id,
@@ -240,6 +234,13 @@ serve(async (req) => {
         }
       }
     };
+    
+    // CRITICAL: Only add customer_update if customer exists
+    if (customerId) {
+      sessionConfig.customer_update = {
+        address: 'auto'  // Collect address for tax calculation
+      };
+    }
     
     // For trials: add 3-day trial period + €0.99 upfront charge
     if (isTrial) {
