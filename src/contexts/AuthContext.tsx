@@ -277,6 +277,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Defer async operations to prevent blocking auth flow
           setTimeout(async () => {
+            // Log user activity for ALL logins (email, OAuth, etc.)
+            try {
+              // Collect browser and device information
+              const browserInfo = {
+                browser: navigator.userAgent.match(/(?:Firefox|Chrome|Safari|Edge|Opera)\/[\d.]+/)?.[0]?.split('/')[0] || 'Unknown',
+                browserVersion: navigator.userAgent.match(/(?:Firefox|Chrome|Safari|Edge|Opera)\/([\d.]+)/)?.[1] || 'Unknown',
+                device: /Mobile|Tablet/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+                os: navigator.platform || 'Unknown',
+                userAgent: navigator.userAgent,
+                isMobile: /Mobile/i.test(navigator.userAgent),
+                isTablet: /Tablet/i.test(navigator.userAgent),
+                isDesktop: !/Mobile|Tablet/i.test(navigator.userAgent),
+              };
+              
+              const deviceInfo = {
+                platform: navigator.platform,
+                language: navigator.language,
+                languages: navigator.languages,
+                screenResolution: `${screen.width}x${screen.height}`,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                viewportWidth: window.innerWidth,
+                viewportHeight: window.innerHeight,
+                colorDepth: screen.colorDepth,
+                devicePixelRatio: window.devicePixelRatio,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timezoneOffset: new Date().getTimezoneOffset(),
+                cookiesEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                touchSupport: 'ontouchstart' in window
+              };
+              
+              // Call log-user-activity edge function
+              await supabase.functions.invoke('log-user-activity', {
+                body: {
+                  userId: session.user.id,
+                  activityType: 'login',
+                  browserInfo,
+                  deviceInfo,
+                  referrer: document.referrer,
+                  metadata: {
+                    authProvider: session.user.app_metadata?.provider || 'email',
+                    signInMethod: event === 'SIGNED_IN' ? 'signin' : 'unknown'
+                  }
+                }
+              });
+            } catch (activityError) {
+              console.warn('Failed to log user activity:', activityError);
+              // Don't block auth flow if activity logging fails
+            }
+            
             // Check if this is a new signup
             const { data: profile } = await supabase
               .from('profiles')
