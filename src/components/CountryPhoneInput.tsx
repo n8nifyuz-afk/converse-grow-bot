@@ -26,7 +26,6 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isDetectingCountry, setIsDetectingCountry] = useState(true);
-  const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -138,23 +137,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
   const toggleDropdown = () => {
     if (!disabled && !isDetectingCountry) {
-      const newIsOpen = !isDropdownOpen;
-      setIsDropdownOpen(newIsOpen);
-      
-      if (newIsOpen && containerRef.current) {
-        // Calculate dropdown position based on available space
-        const rect = containerRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const spaceAbove = rect.top;
-        const dropdownHeight = 370; // Approximate height of dropdown with search
-        
-        // If not enough space below and more space above, show above
-        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
-          setDropdownPosition('above');
-        } else {
-          setDropdownPosition('below');
-        }
-      }
+      setIsDropdownOpen(!isDropdownOpen);
     }
   };
 
@@ -204,7 +187,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
       {/* Dropdown */}
       {isDropdownOpen && (
-        <div className={`country-dropdown ${dropdownPosition === 'above' ? 'dropdown-above' : ''}`}>
+        <div className="country-dropdown">
           <input
             type="text"
             placeholder="Search country..."
@@ -221,7 +204,10 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
                 onClick={() => handleCountrySelect(country)}
                 className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
               >
-                <span className="country-name">{country.name}</span>
+                <div className="country-info">
+                  <span className="country-flag">{country.code}</span>
+                  <span className="country-name">{country.name}</span>
+                </div>
                 <span className="country-dial-code">{country.dialCode}</span>
               </button>
             ))}
