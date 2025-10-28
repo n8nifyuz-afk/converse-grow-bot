@@ -39,7 +39,6 @@ export default function AuthModal({
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const {
     user,
     signIn,
@@ -85,28 +84,6 @@ export default function AuthModal({
       return () => clearTimeout(timer);
     }
   }, [otpTimer]);
-
-  // Detect keyboard open/close on mobile
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleResize = () => {
-      // On mobile, if viewport height decreases significantly, keyboard is likely open
-      const viewportHeight = window.visualViewport?.height || window.innerHeight;
-      const screenHeight = window.screen.height;
-      const keyboardThreshold = screenHeight * 0.7;
-      
-      setIsKeyboardOpen(viewportHeight < keyboardThreshold);
-    };
-
-    window.visualViewport?.addEventListener('resize', handleResize);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [isMobile]);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -452,12 +429,12 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className={`flex flex-col transition-all duration-300 ${isKeyboardOpen ? 'min-h-0' : 'min-h-[500px]'} md:min-h-[420px]`}>
+  const authContent = <div className="flex flex-col min-h-[500px] md:min-h-[420px]">
           {/* Auth Form */}
-          <div className={`w-full flex flex-col transition-all duration-300 ${isKeyboardOpen ? 'p-2 pb-0' : 'p-4 md:p-6'}`}>
+          <div className="w-full p-4 md:p-6 flex flex-col">
             {/* Main Heading */}
-            <div className={`text-center transition-all duration-300 ${isKeyboardOpen ? 'mb-2' : 'mb-6 md:mb-7'}`}>
-              <h2 className={`font-bold leading-tight transition-all duration-300 ${isKeyboardOpen ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
+            <div className="mb-6 md:mb-7 text-center">
+              <h2 className="text-2xl md:text-3xl font-bold leading-tight">
                 {t('authModal.title')}
               </h2>
             </div>
