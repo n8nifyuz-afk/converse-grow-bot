@@ -41,52 +41,67 @@ const handler = async (req: Request): Promise<Response> => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta name="x-apple-disable-message-reformatting">
           </head>
-          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
-            <div style="display: none; max-height: 0; overflow: hidden;">Your AI workspace is ready start exploring now.</div>
+          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f6f9fc;">
+            <div style="display: none; max-height: 0; overflow: hidden;">Welcome to ChatLearn - Your AI workspace is ready</div>
             <table role="presentation" style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td align="center" style="padding: 40px 20px;">
-                  <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                  <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; border: 1px solid #e6ebf1;">
+                    <!-- Logo Section -->
                     <tr>
-                      <td style="padding: 40px 40px 30px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px 12px 0 0;">
-                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Welcome to ChatL! 🎉</h1>
+                      <td style="padding: 40px 40px 20px; text-align: center;">
+                        <img src="https://www.chatl.ai/favicon.png" alt="ChatLearn Logo" width="64" height="64" style="display: block; margin: 0 auto;">
                       </td>
                     </tr>
+                    <!-- Brand Name -->
                     <tr>
-                      <td style="padding: 40px;">
-                        <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
+                      <td style="padding: 0 40px 30px; text-align: center;">
+                        <h2 style="margin: 0; color: #1a1a1a; font-size: 20px; font-weight: 600;">ChatLearn</h2>
+                      </td>
+                    </tr>
+                    <!-- Title -->
+                    <tr>
+                      <td style="padding: 0 40px 30px; text-align: center;">
+                        <h1 style="margin: 0; color: #1a1a1a; font-size: 24px; font-weight: 700;">Welcome to ChatLearn</h1>
+                      </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                      <td style="padding: 0 40px 20px;">
+                        <p style="margin: 0 0 20px; font-size: 16px; line-height: 24px; color: #484848;">
                           Hi ${displayName},
                         </p>
-                        <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.6; color: #333333;">
-                          Thank you for joining ChatLearn.
+                        <p style="margin: 0 0 20px; font-size: 16px; line-height: 24px; color: #484848;">
+                          Thank you for joining ChatLearn. Your account has been successfully created, and you're ready to start exploring the power of AI.
                         </p>
-                        <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                          We're excited to have you on board. Your account has been successfully created, and you're ready to start exploring the full power of AI.
+                        <p style="margin: 0 0 16px; font-size: 16px; line-height: 24px; color: #484848; font-weight: 600;">
+                          What you can do:
                         </p>
-                        <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.6; color: #333333; font-weight: 600;">
-                          What You Can Do:
-                        </p>
-                        <ul style="margin: 0 0 30px; padding-left: 20px; font-size: 16px; line-height: 1.8; color: #333333;">
+                        <ul style="margin: 0 0 30px; padding-left: 20px; font-size: 16px; line-height: 26px; color: #484848;">
                           <li>Chat with multiple AI models (GPT-5, Gemini, Claude, and more)</li>
                           <li>Generate and edit images with AI</li>
                           <li>Use voice mode for hands-free conversations</li>
                           <li>Analyze PDFs and documents</li>
                         </ul>
                         <div style="text-align: center; margin: 30px 0;">
-                          <a href="https://www.chatl.ai" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                          <a href="https://www.chatl.ai" style="display: inline-block; padding: 12px 32px; background-color: #000000; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
                             Start Chatting Now
                           </a>
                         </div>
-                        <p style="margin: 30px 0 0; font-size: 14px; line-height: 1.6; color: #666666; padding-top: 20px; border-top: 1px solid #e5e5e5;">
-                          Need help getting started? Contact us at <a href="mailto:support@chatl.ai" style="color: #667eea; text-decoration: none;">support@chatl.ai</a>.
+                        <p style="margin: 30px 0 0; font-size: 14px; line-height: 20px; color: #666666; padding-top: 20px; border-top: 1px solid #e6ebf1;">
+                          If you didn't sign up for ChatLearn, you can safely ignore this message.
                         </p>
                       </td>
                     </tr>
+                    <!-- Footer -->
                     <tr>
-                      <td style="padding: 30px 40px; text-align: center; background-color: #f8f9fa; border-radius: 0 0 12px 12px;">
-                        <p style="margin: 0; font-size: 14px; color: #666666;">
-                          Best regards,<br>
+                      <td style="padding: 30px 40px; text-align: center;">
+                        <p style="margin: 0 0 8px; font-size: 14px; color: #484848;">
+                          Best,<br>
                           <strong>The ChatLearn Team</strong>
+                        </p>
+                        <p style="margin: 16px 0 0; font-size: 13px; line-height: 20px; color: #8898aa;">
+                          If you have any questions, please contact us through our <a href="https://www.chatl.ai/help" style="color: #000000; text-decoration: none;">help center</a>.
                         </p>
                       </td>
                     </tr>
