@@ -778,20 +778,7 @@ export default function Chat() {
       autoSendTempMessage.current = tempUserMessage;
       console.log('[CHAT-INITIAL] Stored temp message in ref:', tempId);
       
-      // CRITICAL: Mark temp message as processed IMMEDIATELY to prevent AUTO-TRIGGER from firing
-      if (!processedUserMessages.current.has(chatId)) {
-        processedUserMessages.current.set(chatId, new Set());
-      }
-      processedUserMessages.current.get(chatId)!.add(tempId);
-      
-      // Persist to sessionStorage
-      const storageKey = `processed_messages_${chatId}`;
-      const processedArray = Array.from(processedUserMessages.current.get(chatId)!);
-      sessionStorage.setItem(storageKey, JSON.stringify(processedArray));
-      
-      console.log('[CHAT-INITIAL] Marked temp message as processed to prevent duplicate AUTO-TRIGGER');
-      
-      // Add message to UI immediately so user sees their image
+      // Add message to UI immediately so user sees their message
       setMessages(prev => [...prev, tempUserMessage]);
       scrollToBottom();
       
@@ -2669,20 +2656,7 @@ export default function Chat() {
           // Check if this was from auto-send (homepage navigation)
           const isAutoSendMessage = tempUserMessage.id.startsWith('temp-init-');
           
-          if (isAutoSendMessage) {
-            console.log('[TEXT-MESSAGE] Auto-send message from homepage - marking as processed to prevent duplicate AI trigger');
-            // CRITICAL: Mark as processed immediately to prevent AUTO-TRIGGER from firing twice
-            // The temp message already triggered AUTO-TRIGGER, so we need to mark the real message as processed
-            if (!processedUserMessages.current.has(chatId)) {
-              processedUserMessages.current.set(chatId, new Set());
-            }
-            processedUserMessages.current.get(chatId)!.add(insertedMessage.id);
-            
-            // Persist to sessionStorage
-            const storageKey = `processed_messages_${chatId}`;
-            const processedArray = Array.from(processedUserMessages.current.get(chatId)!);
-            sessionStorage.setItem(storageKey, JSON.stringify(processedArray));
-          } else {
+          if (!isAutoSendMessage) {
             // Check if the temp message was already processed by AUTO-TRIGGER (for regular chat messages)
             const tempMessageId = tempUserMessage.id;
             const tempWasProcessed = processedUserMessages.current.get(chatId)?.has(tempMessageId);
