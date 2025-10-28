@@ -313,7 +313,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               <div 
                 className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0 transition-all duration-300"
                 style={{ 
-                  paddingTop: showCloseButton ? 'max(1.5rem, env(safe-area-inset-top))' : '0',
+                  paddingTop: showCloseButton ? 'max(3rem, env(safe-area-inset-top))' : '0',
                   paddingBottom: showCloseButton ? '1rem' : '0',
                   opacity: showCloseButton ? 1 : 0
                 }}
