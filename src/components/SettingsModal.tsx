@@ -786,16 +786,16 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
               {/* Email Verification Linking - Only for phone users without email */}
               {userProfile?.signup_method === 'phone' && !userProfile?.email && (
-                <Card className="border-none shadow-md hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-card via-card to-card/80">
-                  <CardContent className="p-5">
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                          <Mail className="h-4 w-4 text-primary" />
+                <Card className="border-none shadow-sm bg-gradient-to-br from-card via-card to-card/80">
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-start gap-2">
+                        <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
+                          <Mail className="h-3.5 w-3.5 text-primary" />
                         </div>
-                        <div className="flex-1 space-y-1.5">
-                          <p className="font-semibold text-foreground">Link Email Account</p>
-                          <p className="text-sm text-muted-foreground">Connect your email to access your account from any device</p>
+                        <div className="flex-1 space-y-0.5">
+                          <p className="font-semibold text-foreground text-sm">Link Email Account</p>
+                          <p className="text-xs text-muted-foreground">Connect your email to access your account from any device</p>
                         </div>
                       </div>
                       

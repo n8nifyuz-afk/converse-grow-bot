@@ -118,10 +118,10 @@ export function EmailVerificationLinking() {
 
   if (step === 'verify') {
     return (
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="code" className="flex items-center gap-2">
-            <Key className="h-4 w-4" />
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="code" className="flex items-center gap-1.5 text-xs">
+            <Key className="h-3 w-3" />
             Verification Code
           </Label>
           <Input
@@ -132,9 +132,9 @@ export function EmailVerificationLinking() {
             onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             maxLength={6}
             disabled={loading}
-            className="font-mono text-lg tracking-widest"
+            className="font-mono text-sm tracking-widest h-9"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[10px] text-muted-foreground">
             Check your email ({email}) for the verification code
           </p>
         </div>
@@ -143,11 +143,12 @@ export function EmailVerificationLinking() {
           <Button
             onClick={handleVerifyAndLink}
             disabled={loading || verificationCode.length !== 6}
-            className="flex-1"
+            className="flex-1 h-8 text-xs"
+            size="sm"
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
                 Verifying...
               </>
             ) : (
@@ -161,6 +162,8 @@ export function EmailVerificationLinking() {
               setVerificationCode('');
             }}
             disabled={loading}
+            className="h-8 text-xs"
+            size="sm"
           >
             Back
           </Button>
@@ -170,10 +173,10 @@ export function EmailVerificationLinking() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email" className="flex items-center gap-2">
-          <Mail className="h-4 w-4" />
+    <div className="space-y-3">
+      <div className="space-y-1.5">
+        <Label htmlFor="email" className="flex items-center gap-1.5 text-xs">
+          <Mail className="h-3 w-3" />
           Email Address
         </Label>
         <Input
@@ -183,12 +186,13 @@ export function EmailVerificationLinking() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
+          className="h-9 text-sm"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password" className="flex items-center gap-2">
-          <Lock className="h-4 w-4" />
+      <div className="space-y-1.5">
+        <Label htmlFor="password" className="flex items-center gap-1.5 text-xs">
+          <Lock className="h-3 w-3" />
           Password
         </Label>
         <Input
@@ -198,8 +202,9 @@ export function EmailVerificationLinking() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={loading}
+          className="h-9 text-sm"
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           Minimum 6 characters
         </p>
       </div>
@@ -207,11 +212,12 @@ export function EmailVerificationLinking() {
       <Button
         onClick={handleSendCode}
         disabled={loading || !email || !password}
-        className="w-full"
+        className="w-full h-8 text-xs"
+        size="sm"
       >
         {loading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
             Sending...
           </>
         ) : (
