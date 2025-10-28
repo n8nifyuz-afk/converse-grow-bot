@@ -23,13 +23,13 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { email, code } = await req.json();
+    const { verificationId, code, email, password } = await req.json();
     
-    if (!email || !code) {
-      throw new Error("Email and code are required");
+    if (!verificationId || !code || !email || !password) {
+      throw new Error("All fields are required");
     }
 
-    logStep("Verification attempt", { email, code });
+    logStep("Verification attempt", { email, verificationId });
 
     // Initialize Supabase admin client
     const supabaseAdmin = createClient(
@@ -37,24 +37,41 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Get authenticated user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
+
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (userError || !user) {
+      throw new Error('Unauthorized');
+    }
+
     // Get verification record
     const { data: verification, error: fetchError } = await supabaseAdmin
       .from('email_verifications')
       .select('*')
+      .eq('id', verificationId)
       .eq('email', email)
-      .eq('code', code)
       .single();
 
     if (fetchError || !verification) {
+      logStep("Invalid verification ID", { email, verificationId });
+      throw new Error("Invalid verification request");
+    }
+
+    // Check if code matches
+    if (verification.code !== code) {
       logStep("Invalid code", { email });
-      throw new Error("Invalid or expired verification code");
+      throw new Error("Invalid verification code");
     }
 
     // Check if code is expired
     const expiresAt = new Date(verification.expires_at);
     if (expiresAt < new Date()) {
       logStep("Code expired", { email, expiresAt });
-      throw new Error("Verification code has expired");
+      throw new Error("Verification code has expired. Please request a new one.");
     }
 
     // Check if already verified
@@ -63,150 +80,57 @@ serve(async (req) => {
       throw new Error("This code has already been used");
     }
 
-    logStep("Code verified, checking if user exists", { email });
+    // Hash the password to compare
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Check if user already exists (OAuth user)
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = existingUsers?.users.find(u => u.email === email);
-
-    let userId: string;
-
-    if (existingUser) {
-      // User exists (OAuth user), update their password
-      logStep("Updating existing OAuth user with password", { userId: existingUser.id });
-      
-      const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-        existingUser.id,
-        {
-          password: verification.password_hash,
-          email_confirm: true
-        }
-      );
-
-      if (updateError) {
-        logStep("Error updating user password", { error: updateError.message });
-        throw new Error(`Failed to update account: ${updateError.message}`);
-      }
-
-      userId = existingUser.id;
-      logStep("Password added to existing user successfully", { userId });
-    } else {
-      // Create new user
-      logStep("Creating new user", { email });
-      
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password: verification.password_hash,
-        email_confirm: true,
-      });
-
-      if (authError) {
-        logStep("Error creating user", { error: authError.message });
-        throw new Error(`Failed to create account: ${authError.message}`);
-      }
-
-      userId = authData.user?.id || '';
-      logStep("New user created successfully", { userId });
+    // Verify password matches
+    if (verification.password_hash !== passwordHash) {
+      throw new Error('Password mismatch');
     }
+
+    logStep("Code verified, updating user", { userId: user.id });
+
+    // Update the user's email and password using admin API
+    const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      {
+        email: email,
+        password: password,
+        email_confirm: true, // Auto-confirm the email
+      }
+    );
+
+    if (updateError) {
+      logStep("Error updating user", { error: updateError.message });
+      throw new Error('Failed to link email to account');
+    }
+
+    // Update profile to reflect email
+    await supabaseAdmin
+      .from('profiles')
+      .update({
+        email: email,
+        signup_method: 'phone+email',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', user.id);
 
     // Mark verification as used
     await supabaseAdmin
       .from('email_verifications')
       .update({ verified: true })
-      .eq('email', email);
+      .eq('id', verificationId);
 
-    logStep("User setup completed", { userId });
-
-    // Send welcome email
-    try {
-      logStep("Sending welcome email", { email });
-      
-      await resend.emails.send({
-        from: "ChatL <onboarding@resend.dev>",
-        to: [email],
-        subject: "Welcome to ChatL - Your Account is Ready! 🎉",
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
-              <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td align="center" style="padding: 40px 20px;">
-                    <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                      <!-- Header -->
-                      <tr>
-                        <td style="padding: 40px 40px 30px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px 12px 0 0;">
-                          <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Welcome to ChatL! 🎉</h1>
-                        </td>
-                      </tr>
-                      
-                      <!-- Content -->
-                      <tr>
-                        <td style="padding: 40px;">
-                          <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                            Hi there,
-                          </p>
-                          
-                          <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                            Thank you for joining <strong>ChatL</strong>! Your account has been successfully created and verified. 
-                          </p>
-                          
-                          <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                            You can now access all our features:
-                          </p>
-                          
-                          <ul style="margin: 0 0 30px; padding-left: 20px; font-size: 16px; line-height: 1.8; color: #333333;">
-                            <li>Chat with multiple AI models (ChatGPT, Claude, Gemini, and more)</li>
-                            <li>Generate and edit images with AI</li>
-                            <li>Voice conversations with AI</li>
-                            <li>Organize your chats with projects</li>
-                            <li>And much more!</li>
-                          </ul>
-                          
-                          <div style="text-align: center; margin: 30px 0;">
-                            <a href="https://lciaiunzacgvvbvcshdh.supabase.co" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                              Start Chatting Now
-                            </a>
-                          </div>
-                          
-                          <p style="margin: 30px 0 0; font-size: 14px; line-height: 1.6; color: #666666; padding-top: 20px; border-top: 1px solid #e5e5e5;">
-                            If you have any questions or need assistance, feel free to reach out to our support team.
-                          </p>
-                        </td>
-                      </tr>
-                      
-                      <!-- Footer -->
-                      <tr>
-                        <td style="padding: 30px 40px; text-align: center; background-color: #f8f9fa; border-radius: 0 0 12px 12px;">
-                          <p style="margin: 0; font-size: 14px; color: #666666;">
-                            Best regards,<br>
-                            <strong>The ChatL Team</strong>
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </body>
-          </html>
-        `,
-      });
-      
-      logStep("Welcome email sent successfully");
-    } catch (emailError) {
-      // Log but don't fail the request if email fails
-      logStep("Failed to send welcome email", { error: emailError });
-    }
+    logStep("User email linked successfully", { userId: user.id });
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: "Email verified successfully! You can now sign in."
+        message: "Email successfully linked to your account"
       }),
       {
         status: 200,
