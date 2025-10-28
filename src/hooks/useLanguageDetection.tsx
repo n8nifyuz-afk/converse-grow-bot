@@ -28,14 +28,15 @@ export function initLanguageDetection() {
         }
       }
 
-      // Second, check localStorage for manually set language (only if it's a valid language code)
-      const savedLanguage = localStorage.getItem('i18nextLng');
+      // Second, check if user has manually changed language (stored with a flag)
+      const manuallySetLanguage = localStorage.getItem('i18nextLng');
+      const isManuallySet = localStorage.getItem('i18nextLng_manual') === 'true';
       const validLanguages = ['en', 'es', 'fr', 'de', 'pt', 'it', 'zh', 'ja', 'ar', 'ru'];
       
-      if (savedLanguage && savedLanguage !== 'undefined' && savedLanguage !== 'null' && validLanguages.includes(savedLanguage)) {
-        console.log('[Language Detection] Using localStorage language:', savedLanguage);
-        await i18n.changeLanguage(savedLanguage);
-        return; // Local preference takes priority
+      if (isManuallySet && manuallySetLanguage && validLanguages.includes(manuallySetLanguage)) {
+        console.log('[Language Detection] Using manually set language:', manuallySetLanguage);
+        await i18n.changeLanguage(manuallySetLanguage);
+        return; // Manually set language takes priority
       }
 
       // Finally, detect language from country/IP (this works for both logged-in and non-logged-in users)
@@ -51,6 +52,8 @@ export function initLanguageDetection() {
           console.log('[Language Detection] Setting language to:', detectedLanguage);
           await i18n.changeLanguage(detectedLanguage);
           localStorage.setItem('i18nextLng', detectedLanguage);
+          // Don't set manual flag - this is automatic detection
+          localStorage.removeItem('i18nextLng_manual');
         } else {
           console.log('[Language Detection] No language mapping for country:', metadata.countryCode);
         }

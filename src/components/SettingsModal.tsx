@@ -104,8 +104,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const handleLanguageChange = async (newLanguage: string) => {
     await i18n.changeLanguage(newLanguage);
     
-    // Save to localStorage for non-logged-in users
+    // Save to localStorage for non-logged-in users and mark as manually set
     localStorage.setItem('i18nextLng', newLanguage);
+    localStorage.setItem('i18nextLng_manual', 'true'); // Mark as manually set
     
     // Save to database for logged-in users
     if (user) {
