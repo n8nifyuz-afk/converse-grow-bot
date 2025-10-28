@@ -386,7 +386,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </Tabs>
 
               {/* Billing Period Options */}
-              <div className="space-y-4 sm:space-y-2 mb-6 sm:mb-2.5 flex flex-col flex-1 overflow-hidden md:flex-initial md:block md:overflow-visible">
+              <div className="space-y-3 sm:space-y-2 mb-6 sm:mb-2.5 flex flex-col flex-shrink-0 md:flex-initial md:block overflow-visible">
                 {isTrialEligible && !checkingEligibility && (
                   <div className="space-y-2">
                     <button
@@ -427,15 +427,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
                 <button
                   onClick={() => setSelectedPeriod('3month')}
-                  className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
+                  className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group ${
                     selectedPeriod === '3month'
                       ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
                       : 'border-zinc-200 hover:border-zinc-300 bg-white'
                   }`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.threeMonths')}</div>
-                    <div className="font-bold text-xl sm:text-xl text-zinc-900">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="font-semibold text-base sm:text-sm text-zinc-900 whitespace-nowrap">{t('pricingModal.threeMonths')}</div>
+                    <div className="font-bold text-xl sm:text-lg text-zinc-900 whitespace-nowrap">
                       €{pricingOptions[selectedPlan]['3month'].price.toFixed(2)}
                     </div>
                   </div>
