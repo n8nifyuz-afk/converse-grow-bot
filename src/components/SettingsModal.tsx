@@ -53,12 +53,21 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const [activeTab, setActiveTab] = React.useState('general');
   const [isExporting, setIsExporting] = React.useState(false);
   const [isLoadingPortal, setIsLoadingPortal] = React.useState(false);
+  const [displayName, setDisplayName] = React.useState('');
+  const [isUpdatingName, setIsUpdatingName] = React.useState(false);
   const { theme, accentColor, setTheme, setAccentColor } = useTheme();
   const { toast } = useToast();
   const { user, signOut, userProfile, subscriptionStatus, checkSubscription } = useAuth();
   const isMobile = useIsMobile();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
   const { i18n, t } = useTranslation();
+
+  // Initialize display name from profile
+  React.useEffect(() => {
+    if (userProfile?.display_name) {
+      setDisplayName(userProfile.display_name);
+    }
+  }, [userProfile]);
 
   const sidebarItems = [
     { id: 'general', label: t('settings.general'), icon: Settings },
@@ -117,6 +126,39 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       title: t('toast.languageUpdated'),
       description: `${t('toast.languageChangedTo')} ${newLanguage === 'en' ? 'English' : newLanguage === 'es' ? 'Español' : newLanguage === 'fr' ? 'Français' : newLanguage === 'de' ? 'Deutsch' : newLanguage === 'pt' ? 'Português' : newLanguage === 'it' ? 'Italiano' : newLanguage === 'zh' ? '中文' : newLanguage === 'ja' ? '日本語' : newLanguage === 'ar' ? 'العربية' : 'Русский'}`,
     });
+  };
+
+  const handleUpdateDisplayName = async () => {
+    if (!user || !displayName.trim()) return;
+    
+    setIsUpdatingName(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ display_name: displayName.trim() })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Name Updated',
+        description: 'Your display name has been updated successfully.',
+      });
+      
+      // Refresh the page to update the display name everywhere
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error: any) {
+      console.error('Update name error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update display name. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdatingName(false);
+    }
   };
 
   const handleLogoutThisDevice = async () => {
@@ -652,6 +694,42 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             </div>
             
             <div className="space-y-4 md:space-y-6">
+              {/* Full Name Section - Only for Phone Users */}
+              {userProfile?.signup_method === 'phone' && (
+                <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
+                  <CardContent className="p-4 md:p-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2.5 md:gap-3">
+                        <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                          <User className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground text-sm md:text-base">Full Name</p>
+                          <p className="text-xs md:text-sm text-muted-foreground">Your display name</p>
+                        </div>
+                      </div>
+                      <div className="ml-0 md:ml-11 space-y-2">
+                        <input
+                          type="text"
+                          value={displayName}
+                          onChange={(e) => setDisplayName(e.target.value)}
+                          placeholder="Enter your full name"
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        <Button 
+                          onClick={handleUpdateDisplayName}
+                          disabled={isUpdatingName || !displayName.trim() || displayName === userProfile?.display_name}
+                          size="sm"
+                          className="w-full sm:w-auto"
+                        >
+                          {isUpdatingName ? 'Updating...' : 'Update Name'}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Email/Phone Section */}
               <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
                 <CardContent className="p-4 md:p-6">
