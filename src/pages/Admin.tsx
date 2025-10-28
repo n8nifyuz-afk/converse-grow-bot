@@ -482,8 +482,8 @@ export default function Admin() {
           const subscribedUserIds = activeSubscriptions?.map(s => s.user_id) || [];
           
           if (subscribedUserIds.length > 0) {
-            // Exclude subscribed users (this is more efficient than loading all profiles)
-            query = query.not('user_id', 'in', `(${subscribedUserIds.map(id => `'${id}'`).join(',')})`);
+            // Exclude subscribed users using proper Supabase NOT IN syntax
+            query = query.not('user_id', 'in', subscribedUserIds);
           }
           // If no subscribed users, all users are free (no filter needed)
           
