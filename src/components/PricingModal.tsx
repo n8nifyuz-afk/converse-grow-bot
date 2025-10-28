@@ -383,8 +383,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
               </div>
             </div>
 
-            {/* Right Panel - Pricing */}
-            <div ref={scrollRef} className={`w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible ${isMobile ? 'pb-32' : 'pb-5 sm:pb-6'}`}>
+              {/* Right Panel - Pricing */}
+            <div ref={scrollRef} className={`w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible pb-5 sm:pb-6`}>
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
@@ -588,6 +588,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   <a href="https://www.chatl.ai/refund-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.refundCancellationPolicy')}</a>.
                 </p>
               </div>
+
+              {/* Mobile Bottom Spacer - matches top close button area */}
+              {isMobile && (
+                <div 
+                  className="bg-white flex-shrink-0 transition-all duration-300"
+                  style={{ 
+                    paddingTop: showCloseButton ? '3rem' : '0',
+                    paddingBottom: showCloseButton ? '1rem' : '0',
+                    opacity: showCloseButton ? 1 : 0
+                  }}
+                />
+              )}
             </div>
           </div>
   );
