@@ -687,40 +687,39 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         );
         }
         return (
-          <div className="space-y-6 md:space-y-8">
-            <div className="space-y-1.5 md:space-y-2">
+          <div className="space-y-3 md:space-y-4">
+            <div className="space-y-1 md:space-y-1.5">
               <h2 className="text-xl md:text-2xl font-bold text-foreground">{t('profile.title')}</h2>
               <p className="text-sm md:text-base text-muted-foreground">{t('profile.manageAccount')}</p>
             </div>
             
-            <div className="space-y-4 md:space-y-6">
-              {/* Full Name Section - Only for Phone Users */}
+            <div className="space-y-3 md:space-y-4">{/* Full Name Section - Only for Phone Users */}
               {userProfile?.signup_method === 'phone' && (
                 <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                  <CardContent className="p-4 md:p-6">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2.5 md:gap-3">
-                        <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                          <User className="h-4 w-4 text-primary" />
+                  <CardContent className="p-3 md:p-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 md:gap-2.5">
+                        <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
+                          <User className="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-foreground text-sm md:text-base">Full Name</p>
-                          <p className="text-xs md:text-sm text-muted-foreground">Your display name</p>
+                          <p className="font-semibold text-foreground text-sm">Full Name</p>
+                          <p className="text-xs text-muted-foreground">Your display name</p>
                         </div>
                       </div>
-                      <div className="ml-0 md:ml-11 space-y-2">
+                      <div className="ml-0 md:ml-9 space-y-2">
                         <input
                           type="text"
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
                           placeholder="Enter your full name"
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                         <Button 
                           onClick={handleUpdateDisplayName}
                           disabled={isUpdatingName || !displayName.trim() || displayName === userProfile?.display_name}
                           size="sm"
-                          className="w-full sm:w-auto"
+                          className="w-full sm:w-auto h-8 text-xs"
                         >
                           {isUpdatingName ? 'Updating...' : 'Update Name'}
                         </Button>
@@ -732,23 +731,23 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
               {/* Email/Phone Section */}
               <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-4 md:p-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5 md:gap-3">
-                      <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                        <Mail className="h-4 w-4 text-primary" />
+                <CardContent className="p-3 md:p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 md:gap-2.5">
+                      <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
+                        <Mail className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm md:text-base">
+                        <p className="font-semibold text-foreground text-sm">
                           {user?.email ? t('profile.emailAddress') : 'Phone Number'}
                         </p>
-                        <p className="text-xs md:text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {user?.email ? t('profile.yourAccountEmail') : 'Your registered phone number'}
                         </p>
                       </div>
                     </div>
-                    <div className="ml-0 md:ml-11 mt-2">
-                      <p className="font-medium text-foreground bg-muted/40 px-3 py-2 rounded-lg border border-border/30 break-all text-sm md:text-base">
+                    <div className="ml-0 md:ml-9 mt-1.5">
+                      <p className="font-medium text-foreground bg-muted/40 px-2.5 py-1.5 rounded-lg border border-border/30 break-all text-sm">
                         {user?.email || user?.phone || userProfile?.phone_number || 'Not available'}
                       </p>
                     </div>
@@ -758,25 +757,24 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
               {/* Login Methods Section */}
               <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-4 md:p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2.5 md:gap-3">
-                      <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                        <Shield className="h-4 w-4 text-primary" />
+                <CardContent className="p-3 md:p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 md:gap-2.5">
+                      <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
+                        <Shield className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm md:text-base">{t('profile.loginMethods')}</p>
-                        <p className="text-xs md:text-sm text-muted-foreground">{t('profile.connectedProviders')}</p>
+                        <p className="font-semibold text-foreground text-sm">{t('profile.loginMethods')}</p>
+                        <p className="text-xs text-muted-foreground">{t('profile.connectedProviders')}</p>
                       </div>
                     </div>
                     
-                    <div className="ml-0 md:ml-11 space-y-3">
-                      {/* Google Provider */}
+                    <div className="ml-0 md:ml-9 space-y-2.5">{/* Google Provider */}
                       {user?.app_metadata?.providers?.includes('google') && (
-                        <div className="flex items-center justify-between gap-3 p-3 md:p-4 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
-                          <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                            <div className="p-1.5 md:p-2 bg-white rounded-lg shadow-sm flex-shrink-0">
-                              <svg className="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24">
+                        <div className="flex items-center justify-between gap-2.5 p-2.5 md:p-3 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-white rounded-lg shadow-sm flex-shrink-0">
+                              <svg className="h-4 w-4" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -784,42 +782,42 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                               </svg>
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium text-foreground text-sm md:text-base">Google</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithGoogle')}</p>
+                              <p className="font-medium text-foreground text-sm">Google</p>
+                              <p className="text-xs text-muted-foreground hidden sm:block">{t('profile.signInWithGoogle')}</p>
                             </div>
                           </div>
-                          <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
-                            <Check className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
+                          <div className="p-1 bg-green-100 rounded-full flex-shrink-0">
+                            <Check className="h-3.5 w-3.5 text-green-600" />
                           </div>
                         </div>
                       )}
 
                       {/* Apple Provider */}
                       {user?.app_metadata?.providers?.includes('apple') && (
-                        <div className="flex items-center justify-between gap-3 p-3 md:p-4 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
-                          <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                            <div className="p-1.5 md:p-2 bg-black dark:bg-white rounded-lg shadow-sm flex-shrink-0">
-                              <svg className="h-4 w-4 md:h-5 md:w-5 text-white dark:text-black" viewBox="0 0 24 24" fill="currentColor">
+                        <div className="flex items-center justify-between gap-2.5 p-2.5 md:p-3 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-black dark:bg-white rounded-lg shadow-sm flex-shrink-0">
+                              <svg className="h-4 w-4 text-white dark:text-black" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                               </svg>
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium text-foreground text-sm md:text-base">Apple</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithApple')}</p>
+                              <p className="font-medium text-foreground text-sm">Apple</p>
+                              <p className="text-xs text-muted-foreground hidden sm:block">{t('profile.signInWithApple')}</p>
                             </div>
                           </div>
-                          <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
-                            <Check className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
+                          <div className="p-1 bg-green-100 rounded-full flex-shrink-0">
+                            <Check className="h-3.5 w-3.5 text-green-600" />
                           </div>
                         </div>
                       )}
 
                       {/* Microsoft Provider */}
                       {user?.app_metadata?.providers?.includes('azure') && (
-                        <div className="flex items-center justify-between gap-3 p-3 md:p-4 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
-                          <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                            <div className="p-1.5 md:p-2 bg-white rounded-lg shadow-sm flex-shrink-0">
-                              <svg className="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 23 23">
+                        <div className="flex items-center justify-between gap-2.5 p-2.5 md:p-3 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-white rounded-lg shadow-sm flex-shrink-0">
+                              <svg className="h-4 w-4" viewBox="0 0 23 23">
                                 <path fill="#f35325" d="M0 0h11v11H0z"/>
                                 <path fill="#81bc06" d="M12 0h11v11H12z"/>
                                 <path fill="#05a6f0" d="M0 12h11v11H0z"/>
@@ -827,12 +825,12 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                               </svg>
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium text-foreground text-sm md:text-base">Microsoft</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithMicrosoft')}</p>
+                              <p className="font-medium text-foreground text-sm">Microsoft</p>
+                              <p className="text-xs text-muted-foreground hidden sm:block">{t('profile.signInWithMicrosoft')}</p>
                             </div>
                           </div>
-                          <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
-                            <Check className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
+                          <div className="p-1 bg-green-100 rounded-full flex-shrink-0">
+                            <Check className="h-3.5 w-3.5 text-green-600" />
                           </div>
                         </div>
                       )}
@@ -1326,7 +1324,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
           {/* Desktop Content */}
           <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-background/98">
-            <div className="p-4 md:p-5 lg:p-6">
+            <div className="p-3 md:p-4 lg:p-5">
               {renderContent()}
             </div>
           </div>
