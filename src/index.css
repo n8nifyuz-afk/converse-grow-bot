@@ -104,7 +104,6 @@
   border-radius: 0.5rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
   z-index: 9999;
-  max-height: min(320px, 50vh);
   display: flex;
   flex-direction: column;
 }
@@ -130,9 +129,8 @@
 }
 
 .country-list {
-  overflow-y: auto;
+  overflow-y: hidden;
   padding: 0.25rem;
-  flex: 1;
 }
 
 .country-option {
@@ -186,21 +184,7 @@
 
 /* Scrollbar Styling */
 .country-list::-webkit-scrollbar {
-  width: 0.5rem;
-}
-
-.country-list::-webkit-scrollbar-track {
-  background: hsl(var(--muted) / 0.3);
-  border-radius: 0.25rem;
-}
-
-.country-list::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.5);
-  border-radius: 0.25rem;
-}
-
-.country-list::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.7);
+  display: none;
 }
 
 /* Mobile Optimizations */
@@ -220,7 +204,6 @@
   }
   
   .country-dropdown {
-    max-height: 60vh;
     border-radius: 0.375rem;
   }
   
