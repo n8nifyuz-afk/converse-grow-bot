@@ -241,6 +241,7 @@ export default function Admin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState(''); // Local input state for debouncing
   const [sortField, setSortField] = useState<'name' | 'email' | 'plan' | 'cost' | 'registered'>('registered');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [userChats, setUserChats] = useState<UserChat[]>([]);
@@ -276,10 +277,20 @@ export default function Admin() {
   const [tempDateFilter, setTempDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [tempTimeFilter, setTempTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
   const usersPerPage = 20; // Load 20 users per page
+  
+  // Debounce search input to prevent too many queries
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 500); // 500ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+  
   useEffect(() => {
     checkAdminAccess();
   }, [user]);
-  // Fetch data when page changes
+  // Fetch data when page changes OR filters change
   useEffect(() => {
     if (isAdmin) {
       setLoading(true);
@@ -289,7 +300,7 @@ export default function Admin() {
         fetchAggregateStats()
       ]);
     }
-  }, [isAdmin, currentPage]); // Re-fetch when page changes
+  }, [isAdmin, currentPage, searchQuery, planFilter, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]); // Re-fetch when filters change
   const checkAdminAccess = async () => {
     if (!user) {
       navigate('/');
@@ -435,24 +446,62 @@ export default function Admin() {
         setLoading(true);
       }
 
-      console.log('[ADMIN] Starting to fetch page data...');
+      console.log('[ADMIN] Starting to fetch page data with filters...');
 
       // Calculate offset based on current page
       const offset = (currentPage - 1) * usersPerPage;
       
-      // Fetch ONLY 20 users for current page with total count
-      const { data: profilesData, error: profilesError, count } = await supabase
+      // Build query with filters
+      let query = supabase
         .from('profiles')
-        .select('user_id, email, display_name, created_at, ip_address, country', { count: 'exact' })
+        .select('user_id, email, display_name, created_at, ip_address, country', { count: 'exact' });
+      
+      // Apply search filter (name or email)
+      if (searchQuery.trim()) {
+        const search = searchQuery.trim();
+        query = query.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
+      }
+      
+      // Apply date filter
+      if (dateFilter.from || dateFilter.to) {
+        const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
+        const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
+        
+        if (fromDateTime && toDateTime) {
+          query = query.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+        } else if (fromDateTime) {
+          query = query.gte('created_at', fromDateTime.toISOString());
+        } else if (toDateTime) {
+          query = query.lte('created_at', toDateTime.toISOString());
+        }
+      }
+      
+      // Apply country filter
+      if (countryFilter !== 'all') {
+        query = query.eq('country', countryFilter);
+      }
+      
+      // Fetch filtered profiles with pagination
+      const { data: profilesData, error: profilesError, count } = await query
         .order('created_at', { ascending: false })
         .range(offset, offset + usersPerPage - 1);
       
       if (profilesError) throw profilesError;
       
-      console.log('[ADMIN] Loaded profiles for page:', profilesData?.length, 'Total:', count);
+      console.log('[ADMIN] Loaded profiles for page:', profilesData?.length, 'Total filtered:', count);
 
-      // Fetch subscriptions only for these 20 users
+      // Fetch subscriptions only for these users
       const userIds = profilesData?.map(p => p.user_id) || [];
+      
+      if (userIds.length === 0) {
+        setUserUsages([]);
+        setModelUsages([]);
+        (window as any).__adminTotalUsers = 0;
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+      
       const { data: subscriptionsData } = await supabase
         .from('user_subscriptions')
         .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
@@ -461,7 +510,7 @@ export default function Admin() {
       const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
 
       // Build user data without token usage (load on demand)
-      const users: UserTokenUsage[] = profilesData?.map((profile: any) => {
+      let users: UserTokenUsage[] = profilesData?.map((profile: any) => {
         const subscription = subscriptionsMap.get(profile.user_id);
         return {
           user_id: profile.user_id,
@@ -489,7 +538,25 @@ export default function Admin() {
         };
       }) || [];
       
-      console.log('[ADMIN] Loaded users:', users.length);
+      // Apply plan filter (client-side because it depends on subscription data)
+      if (planFilter !== 'all') {
+        users = users.filter(user => {
+          const userPlan = getUserPlan(user);
+          return userPlan === planFilter;
+        });
+      }
+      
+      // Apply subscription status filter
+      if (subscriptionStatusFilter !== 'all') {
+        users = users.filter(user => {
+          const isSubscribed = user.subscription_status?.subscribed;
+          if (subscriptionStatusFilter === 'subscribed' && !isSubscribed) return false;
+          if (subscriptionStatusFilter === 'free' && isSubscribed) return false;
+          return true;
+        });
+      }
+      
+      console.log('[ADMIN] Loaded users after filters:', users.length);
       setUserUsages(users);
       setModelUsages([]);
       
@@ -560,8 +627,24 @@ export default function Admin() {
       : <ArrowDown className="h-3 w-3 sm:h-4 sm:w-4" />;
   };
 
-  // Get unique countries from users
-  const uniqueCountries = Array.from(new Set(userUsages.map(u => u.country).filter(Boolean))).sort();
+  // Get unique countries - fetch from all profiles for filter dropdown
+  const [uniqueCountries, setUniqueCountries] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const fetchCountries = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('country')
+        .not('country', 'is', null);
+      
+      const countries = Array.from(new Set(data?.map(p => p.country).filter(Boolean))).sort() as string[];
+      setUniqueCountries(countries);
+    };
+    
+    if (isAdmin) {
+      fetchCountries();
+    }
+  }, [isAdmin]);
 
   // Combine date and time into a single Date object
   const getDateTimeFromFilter = (date: Date | undefined, time: string): Date | undefined => {
@@ -572,50 +655,8 @@ export default function Admin() {
     return dateTime;
   };
 
-  // Filter users by multiple criteria
-  const filteredUsers = userUsages.filter(usage => {
-    // Filter by plan
-    if (planFilter !== 'all' && getUserPlan(usage) !== planFilter) {
-      return false;
-    }
-    
-    // Filter by search query (name or email)
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      const nameMatch = usage.display_name?.toLowerCase().includes(query);
-      const emailMatch = usage.email?.toLowerCase().includes(query);
-      if (!nameMatch && !emailMatch) return false;
-    }
-    
-    // Filter by date range with time
-    if (dateFilter.from || dateFilter.to) {
-      const userDate = new Date(usage.created_at);
-      const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
-      const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
-      
-      if (fromDateTime && toDateTime) {
-        if (!isWithinInterval(userDate, { start: fromDateTime, end: toDateTime })) return false;
-      } else if (fromDateTime) {
-        if (userDate < fromDateTime) return false;
-      } else if (toDateTime) {
-        if (userDate > toDateTime) return false;
-      }
-    }
-
-    // Filter by country
-    if (countryFilter !== 'all' && usage.country !== countryFilter) {
-      return false;
-    }
-
-    // Filter by subscription status
-    if (subscriptionStatusFilter !== 'all') {
-      const isSubscribed = usage.subscription_status?.subscribed;
-      if (subscriptionStatusFilter === 'subscribed' && !isSubscribed) return false;
-      if (subscriptionStatusFilter === 'free' && isSubscribed) return false;
-    }
-    
-    return true;
-  });
+  // Users are already filtered server-side, so use them directly
+  const filteredUsers = userUsages;
 
   // Sort filtered users
   const sortedUsers = [...filteredUsers].sort((a, b) => {
@@ -743,6 +784,7 @@ export default function Admin() {
   const clearAllFilters = () => {
     setPlanFilter('all');
     setSearchQuery('');
+    setSearchInput(''); // Clear input as well
     setDateFilter({ from: undefined, to: undefined });
     setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setCountryFilter('all');
@@ -754,56 +796,11 @@ export default function Admin() {
     setPendingSubscriptionStatusFilter('all');
   };
 
-  // Calculate stats based on date filter
-  const statsFilteredUsers = userUsages.filter(usage => {
-    // Filter by date range with time
-    if (dateFilter.from || dateFilter.to) {
-      const userDate = new Date(usage.created_at);
-      const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
-      const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
-      
-      if (fromDateTime && toDateTime) {
-        if (!isWithinInterval(userDate, { start: fromDateTime, end: toDateTime })) return false;
-      } else if (fromDateTime) {
-        if (userDate < fromDateTime) return false;
-      } else if (toDateTime) {
-        if (userDate > toDateTime) return false;
-      }
-    }
-    return true;
-  });
-
-  // Calculate filtered model usages based on date
-  const statsFilteredModelUsages = useMemo(() => {
-    if (!dateFilter.from && !dateFilter.to) {
-      return modelUsages;
-    }
-
-    const modelMap = new Map<string, TokenUsageByModel>();
-    
-    statsFilteredUsers.forEach(user => {
-      user.model_usages.forEach(usage => {
-        if (!modelMap.has(usage.model)) {
-          modelMap.set(usage.model, {
-            model: usage.model,
-            input_tokens: 0,
-            output_tokens: 0,
-            total_cost: 0
-          });
-        }
-        const modelUsage = modelMap.get(usage.model)!;
-        modelUsage.input_tokens += usage.input_tokens;
-        modelUsage.output_tokens += usage.output_tokens;
-        modelUsage.total_cost += usage.cost;
-      });
-    });
-
-    return Array.from(modelMap.values()).sort((a, b) => b.total_cost - a.total_cost);
-  }, [dateFilter, statsFilteredUsers, modelUsages]);
-
-  // Reset to page 1 when filter, search, or sort changes
+  // Reset to page 1 when filter, search, or sort changes (before fetching data)
   useEffect(() => {
-    setCurrentPage(1);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
   }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]);
 
   // Fetch cost/token usage data for a specific user when "Cost View" is clicked
@@ -1555,16 +1552,19 @@ export default function Admin() {
                   <Input
                     type="text"
                     placeholder="Search by name or email..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
                     className="pl-10 pr-9 h-11 text-sm sm:text-base w-full"
                   />
-                  {searchQuery && (
+                  {searchInput && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted"
-                      onClick={() => setSearchQuery('')}
+                      onClick={() => {
+                        setSearchInput('');
+                        setSearchQuery('');
+                      }}
                     >
                       <X className="h-3 w-3" />
                     </Button>
