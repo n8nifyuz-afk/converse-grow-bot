@@ -390,18 +390,35 @@ export default function Admin() {
       if (subscriptionsError) console.error('Error fetching subscriptions:', subscriptionsError);
       console.log('Subscriptions data:', subscriptionsData);
 
-      // Fetch all token usage data
+      // Fetch LIMITED token usage data (only recent 10000 records for performance)
       const {
         data: tokenData,
         error: tokenError
-      } = await supabase.from('token_usage').select('*').order('created_at', {
-        ascending: false
-      });
+      } = await supabase
+        .from('token_usage')
+        .select('user_id, model, input_tokens, output_tokens')
+        .order('created_at', { ascending: false })
+        .limit(10000); // Only fetch recent records for performance
+      
       if (tokenError) throw tokenError;
 
       // Create maps for quick lookup
-      const profilesMap = new Map(allProfilesData?.map(profile => [profile.user_id, profile]) || []);
       const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
+
+      // Aggregate token usage by user
+      const userTokenMap = new Map();
+      tokenData?.forEach((usage: any) => {
+        const cost = calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0);
+        if (!userTokenMap.has(usage.user_id)) {
+          userTokenMap.set(usage.user_id, []);
+        }
+        userTokenMap.get(usage.user_id).push({
+          model: usage.model,
+          input_tokens: usage.input_tokens || 0,
+          output_tokens: usage.output_tokens || 0,
+          cost
+        });
+      });
 
       // Initialize userMap with ALL users from profiles
       const userMap = new Map<string, UserTokenUsage>();
@@ -414,7 +431,7 @@ export default function Admin() {
           created_at: profile.created_at,
           ip_address: profile.ip_address,
           country: profile.country,
-          model_usages: [],
+          model_usages: userTokenMap.get(profile.user_id) || [],
           subscription_status: subscription && subscription.status === 'active' ? {
             subscribed: true,
             product_id: subscription.product_id,
@@ -432,56 +449,12 @@ export default function Admin() {
           }
         });
       });
-
-      // Then add token usage data to the users
-      let totalInputTokens = 0;
-      let totalOutputTokens = 0;
-      let totalCost = 0;
-      const modelMap = new Map<string, TokenUsageByModel>();
-      tokenData?.forEach((usage: any) => {
-        const userId = usage.user_id;
-        const inputTokens = usage.input_tokens || 0;
-        const outputTokens = usage.output_tokens || 0;
-        const model = usage.model;
-        const cost = calculateCost(model, inputTokens, outputTokens);
-
-        // Add to totals
-        totalInputTokens += inputTokens;
-        totalOutputTokens += outputTokens;
-        totalCost += cost;
-
-        // Get user from map (all users already initialized)
-        const userUsage = userMap.get(userId);
-        if (userUsage) {
-          userUsage.model_usages.push({
-            model,
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            cost
-          });
-        }
-
-        // Aggregate by model
-        if (!modelMap.has(model)) {
-          modelMap.set(model, {
-            model,
-            input_tokens: 0,
-            output_tokens: 0,
-            total_cost: 0
-          });
-        }
-        const modelUsage = modelMap.get(model)!;
-        modelUsage.input_tokens += inputTokens;
-        modelUsage.output_tokens += outputTokens;
-        modelUsage.total_cost += cost;
-      });
       
       console.log('Total users loaded:', userMap.size);
       console.log('Active subscriptions:', subscriptionsData?.filter(s => s.status === 'active').length);
-      console.log('Total usage - Input tokens:', totalInputTokens, 'Output tokens:', totalOutputTokens, 'Cost: $', totalCost.toFixed(2));
       
       setUserUsages(Array.from(userMap.values()));
-      setModelUsages(Array.from(modelMap.values()).sort((a, b) => b.total_cost - a.total_cost));
+      setModelUsages([]);
     } catch (error) {
       console.error('Error fetching token usage:', error);
       toast.error('Failed to load token usage data');
