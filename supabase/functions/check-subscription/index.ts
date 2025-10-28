@@ -69,14 +69,25 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user) throw new Error("User not authenticated");
+    logStep("User authenticated", { userId: user.id, email: user.email || 'none', phone: user.phone || 'none' });
 
     // Fetch product mappings from database
     const productToPlanMap = await getProductMappings(supabaseClient);
     
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    
+    // Look up customer by email if available, otherwise by user ID metadata
+    let customers;
+    if (user.email) {
+      customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    } else {
+      // For phone-only users, search by user_id metadata
+      customers = await stripe.customers.search({ 
+        query: `metadata['user_id']:'${user.id}'`,
+        limit: 1 
+      });
+    }
     
     if (customers.data.length === 0) {
       logStep("No customer found, user not subscribed");

@@ -37,8 +37,8 @@ serve(async (req) => {
     }
     
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user) throw new Error("User not authenticated");
+    logStep("User authenticated", { userId: user.id, email: user.email || 'none', phone: user.phone || 'none' });
 
     const { priceId, isTrial } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
@@ -48,7 +48,17 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil" 
     });
     
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // Look up customer by email if available, otherwise by user ID metadata
+    let customers;
+    if (user.email) {
+      customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    } else {
+      // For phone-only users, search by user_id metadata
+      customers = await stripe.customers.search({ 
+        query: `metadata['user_id']:'${user.id}'`,
+        limit: 1 
+      });
+    }
     let customerId;
     let customerCurrency = "eur"; // Default to EUR
     
@@ -121,6 +131,20 @@ serve(async (req) => {
       }
     } else {
       logStep("No existing customer, will create during checkout");
+      
+      // For phone-only users, create customer manually with metadata
+      if (!user.email && user.phone) {
+        logStep("Creating customer for phone-only user", { phone: user.phone });
+        const newCustomer = await stripe.customers.create({
+          phone: user.phone,
+          metadata: {
+            user_id: user.id,
+            phone: user.phone,
+          }
+        });
+        customerId = newCustomer.id;
+        logStep("Created new customer for phone user", { customerId });
+      }
     }
 
     // Price IDs for Pro and Ultra Pro plans
@@ -178,7 +202,14 @@ serve(async (req) => {
     // Always use subscription mode
     const sessionConfig: any = {
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : (user.email || undefined),
+      // For phone-only users without existing customer, we already created one above
+      customer_creation: customerId ? undefined : 'always',
+      // Add metadata for the session
+      metadata: {
+        user_id: user.id,
+        phone: user.phone || '',
+      },
       line_items: [
         {
           price: priceId, // Always use the monthly subscription price
@@ -201,6 +232,7 @@ serve(async (req) => {
         metadata: {
           plan: targetPlan,
           user_id: user.id,
+          phone: user.phone || '',
         }
       }
     };
