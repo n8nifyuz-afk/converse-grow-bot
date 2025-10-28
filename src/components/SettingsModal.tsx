@@ -28,7 +28,6 @@ import {
   ImageIcon,
   Languages
 } from 'lucide-react';
-import { EmailVerificationLinking } from './EmailVerificationLinking';
 
 interface SettingsModalProps {
   open: boolean;
@@ -760,50 +759,11 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         </div>
                       )}
                       
-                      {/* Phone Provider */}
-                      {(user?.phone || userProfile?.signup_method === 'phone' || user?.app_metadata?.providers?.includes('phone')) && (
-                        <div className="flex items-center justify-between gap-3 p-3 md:p-4 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
-                          <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                            <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                              <svg className="h-4 w-4 md:h-5 md:w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                              </svg>
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-medium text-foreground text-sm md:text-base">Phone</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Sign in with phone number</p>
-                            </div>
-                          </div>
-                          <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
-                            <Check className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Email Verification Linking - Only for phone users without email */}
-              {userProfile?.signup_method === 'phone' && !userProfile?.email && (
-                <Card className="border-none shadow-sm bg-gradient-to-br from-card via-card to-card/80">
-                  <CardContent className="p-3 md:p-4">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-start gap-2">
-                        <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
-                          <Mail className="h-3.5 w-3.5 text-primary" />
-                        </div>
-                        <div className="flex-1 space-y-0.5">
-                          <p className="font-semibold text-foreground text-sm">Link Email Account</p>
-                          <p className="text-xs text-muted-foreground">Connect your email to access your account from any device</p>
-                        </div>
-                      </div>
-                      
-                      <EmailVerificationLinking />
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
           </div>
         );
