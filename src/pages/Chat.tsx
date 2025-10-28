@@ -1040,17 +1040,19 @@ export default function Chat() {
         console.error('[REGENERATE] Error checking first message:', error);
       }
       
-      // Fetch user's external_id from profiles
+      // Fetch user's external_id and email from profiles
       let externalId = null;
+      let userEmail = user.email || null;
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('external_id')
+          .select('external_id, email')
           .eq('user_id', user.id)
           .single();
         externalId = profile?.external_id;
+        userEmail = profile?.email || user.email || null;
       } catch (error) {
-        console.error('[REGENERATE] Error fetching external_id:', error);
+        console.error('[REGENERATE] Error fetching profile data:', error);
       }
       
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
@@ -1062,6 +1064,7 @@ export default function Chat() {
           ...payload,
           isFirstMessage,
           externalId,
+          userEmail,
           ...metadata
         })
       });
@@ -1272,17 +1275,19 @@ export default function Chat() {
         console.error('[AI-RESPONSE] Error checking first message:', error);
       }
       
-      // Fetch user's external_id from profiles
+      // Fetch user's external_id and email from profiles
       let externalId = null;
+      let userEmail = user.email || null;
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('external_id')
+          .select('external_id, email')
           .eq('user_id', user.id)
           .single();
         externalId = profile?.external_id;
+        userEmail = profile?.email || user.email || null;
       } catch (error) {
-        console.error('[AI-RESPONSE] Error fetching external_id:', error);
+        console.error('[AI-RESPONSE] Error fetching profile data:', error);
       }
       
       const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
@@ -1298,6 +1303,7 @@ export default function Chat() {
           model: selectedModel,
           isFirstMessage,
           externalId,
+          userEmail,
           ...metadata
         })
       });
@@ -2020,17 +2026,19 @@ export default function Chat() {
           console.error('[IMAGE-GEN] Error checking first message:', error);
         }
         
-        // Fetch user's external_id from profiles
+        // Fetch user's external_id and email from profiles
         let externalId = null;
+        let userEmail = user.email || null;
         try {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('external_id')
+            .select('external_id, email')
             .eq('user_id', user.id)
             .single();
           externalId = profile?.external_id;
+          userEmail = profile?.email || user.email || null;
         } catch (error) {
-          console.error('[IMAGE-GEN] Error fetching external_id:', error);
+          console.error('[IMAGE-GEN] Error fetching profile data:', error);
         }
         
         const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
@@ -2046,6 +2054,7 @@ export default function Chat() {
             model: 'generate-image',
             isFirstMessage,
             externalId,
+            userEmail,
             ...metadata
           })
         });
@@ -2433,6 +2442,19 @@ export default function Chat() {
             // Get webhook metadata
             const metadata = await getWebhookMetadata();
             
+            // Fetch user email from profiles
+            let userEmail = user.email || null;
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('email')
+                .eq('user_id', user.id)
+                .single();
+              userEmail = profile?.email || user.email || null;
+            } catch (error) {
+              console.error('[WEBHOOK] Error fetching email:', error);
+            }
+            
             // Build webhook body conditionally based on model
             const webhookBody: any = {
               fileName: attachment.name,
@@ -2443,6 +2465,7 @@ export default function Chat() {
               chatId: chatId,
               message: userMessage,
               model: selectedModel,
+              userEmail,
               ...metadata
             };
             
