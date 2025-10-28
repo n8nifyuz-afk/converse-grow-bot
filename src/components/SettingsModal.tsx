@@ -735,21 +735,69 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                             variant="outline"
                             onClick={async () => {
                               try {
+                                // First, validate if linking is allowed
+                                const { data: { session } } = await supabase.auth.getSession();
+                                if (!session) {
+                                  throw new Error('No active session');
+                                }
+
+                                const { data: validationData, error: validationError } = await supabase.functions.invoke('validate-account-link', {
+                                  headers: {
+                                    Authorization: `Bearer ${session.access_token}`,
+                                  },
+                                  body: {
+                                    provider: 'google',
+                                    email: user?.email
+                                  }
+                                });
+
+                                if (validationError) {
+                                  throw new Error(validationError.message || 'Failed to validate account');
+                                }
+
+                                if (!validationData.canLink) {
+                                  toast({
+                                    title: t('toast.connectionNotAllowed'),
+                                    description: validationData.message,
+                                    variant: 'destructive',
+                                    duration: 6000,
+                                  });
+                                  return;
+                                }
+
+                                // If validation passed, proceed with linking
                                 const { error } = await supabase.auth.linkIdentity({
                                   provider: 'google',
                                 });
-                                if (error) throw error;
-                              } catch (error: any) {
+                                
+                                if (error) {
+                                  // Handle specific error cases
+                                  if (error.message.includes('identity_already_exists')) {
+                                    throw new Error('This Google account is already connected to another user. Please use a different Google account.');
+                                  }
+                                  throw error;
+                                }
+
                                 toast({
-                                  title: 'Connection Failed',
+                                  title: t('toast.accountConnected'),
+                                  description: t('toast.googleAccountConnected'),
+                                });
+
+                                // Refresh the page to show updated provider info
+                                setTimeout(() => window.location.reload(), 1500);
+                              } catch (error: any) {
+                                console.error('Connection error:', error);
+                                toast({
+                                  title: t('toast.connectionFailed'),
                                   description: error.message || 'Failed to connect Google account',
                                   variant: 'destructive',
+                                  duration: 6000,
                                 });
                               }
                             }}
                             className="flex-shrink-0"
                           >
-                            Connect
+                            {t('profile.connect')}
                           </Button>
                         </div>
                       )}
