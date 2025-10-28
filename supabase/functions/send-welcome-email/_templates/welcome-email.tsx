@@ -26,7 +26,7 @@ export const WelcomeEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Welcome to ChatLearn - Your AI Assistant is Ready!</Preview>
+      <Preview>Your AI workspace is ready start exploring now.</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Logo Section */}
@@ -41,31 +41,33 @@ export const WelcomeEmail = ({
           </Section>
 
           {/* Main Content */}
-          <Heading style={h1}>Welcome to ChatLearn! 🎉</Heading>
+          <Heading style={h1}>Welcome to ChatLearn</Heading>
           
           <Text style={text}>
             Hi {displayName},
           </Text>
           
           <Text style={text}>
-            Thank you for joining ChatLearn! We're excited to have you on board. 
-            Your account has been successfully created and you're ready to start 
-            exploring the power of AI.
+            Thank you for joining ChatLearn.
+          </Text>
+          
+          <Text style={text}>
+            We're excited to have you on board. Your account has been successfully created, and you're ready to start exploring the full power of AI.
           </Text>
 
           <Section style={featuresSection}>
             <Heading style={h2}>What You Can Do:</Heading>
             <Text style={featureItem}>
-              ✨ Chat with multiple AI models (GPT-5, Gemini, Claude & more)
+              • Chat with multiple AI models (GPT-5, Gemini, Claude, and more)
             </Text>
             <Text style={featureItem}>
-              🎨 Generate and edit images with AI
+              • Generate and edit images with AI
             </Text>
             <Text style={featureItem}>
-              🎤 Use voice mode for hands-free conversations
+              • Use voice mode for hands-free conversations
             </Text>
             <Text style={featureItem}>
-              📄 Analyze PDFs and documents
+              • Analyze PDFs and documents
             </Text>
           </Section>
 
@@ -80,11 +82,18 @@ export const WelcomeEmail = ({
           </Section>
 
           <Text style={text}>
-            Need help getting started? Check out our{' '}
-            <Link href="https://www.chatl.ai/help" style={link}>
-              Help Center
-            </Link>{' '}
-            or contact our support team.
+            Need help getting started? Contact us at{' '}
+            <Link href="mailto:support@chatl.ai" style={link}>
+              support@chatl.ai
+            </Link>.
+          </Text>
+          
+          <Text style={text}>
+            Best regards,
+          </Text>
+          
+          <Text style={text}>
+            The ChatLearn Team
           </Text>
 
           {/* Footer */}
