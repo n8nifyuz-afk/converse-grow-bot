@@ -132,9 +132,23 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
   const [snapPoint, setSnapPoint] = useState<number | string | null>(1);
+  const [showCloseButton, setShowCloseButton] = useState(false);
   
   const allFeatures = getFeatures(t, selectedPlan);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  // Hide close button for first 3 seconds on mobile
+  React.useEffect(() => {
+    if (open && isMobile) {
+      setShowCloseButton(false);
+      const timer = setTimeout(() => {
+        setShowCloseButton(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else if (open && !isMobile) {
+      setShowCloseButton(true);
+    }
+  }, [open, isMobile]);
 
   // Scroll to show terms text and subscribe button on mobile when modal opens
   React.useEffect(() => {
@@ -295,7 +309,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const modalContent = (
     <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative ${isMobile ? 'pt-16' : ''}`}>
             {/* Mobile Close Button - Scrolls with content */}
-            {isMobile && (
+            {isMobile && showCloseButton && (
               <div 
                 className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0 mb-4"
                 style={{ 
