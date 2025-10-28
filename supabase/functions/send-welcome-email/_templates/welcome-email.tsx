@@ -26,14 +26,14 @@ export const WelcomeEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Welcome to Chat Learn - Your AI Assistant is Ready!</Preview>
+      <Preview>Welcome to ChatLearn - Your AI Assistant is Ready!</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Logo Section */}
           <Section style={logoSection}>
             <Img
               src="https://www.chatl.ai/favicon.png"
-              alt="Chat Learn Logo"
+              alt="ChatLearn Logo"
               width="120"
               height="auto"
               style={logo}
@@ -41,14 +41,14 @@ export const WelcomeEmail = ({
           </Section>
 
           {/* Main Content */}
-          <Heading style={h1}>Welcome to Chat Learn! 🎉</Heading>
+          <Heading style={h1}>Welcome to ChatLearn! 🎉</Heading>
           
           <Text style={text}>
             Hi {displayName},
           </Text>
           
           <Text style={text}>
-            Thank you for joining Chat Learn! We're excited to have you on board. 
+            Thank you for joining ChatLearn! We're excited to have you on board. 
             Your account has been successfully created and you're ready to start 
             exploring the power of AI.
           </Text>
@@ -71,7 +71,7 @@ export const WelcomeEmail = ({
 
           <Section style={buttonSection}>
             <Link
-              href="https://chatl.ai/chat"
+              href="https://www.chatl.ai/chat"
               target="_blank"
               style={button}
             >
@@ -81,7 +81,7 @@ export const WelcomeEmail = ({
 
           <Text style={text}>
             Need help getting started? Check out our{' '}
-            <Link href="https://chatl.ai/help" style={link}>
+            <Link href="https://www.chatl.ai/help" style={link}>
               Help Center
             </Link>{' '}
             or contact our support team.
@@ -90,19 +90,19 @@ export const WelcomeEmail = ({
           {/* Footer */}
           <Section style={footer}>
             <Text style={footerText}>
-              © {new Date().getFullYear()} Chat Learn. All rights reserved.
+              © {new Date().getFullYear()} ChatLearn. All rights reserved.
             </Text>
             <Text style={footerText}>
-              <Link href="https://chatl.ai/privacy" style={footerLink}>
+              <Link href="https://www.chatl.ai/privacy" style={footerLink}>
                 Privacy Policy
               </Link>
               {' • '}
-              <Link href="https://chatl.ai/terms" style={footerLink}>
+              <Link href="https://www.chatl.ai/terms" style={footerLink}>
                 Terms of Service
               </Link>
             </Text>
             <Text style={footerText}>
-              You received this email because you created an account at Chat Learn.
+              You received this email because you created an account at ChatLearn.
             </Text>
           </Section>
         </Container>
