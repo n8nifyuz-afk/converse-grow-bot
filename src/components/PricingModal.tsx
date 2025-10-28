@@ -308,20 +308,22 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile Close Button - Absolute positioned overlay */}
+            {/* Mobile Close Button - Always takes space, button fades in */}
             {isMobile && (
               <div 
-                className="absolute top-0 left-0 right-0 z-50 bg-white border-b border-zinc-200 flex justify-end px-4 py-3 transition-opacity duration-300"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0"
                 style={{ 
                   paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
-                  paddingBottom: '0.75rem',
-                  opacity: showCloseButton ? 1 : 0,
-                  pointerEvents: showCloseButton ? 'auto' : 'none'
+                  paddingBottom: '0.75rem'
                 }}
               >
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
+                  className="transition-all hover:scale-110 focus:outline-none hover:opacity-100 touch-manipulation cursor-pointer"
+                  style={{
+                    opacity: showCloseButton ? 0.7 : 0,
+                    pointerEvents: showCloseButton ? 'auto' : 'none'
+                  }}
                   aria-label="Close"
                 >
                   <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
