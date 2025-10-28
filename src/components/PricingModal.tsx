@@ -308,30 +308,6 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile Close Button - Space and button fade in together */}
-            {isMobile && (
-              <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0 transition-all duration-300"
-                style={{ 
-                  paddingTop: showCloseButton ? 'max(3rem, env(safe-area-inset-top))' : '0',
-                  paddingBottom: showCloseButton ? '1rem' : '0',
-                  opacity: showCloseButton ? 1 : 0
-                }}
-              >
-                <button
-                  onClick={() => onOpenChange(false)}
-                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
-                  style={{
-                    pointerEvents: showCloseButton ? 'auto' : 'none'
-                  }}
-                  aria-label="Close"
-                >
-                  <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
-                  <span className="sr-only">Close</span>
-                </button>
-              </div>
-            )}
-            
             {/* Left Panel - Features Comparison */}
             <div className="hidden md:flex md:w-7/12 bg-gradient-to-br from-white via-zinc-50/50 to-white p-3 sm:p-4 md:p-4 lg:p-8 border-r border-zinc-200 flex-col relative">
               {/* Decorative gradient overlay */}
@@ -386,9 +362,20 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             {/* Right Panel - Pricing */}
             <div ref={scrollRef} className={`w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible ${isMobile ? 'pb-32' : 'pb-5 sm:pb-6'}`}>
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
-                <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
-                  {t('pricingModal.chooseYourPlan')}
-                </h2>
+                <div className="flex items-start justify-between mb-1 sm:mb-1">
+                  <h2 className="text-xl sm:text-2xl md:text-2xl font-bold bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
+                    {t('pricingModal.chooseYourPlan')}
+                  </h2>
+                  {isMobile && snapPoint === 0.5 && (
+                    <button
+                      onClick={() => onOpenChange(false)}
+                      className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer ml-2 flex-shrink-0"
+                      aria-label="Close"
+                    >
+                      <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
+                    </button>
+                  )}
+                </div>
                 <p className="text-zinc-600 text-sm sm:text-xs">{t('pricingModal.unlimitedAccess')}</p>
               </div>
 
