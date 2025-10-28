@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslation } from 'react-i18next';
 import { trackRegistrationComplete } from '@/utils/gtmTracking';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -445,26 +447,25 @@ export default function AuthModal({
           }} className="text-sm text-primary hover:underline">
                     ← Back to sign in
                   </button>
-                </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-4">
+                 </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-4">
                   <div className="text-sm text-muted-foreground mb-4">
                     Enter your phone number to receive a verification code.
                   </div>
-                  <Input 
-                    type="tel" 
-                    placeholder="+1234567890" 
-                    value={phone} 
-                    onChange={e => setPhone(e.target.value)} 
-                    required 
-                    className="h-11 md:h-12 text-base"
-                    pattern="^\+[1-9]\d{1,14}$"
+                  <PhoneInput
+                    international
+                    defaultCountry="US"
+                    value={phone}
+                    onChange={(value) => setPhone(value || '')}
+                    className="phone-input-container"
+                    numberInputProps={{
+                      className: 'h-11 md:h-12 text-base px-4 border-2 border-gray-400 dark:border-gray-600 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-primary',
+                      required: true,
+                    }}
                   />
-                  <div className="text-xs text-muted-foreground">
-                    Include country code (e.g., +1 for US, +44 for UK)
-                  </div>
                   {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                      {error}
                    </div>}
-                  <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-11 md:h-12 text-base">
+                  <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-11 md:h-12 text-base bg-black hover:bg-black/90 text-white dark:bg-primary dark:hover:bg-primary/90">
                     {phoneLoading ? <>
                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                         Sending code...
@@ -489,6 +490,8 @@ export default function AuthModal({
                     required 
                     className="h-11 md:h-12 text-base text-center text-xl tracking-widest"
                     maxLength={6}
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
                   />
                   {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                      {error}
@@ -766,7 +769,7 @@ export default function AuthModal({
           </div>
         </div>;
   if (isMobile) {
-    return <Drawer open={isOpen} onOpenChange={onClose}>
+    return <Drawer open={isOpen} onOpenChange={onClose} dismissible={mode !== 'phone' && mode !== 'verify'}>
         <DrawerContent className="max-h-[90vh] p-0">
           <DrawerHeader className="sr-only">
             <DrawerTitle>ChatLearn Authentication</DrawerTitle>
