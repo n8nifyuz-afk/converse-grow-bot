@@ -100,7 +100,7 @@
   top: calc(100% + 0.5rem);
   left: 0;
   right: 0;
-  background: hsl(var(--popover));
+  background: white;
   border: 2px solid hsl(var(--border));
   border-radius: 0.75rem;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
@@ -109,19 +109,26 @@
   display: flex;
   flex-direction: column;
   opacity: 1;
-  backdrop-filter: blur(8px);
+}
+
+.dark .country-dropdown {
+  background: #1f1f1f;
 }
 
 .country-search {
   padding: 0.875rem 1rem;
   border: none;
   border-bottom: 2px solid hsl(var(--border));
-  background: hsl(var(--background));
+  background: white;
   font-size: 0.9375rem;
   color: hsl(var(--foreground));
   outline: none;
   border-radius: 0.75rem 0.75rem 0 0;
   font-weight: 500;
+}
+
+.dark .country-search {
+  background: #1f1f1f;
 }
 
 .country-search:focus {
@@ -138,7 +145,11 @@
   overflow-y: auto;
   padding: 0.25rem;
   flex: 1;
-  background: hsl(var(--background));
+  background: white;
+}
+
+.dark .country-list {
+  background: #1f1f1f;
 }
 
 .country-option {
