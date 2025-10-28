@@ -221,7 +221,7 @@ serve(async (req) => {
       
       // CRITICAL: Ensure payment method is saved for future billing
       sessionConfig.payment_method_collection = 'always';
-      sessionConfig.subscription_data.payment_behavior = 'default_incomplete'; // Create subscription immediately, charge after trial
+      sessionConfig.subscription_data.payment_behavior = 'allow_incomplete'; // Allow subscription to proceed even if initial payment pending
       
       // Add trial fee as a separate one-time line item charged immediately (EUR only)
       const trialAmount = 99; // €0.99 in cents
