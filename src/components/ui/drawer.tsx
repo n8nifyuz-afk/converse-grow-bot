@@ -31,15 +31,13 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 flex h-auto min-h-[50vh] max-h-[95vh] flex-col rounded-t-[10px] border bg-background [&>div[vaul-drawer-visible]]:!hidden",
+        "fixed inset-x-0 bottom-0 z-50 flex h-auto max-h-[95vh] flex-col rounded-t-[10px] border bg-background [&>div[vaul-drawer-visible]]:!hidden",
         className,
       )}
       style={{ touchAction: 'none' }}
       {...props}
     >
-      <div className="overflow-y-auto overscroll-contain">
-        {children}
-      </div>
+      {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));
