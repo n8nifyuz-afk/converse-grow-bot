@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -242,7 +242,6 @@ export default function Admin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchInput, setSearchInput] = useState(''); // Local input state for debouncing
   const [sortField, setSortField] = useState<'name' | 'email' | 'plan' | 'cost' | 'registered'>('registered');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [userChats, setUserChats] = useState<UserChat[]>([]);
@@ -267,6 +266,7 @@ export default function Admin() {
   const [timezone, setTimezone] = useState<string>('Europe/Nicosia');
   
   // Pending filter states (not applied until user clicks Apply)
+  const [pendingSearchQuery, setPendingSearchQuery] = useState<string>('');
   const [pendingPlanFilter, setPendingPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [pendingDateFilter, setPendingDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [pendingTimeFilter, setPendingTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
@@ -279,41 +279,37 @@ export default function Admin() {
   const [tempTimeFilter, setTempTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
   const usersPerPage = 20; // Load 20 users per page
   
-  // Debounce search input to prevent too many queries
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchQuery(searchInput);
-    }, 500); // 500ms debounce
-    
-    return () => clearTimeout(timer);
-  }, [searchInput]);
   
   useEffect(() => {
     checkAdminAccess();
   }, [user]);
-  // Fetch data when page changes OR filters change
+  
+  // Initial load only - fetch data when admin access is confirmed
   useEffect(() => {
-    if (isAdmin) {
-      // Use loading for initial load, isRefreshing for filter updates
-      const isInitialLoad = !userUsages.length;
-      if (isInitialLoad) {
-        setLoading(true);
-      } else {
-        setIsRefreshing(true);
-      }
-      // Fetch both user data and aggregate stats
+    if (isAdmin && userUsages.length === 0) {
+      setLoading(true);
       Promise.all([
         fetchTokenUsageData(),
         fetchAggregateStats()
       ]).finally(() => {
-        if (isInitialLoad) {
-          setLoading(false);
-        } else {
-          setIsRefreshing(false);
-        }
+        setLoading(false);
       });
     }
-  }, [isAdmin, currentPage, searchQuery, planFilter, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]); // Re-fetch when filters change
+  }, [isAdmin]);
+  
+  // Fetch data when page changes (pagination)
+  // Use a ref to track if this is from applying filters to avoid double fetch
+  const isApplyingFilters = useRef(false);
+  
+  useEffect(() => {
+    if (isAdmin && userUsages.length > 0 && !isApplyingFilters.current) {
+      setIsRefreshing(true);
+      fetchTokenUsageData().finally(() => {
+        setIsRefreshing(false);
+      });
+    }
+    isApplyingFilters.current = false;
+  }, [currentPage]);
   const checkAdminAccess = async () => {
     if (!user) {
       navigate('/');
@@ -784,7 +780,13 @@ export default function Admin() {
   }, [showDatePicker]);
   
   // Apply filters function
-  const applyFilters = () => {
+  const applyFilters = async () => {
+    // Reset to page 1 when applying new filters
+    isApplyingFilters.current = true;
+    setCurrentPage(1);
+    
+    // Apply all pending filters including search
+    setSearchQuery(pendingSearchQuery);
     setPlanFilter(pendingPlanFilter);
     setDateFilter(pendingDateFilter);
     setTimeFilter(pendingTimeFilter);
@@ -792,6 +794,24 @@ export default function Admin() {
     setSubscriptionStatusFilter(pendingSubscriptionStatusFilter);
     setTimezone(pendingTimezone);
     setShowFilters(false);
+    
+    // Fetch data with new filters
+    setIsRefreshing(true);
+    await Promise.all([
+      fetchTokenUsageData(),
+      fetchAggregateStats()
+    ]);
+    setIsRefreshing(false);
+  };
+  
+  // Manual refresh function
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      fetchTokenUsageData(),
+      fetchAggregateStats()
+    ]);
+    setRefreshing(false);
   };
   
   // Sync pending filters when opening the filter panel
@@ -820,7 +840,7 @@ export default function Admin() {
   const clearAllFilters = () => {
     setPlanFilter('all');
     setSearchQuery('');
-    setSearchInput(''); // Clear input as well
+    setPendingSearchQuery(''); // Clear pending search as well
     setDateFilter({ from: undefined, to: undefined });
     setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setCountryFilter('all');
@@ -1071,11 +1091,7 @@ export default function Admin() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setRefreshing(true);
-                Promise.all([
-                  fetchTokenUsageData(true),
-                  fetchAggregateStats()
-                ]);
+                handleRefresh();
               }}
               type="button"
               className="gap-2 h-10"
@@ -1104,11 +1120,7 @@ export default function Admin() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setRefreshing(true);
-                Promise.all([
-                  fetchTokenUsageData(true),
-                  fetchAggregateStats()
-                ]);
+                handleRefresh();
               }}
               type="button"
               variant="outline"
@@ -1591,17 +1603,17 @@ export default function Admin() {
                   <Input
                     type="text"
                     placeholder="Search by name or email..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
+                    value={pendingSearchQuery}
+                    onChange={(e) => setPendingSearchQuery(e.target.value)}
                     className="pl-10 pr-9 h-11 text-sm sm:text-base w-full"
                   />
-                  {searchInput && (
+                  {pendingSearchQuery && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted"
                       onClick={() => {
-                        setSearchInput('');
+                        setPendingSearchQuery('');
                         setSearchQuery('');
                       }}
                     >
