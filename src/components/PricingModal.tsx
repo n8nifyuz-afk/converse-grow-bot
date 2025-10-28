@@ -366,7 +366,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   <h2 className="text-xl sm:text-2xl md:text-2xl font-bold bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                     {t('pricingModal.chooseYourPlan')}
                   </h2>
-                  {isMobile && snapPoint === 0.5 && (
+                  {isMobile && (
                     <button
                       onClick={() => onOpenChange(false)}
                       className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer ml-2 flex-shrink-0"
