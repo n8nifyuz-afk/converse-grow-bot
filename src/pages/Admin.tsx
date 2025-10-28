@@ -1088,6 +1088,7 @@ export default function Admin() {
                     <div className="space-y-2.5">
                       <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
                         <div className="w-1 h-3 bg-primary rounded-full" />
+                        Registration Date & Time
                       </label>
                       <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                         <PopoverTrigger asChild>
