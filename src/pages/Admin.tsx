@@ -351,56 +351,44 @@ export default function Admin() {
         setLoading(true);
       }
 
-      // Fetch ONLY basic profile info for initial load (optimized)
-      let allProfilesData: any[] = [];
-      let from = 0;
-      const batchSize = 1000;
-      let hasMore = true;
-
-      console.log('Fetching basic user profiles...');
-      while (hasMore) {
-        const {
-          data: batchData,
-          error: batchError
-        } = await supabase
-          .from('profiles')
-          .select('user_id, email, display_name, created_at, ip_address, country')
-          .order('created_at', { ascending: false })
-          .range(from, from + batchSize - 1);
-        
-        if (batchError) throw batchError;
-        
-        if (batchData && batchData.length > 0) {
-          allProfilesData = [...allProfilesData, ...batchData];
-          console.log(`Fetched ${batchData.length} profiles (total so far: ${allProfilesData.length})`);
-          from += batchSize;
-          hasMore = batchData.length === batchSize;
-        } else {
-          hasMore = false;
-        }
-      }
+      // Fetch ONLY first 200 users for fast initial load
+      console.log('Fetching first 200 user profiles...');
+      const {
+        data: allProfilesData,
+        error: profilesError
+      } = await supabase
+        .from('profiles')
+        .select('user_id, email, display_name, created_at, ip_address, country')
+        .order('created_at', { ascending: false })
+        .limit(200); // Only load 200 most recent users for fast loading
       
-      console.log('Total profiles (auth.users):', allProfilesData?.length);
+      if (profilesError) throw profilesError;
+      console.log('Loaded profiles:', allProfilesData?.length);
 
-      // Fetch ALL subscriptions (active and inactive)
+      // Fetch ONLY subscriptions for the loaded users
+      const userIds = allProfilesData?.map(p => p.user_id) || [];
       const {
         data: subscriptionsData,
         error: subscriptionsError
-      } = await supabase.from('user_subscriptions').select('user_id, status, product_id, plan, plan_name, current_period_end, stripe_subscription_id, stripe_customer_id');
+      } = await supabase
+        .from('user_subscriptions')
+        .select('user_id, status, product_id, plan, plan_name, current_period_end, stripe_subscription_id, stripe_customer_id')
+        .in('user_id', userIds);
+      
       if (subscriptionsError) console.error('Error fetching subscriptions:', subscriptionsError);
-      console.log('Subscriptions data:', subscriptionsData);
 
-      // Fetch LIMITED token usage data (only recent 10000 records for performance)
+      // Fetch ONLY token usage for the loaded users (last 5000 records)
       const {
         data: tokenData,
         error: tokenError
       } = await supabase
         .from('token_usage')
         .select('user_id, model, input_tokens, output_tokens')
+        .in('user_id', userIds)
         .order('created_at', { ascending: false })
-        .limit(10000); // Only fetch recent records for performance
+        .limit(5000); // Only fetch recent records for loaded users
       
-      if (tokenError) throw tokenError;
+      if (tokenError) console.error('Error fetching token usage:', tokenError);
 
       // Create maps for quick lookup
       const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
