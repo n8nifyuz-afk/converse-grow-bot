@@ -311,10 +311,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             {/* Mobile Close Button - Space and button fade in together */}
             {isMobile && (
               <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0 transition-all duration-300"
+                className="absolute top-0 left-0 right-0 bg-white border-b border-zinc-200 flex justify-end px-4 transition-all duration-300 z-50"
                 style={{ 
-                  paddingTop: showCloseButton ? 'max(3rem, env(safe-area-inset-top))' : '0',
-                  paddingBottom: showCloseButton ? '1rem' : '0',
+                  paddingTop: 'max(3rem, env(safe-area-inset-top))',
+                  paddingBottom: '1rem',
                   opacity: showCloseButton ? 1 : 0,
                   transform: showCloseButton ? 'translateY(0)' : 'translateY(-100%)'
                 }}
