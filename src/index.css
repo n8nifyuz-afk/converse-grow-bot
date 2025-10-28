@@ -619,23 +619,40 @@ All colors MUST be HSL.
     overflow: hidden;
     position: fixed;
     width: 100%;
+    height: 100vh;
+    height: 100dvh;
   }
   
-  /* Keep drawer at bottom */
+  /* Keep drawer at bottom with fixed positioning */
   [data-vaul-drawer][data-vaul-drawer-visible] {
     position: fixed !important;
     bottom: 0 !important;
+    transform: translateY(0) !important;
+    max-height: 500px !important;
+  }
+  
+  /* Prevent drawer content from changing height */
+  [data-vaul-drawer-content] {
+    max-height: 500px !important;
+    overflow-y: auto;
   }
   
   /* Prevent scroll-into-view behavior */
   [data-vaul-drawer] input:focus,
   [data-vaul-drawer] textarea:focus {
     scroll-margin: 0;
+    transform: translateY(0) !important;
   }
   
-  /* Smooth transitions */
+  /* Prevent any transitions that might cause jumping */
   [data-vaul-drawer] input,
   [data-vaul-drawer] textarea {
     transition: none;
+  }
+  
+  /* Prevent viewport changes from affecting drawer */
+  [data-vaul-drawer] * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 }
