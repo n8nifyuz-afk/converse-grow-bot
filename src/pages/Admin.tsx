@@ -248,6 +248,7 @@ export default function Admin() {
   const [timeFilter, setTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showDatePickerView, setShowDatePickerView] = useState(false);
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<'all' | 'subscribed' | 'free'>('all');
   const [timezone, setTimezone] = useState<string>('Europe/Nicosia');
@@ -678,7 +679,7 @@ export default function Admin() {
   const applyDatePicker = () => {
     setPendingDateFilter(tempDateFilter);
     setPendingTimeFilter(tempTimeFilter);
-    setShowDatePicker(false);
+    setShowDatePickerView(false);
   };
   
   // Initialize temp values when date picker opens
@@ -709,6 +710,7 @@ export default function Admin() {
       setPendingCountryFilter(countryFilter);
       setPendingSubscriptionStatusFilter(subscriptionStatusFilter);
       setPendingTimezone(timezone);
+      setShowDatePickerView(false);
     }
   }, [showFilters]);
 
@@ -1024,12 +1026,22 @@ export default function Admin() {
                   {/* Header */}
                   <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-gradient-to-r from-background to-muted/20">
                     <div className="flex items-center gap-2.5">
+                      {showDatePickerView && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowDatePickerView(false)}
+                          className="h-7 px-2 mr-1 hover:bg-muted/50"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                      )}
                       <div className="p-1.5 rounded-md bg-primary/10">
                         <Filter className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <h4 className="font-semibold text-sm">Advanced Filters</h4>
+                      <h4 className="font-semibold text-sm">{showDatePickerView ? 'Select Date & Time' : 'Advanced Filters'}</h4>
                     </div>
-                    {activeFiltersCount > 0 && (
+                    {activeFiltersCount > 0 && !showDatePickerView && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1041,7 +1053,9 @@ export default function Admin() {
                     )}
                   </div>
 
-                  <div className="px-5 py-4 space-y-5">
+                  {!showDatePickerView ? (
+                    <>
+                    <div className="px-5 py-4 space-y-5">
                     {/* Plan Filter */}
                     <div className="space-y-2.5">
                       <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -1084,143 +1098,45 @@ export default function Admin() {
                       </div>
                     </div>
 
-                    {/* Date Range Filter */}
-                    <div className="space-y-2.5">
-                      <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                        <div className="w-1 h-3 bg-primary rounded-full" />
-                        Date & Time
-                      </label>
-                      <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full h-10 justify-start text-left font-normal text-xs transition-all duration-200 hover:bg-muted/50 hover:border-primary/30"
-                          >
-                            <CalendarIcon className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-                            <span className="truncate">
-                              {pendingDateFilter.from ? (
-                                pendingDateFilter.to ? (
-                                  pendingDateFilter.from.getTime() === pendingDateFilter.to.getTime() ? (
-                                    // Single day selected
-                                    <>
-                                      {format(pendingDateFilter.from, 'MMM dd, yyyy')} {pendingTimeFilter.fromTime}
-                                      {pendingTimeFilter.fromTime !== pendingTimeFilter.toTime && ` - ${pendingTimeFilter.toTime}`}
-                                    </>
-                                  ) : (
-                                    // Date range selected
-                                    <>
-                                      {format(pendingDateFilter.from, 'MMM dd')} {pendingTimeFilter.fromTime} - {format(pendingDateFilter.to, 'MMM dd, yyyy')} {pendingTimeFilter.toTime}
-                                    </>
-                                  )
+                      {/* Date Range Filter */}
+                      <div className="space-y-2.5">
+                        <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                          <div className="w-1 h-3 bg-primary rounded-full" />
+                          Date & Time
+                        </label>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setTempDateFilter(pendingDateFilter);
+                            setTempTimeFilter(pendingTimeFilter);
+                            setShowDatePickerView(true);
+                          }}
+                          className="w-full h-10 justify-start text-left font-normal text-xs transition-all duration-200 hover:bg-muted/50 hover:border-primary/30"
+                        >
+                          <CalendarIcon className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
+                          <span className="truncate">
+                            {pendingDateFilter.from ? (
+                              pendingDateFilter.to ? (
+                                pendingDateFilter.from.getTime() === pendingDateFilter.to.getTime() ? (
+                                  // Single day selected
+                                  <>
+                                    {format(pendingDateFilter.from, 'MMM dd, yyyy')} {pendingTimeFilter.fromTime}
+                                    {pendingTimeFilter.fromTime !== pendingTimeFilter.toTime && ` - ${pendingTimeFilter.toTime}`}
+                                  </>
                                 ) : (
-                                  `${format(pendingDateFilter.from, 'MMM dd, yyyy')} ${pendingTimeFilter.fromTime}`
+                                  // Date range selected
+                                  <>
+                                    {format(pendingDateFilter.from, 'MMM dd')} {pendingTimeFilter.fromTime} - {format(pendingDateFilter.to, 'MMM dd, yyyy')} {pendingTimeFilter.toTime}
+                                  </>
                                 )
                               ) : (
-                                'Select date & time range'
-                              )}
-                            </span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] p-0 shadow-xl animate-scale-in" align="start">
-                          <div className="flex flex-col">
-                            <div className="flex flex-col sm:flex-row">
-                              <div className="border-b sm:border-b-0 sm:border-r border-border/50 p-2 space-y-1 bg-gradient-to-b from-muted/30 to-muted/10 w-full sm:min-w-[120px]">
-                                <div className="px-2 py-1.5">
-                                  <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">Quick Select</p>
-                                </div>
-                                <div className="flex flex-row sm:flex-col gap-1 sm:gap-0 flex-wrap sm:flex-nowrap">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex-1 sm:w-full justify-start h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                    onClick={() => setDatePreset('today')}
-                                  >
-                                    Today
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex-1 sm:w-full justify-start h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                    onClick={() => setDatePreset('yesterday')}
-                                  >
-                                    Yesterday
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex-1 sm:w-full justify-start h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                    onClick={() => setDatePreset('week')}
-                                  >
-                                    Week
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex-1 sm:w-full justify-start h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-2.5 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
-                                    onClick={() => setDatePreset('month')}
-                                  >
-                                    Month
-                                  </Button>
-                                  <div className="hidden sm:block border-t border-border/50 my-2 w-full" />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex-1 sm:w-full justify-start h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-2.5 text-muted-foreground hover:text-foreground transition-all duration-200"
-                                    onClick={() => setDatePreset('all')}
-                                  >
-                                    Clear
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className="p-2 sm:p-3 flex justify-center">
-                                <Calendar
-                                  mode="range"
-                                  selected={{ from: tempDateFilter.from, to: tempDateFilter.to }}
-                                  onSelect={(range) => {
-                                    setTempDateFilter({ from: range?.from, to: range?.to });
-                                  }}
-                                  numberOfMonths={1}
-                                  className="pointer-events-auto scale-90 sm:scale-100 origin-top"
-                                />
-                              </div>
-                            </div>
-                            {/* Time Selection */}
-                            {tempDateFilter.from && (
-                              <div className="border-t border-border/50 p-3 sm:p-4 space-y-2 sm:space-y-3 bg-gradient-to-b from-muted/10 to-background animate-fade-in">
-                                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                                  <div className="space-y-1.5 sm:space-y-2">
-                                    <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">From Time</label>
-                                    <Input
-                                      type="time"
-                                      value={tempTimeFilter.fromTime}
-                                      onChange={(e) => setTempTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
-                                      className="h-8 sm:h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                    />
-                                  </div>
-                                  <div className="space-y-1.5 sm:space-y-2">
-                                    <label className="text-[10px] font-semibold text-foreground uppercase tracking-wider">To Time</label>
-                                    <Input
-                                      type="time"
-                                      value={tempTimeFilter.toTime}
-                                      onChange={(e) => setTempTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
-                                      className="h-8 sm:h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
+                                `${format(pendingDateFilter.from, 'MMM dd, yyyy')} ${pendingTimeFilter.fromTime}`
+                              )
+                            ) : (
+                              'Select date & time range'
                             )}
-                            {/* Apply Button for Date Picker */}
-                            <div className="px-3 py-2.5 sm:px-4 sm:py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
-                              <Button 
-                                onClick={applyDatePicker} 
-                                className="w-full h-8 sm:h-9 font-semibold text-xs"
-                              >
-                                Apply Date & Time
-                              </Button>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
+                          </span>
+                        </Button>
                     </div>
 
                     {/* Timezone Filter */}
@@ -1282,6 +1198,109 @@ export default function Admin() {
                       Apply Filters
                     </Button>
                   </div>
+                  </>
+                  ) : (
+                    <>
+                    {/* Date Picker View */}
+                    <div className="flex flex-col">
+                      <div className="flex flex-col sm:flex-row">
+                        <div className="border-b sm:border-b-0 sm:border-r border-border/50 p-3 space-y-1.5 bg-gradient-to-b from-muted/30 to-muted/10 w-full sm:min-w-[160px]">
+                          <div className="px-2 py-1.5">
+                            <p className="text-xs font-bold text-foreground uppercase tracking-wider">Quick Select</p>
+                          </div>
+                          <div className="flex flex-row sm:flex-col gap-1.5 sm:gap-1 flex-wrap sm:flex-nowrap">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-1 sm:w-full justify-start h-9 text-xs px-3 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                              onClick={() => setDatePreset('today')}
+                            >
+                              Today
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-1 sm:w-full justify-start h-9 text-xs px-3 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                              onClick={() => setDatePreset('yesterday')}
+                            >
+                              Yesterday
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-1 sm:w-full justify-start h-9 text-xs px-3 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                              onClick={() => setDatePreset('week')}
+                            >
+                              Week
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-1 sm:w-full justify-start h-9 text-xs px-3 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+                              onClick={() => setDatePreset('month')}
+                            >
+                              Month
+                            </Button>
+                            <div className="hidden sm:block border-t border-border/50 my-2 w-full" />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-1 sm:w-full justify-start h-9 text-xs px-3 text-muted-foreground hover:text-foreground transition-all duration-200"
+                              onClick={() => setDatePreset('all')}
+                            >
+                              Clear
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-3 sm:p-4 flex justify-center">
+                          <Calendar
+                            mode="range"
+                            selected={{ from: tempDateFilter.from, to: tempDateFilter.to }}
+                            onSelect={(range) => {
+                              setTempDateFilter({ from: range?.from, to: range?.to });
+                            }}
+                            numberOfMonths={1}
+                            className="pointer-events-auto"
+                          />
+                        </div>
+                      </div>
+                      {/* Time Selection */}
+                      {tempDateFilter.from && (
+                        <div className="border-t border-border/50 p-4 space-y-3 bg-gradient-to-b from-muted/10 to-background animate-fade-in">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-foreground uppercase tracking-wider">From Time</label>
+                              <Input
+                                type="time"
+                                value={tempTimeFilter.fromTime}
+                                onChange={(e) => setTempTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
+                                className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-foreground uppercase tracking-wider">To Time</label>
+                              <Input
+                                type="time"
+                                value={tempTimeFilter.toTime}
+                                onChange={(e) => setTempTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
+                                className="h-9 text-xs transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {/* Apply Button for Date Picker */}
+                      <div className="px-4 py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
+                        <Button 
+                          onClick={applyDatePicker} 
+                          className="w-full h-10 font-semibold"
+                        >
+                          Apply Date & Time
+                        </Button>
+                      </div>
+                    </div>
+                    </>
+                  )}
                 </div>
               </PopoverContent>
             </Popover>
