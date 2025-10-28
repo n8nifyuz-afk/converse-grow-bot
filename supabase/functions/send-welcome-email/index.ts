@@ -32,15 +32,17 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "ChatL <no-reply@chatl.ai>",
       to: [userEmail],
-      subject: "Welcome to ChatL - Your AI Assistant is Ready! 🎉",
+      subject: "Welcome to ChatLearn",
       html: `
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="x-apple-disable-message-reformatting">
           </head>
           <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+            <div style="display: none; max-height: 0; overflow: hidden;">Your AI workspace is ready start exploring now.</div>
             <table role="presentation" style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td align="center" style="padding: 40px 20px;">
@@ -55,26 +57,28 @@ const handler = async (req: Request): Promise<Response> => {
                         <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
                           Hi ${displayName},
                         </p>
-                        <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                          Thank you for joining <strong>ChatL</strong>! Your account has been successfully created.
+                        <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.6; color: #333333;">
+                          Thank you for joining ChatLearn.
                         </p>
                         <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                          You can now access all our features:
+                          We're excited to have you on board. Your account has been successfully created, and you're ready to start exploring the full power of AI.
+                        </p>
+                        <p style="margin: 0 0 10px; font-size: 16px; line-height: 1.6; color: #333333; font-weight: 600;">
+                          What You Can Do:
                         </p>
                         <ul style="margin: 0 0 30px; padding-left: 20px; font-size: 16px; line-height: 1.8; color: #333333;">
-                          <li>Chat with multiple AI models (ChatGPT, Claude, Gemini, and more)</li>
+                          <li>Chat with multiple AI models (GPT-5, Gemini, Claude, and more)</li>
                           <li>Generate and edit images with AI</li>
-                          <li>Voice conversations with AI</li>
-                          <li>Organize your chats with projects</li>
-                          <li>And much more!</li>
+                          <li>Use voice mode for hands-free conversations</li>
+                          <li>Analyze PDFs and documents</li>
                         </ul>
                         <div style="text-align: center; margin: 30px 0;">
-                          <a href="https://lciaiunzacgvvbvcshdh.supabase.co" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                          <a href="https://www.chatl.ai" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
                             Start Chatting Now
                           </a>
                         </div>
                         <p style="margin: 30px 0 0; font-size: 14px; line-height: 1.6; color: #666666; padding-top: 20px; border-top: 1px solid #e5e5e5;">
-                          If you have any questions or need assistance, feel free to reach out to our support team.
+                          Need help getting started? Contact us at <a href="mailto:support@chatl.ai" style="color: #667eea; text-decoration: none;">support@chatl.ai</a>.
                         </p>
                       </td>
                     </tr>
@@ -82,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
                       <td style="padding: 30px 40px; text-align: center; background-color: #f8f9fa; border-radius: 0 0 12px 12px;">
                         <p style="margin: 0; font-size: 14px; color: #666666;">
                           Best regards,<br>
-                          <strong>The ChatL Team</strong>
+                          <strong>The ChatLearn Team</strong>
                         </p>
                       </td>
                     </tr>
