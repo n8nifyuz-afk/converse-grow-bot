@@ -131,6 +131,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isLoading, setIsLoading] = useState(false);
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
+  const [snapPoint, setSnapPoint] = useState<number | string | null>(1);
   const [showCloseButton, setShowCloseButton] = useState(false);
   
   const allFeatures = getFeatures(t, selectedPlan);
@@ -148,6 +149,27 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
       setShowCloseButton(true);
     }
   }, [open, isMobile]);
+
+  // Scroll to show terms text and subscribe button on mobile when modal opens
+  React.useEffect(() => {
+    if (open && isMobile && scrollRef.current) {
+      // Immediate scroll to bottom
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      
+      // Multiple aggressive scroll attempts to ensure bottom stays visible
+      const scrollToBottom = () => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      };
+      
+      // Rapid scroll attempts
+      const timeouts = [0, 50, 100, 200, 300, 500, 800];
+      timeouts.forEach(delay => {
+        setTimeout(scrollToBottom, delay);
+      });
+    }
+  }, [open, isMobile, checkingEligibility, isTrialEligible, selectedPeriod]);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
@@ -563,13 +585,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
         <Drawer 
           open={open} 
           onOpenChange={onOpenChange} 
-          dismissible={false}
+          dismissible={true}
+          snapPoints={[1, 0.5]}
+          activeSnapPoint={snapPoint}
+          setActiveSnapPoint={setSnapPoint}
           modal={true}
         >
           <DrawerContent 
             className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl flex flex-col overflow-hidden"
           >
-            {modalContent}
+            <div ref={scrollRef} className="flex-1 overflow-y-scroll overscroll-contain touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
+              {modalContent}
+            </div>
           </DrawerContent>
         </Drawer>
       ) : (
