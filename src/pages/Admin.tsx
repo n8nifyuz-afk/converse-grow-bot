@@ -266,7 +266,6 @@ export default function Admin() {
   const [timezone, setTimezone] = useState<string>('Europe/Nicosia');
   
   // Pending filter states (not applied until user clicks Apply)
-  const [pendingSearchQuery, setPendingSearchQuery] = useState<string>('');
   const [pendingPlanFilter, setPendingPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [pendingDateFilter, setPendingDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [pendingTimeFilter, setPendingTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
@@ -310,6 +309,21 @@ export default function Admin() {
     }
     isApplyingFilters.current = false;
   }, [currentPage]);
+
+  // Real-time search with debounce
+  useEffect(() => {
+    if (!isAdmin || userUsages.length === 0) return;
+
+    const debounceTimer = setTimeout(() => {
+      setCurrentPage(1); // Reset to first page on search
+      setIsRefreshing(true);
+      fetchTokenUsageData().finally(() => {
+        setIsRefreshing(false);
+      });
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
   const checkAdminAccess = async () => {
     if (!user) {
       navigate('/');
@@ -785,8 +799,7 @@ export default function Admin() {
     isApplyingFilters.current = true;
     setCurrentPage(1);
     
-    // Apply all pending filters including search
-    setSearchQuery(pendingSearchQuery);
+    // Apply all pending filters (search is now real-time, so not included here)
     setPlanFilter(pendingPlanFilter);
     setDateFilter(pendingDateFilter);
     setTimeFilter(pendingTimeFilter);
@@ -840,7 +853,6 @@ export default function Admin() {
   const clearAllFilters = () => {
     setPlanFilter('all');
     setSearchQuery('');
-    setPendingSearchQuery(''); // Clear pending search as well
     setDateFilter({ from: undefined, to: undefined });
     setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setCountryFilter('all');
@@ -1603,19 +1615,16 @@ export default function Admin() {
                   <Input
                     type="text"
                     placeholder="Search by name or email..."
-                    value={pendingSearchQuery}
-                    onChange={(e) => setPendingSearchQuery(e.target.value)}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 pr-9 h-11 text-sm sm:text-base w-full"
                   />
-                  {pendingSearchQuery && (
+                  {searchQuery && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted"
-                      onClick={() => {
-                        setPendingSearchQuery('');
-                        setSearchQuery('');
-                      }}
+                      onClick={() => setSearchQuery('')}
                     >
                       <X className="h-3 w-3" />
                     </Button>
