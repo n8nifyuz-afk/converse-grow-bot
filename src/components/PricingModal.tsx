@@ -407,7 +407,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 )}
 
-                {!isTrialEligible && !checkingEligibility && (
+                {!checkingEligibility && (
                   <button
                     onClick={() => setSelectedPeriod('monthly')}
                     className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
