@@ -240,6 +240,16 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
     setIsLoading(true);
     try {
+      // CRITICAL FIX: Get fresh session to ensure valid auth token
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !currentSession) {
+        toast.error(t('pricingModal.errors.sessionExpired') || 'Your session has expired. Please log in again.');
+        setIsLoading(false);
+        setShowAuthModal(true);
+        return;
+      }
+
       const priceId = priceIds[selectedPlan][selectedPeriod];
       const isTrial = selectedPeriod === 'trial';
       

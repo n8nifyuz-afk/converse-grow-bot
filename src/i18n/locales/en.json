@@ -458,7 +458,10 @@
     "voiceModeDesc": "Talk to your AI naturally using voice",
     "prioritySupportDesc": "Faster help and responses from our team",
     "standardPrioritySupport": "Standard priority support",
-    "whatsappDesc": "Mobile AI chat integration (coming soon)"
+    "whatsappDesc": "Mobile AI chat integration (coming soon)",
+    "errors": {
+      "sessionExpired": "Your session has expired. Please log in again."
+    }
   },
   "upgradeButton": {
     "upgradeNow": "Go Pro"
