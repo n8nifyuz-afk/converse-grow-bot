@@ -124,7 +124,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const isMobile = useIsMobile();
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | '3month' | 'yearly' | 'trial'>('trial');
+  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly' | 'trial'>('trial');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -197,9 +197,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
         const eligible = !trialData && !subData;
         setIsTrialEligible(eligible);
 
-        // If not eligible and trial was selected, switch to 3month
+        // If not eligible and trial was selected, switch to monthly
         if (!eligible && selectedPeriod === 'trial') {
-          setSelectedPeriod('3month');
+          setSelectedPeriod('monthly');
         }
       } catch (error) {
         console.error('Error checking trial eligibility:', error);
@@ -417,29 +417,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     }`}
                   >
                     <div className="flex justify-between items-center">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.monthly')}</div>
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">1 Month</div>
                       <div className="font-bold text-xl sm:text-xl text-zinc-900">
                         €{pricingOptions[selectedPlan].monthly.price.toFixed(2)}
                       </div>
                     </div>
                   </button>
                 )}
-
-                <button
-                  onClick={() => setSelectedPeriod('3month')}
-                  className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group ${
-                    selectedPeriod === '3month'
-                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
-                      : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                  }`}
-                >
-                  <div className="flex justify-between items-center gap-2">
-                    <div className="font-semibold text-base sm:text-sm text-zinc-900 whitespace-nowrap">{t('pricingModal.threeMonths')}</div>
-                    <div className="font-bold text-xl sm:text-lg text-zinc-900 whitespace-nowrap">
-                      €{pricingOptions[selectedPlan]['3month'].price.toFixed(2)}
-                    </div>
-                  </div>
-                </button>
                 {selectedPeriod === 'trial' && (
                   <div className="text-sm text-zinc-600 px-2">
                     After 3 days, your plan renews automatically at €{pricingOptions[selectedPlan].monthly.price.toFixed(2)}/month — cancel anytime.
