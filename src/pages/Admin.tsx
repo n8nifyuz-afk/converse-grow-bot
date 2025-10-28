@@ -290,7 +290,10 @@ export default function Admin() {
       }
       setIsAdmin(true);
     } catch (error) {
+      console.error('Admin access check error:', error);
       navigate('/');
+    } finally {
+      setLoading(false);
     }
   };
 
