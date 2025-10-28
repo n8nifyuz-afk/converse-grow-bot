@@ -40,8 +40,15 @@ const handler = async (req: Request): Promise<Response> => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta name="color-scheme" content="light">
             <meta name="supported-color-schemes" content="light">
+            <!--[if !mso]><!-->
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <!--<![endif]-->
           </head>
           <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; background-color: #f6f9fc;">
+            <!-- Preheader text -->
+            <div style="display: none; max-height: 0; overflow: hidden;">
+              Your AI workspace is ready start exploring now.
+            </div>
             <table role="presentation" style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td align="center" style="padding: 20px 0 48px; margin-bottom: 64px;">
@@ -95,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
                         <table role="presentation" style="width: 100%; margin: 32px 0;">
                           <tr>
                             <td align="center">
-                              <a href="https://www.chatl.ai/chat" target="_blank" style="background-color: #000000; border-radius: 8px; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; text-align: center; display: inline-block; padding: 14px 40px;">
+                              <a href="https://www.chatl.ai" target="_blank" style="background-color: #000000; border-radius: 8px; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; text-align: center; display: inline-block; padding: 14px 40px;">
                                 Start Chatting Now
                               </a>
                             </td>
