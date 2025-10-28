@@ -1327,7 +1327,7 @@ export default function Admin() {
                     {/* Date Picker View */}
                     <div className="flex flex-col bg-background">
                       <div className="flex flex-col sm:flex-row">
-                        <div className="border-b sm:border-b-0 sm:border-r border-border p-2.5 space-y-1.5 bg-gradient-to-br from-primary/5 to-transparent w-full sm:w-[160px]">
+                        <div className="border-b sm:border-b-0 sm:border-r border-border p-2.5 space-y-1.5 bg-gradient-to-br from-primary/5 to-transparent w-full sm:w-[160px] sm:ml-3">
                           <div className="px-1">
                             <h3 className="text-xs font-bold text-foreground">Quick Select</h3>
                           </div>
@@ -1335,7 +1335,7 @@ export default function Admin() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex-1 sm:w-full justify-start h-8 text-sm font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
+                              className="flex-1 sm:w-full justify-start h-8 text-base font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
                               onClick={() => setDatePreset('today')}
                             >
                               Today
@@ -1343,7 +1343,7 @@ export default function Admin() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex-1 sm:w-full justify-start h-8 text-sm font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
+                              className="flex-1 sm:w-full justify-start h-8 text-base font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
                               onClick={() => setDatePreset('yesterday')}
                             >
                               Yesterday
@@ -1351,7 +1351,7 @@ export default function Admin() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex-1 sm:w-full justify-start h-8 text-sm font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
+                              className="flex-1 sm:w-full justify-start h-8 text-base font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
                               onClick={() => setDatePreset('week')}
                             >
                               Last 7 Days
@@ -1359,7 +1359,7 @@ export default function Admin() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex-1 sm:w-full justify-start h-8 text-sm font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
+                              className="flex-1 sm:w-full justify-start h-8 text-base font-medium px-2.5 transition-all duration-200 hover:bg-primary/15 hover:text-primary"
                               onClick={() => setDatePreset('month')}
                             >
                               Last 30 Days
@@ -1368,7 +1368,7 @@ export default function Admin() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex-1 sm:w-full justify-start h-8 text-sm font-medium px-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+                              className="flex-1 sm:w-full justify-start h-8 text-base font-medium px-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
                               onClick={() => setDatePreset('all')}
                             >
                               Clear
