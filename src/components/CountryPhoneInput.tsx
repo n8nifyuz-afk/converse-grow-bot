@@ -137,6 +137,10 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
   const toggleDropdown = () => {
     if (!disabled && !isDetectingCountry) {
+      // Close keyboard on mobile by blurring the input
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
       setIsDropdownOpen(!isDropdownOpen);
     }
   };
