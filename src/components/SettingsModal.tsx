@@ -680,60 +680,63 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
               {/* Login Methods Section */}
               <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-4 md:p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5 md:gap-3">
-                        <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                          <Shield className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-foreground text-sm md:text-base">Connected Accounts</p>
-                          <p className="text-xs md:text-sm text-muted-foreground">Manage your sign-in methods</p>
-                        </div>
+                <CardContent className="p-5 md:p-7">
+                  <div className="space-y-5">
+                    {/* Header */}
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                        <Shield className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground text-base md:text-lg">Connected Accounts</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">Link multiple sign-in methods to your account</p>
                       </div>
                     </div>
+
+                    {/* Separator */}
+                    <div className="border-t border-border/50" />
                     
-                    <div className="ml-0 md:ml-11 space-y-3">
+                    {/* Providers Grid */}
+                    <div className="space-y-3">
                       {/* Google Provider */}
                       {user?.app_metadata?.providers?.includes('google') ? (
-                        <div className="flex items-center justify-between gap-3 p-3 md:p-4 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
-                          <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                            <div className="p-1.5 md:p-2 bg-white rounded-lg shadow-sm flex-shrink-0">
-                              <svg className="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24">
+                        <div className="group flex items-center justify-between gap-4 p-4 md:p-5 bg-gradient-to-r from-background to-background/80 rounded-2xl border-2 border-green-500/30 shadow-sm hover:shadow-md transition-all duration-200">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="p-2.5 bg-white rounded-xl shadow-sm flex-shrink-0 ring-2 ring-green-500/20">
+                              <svg className="h-5 w-5 md:h-6 md:w-6" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                               </svg>
                             </div>
-                            <div className="min-w-0">
-                              <p className="font-medium text-foreground text-sm md:text-base">Google</p>
-                              <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">{t('profile.signInWithGoogle')}</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-foreground text-base">Google</p>
+                              <p className="text-xs md:text-sm text-muted-foreground">Connected account</p>
                             </div>
                           </div>
-                          <div className="p-1 md:p-1.5 bg-green-100 rounded-full flex-shrink-0">
-                            <Check className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full flex-shrink-0">
+                            <Check className="h-4 w-4 md:h-5 md:w-5 text-green-600 dark:text-green-400" />
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between gap-3 p-3 md:p-4 bg-background/40 rounded-xl border border-dashed border-border/50">
-                          <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                            <div className="p-1.5 md:p-2 bg-white rounded-lg shadow-sm flex-shrink-0 opacity-50">
-                              <svg className="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24">
+                        <div className="group flex items-center justify-between gap-4 p-4 md:p-5 bg-muted/30 rounded-2xl border-2 border-dashed border-border/50 hover:border-primary/30 hover:bg-muted/50 transition-all duration-200">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="p-2.5 bg-white/60 dark:bg-white/10 rounded-xl shadow-sm flex-shrink-0 opacity-60 group-hover:opacity-80 transition-opacity">
+                              <svg className="h-5 w-5 md:h-6 md:w-6" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                               </svg>
                             </div>
-                            <div className="min-w-0">
-                              <p className="font-medium text-muted-foreground text-sm md:text-base">Google</p>
-                              <p className="text-xs md:text-sm text-muted-foreground/70 hidden sm:block">Not connected</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-muted-foreground text-base group-hover:text-foreground transition-colors">Google</p>
+                              <p className="text-xs md:text-sm text-muted-foreground/70">Not connected</p>
                             </div>
                           </div>
                           <Button 
-                            size="sm" 
+                            size="default"
                             variant="outline"
                             onClick={async () => {
                               try {
@@ -748,7 +751,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                                 });
                               }
                             }}
-                            className="flex-shrink-0"
+                            className="flex-shrink-0 border-primary/50 hover:border-primary hover:bg-primary/10 font-medium"
                           >
                             Connect
                           </Button>
