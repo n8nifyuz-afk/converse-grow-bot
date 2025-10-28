@@ -267,11 +267,7 @@
     "errorDeletingAccount": "Error deleting account",
     "unableToDeleteAccount": "Unable to delete account. Please try again.",
     "stripeConfigRequired": "Stripe Configuration Required",
-    "failedOpenPortal": "Failed to open customer portal. Please try again.",
-    "connectionNotAllowed": "Connection Not Allowed",
-    "accountConnected": "Account Connected",
-    "googleAccountConnected": "Google account has been successfully connected.",
-    "connectionFailed": "Connection Failed"
+    "failedOpenPortal": "Failed to open customer portal. Please try again."
   },
   "profile": {
     "title": "Profile",
@@ -288,8 +284,7 @@
     "signInWithApple": "Sign in with your Apple account",
     "signInWithMicrosoft": "Sign in with your Microsoft account",
     "emailAndPassword": "Email & Password",
-    "signInWithEmail": "Sign in with your email address",
-    "connect": "Connect"
+    "signInWithEmail": "Sign in with your email address"
   },
   "security": {
     "title": "Security",

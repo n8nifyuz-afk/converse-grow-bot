@@ -30,30 +30,11 @@ import Admin from '@/pages/Admin';
 import Features from '@/pages/Features';
 import AITools from '@/pages/AITools';
 import { SubscriptionCheckingOverlay } from '@/components/SubscriptionCheckingOverlay';
-import { useToast } from '@/hooks/use-toast';
 
 const queryClient = new QueryClient();
 
 function AppContent() {
   const { user } = useAuth();
-  const { toast } = useToast();
-
-  // Global listener for OAuth authentication errors
-  React.useEffect(() => {
-    const handleAuthError = (event: CustomEvent) => {
-      toast({
-        title: 'Authentication Error',
-        description: event.detail.message,
-        variant: 'destructive',
-        duration: 8000,
-      });
-    };
-
-    window.addEventListener('auth-error', handleAuthError as EventListener);
-    return () => {
-      window.removeEventListener('auth-error', handleAuthError as EventListener);
-    };
-  }, [toast]);
 
   return (
     <>
