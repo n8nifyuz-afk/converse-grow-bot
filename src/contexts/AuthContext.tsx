@@ -259,6 +259,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let initialCheckComplete = false;
     
+    // Check for OAuth errors in URL (both hash and query parameters)
+    const checkOAuthErrors = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      
+      const error = urlParams.get('error') || hashParams.get('error');
+      const errorCode = urlParams.get('error_code') || hashParams.get('error_code');
+      const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+      
+      if (error || errorCode) {
+        // Handle specific OAuth errors
+        let errorMessage = errorDescription?.replace(/\+/g, ' ') || 'Authentication failed';
+        
+        if (errorCode === 'identity_already_exists' || errorMessage.includes('already linked')) {
+          errorMessage = 'This Google account is already connected to another user. Please use a different Google account or sign in to the existing account.';
+        }
+        
+        // Show error toast
+        const event = new CustomEvent('auth-error', { 
+          detail: { message: errorMessage } 
+        });
+        window.dispatchEvent(event);
+        
+        // Clean URL
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    };
+    
+    // Check for errors on mount
+    checkOAuthErrors();
+    
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -274,6 +306,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (window.location.hash && window.location.hash.includes('access_token')) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
+          
+          // Check for OAuth errors after auth state change
+          checkOAuthErrors();
           
           // Defer async operations to prevent blocking auth flow
           setTimeout(async () => {

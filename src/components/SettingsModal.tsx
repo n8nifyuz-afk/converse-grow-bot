@@ -119,6 +119,23 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     });
   };
 
+  // Listen for OAuth errors from AuthContext
+  React.useEffect(() => {
+    const handleAuthError = (event: CustomEvent) => {
+      toast({
+        title: t('toast.connectionFailed'),
+        description: event.detail.message,
+        variant: 'destructive',
+        duration: 8000,
+      });
+    };
+
+    window.addEventListener('auth-error', handleAuthError as EventListener);
+    return () => {
+      window.removeEventListener('auth-error', handleAuthError as EventListener);
+    };
+  }, [toast, t]);
+
   const handleLogoutThisDevice = async () => {
     try {
       await signOut();
