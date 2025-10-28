@@ -238,6 +238,7 @@ export default function Admin() {
   const [selectedUser, setSelectedUser] = useState<UserTokenUsage | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false); // For filter/search updates
   const [currentPage, setCurrentPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -293,12 +294,24 @@ export default function Admin() {
   // Fetch data when page changes OR filters change
   useEffect(() => {
     if (isAdmin) {
-      setLoading(true);
+      // Use loading for initial load, isRefreshing for filter updates
+      const isInitialLoad = !userUsages.length;
+      if (isInitialLoad) {
+        setLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       // Fetch both user data and aggregate stats
       Promise.all([
         fetchTokenUsageData(),
         fetchAggregateStats()
-      ]);
+      ]).finally(() => {
+        if (isInitialLoad) {
+          setLoading(false);
+        } else {
+          setIsRefreshing(false);
+        }
+      });
     }
   }, [isAdmin, currentPage, searchQuery, planFilter, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]); // Re-fetch when filters change
   const checkAdminAccess = async () => {
@@ -1458,7 +1471,7 @@ export default function Admin() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5 w-full">
+        <div className={`grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5 w-full transition-opacity duration-200 ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}>
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Total Users</CardTitle>
@@ -1538,6 +1551,9 @@ export default function Admin() {
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse flex-shrink-0" />
                     <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">Token Usage by User</CardTitle>
+                    {isRefreshing && (
+                      <Loader2 className="h-4 w-4 animate-spin text-primary flex-shrink-0" />
+                    )}
                   </div>
                   <CardDescription className="text-xs sm:text-sm mt-2 truncate">
                     Showing {userUsages.length} users (Page {currentPage} of {totalPages})
@@ -1575,7 +1591,7 @@ export default function Admin() {
           </CardHeader>
           <CardContent className="p-0 w-full overflow-hidden">
             {/* Mobile/Tablet Card Layout */}
-            <div className="lg:hidden">
+            <div className={`lg:hidden transition-opacity duration-200 ${isRefreshing ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                   {/* Mobile Sort Controls */}
                   <div className="border-b border-border/50 p-4 bg-muted/20">
                     <p className="text-xs font-medium text-muted-foreground mb-3">Sort by:</p>
@@ -1724,7 +1740,7 @@ export default function Admin() {
               </div>
 
               {/* Desktop Table Layout */}
-              <div className="hidden lg:block overflow-x-auto">
+              <div className={`hidden lg:block overflow-x-auto transition-opacity duration-200 ${isRefreshing ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50 hover:bg-muted/50">
