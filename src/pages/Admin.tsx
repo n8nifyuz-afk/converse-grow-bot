@@ -801,32 +801,56 @@ export default function Admin() {
 
   // Fetch chats for a specific user
   const fetchUserChats = async (userId: string) => {
+    console.log('[ADMIN] Fetching chats for user:', userId);
     try {
       setLoadingChats(true);
+      console.log('[ADMIN] Loading chats set to true');
+      
       const { data, error } = await supabase
         .from('chats')
         .select('id, title, created_at, updated_at, model_id')
         .eq('user_id', userId)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('[ADMIN] Chats query result:', { dataCount: data?.length, error });
 
+      if (error) {
+        console.error('[ADMIN] Error from chats query:', error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.log('[ADMIN] No chats found for user');
+        setUserChats([]);
+        return;
+      }
+
+      console.log('[ADMIN] Fetching message counts for', data.length, 'chats');
+      
       // Get message counts for each chat
       const chatsWithCounts = await Promise.all(
-        (data || []).map(async (chat) => {
-          const { count } = await supabase
+        data.map(async (chat) => {
+          const { count, error: countError } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('chat_id', chat.id);
+          
+          if (countError) {
+            console.warn('[ADMIN] Error counting messages for chat:', chat.id, countError);
+          }
+          
           return { ...chat, message_count: count || 0 };
         })
       );
 
+      console.log('[ADMIN] Chats with counts:', chatsWithCounts.length);
       setUserChats(chatsWithCounts);
     } catch (error) {
-      console.error('Error fetching user chats:', error);
+      console.error('[ADMIN] Error in fetchUserChats:', error);
       toast.error('Failed to load user chats');
+      setUserChats([]);
     } finally {
+      console.log('[ADMIN] Setting loadingChats to false');
       setLoadingChats(false);
     }
   };
