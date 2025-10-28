@@ -13,8 +13,24 @@ interface Country {
 const countries: Country[] = [
   { code: 'US', dialCode: '+1', name: 'United States', format: /^\d{10}$/, placeholder: '2025551234', maxLength: 10 },
   { code: 'UZ', dialCode: '+998', name: 'Uzbekistan', format: /^\d{9}$/, placeholder: '901234567', maxLength: 9 },
+  { code: 'VE', dialCode: '+58', name: 'Venezuela', format: /^\d{10}$/, placeholder: '4241234567', maxLength: 10 },
   { code: 'GB', dialCode: '+44', name: 'United Kingdom', format: /^\d{10}$/, placeholder: '7400123456', maxLength: 10 },
+  { code: 'CN', dialCode: '+86', name: 'China', format: /^\d{11}$/, placeholder: '13800138000', maxLength: 11 },
   { code: 'IN', dialCode: '+91', name: 'India', format: /^\d{10}$/, placeholder: '9876543210', maxLength: 10 },
+  { code: 'RU', dialCode: '+7', name: 'Russia', format: /^\d{10}$/, placeholder: '9161234567', maxLength: 10 },
+  { code: 'BR', dialCode: '+55', name: 'Brazil', format: /^\d{11}$/, placeholder: '11987654321', maxLength: 11 },
+  { code: 'JP', dialCode: '+81', name: 'Japan', format: /^\d{10}$/, placeholder: '9012345678', maxLength: 10 },
+  { code: 'DE', dialCode: '+49', name: 'Germany', format: /^\d{10,11}$/, placeholder: '15012345678', maxLength: 11 },
+  { code: 'FR', dialCode: '+33', name: 'France', format: /^\d{9}$/, placeholder: '612345678', maxLength: 9 },
+  { code: 'IT', dialCode: '+39', name: 'Italy', format: /^\d{10}$/, placeholder: '3123456789', maxLength: 10 },
+  { code: 'ES', dialCode: '+34', name: 'Spain', format: /^\d{9}$/, placeholder: '612345678', maxLength: 9 },
+  { code: 'CA', dialCode: '+1', name: 'Canada', format: /^\d{10}$/, placeholder: '4165551234', maxLength: 10 },
+  { code: 'AU', dialCode: '+61', name: 'Australia', format: /^\d{9}$/, placeholder: '412345678', maxLength: 9 },
+  { code: 'MX', dialCode: '+52', name: 'Mexico', format: /^\d{10}$/, placeholder: '5512345678', maxLength: 10 },
+  { code: 'TR', dialCode: '+90', name: 'Turkey', format: /^\d{10}$/, placeholder: '5321234567', maxLength: 10 },
+  { code: 'SA', dialCode: '+966', name: 'Saudi Arabia', format: /^\d{9}$/, placeholder: '501234567', maxLength: 9 },
+  { code: 'AE', dialCode: '+971', name: 'UAE', format: /^\d{9}$/, placeholder: '501234567', maxLength: 9 },
+  { code: 'PK', dialCode: '+92', name: 'Pakistan', format: /^\d{10}$/, placeholder: '3001234567', maxLength: 10 },
 ];
 
 interface CountryPhoneInputProps {
