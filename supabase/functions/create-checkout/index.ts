@@ -143,7 +143,7 @@ serve(async (req) => {
         .select('id, created_at')
         .eq('user_id', user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (existingTrial) {
         logStep("User already used trial - blocking access", { 
