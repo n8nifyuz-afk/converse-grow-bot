@@ -31,10 +31,18 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 flex h-auto max-h-[95vh] flex-col rounded-t-[10px] border bg-background [&>div[vaul-drawer-visible]]:!hidden",
+        "fixed inset-x-0 bottom-0 z-50 flex h-auto max-h-[95vh] flex-col rounded-t-[10px] border bg-background",
         className,
       )}
       style={{ touchAction: 'none' }}
+      onFocus={(e) => {
+        // Prevent scrolling when input is focused on mobile
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          setTimeout(() => {
+            e.target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+          }, 100);
+        }
+      }}
       {...props}
     >
       {children}
