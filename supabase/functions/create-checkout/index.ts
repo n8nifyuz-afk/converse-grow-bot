@@ -203,8 +203,8 @@ serve(async (req) => {
     const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : (user.email || undefined),
-      // For phone-only users without existing customer, we already created one above
-      customer_creation: customerId ? undefined : 'always',
+      // CRITICAL: customer_creation is NOT allowed in subscription mode
+      // Stripe will auto-create customer from customer_email if needed
       // Automatically collect and save address during checkout for tax calculation
       customer_update: {
         address: 'auto'
