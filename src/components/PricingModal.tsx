@@ -91,13 +91,11 @@ const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature
 const pricingOptions = {
   pro: {
     monthly: { price: 19.99, perDay: 0.67 },
-    '3month': { price: 39.99, perDay: 0.44 },
     yearly: { price: 59.99, perDay: 0.16, savings: 75 },
     trial: { price: 0.99, perDay: 0.33, trialDays: 3 }
   },
   ultra: {
     monthly: { price: 39.99, perDay: 1.33 },
-    '3month': { price: 79.99, perDay: 0.89 },
     yearly: { price: 119.99, perDay: 0.33, savings: 75 },
     trial: { price: 0.99, perDay: 0.33, trialDays: 3 }
   }
@@ -107,13 +105,11 @@ const pricingOptions = {
 const priceIds = {
   pro: {
     monthly: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq',   // €19.99/month
-    '3month': 'price_1SKJ76L8Zm4LqDn4lboudMxL',  // €39.99 for 3 months
     yearly: 'price_1SKJ8cL8Zm4LqDn4jPkxLxeF',    // €59.99/year
     trial: 'price_1SKKdNL8Zm4LqDn4gBXwrsAq'      // Use monthly price
   },
   ultra: {
     monthly: 'price_1SKJAxL8Zm4LqDn43kl9BRd8',   // €39.99/month
-    '3month': 'price_1SKJD6L8Zm4LqDn4l1KXsNw1',  // €79.99 for 3 months
     yearly: 'price_1SKJEwL8Zm4LqDn4qcEFPlgP',    // €119.99/year
     trial: 'price_1SKJAxL8Zm4LqDn43kl9BRd8'      // Use monthly price
   }
@@ -124,7 +120,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const isMobile = useIsMobile();
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'ultra'>('pro');
-  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | '3month' | 'yearly' | 'trial'>('trial');
+  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly' | 'trial'>('trial');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeBlockedDialog, setShowUpgradeBlockedDialog] = useState(false);
   const [blockedPlanName, setBlockedPlanName] = useState('');
@@ -197,9 +193,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
         const eligible = !trialData && !subData;
         setIsTrialEligible(eligible);
 
-        // If not eligible and trial was selected, switch to 3month
+        // If not eligible and trial was selected, switch to monthly
         if (!eligible && selectedPeriod === 'trial') {
-          setSelectedPeriod('3month');
+          setSelectedPeriod('monthly');
         }
       } catch (error) {
         console.error('Error checking trial eligibility:', error);
@@ -407,36 +403,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   </div>
                 )}
 
-                {!isTrialEligible && !checkingEligibility && (
-                  <button
-                    onClick={() => setSelectedPeriod('monthly')}
-                    className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
-                      selectedPeriod === 'monthly'
-                        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
-                        : 'border-zinc-200 hover:border-zinc-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.monthly')}</div>
-                      <div className="font-bold text-xl sm:text-xl text-zinc-900">
-                        €{pricingOptions[selectedPlan].monthly.price.toFixed(2)}
-                      </div>
-                    </div>
-                  </button>
-                )}
-
                 <button
-                  onClick={() => setSelectedPeriod('3month')}
-                  className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group ${
-                    selectedPeriod === '3month'
+                  onClick={() => setSelectedPeriod('monthly')}
+                  className={`w-full p-4 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left relative group overflow-hidden ${
+                    selectedPeriod === 'monthly'
                       ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-white shadow-lg'
                       : 'border-zinc-200 hover:border-zinc-300 bg-white'
                   }`}
                 >
-                  <div className="flex justify-between items-center gap-2">
-                    <div className="font-semibold text-base sm:text-sm text-zinc-900 whitespace-nowrap">{t('pricingModal.threeMonths')}</div>
-                    <div className="font-bold text-xl sm:text-lg text-zinc-900 whitespace-nowrap">
-                      €{pricingOptions[selectedPlan]['3month'].price.toFixed(2)}
+                  <div className="flex justify-between items-center">
+                    <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.monthly')}</div>
+                    <div className="font-bold text-xl sm:text-xl text-zinc-900">
+                      €{pricingOptions[selectedPlan].monthly.price.toFixed(2)}
                     </div>
                   </div>
                 </button>
