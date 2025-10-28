@@ -315,7 +315,8 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 style={{ 
                   paddingTop: showCloseButton ? 'max(3rem, env(safe-area-inset-top))' : '0',
                   paddingBottom: showCloseButton ? '1rem' : '0',
-                  opacity: showCloseButton ? 1 : 0
+                  opacity: showCloseButton ? 1 : 0,
+                  transform: showCloseButton ? 'translateY(0)' : 'translateY(-100%)'
                 }}
               >
                 <button
