@@ -447,25 +447,28 @@ export default function AuthModal({
           }} className="text-sm text-primary hover:underline">
                     ← Back to sign in
                   </button>
-                 </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-4">
-                  <div className="text-sm text-muted-foreground mb-4">
+                 </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-5">
+                  <div className="text-sm md:text-base text-muted-foreground mb-2">
                     Enter your phone number to receive a verification code.
                   </div>
-                  <PhoneInput
-                    international
-                    defaultCountry="US"
-                    value={phone}
-                    onChange={(value) => setPhone(value || '')}
-                    className="phone-input-container"
-                    numberInputProps={{
-                      className: 'h-11 md:h-12 text-base px-4 border-2 border-gray-400 dark:border-gray-600 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-primary',
-                      required: true,
-                    }}
-                  />
-                  {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                  <div className="w-full">
+                    <PhoneInput
+                      international
+                      defaultCountry="US"
+                      value={phone}
+                      onChange={(value) => setPhone(value || '')}
+                      className="phone-input-wrapper"
+                      numberInputProps={{
+                        className: 'phone-number-input',
+                        required: true,
+                        placeholder: 'Phone number',
+                      }}
+                    />
+                  </div>
+                  {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
                      {error}
                    </div>}
-                  <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-11 md:h-12 text-base bg-black hover:bg-black/90 text-white dark:bg-primary dark:hover:bg-primary/90">
+                  <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-12 md:h-13 text-base md:text-lg font-medium bg-black hover:bg-black/90 text-white dark:bg-primary dark:hover:bg-primary/90">
                     {phoneLoading ? <>
                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                         Sending code...
