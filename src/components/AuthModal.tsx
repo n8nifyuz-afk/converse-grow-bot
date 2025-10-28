@@ -778,7 +778,7 @@ export default function AuthModal({
         </div>;
   if (isMobile) {
     return <Drawer open={isOpen} onOpenChange={onClose} dismissible={mode !== 'phone' && mode !== 'verify'}>
-        <DrawerContent className="h-[65vh] p-0 overflow-y-auto">
+        <DrawerContent className="p-0">
           <DrawerHeader className="sr-only">
             <DrawerTitle>ChatLearn Authentication</DrawerTitle>
             <DrawerDescription>
