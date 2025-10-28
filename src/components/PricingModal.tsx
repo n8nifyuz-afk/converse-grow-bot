@@ -150,23 +150,21 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
     }
   }, [open, isMobile]);
 
-  // Scroll to show terms text and subscribe button on mobile when modal opens
+  // Scroll to hide close button area initially on mobile
   React.useEffect(() => {
     if (open && isMobile && scrollRef.current) {
-      // Immediate scroll to bottom
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      
-      // Multiple aggressive scroll attempts to ensure bottom stays visible
-      const scrollToBottom = () => {
+      // Scroll down by 100px to hide the close button area
+      const scrollDown = () => {
         if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          scrollRef.current.scrollTop = 100;
         }
       };
       
-      // Rapid scroll attempts
-      const timeouts = [0, 50, 100, 200, 300, 500, 800];
+      // Immediate and delayed scroll to ensure it stays at 100px
+      scrollDown();
+      const timeouts = [0, 50, 100, 200, 300];
       timeouts.forEach(delay => {
-        setTimeout(scrollToBottom, delay);
+        setTimeout(scrollDown, delay);
       });
     }
   }, [open, isMobile, checkingEligibility, isTrialEligible, selectedPeriod]);
@@ -308,21 +306,23 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile Close Button - Space and button fade in together */}
+            {/* Mobile Close Button - Fixed height container, button fades in */}
             {isMobile && (
               <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0 transition-all duration-300"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0"
                 style={{ 
-                  paddingTop: showCloseButton ? 'max(3rem, env(safe-area-inset-top))' : '0',
-                  paddingBottom: showCloseButton ? '1rem' : '0',
-                  opacity: showCloseButton ? 1 : 0
+                  paddingTop: 'max(3rem, env(safe-area-inset-top))',
+                  paddingBottom: '1rem',
+                  minHeight: '100px'
                 }}
               >
                 <button
                   onClick={() => onOpenChange(false)}
                   className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
                   style={{
-                    pointerEvents: showCloseButton ? 'auto' : 'none'
+                    opacity: showCloseButton ? 1 : 0,
+                    pointerEvents: showCloseButton ? 'auto' : 'none',
+                    transition: 'opacity 0.3s ease'
                   }}
                   aria-label="Close"
                 >
