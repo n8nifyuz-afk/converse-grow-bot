@@ -38,6 +38,7 @@ export default function AuthModal({
   const [otpTimer, setOtpTimer] = useState<number>(0);
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const {
     user,
     signIn,
@@ -96,8 +97,16 @@ export default function AuthModal({
       setOtpTimer(0);
       setError('');
       setShowPassword(false);
+      setShowPhoneValidation(false);
     }
   }, [isOpen]);
+
+  // Reset phone validation when changing modes
+  useEffect(() => {
+    if (mode !== 'phone') {
+      setShowPhoneValidation(false);
+    }
+  }, [mode]);
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -332,6 +341,8 @@ export default function AuthModal({
 
   const handlePhoneSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowPhoneValidation(true); // Show validation when form is submitted
+    
     if (!phone) return;
     
     setPhoneLoading(true);
@@ -349,6 +360,7 @@ export default function AuthModal({
       } else {
         setMode('verify');
         setOtpTimer(60); // 60 seconds countdown
+        setShowPhoneValidation(false); // Reset validation state
         toast({
           title: "Code sent!",
           description: "Please check your phone for the verification code."
@@ -455,6 +467,7 @@ export default function AuthModal({
                     onChange={setPhone}
                     className="w-full"
                     disabled={phoneLoading}
+                    showValidation={showPhoneValidation}
                   />
                   {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
                      {error}
@@ -469,6 +482,7 @@ export default function AuthModal({
             setMode('signin');
             setPhone('');
             setError('');
+            setShowPhoneValidation(false);
           }} className="text-sm text-primary hover:underline">
                     ← Back to sign in
                   </button>

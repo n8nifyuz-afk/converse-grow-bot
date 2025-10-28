@@ -39,6 +39,7 @@ interface CountryPhoneInputProps {
   onValidation?: (isValid: boolean) => void;
   className?: string;
   disabled?: boolean;
+  showValidation?: boolean;
 }
 
 export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
@@ -47,6 +48,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   onValidation,
   className = '',
   disabled = false,
+  showValidation = false,
 }) => {
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -158,7 +160,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
       </div>
 
       {/* Validation Message */}
-      {isValid === false && phoneNumber.length > 0 && (
+      {showValidation && isValid === false && phoneNumber.length > 0 && (
         <p className="validation-message">
           Invalid phone number for {selectedCountry.name}
         </p>
