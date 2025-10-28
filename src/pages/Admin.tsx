@@ -1231,50 +1231,50 @@ export default function Admin() {
                     {/* Date Picker View */}
                     <div className="flex flex-col bg-background rounded-lg shadow-lg">
                       <div className="flex flex-col sm:flex-row">
-                        <div className="border-b sm:border-b-0 sm:border-r border-border p-4 space-y-3 bg-gradient-to-br from-primary/5 to-transparent w-full sm:w-[240px]">
+                        <div className="border-b sm:border-b-0 sm:border-r border-border p-3 space-y-2 bg-gradient-to-br from-primary/5 to-transparent w-full sm:w-[200px]">
                           <div className="px-1">
                             <h3 className="text-sm font-bold text-foreground">Quick Select</h3>
                           </div>
-                          <div className="flex flex-row sm:flex-col gap-2 flex-wrap sm:flex-nowrap">
+                          <div className="flex flex-row sm:flex-col gap-1.5 flex-wrap sm:flex-nowrap">
                             <Button
                               variant="ghost"
-                              className="flex-1 sm:w-full justify-start h-11 text-sm font-medium px-4 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
+                              className="flex-1 sm:w-full justify-start h-9 text-sm font-medium px-3 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
                               onClick={() => setDatePreset('today')}
                             >
                               Today
                             </Button>
                             <Button
                               variant="ghost"
-                              className="flex-1 sm:w-full justify-start h-11 text-sm font-medium px-4 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
+                              className="flex-1 sm:w-full justify-start h-9 text-sm font-medium px-3 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
                               onClick={() => setDatePreset('yesterday')}
                             >
                               Yesterday
                             </Button>
                             <Button
                               variant="ghost"
-                              className="flex-1 sm:w-full justify-start h-11 text-sm font-medium px-4 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
+                              className="flex-1 sm:w-full justify-start h-9 text-sm font-medium px-3 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
                               onClick={() => setDatePreset('week')}
                             >
                               Last 7 Days
                             </Button>
                             <Button
                               variant="ghost"
-                              className="flex-1 sm:w-full justify-start h-11 text-sm font-medium px-4 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
+                              className="flex-1 sm:w-full justify-start h-9 text-sm font-medium px-3 transition-all duration-200 hover:bg-primary/15 hover:text-primary hover:scale-105"
                               onClick={() => setDatePreset('month')}
                             >
                               Last 30 Days
                             </Button>
-                            <div className="hidden sm:block border-t border-border my-2 w-full" />
+                            <div className="hidden sm:block border-t border-border my-1.5 w-full" />
                             <Button
                               variant="ghost"
-                              className="flex-1 sm:w-full justify-start h-11 text-sm font-medium px-4 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+                              className="flex-1 sm:w-full justify-start h-9 text-sm font-medium px-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
                               onClick={() => setDatePreset('all')}
                             >
                               Clear Filter
                             </Button>
                           </div>
                         </div>
-                        <div className="p-4 flex justify-center items-center flex-1 overflow-auto">
+                        <div className="p-3 flex justify-center items-center flex-1 overflow-auto">
                           <Calendar
                             mode="range"
                             selected={{ from: tempDateFilter.from, to: tempDateFilter.to }}
@@ -1288,35 +1288,35 @@ export default function Admin() {
                       </div>
                       {/* Time Selection */}
                       {tempDateFilter.from && (
-                        <div className="border-t border-border p-5 space-y-4 bg-gradient-to-b from-muted/20 to-background animate-fade-in">
+                        <div className="border-t border-border p-3 space-y-3 bg-gradient-to-b from-muted/20 to-background animate-fade-in">
                           <h4 className="text-sm font-semibold text-foreground">Select Time Range</h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
                               <label className="text-sm font-medium text-foreground">Start Time</label>
                               <Input
                                 type="time"
                                 value={tempTimeFilter.fromTime}
                                 onChange={(e) => setTempTimeFilter(prev => ({ ...prev, fromTime: e.target.value }))}
-                                className="h-11 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary/30 border-border/50"
+                                className="h-9 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary/30 border-border/50"
                               />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                               <label className="text-sm font-medium text-foreground">End Time</label>
                               <Input
                                 type="time"
                                 value={tempTimeFilter.toTime}
                                 onChange={(e) => setTempTimeFilter(prev => ({ ...prev, toTime: e.target.value }))}
-                                className="h-11 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary/30 border-border/50"
+                                className="h-9 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary/30 border-border/50"
                               />
                             </div>
                           </div>
                         </div>
                       )}
                       {/* Apply Button for Date Picker */}
-                      <div className="px-5 py-4 border-t border-border bg-gradient-to-r from-primary/10 via-transparent to-primary/10">
+                      <div className="px-4 py-3 border-t border-border bg-gradient-to-r from-primary/10 via-transparent to-primary/10">
                         <Button 
                           onClick={applyDatePicker} 
-                          className="w-full h-12 font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200"
+                          className="w-full h-10 font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200"
                         >
                           Apply Date & Time Filter
                         </Button>
