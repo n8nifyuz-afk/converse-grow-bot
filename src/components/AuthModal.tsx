@@ -429,9 +429,9 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className="flex flex-col h-full">
+  const authContent = <div className="flex flex-col min-h-0 md:min-h-[420px]">
           {/* Auth Form */}
-          <div className="w-full p-4 md:p-6 flex flex-col h-full">
+          <div className="w-full p-4 md:p-6 flex flex-col">
             {/* Main Heading */}
             <div className="mb-6 md:mb-7 text-center">
               <h2 className="text-2xl md:text-3xl font-bold leading-tight">
