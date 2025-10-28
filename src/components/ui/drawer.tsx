@@ -37,7 +37,7 @@ const DrawerContent = React.forwardRef<
       style={{ touchAction: 'none' }}
       {...props}
     >
-      <div className="flex-1 overflow-y-auto overscroll-contain">
+      <div className="overflow-y-auto overscroll-contain">
         {children}
       </div>
     </DrawerPrimitive.Content>
