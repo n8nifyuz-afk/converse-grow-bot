@@ -132,25 +132,23 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [isTrialEligible, setIsTrialEligible] = useState(true);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
   const [snapPoint, setSnapPoint] = useState<number | string | null>(1);
+  const drawerContentRef = React.useRef<HTMLDivElement>(null);
   
   const allFeatures = getFeatures(t, selectedPlan);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   // Scroll to show the bottom of the modal (hide X button) on mobile when modal opens
   React.useEffect(() => {
-    if (open && isMobile && scrollRef.current) {
+    if (open && isMobile && drawerContentRef.current) {
       const scrollToBottom = () => {
-        if (scrollRef.current) {
-          // Force scroll to the absolute bottom
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        if (drawerContentRef.current) {
+          // Force scroll to the absolute bottom to hide X button
+          drawerContentRef.current.scrollTop = drawerContentRef.current.scrollHeight;
         }
       };
       
-      // Immediate scroll
-      scrollToBottom();
-      
-      // Multiple aggressive scroll attempts with longer delays to ensure bottom stays visible
-      const timeouts = [0, 10, 50, 100, 150, 200, 300, 400, 500, 700, 1000];
+      // Wait for drawer animation to complete, then scroll aggressively
+      const timeouts = [300, 350, 400, 450, 500, 600, 700, 800, 1000, 1200, 1500];
       const intervals: NodeJS.Timeout[] = [];
       
       timeouts.forEach(delay => {
@@ -301,13 +299,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative`}>
-            {/* Mobile Close Button - Positioned at top to scroll out of view */}
+            {/* Mobile Close Button - Positioned at top with large padding to be above viewport */}
             {isMobile && (
               <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-16 flex-shrink-0"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0"
                 style={{ 
-                  paddingTop: 'max(4rem, env(safe-area-inset-top))',
-                  paddingBottom: '1rem'
+                  paddingTop: 'calc(100vh - 100px)',
+                  paddingBottom: '1.5rem'
                 }}
               >
                 <button
@@ -588,17 +586,16 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
           open={open} 
           onOpenChange={onOpenChange} 
           dismissible={true}
-          snapPoints={[1, 0.5]}
-          activeSnapPoint={snapPoint}
-          setActiveSnapPoint={setSnapPoint}
+          snapPoints={[1]}
+          activeSnapPoint={1}
           modal={true}
         >
           <DrawerContent 
-            className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl flex flex-col overflow-hidden"
+            ref={drawerContentRef}
+            className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl overflow-y-scroll overscroll-contain touch-pan-y"
+            style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            <div ref={scrollRef} className="flex-1 overflow-y-scroll overscroll-contain touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
-              {modalContent}
-            </div>
+            {modalContent}
           </DrawerContent>
         </Drawer>
       ) : (
