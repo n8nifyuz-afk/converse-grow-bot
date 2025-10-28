@@ -264,15 +264,16 @@ export default function Admin() {
   // Temp state for date picker (before applying within the date picker popover)
   const [tempDateFilter, setTempDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [tempTimeFilter, setTempTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
-  const usersPerPage = 15;
+  const usersPerPage = 20; // Load 20 users per page
   useEffect(() => {
     checkAdminAccess();
   }, [user]);
+  // Fetch data when page changes
   useEffect(() => {
     if (isAdmin) {
       fetchTokenUsageData();
     }
-  }, [isAdmin]);
+  }, [isAdmin, currentPage]); // Re-fetch when page changes
   const checkAdminAccess = async () => {
     if (!user) {
       navigate('/');
@@ -351,47 +352,42 @@ export default function Admin() {
         setLoading(true);
       }
 
-      // Fetch ONLY first 200 users for fast initial load
-      console.log('Fetching first 200 user profiles...');
-      const {
-        data: allProfilesData,
-        error: profilesError
-      } = await supabase
+      console.log('[ADMIN] Starting to fetch page data...');
+
+      // Calculate offset based on current page
+      const offset = (currentPage - 1) * usersPerPage;
+      
+      // Fetch ONLY 20 users for current page with total count
+      const { data: profilesData, error: profilesError, count } = await supabase
         .from('profiles')
-        .select('user_id, email, display_name, created_at, ip_address, country')
+        .select('user_id, email, display_name, created_at, ip_address, country', { count: 'exact' })
         .order('created_at', { ascending: false })
-        .limit(200); // Only load 200 most recent users for fast loading
+        .range(offset, offset + usersPerPage - 1);
       
       if (profilesError) throw profilesError;
-      console.log('Loaded profiles:', allProfilesData?.length);
-
-      // Fetch subscriptions for loaded users (parallel to speed up)
-      const userIds = allProfilesData?.map(p => p.user_id) || [];
-      const {
-        data: subscriptionsData,
-        error: subscriptionsError
-      } = await supabase
-        .from('user_subscriptions')
-        .select('user_id, status, product_id, plan, plan_name, current_period_end, stripe_subscription_id, stripe_customer_id')
-        .in('user_id', userIds);
       
-      if (subscriptionsError) console.error('Error fetching subscriptions:', subscriptionsError);
+      console.log('[ADMIN] Loaded profiles for page:', profilesData?.length, 'Total:', count);
 
-      // DON'T load token usage on initial load - only when "Cost View" is clicked
+      // Fetch subscriptions only for these 20 users
+      const userIds = profilesData?.map(p => p.user_id) || [];
+      const { data: subscriptionsData } = await supabase
+        .from('user_subscriptions')
+        .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
+        .in('user_id', userIds);
+
       const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
 
-      // Initialize userMap with ALL users from profiles
-      const userMap = new Map<string, UserTokenUsage>();
-      allProfilesData?.forEach((profile: any) => {
+      // Build user data without token usage (load on demand)
+      const users: UserTokenUsage[] = profilesData?.map((profile: any) => {
         const subscription = subscriptionsMap.get(profile.user_id);
-        userMap.set(profile.user_id, {
+        return {
           user_id: profile.user_id,
           email: profile.email || 'Unknown',
           display_name: profile.display_name || profile.email?.split('@')[0] || 'Unknown User',
           created_at: profile.created_at,
           ip_address: profile.ip_address,
           country: profile.country,
-          model_usages: [], // Don't load token usage initially - load on demand
+          model_usages: [], // Load on demand when "Cost View" is clicked
           subscription_status: subscription && subscription.status === 'active' ? {
             subscribed: true,
             product_id: subscription.product_id,
@@ -407,17 +403,19 @@ export default function Admin() {
             stripe_subscription_id: null,
             stripe_customer_id: null
           }
-        });
-      });
+        };
+      }) || [];
       
-      console.log('Total users loaded:', userMap.size);
-      console.log('Active subscriptions:', subscriptionsData?.filter(s => s.status === 'active').length);
-      
-      setUserUsages(Array.from(userMap.values()));
+      console.log('[ADMIN] Loaded users:', users.length);
+      setUserUsages(users);
       setModelUsages([]);
+      
+      // Store total count for pagination
+      (window as any).__adminTotalUsers = count || 0;
+      
     } catch (error) {
-      console.error('Error fetching token usage:', error);
-      toast.error('Failed to load token usage data');
+      console.error('[ADMIN] Error fetching data:', error);
+      toast.error('Failed to load admin data');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -574,11 +572,10 @@ export default function Admin() {
     }
   });
 
-  // Pagination
-  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
-  const startIndex = (currentPage - 1) * usersPerPage;
-  const endIndex = startIndex + usersPerPage;
-  const paginatedUsers = sortedUsers.slice(startIndex, endIndex);
+  // Pagination - use direct data, no client-side filtering
+  const totalUsers = (window as any).__adminTotalUsers || userUsages.length;
+  const totalPages = Math.ceil(totalUsers / usersPerPage);
+  const paginatedUsers = userUsages; // Already paginated from server
 
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
@@ -1455,7 +1452,7 @@ export default function Admin() {
                     <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">Token Usage by User</CardTitle>
                   </div>
                   <CardDescription className="text-xs sm:text-sm mt-2 truncate">
-                    Showing {paginatedUsers.length} of {sortedUsers.length} users
+                    Showing {userUsages.length} users (Page {currentPage} of {totalPages})
                   </CardDescription>
                 </div>
               </div>
