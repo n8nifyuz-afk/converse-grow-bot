@@ -728,10 +728,10 @@ export default function Admin() {
     }
   });
 
-  // Pagination - use direct data, no client-side filtering
+  // Pagination - use sorted data
   const totalUsers = (window as any).__adminTotalUsers || userUsages.length;
   const totalPages = Math.ceil(totalUsers / usersPerPage);
-  const paginatedUsers = userUsages; // Already paginated from server
+  const paginatedUsers = sortedUsers; // Use sorted data instead of raw userUsages
 
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
