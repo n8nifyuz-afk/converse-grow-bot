@@ -798,9 +798,7 @@ export default function Admin() {
 
   // Reset to page 1 when filter, search, or sort changes (before fetching data)
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
+    setCurrentPage(1);
   }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]);
 
   // Fetch cost/token usage data for a specific user when "Cost View" is clicked
@@ -1274,6 +1272,7 @@ export default function Admin() {
                   {/* Apply Button */}
                   <div className="px-5 py-3 border-t border-border/50 bg-gradient-to-r from-muted/20 to-background">
                     <Button 
+                      type="button"
                       onClick={applyFilters} 
                       className="w-full h-10 font-semibold"
                     >
@@ -1375,6 +1374,7 @@ export default function Admin() {
                       {/* Apply Button */}
                       <div className="px-3 py-2.5 border-t border-border bg-muted/5">
                         <Button 
+                          type="button"
                           onClick={applyDatePicker} 
                           className="w-full h-9 font-semibold text-sm"
                         >
