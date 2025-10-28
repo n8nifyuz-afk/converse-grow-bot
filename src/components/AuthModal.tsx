@@ -507,24 +507,24 @@ export default function AuthModal({
             <div className="flex-1 flex flex-col">
               {mode === 'reset' ? <form onSubmit={handlePasswordReset} className="space-y-4">
                   <div className="text-sm text-muted-foreground mb-4">
-                    Enter your email and we'll send you a reset link.
+                    {t('authModal.resetDescription')}
                   </div>
-                  <Input type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required className="h-11 md:h-12 text-base" />
+                  <Input type="email" placeholder={t('authModal.enterEmail')} value={email} onChange={e => setEmail(e.target.value)} required className="h-11 md:h-12 text-base" />
                   <Button type="submit" disabled={loading || !email} className="w-full h-11 md:h-12 text-base">
                     {loading ? <>
                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                        Sending...
-                      </> : 'Send Reset Link'}
+                        {t('authModal.sending')}
+                      </> : t('authModal.sendResetLink')}
                   </Button>
                   <button type="button" onClick={() => {
             setMode('signin');
             setEmail('');
           }} className="text-sm text-primary hover:underline">
-                    ← Back to sign in
+                    {t('authModal.backToSignIn')}
                   </button>
                  </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-5">
                   <div className="text-sm md:text-base text-muted-foreground mb-2">
-                    Enter your phone number to receive a verification code.
+                    {t('authModal.enterPhoneNumber')}
                   </div>
                   <CountryPhoneInput
                     value={phone}
@@ -539,8 +539,8 @@ export default function AuthModal({
                   <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-12 md:h-13 text-base md:text-lg font-medium bg-black hover:bg-black/90 text-white dark:bg-primary dark:hover:bg-primary/90">
                     {phoneLoading ? <>
                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                        Sending code...
-                      </> : 'Send Verification Code'}
+                        {t('authModal.sendingCode')}
+                      </> : t('authModal.sendVerificationCode')}
                   </Button>
                   <button type="button" onClick={() => {
             setMode('signin');
@@ -772,7 +772,7 @@ export default function AuthModal({
                       >
                         {microsoftLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
-                            Continue with Microsoft
+                            {t('authModal.continueWithMicrosoft')}
                           </> : <>
                             <svg className="w-6 h-6 mr-3" viewBox="0 0 23 23" fill="none">
                               <path d="M0 0h11v11H0V0z" fill="#f25022"/>
@@ -780,7 +780,7 @@ export default function AuthModal({
                               <path d="M0 12h11v11H0V12z" fill="#7fba00"/>
                               <path d="M12 12h11v11H12V12z" fill="#ffb900"/>
                             </svg>
-                            Continue with Microsoft
+                            {t('authModal.continueWithMicrosoft')}
                           </>}
                       </Button>
 
@@ -793,7 +793,7 @@ export default function AuthModal({
                         <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                         </svg>
-                        Continue with Phone
+                        {t('authModal.continueWithPhone')}
                       </Button>
 
                       <div className="relative my-4">
@@ -807,7 +807,7 @@ export default function AuthModal({
                     </>}
 
                    <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
-                     <Input type="email" placeholder="Enter your email" value={email} onChange={e => {
+                     <Input type="email" placeholder={t('authModal.enterEmail')} value={email} onChange={e => {
               setEmail(e.target.value);
               setError('');
               // Show password field when email is entered, hide when cleared
@@ -864,19 +864,19 @@ export default function AuthModal({
             {/* Footer */}
             <div className="mt-5 md:mt-6 pt-5 border-t border-border">
               <div className="text-sm text-muted-foreground text-center">
-                By proceeding, you agree to our{' '}
+                {t('authModal.termsAgreement')}{' '}
                 <button onClick={() => {
             onClose();
             navigate('/terms');
           }} className="text-primary hover:underline">
-                  Terms of Service
+                  {t('authModal.termsOfService')}
                 </button>
-                {' '}and read our{' '}
+                {' '}{t('authModal.and')}{' '}
                 <button onClick={() => {
             onClose();
             navigate('/privacy');
           }} className="text-primary hover:underline">
-                  Privacy Policy
+                  {t('authModal.privacyPolicy')}
                 </button>
                 .
               </div>
