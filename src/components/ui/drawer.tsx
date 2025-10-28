@@ -35,14 +35,6 @@ const DrawerContent = React.forwardRef<
         className,
       )}
       style={{ touchAction: 'none' }}
-      onFocus={(e) => {
-        // Prevent scrolling when input is focused on mobile
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-          setTimeout(() => {
-            e.target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
-          }, 100);
-        }
-      }}
       {...props}
     >
       {children}

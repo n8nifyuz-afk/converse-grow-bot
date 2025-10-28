@@ -603,22 +603,39 @@ All colors MUST be HSL.
   animation-play-state: paused;
 }
 
-/* Mobile Keyboard Handling - Prevent drawer from scrolling up when keyboard appears */
+/* Mobile Keyboard Handling - Keep drawer stable when keyboard appears */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific fixes */
+  [data-vaul-drawer][data-vaul-drawer-visible] {
+    position: fixed !important;
+    bottom: 0 !important;
+    transform: none !important;
+  }
+}
+
 @media (max-width: 767px) {
+  /* Prevent body scroll when drawer is open */
   body:has([data-vaul-drawer][data-vaul-drawer-visible]) {
+    overflow: hidden;
     position: fixed;
     width: 100%;
-    height: 100%;
   }
   
+  /* Keep drawer at bottom */
   [data-vaul-drawer][data-vaul-drawer-visible] {
     position: fixed !important;
     bottom: 0 !important;
   }
   
-  /* Prevent input scroll behavior on focus */
+  /* Prevent scroll-into-view behavior */
+  [data-vaul-drawer] input:focus,
+  [data-vaul-drawer] textarea:focus {
+    scroll-margin: 0;
+  }
+  
+  /* Smooth transitions */
   [data-vaul-drawer] input,
   [data-vaul-drawer] textarea {
-    transform: translateZ(0);
+    transition: none;
   }
 }
