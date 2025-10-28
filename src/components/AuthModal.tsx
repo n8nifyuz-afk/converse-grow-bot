@@ -454,15 +454,20 @@ export default function AuthModal({
                   <div className="w-full">
                     <PhoneInput
                       international
+                      countryCallingCodeEditable={false}
                       defaultCountry="US"
                       value={phone}
                       onChange={(value) => setPhone(value || '')}
                       className="phone-input-wrapper"
+                      countrySelectProps={{
+                        className: 'country-select-dropdown',
+                      }}
                       numberInputProps={{
                         className: 'phone-number-input',
                         required: true,
-                        placeholder: 'Phone number',
+                        placeholder: 'Enter phone number',
                       }}
+                      flags={undefined}
                     />
                   </div>
                   {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
