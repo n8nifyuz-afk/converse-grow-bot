@@ -110,6 +110,11 @@
   flex-direction: column;
 }
 
+.country-dropdown.dropdown-above {
+  top: auto;
+  bottom: calc(100% + 0.5rem);
+}
+
 .country-search {
   padding: 0.625rem 0.875rem;
   border: none;

@@ -26,8 +26,10 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isDetectingCountry, setIsDetectingCountry] = useState(true);
+  const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Auto-detect country on mount
@@ -116,16 +118,8 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   };
 
   const handleInputFocus = () => {
-    // Close dropdown when focusing input on mobile to prevent conflicts
+    // Close dropdown when focusing input to prevent conflicts
     setIsDropdownOpen(false);
-    
-    // Scroll input into view on mobile after a short delay
-    setTimeout(() => {
-      inputRef.current?.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center'
-      });
-    }, 300);
   };
 
   const handleCountrySelect = (country: Country) => {
@@ -142,6 +136,28 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     }
   };
 
+  const toggleDropdown = () => {
+    if (!disabled && !isDetectingCountry) {
+      const newIsOpen = !isDropdownOpen;
+      setIsDropdownOpen(newIsOpen);
+      
+      if (newIsOpen && containerRef.current) {
+        // Calculate dropdown position based on available space
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const dropdownHeight = 370; // Approximate height of dropdown with search
+        
+        // If not enough space below and more space above, show above
+        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+          setDropdownPosition('above');
+        } else {
+          setDropdownPosition('below');
+        }
+      }
+    }
+  };
+
   const filteredCountries = allCountries.filter(country =>
     country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     country.dialCode.includes(searchQuery) ||
@@ -149,12 +165,12 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   );
 
   return (
-    <div className={`country-phone-input-container ${className}`} ref={dropdownRef}>
-      <div className="country-phone-input-wrapper">
+    <div className={`country-phone-input-container ${className}`} ref={containerRef}>
+      <div className="country-phone-input-wrapper" ref={dropdownRef}>
         {/* Country Code Selector */}
         <button
           type="button"
-          onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
+          onClick={toggleDropdown}
           disabled={disabled || isDetectingCountry}
           className="country-selector"
           title={selectedCountry.name}
@@ -188,7 +204,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
       {/* Dropdown */}
       {isDropdownOpen && (
-        <div className="country-dropdown">
+        <div className={`country-dropdown ${dropdownPosition === 'above' ? 'dropdown-above' : ''}`}>
           <input
             type="text"
             placeholder="Search country..."
