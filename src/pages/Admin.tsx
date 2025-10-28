@@ -464,10 +464,57 @@ export default function Admin() {
       // Calculate offset based on current page
       const offset = (currentPage - 1) * usersPerPage;
       
-      // Build query with filters
+      // Step 1: Get filtered user_ids based on plan filter if needed
+      let filteredUserIds: string[] | null = null;
+      
+      if (planFilter !== 'all') {
+        if (planFilter === 'free') {
+          // Get all user_ids that DON'T have active subscriptions
+          const { data: allProfiles } = await supabase
+            .from('profiles')
+            .select('user_id');
+          
+          const { data: activeSubscriptions } = await supabase
+            .from('user_subscriptions')
+            .select('user_id')
+            .eq('status', 'active');
+          
+          const subscribedUserIds = new Set(activeSubscriptions?.map(s => s.user_id) || []);
+          filteredUserIds = allProfiles?.filter(p => !subscribedUserIds.has(p.user_id)).map(p => p.user_id) || [];
+        } else {
+          // Get user_ids with specific plan (pro or ultra)
+          const planValue = planFilter === 'ultra' ? 'ultra_pro' : planFilter;
+          const { data: subscriptions } = await supabase
+            .from('user_subscriptions')
+            .select('user_id')
+            .eq('status', 'active')
+            .eq('plan', planValue);
+          
+          filteredUserIds = subscriptions?.map(s => s.user_id) || [];
+        }
+        
+        console.log('[ADMIN] Filtered user_ids by plan:', filteredUserIds.length);
+        
+        // If no users match the plan filter, return empty
+        if (filteredUserIds.length === 0) {
+          setUserUsages([]);
+          setModelUsages([]);
+          (window as any).__adminTotalUsers = 0;
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
+      }
+      
+      // Step 2: Build query with all filters
       let query = supabase
         .from('profiles')
         .select('user_id, email, display_name, created_at, ip_address, country', { count: 'exact' });
+      
+      // Apply plan filter user_ids
+      if (filteredUserIds !== null) {
+        query = query.in('user_id', filteredUserIds);
+      }
       
       // Apply search filter (name or email)
       if (searchQuery.trim()) {
@@ -494,7 +541,7 @@ export default function Admin() {
         query = query.eq('country', countryFilter);
       }
       
-      // Fetch filtered profiles with pagination
+      // Step 3: Apply pagination and fetch
       const { data: profilesData, error: profilesError, count } = await query
         .order('created_at', { ascending: false })
         .range(offset, offset + usersPerPage - 1);
@@ -509,7 +556,7 @@ export default function Admin() {
       if (userIds.length === 0) {
         setUserUsages([]);
         setModelUsages([]);
-        (window as any).__adminTotalUsers = 0;
+        (window as any).__adminTotalUsers = count || 0;
         setLoading(false);
         setRefreshing(false);
         return;
@@ -523,7 +570,7 @@ export default function Admin() {
       const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
 
       // Build user data without token usage (load on demand)
-      let users: UserTokenUsage[] = profilesData?.map((profile: any) => {
+      const users: UserTokenUsage[] = profilesData?.map((profile: any) => {
         const subscription = subscriptionsMap.get(profile.user_id);
         return {
           user_id: profile.user_id,
@@ -550,24 +597,6 @@ export default function Admin() {
           }
         };
       }) || [];
-      
-      // Apply plan filter (client-side because it depends on subscription data)
-      if (planFilter !== 'all') {
-        users = users.filter(user => {
-          const userPlan = getUserPlan(user);
-          return userPlan === planFilter;
-        });
-      }
-      
-      // Apply subscription status filter
-      if (subscriptionStatusFilter !== 'all') {
-        users = users.filter(user => {
-          const isSubscribed = user.subscription_status?.subscribed;
-          if (subscriptionStatusFilter === 'subscribed' && !isSubscribed) return false;
-          if (subscriptionStatusFilter === 'free' && isSubscribed) return false;
-          return true;
-        });
-      }
       
       console.log('[ADMIN] Loaded users after filters:', users.length);
       setUserUsages(users);
