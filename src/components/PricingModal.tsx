@@ -140,23 +140,20 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   // Scroll to show the bottom of the modal (hide X button) on mobile when modal opens
   React.useEffect(() => {
     if (open && isMobile) {
-      // Wait for drawer to fully render and animate
       const scrollToBottom = () => {
         if (drawerContentRef.current) {
-          // Scroll to bottom to hide the X button above the viewport
-          const scrollHeight = drawerContentRef.current.scrollHeight;
-          const clientHeight = drawerContentRef.current.clientHeight;
-          drawerContentRef.current.scrollTop = scrollHeight - clientHeight;
+          // Scroll to bottom - this will show the pricing options and hide X button above
+          drawerContentRef.current.scrollTop = drawerContentRef.current.scrollHeight;
         }
       };
       
-      // Multiple attempts with increasing delays to handle animation timing
-      const delays = [100, 200, 300, 400, 500, 700, 900, 1200];
+      // Wait for drawer animation and content render, then scroll aggressively
+      const delays = [300, 400, 500, 600, 700, 900, 1100, 1400];
       const timeouts = delays.map(delay => setTimeout(scrollToBottom, delay));
       
       return () => timeouts.forEach(clearTimeout);
     }
-  }, [open, isMobile]);
+  }, [open, isMobile, selectedPeriod, checkingEligibility]);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
@@ -581,11 +578,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
           modal={true}
         >
           <DrawerContent 
-            ref={drawerContentRef}
-            className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl overflow-y-scroll overscroll-contain touch-pan-y"
-            style={{ WebkitOverflowScrolling: 'touch' }}
+            className="h-[100dvh] max-h-[100dvh] bg-gradient-to-br from-white via-zinc-50/50 to-white border-none rounded-t-2xl flex flex-col"
           >
-            {modalContent}
+            <div 
+              ref={drawerContentRef}
+              className="flex-1 overflow-y-auto overscroll-contain touch-pan-y"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              {modalContent}
+            </div>
           </DrawerContent>
         </Drawer>
       ) : (
