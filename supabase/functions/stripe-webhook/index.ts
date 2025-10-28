@@ -592,6 +592,13 @@ serve(async (req) => {
 
           // Send subscription purchase webhook
           try {
+            // Fetch user profile for IP and country data
+            const { data: userProfile } = await supabaseClient
+              .from('profiles')
+              .select('ip_address, country')
+              .eq('user_id', user.id)
+              .single();
+
             const webhookPayload = {
               plan_name: subscription.plan_name || planType,
               user_id: user.id,
@@ -599,6 +606,8 @@ serve(async (req) => {
               price: planPrice,
               currency: currency,
               plan_duration: planDuration,
+              ip_address: userProfile?.ip_address || null,
+              country: userProfile?.country || null,
               timestamp: new Date().toISOString()
             };
 
