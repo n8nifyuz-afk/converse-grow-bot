@@ -8,12 +8,20 @@ import { supabase } from '@/integrations/supabase/client';
 export function initLanguageDetection() {
   const detectAndSetLanguage = async () => {
     try {
-      // First, check if user is logged in and has a saved language preference in Supabase
+      // First, check if user is logged in and has a saved language preference in database
       const { data: { user } } = await supabase.auth.getUser();
-      if (user?.user_metadata?.language) {
-        await i18n.changeLanguage(user.user_metadata.language);
-        localStorage.setItem('i18nextLng', user.user_metadata.language);
-        return; // User's saved preference takes highest priority
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('language')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.language) {
+          await i18n.changeLanguage(profile.language);
+          localStorage.setItem('i18nextLng', profile.language);
+          return; // User's saved preference takes highest priority
+        }
       }
 
       // Second, check localStorage for manually set language

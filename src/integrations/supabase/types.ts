@@ -265,6 +265,7 @@ export type Database = {
           gender: string | null
           id: string
           ip_address: string | null
+          language: string | null
           last_login_at: string | null
           locale: string | null
           login_count: number | null
@@ -289,6 +290,7 @@ export type Database = {
           gender?: string | null
           id?: string
           ip_address?: string | null
+          language?: string | null
           last_login_at?: string | null
           locale?: string | null
           login_count?: number | null
@@ -313,6 +315,7 @@ export type Database = {
           gender?: string | null
           id?: string
           ip_address?: string | null
+          language?: string | null
           last_login_at?: string | null
           locale?: string | null
           login_count?: number | null

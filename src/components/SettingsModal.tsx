@@ -107,12 +107,13 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     // Save to localStorage for non-logged-in users
     localStorage.setItem('i18nextLng', newLanguage);
     
-    // Save to Supabase user metadata for logged-in users
+    // Save to database for logged-in users
     if (user) {
       try {
-        const { error } = await supabase.auth.updateUser({
-          data: { language: newLanguage }
-        });
+        const { error } = await supabase
+          .from('profiles')
+          .update({ language: newLanguage })
+          .eq('user_id', user.id);
         
         if (error) {
           console.error('Failed to save language preference:', error);
