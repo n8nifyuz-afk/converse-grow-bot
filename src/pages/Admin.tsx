@@ -1048,7 +1048,7 @@ export default function Admin() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-full sm:w-[400px] md:w-[440px] p-0 animate-scale-in shadow-xl border-border/50" align="end">
+              <PopoverContent className="w-[95vw] sm:w-[580px] md:w-[640px] max-w-[640px] p-0 animate-scale-in shadow-xl border-border/50" align="end">
                 <div className="space-y-0">
                   {/* Header */}
                   <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-gradient-to-r from-background to-muted/20">
@@ -1274,7 +1274,7 @@ export default function Admin() {
                             </Button>
                           </div>
                         </div>
-                        <div className="p-4 sm:p-5 flex justify-center items-center flex-1 bg-gradient-to-tr from-transparent to-primary/5">
+                        <div className="p-4 flex justify-center items-center flex-1 overflow-auto">
                           <Calendar
                             mode="range"
                             selected={{ from: tempDateFilter.from, to: tempDateFilter.to }}
