@@ -311,31 +311,24 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             {/* Mobile Close Button - Space and button fade in together */}
             {isMobile && (
               <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0 relative overflow-hidden"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0 transition-all duration-300"
                 style={{ 
-                  paddingTop: 'max(3rem, env(safe-area-inset-top))',
-                  paddingBottom: '1rem'
+                  paddingTop: showCloseButton ? 'max(3rem, env(safe-area-inset-top))' : '0',
+                  paddingBottom: showCloseButton ? '1rem' : '0',
+                  opacity: showCloseButton ? 1 : 0
                 }}
               >
-                <div
-                  className="transition-all duration-300"
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
                   style={{
-                    opacity: showCloseButton ? 1 : 0,
-                    transform: showCloseButton ? 'translateY(0)' : 'translateY(-100%)'
+                    pointerEvents: showCloseButton ? 'auto' : 'none'
                   }}
+                  aria-label="Close"
                 >
-                  <button
-                    onClick={() => onOpenChange(false)}
-                    className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
-                    style={{
-                      pointerEvents: showCloseButton ? 'auto' : 'none'
-                    }}
-                    aria-label="Close"
-                  >
-                    <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
-                    <span className="sr-only">Close</span>
-                  </button>
-                </div>
+                  <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
+                  <span className="sr-only">Close</span>
+                </button>
               </div>
             )}
             
