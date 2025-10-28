@@ -1,37 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-
-interface Country {
-  code: string;
-  dialCode: string;
-  name: string;
-  format: RegExp;
-  placeholder: string;
-  maxLength: number;
-}
-
-const countries: Country[] = [
-  { code: 'US', dialCode: '+1', name: 'United States', format: /^\d{10}$/, placeholder: '2025551234', maxLength: 10 },
-  { code: 'UZ', dialCode: '+998', name: 'Uzbekistan', format: /^\d{9}$/, placeholder: '901234567', maxLength: 9 },
-  { code: 'VE', dialCode: '+58', name: 'Venezuela', format: /^\d{10}$/, placeholder: '4241234567', maxLength: 10 },
-  { code: 'GB', dialCode: '+44', name: 'United Kingdom', format: /^\d{10}$/, placeholder: '7400123456', maxLength: 10 },
-  { code: 'CN', dialCode: '+86', name: 'China', format: /^\d{11}$/, placeholder: '13800138000', maxLength: 11 },
-  { code: 'IN', dialCode: '+91', name: 'India', format: /^\d{10}$/, placeholder: '9876543210', maxLength: 10 },
-  { code: 'RU', dialCode: '+7', name: 'Russia', format: /^\d{10}$/, placeholder: '9161234567', maxLength: 10 },
-  { code: 'BR', dialCode: '+55', name: 'Brazil', format: /^\d{11}$/, placeholder: '11987654321', maxLength: 11 },
-  { code: 'JP', dialCode: '+81', name: 'Japan', format: /^\d{10}$/, placeholder: '9012345678', maxLength: 10 },
-  { code: 'DE', dialCode: '+49', name: 'Germany', format: /^\d{10,11}$/, placeholder: '15012345678', maxLength: 11 },
-  { code: 'FR', dialCode: '+33', name: 'France', format: /^\d{9}$/, placeholder: '612345678', maxLength: 9 },
-  { code: 'IT', dialCode: '+39', name: 'Italy', format: /^\d{10}$/, placeholder: '3123456789', maxLength: 10 },
-  { code: 'ES', dialCode: '+34', name: 'Spain', format: /^\d{9}$/, placeholder: '612345678', maxLength: 9 },
-  { code: 'CA', dialCode: '+1', name: 'Canada', format: /^\d{10}$/, placeholder: '4165551234', maxLength: 10 },
-  { code: 'AU', dialCode: '+61', name: 'Australia', format: /^\d{9}$/, placeholder: '412345678', maxLength: 9 },
-  { code: 'MX', dialCode: '+52', name: 'Mexico', format: /^\d{10}$/, placeholder: '5512345678', maxLength: 10 },
-  { code: 'TR', dialCode: '+90', name: 'Turkey', format: /^\d{10}$/, placeholder: '5321234567', maxLength: 10 },
-  { code: 'SA', dialCode: '+966', name: 'Saudi Arabia', format: /^\d{9}$/, placeholder: '501234567', maxLength: 9 },
-  { code: 'AE', dialCode: '+971', name: 'UAE', format: /^\d{9}$/, placeholder: '501234567', maxLength: 9 },
-  { code: 'PK', dialCode: '+92', name: 'Pakistan', format: /^\d{10}$/, placeholder: '3001234567', maxLength: 10 },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { allCountries, type Country, getCountryByCode, detectCountryFromIP } from '@/utils/countryPhoneCodes';
 
 interface CountryPhoneInputProps {
   value: string;
@@ -50,22 +20,68 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   disabled = false,
   showValidation = false,
 }) => {
-  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
+  const [selectedCountry, setSelectedCountry] = useState<Country>(allCountries[0]);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [isDetectingCountry, setIsDetectingCountry] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Auto-detect country on mount
+    const detectAndSetCountry = async () => {
+      try {
+        // First, try to get country from user's profile
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('country')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (profile?.country) {
+            const detectedCountry = getCountryByCode(profile.country);
+            if (detectedCountry) {
+              setSelectedCountry(detectedCountry);
+              console.log('Country detected from profile:', detectedCountry.name);
+              setIsDetectingCountry(false);
+              return;
+            }
+          }
+        }
+        
+        // If no profile country, try IP-based detection
+        const countryCode = await detectCountryFromIP();
+        if (countryCode) {
+          const detectedCountry = getCountryByCode(countryCode);
+          if (detectedCountry) {
+            setSelectedCountry(detectedCountry);
+            console.log('Country detected from IP:', detectedCountry.name);
+          }
+        }
+      } catch (error) {
+        console.error('Error detecting country:', error);
+      } finally {
+        setIsDetectingCountry(false);
+      }
+    };
+
     // Parse initial value if provided
     if (value && value.startsWith('+')) {
-      const country = countries.find(c => value.startsWith(c.dialCode));
+      const country = allCountries.find(c => value.startsWith(c.dialCode));
       if (country) {
         setSelectedCountry(country);
         setPhoneNumber(value.substring(country.dialCode.length));
+        setIsDetectingCountry(false);
+      } else {
+        detectAndSetCountry();
       }
+    } else {
+      detectAndSetCountry();
     }
   }, []);
 
@@ -126,9 +142,10 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     }
   };
 
-  const filteredCountries = countries.filter(country =>
+  const filteredCountries = allCountries.filter(country =>
     country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    country.dialCode.includes(searchQuery)
+    country.dialCode.includes(searchQuery) ||
+    country.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -138,10 +155,13 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
         <button
           type="button"
           onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
-          disabled={disabled}
+          disabled={disabled || isDetectingCountry}
           className="country-selector"
+          title={selectedCountry.name}
         >
-          <span className="dial-code">{selectedCountry.dialCode}</span>
+          <span className="dial-code">
+            {isDetectingCountry ? '...' : selectedCountry.dialCode}
+          </span>
           <ChevronDown className={`chevron ${isDropdownOpen ? 'rotate' : ''}`} size={16} />
         </button>
 
