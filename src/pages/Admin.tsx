@@ -385,171 +385,25 @@ export default function Admin() {
     }
   };
   
-  // Fetch aggregate statistics (counts and totals) - optimized for performance
+  // Fetch aggregate statistics (counts and totals) - optimized query
   const fetchAggregateStats = async () => {
     try {
-      console.log('Fetching aggregate statistics with filters...');
+      console.log('Fetching aggregate statistics...');
       
-      // Step 1: Build filtered user_ids list based on plan filter
-      let filteredUserIds: string[] | null = null;
-      
-      if (planFilter !== 'all') {
-        if (planFilter === 'free') {
-          // Get all user_ids that DON'T have active subscriptions
-          const { data: allProfiles } = await supabase
-            .from('profiles')
-            .select('user_id');
-          
-          const { data: activeSubscriptions } = await supabase
-            .from('user_subscriptions')
-            .select('user_id')
-            .eq('status', 'active');
-          
-          const subscribedUserIds = new Set(activeSubscriptions?.map(s => s.user_id) || []);
-          filteredUserIds = allProfiles?.filter(p => !subscribedUserIds.has(p.user_id)).map(p => p.user_id) || [];
-        } else {
-          // Get user_ids with specific plan (pro or ultra)
-          const planValue = planFilter === 'ultra' ? 'ultra_pro' : planFilter;
-          const { data: subscriptions } = await supabase
-            .from('user_subscriptions')
-            .select('user_id')
-            .eq('status', 'active')
-            .eq('plan', planValue);
-          
-          filteredUserIds = subscriptions?.map(s => s.user_id) || [];
-        }
-      }
-      
-      // Step 2: Build base query with filters for counting users
-      let profileQuery = supabase
+      // 1. Get total count of profiles
+      const { count: totalCount, error: countError } = await supabase
         .from('profiles')
-        .select('user_id', { count: 'exact', head: true });
-      
-      // Apply plan filter user_ids
-      if (filteredUserIds !== null) {
-        if (filteredUserIds.length === 0) {
-          setAggregateStats({
-            totalUsers: 0,
-            freeUsers: 0,
-            proUsers: 0,
-            ultraProUsers: 0,
-            totalCost: 0,
-            totalTokens: 0
-          });
-          return;
-        }
-        profileQuery = profileQuery.in('user_id', filteredUserIds);
-      }
-      
-      // Apply search filter
-      if (searchQuery.trim()) {
-        const search = searchQuery.trim();
-        profileQuery = profileQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
-      }
-      
-      // Apply date filter
-      if (dateFilter.from || dateFilter.to) {
-        const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
-        const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
-        
-        if (fromDateTime && toDateTime) {
-          profileQuery = profileQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
-        } else if (fromDateTime) {
-          profileQuery = profileQuery.gte('created_at', fromDateTime.toISOString());
-        } else if (toDateTime) {
-          profileQuery = profileQuery.lte('created_at', toDateTime.toISOString());
-        }
-      }
-      
-      // Apply country filter
-      if (countryFilter !== 'all') {
-        profileQuery = profileQuery.eq('country', countryFilter);
-      }
-      
-      // Step 3: Get user IDs for subscription counting (lightweight query)
-      let userIdsQuery = supabase
-        .from('profiles')
-        .select('user_id');
-      
-      // Apply same filters
-      if (filteredUserIds !== null) {
-        userIdsQuery = userIdsQuery.in('user_id', filteredUserIds);
-      }
-      if (searchQuery.trim()) {
-        const search = searchQuery.trim();
-        userIdsQuery = userIdsQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
-      }
-      if (dateFilter.from || dateFilter.to) {
-        const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
-        const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
-        if (fromDateTime && toDateTime) {
-          userIdsQuery = userIdsQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
-        } else if (fromDateTime) {
-          userIdsQuery = userIdsQuery.gte('created_at', fromDateTime.toISOString());
-        } else if (toDateTime) {
-          userIdsQuery = userIdsQuery.lte('created_at', toDateTime.toISOString());
-        }
-      }
-      if (countryFilter !== 'all') {
-        userIdsQuery = userIdsQuery.eq('country', countryFilter);
-      }
-      
-      // Execute queries in parallel for speed
-      const [countResult, userIdsResult] = await Promise.all([
-        profileQuery,
-        userIdsQuery
-      ]);
-      
-      const { count: totalCount, error: countError } = countResult;
-      const { data: filteredProfiles, error: profileError } = userIdsResult;
+        .select('*', { count: 'exact', head: true });
       
       if (countError) throw countError;
-      if (profileError) throw profileError;
       
-      const filteredProfileUserIds = filteredProfiles?.map(p => p.user_id) || [];
-      
-      if (filteredProfileUserIds.length === 0) {
-        setAggregateStats({
-          totalUsers: 0,
-          freeUsers: 0,
-          proUsers: 0,
-          ultraProUsers: 0,
-          totalCost: 0,
-          totalTokens: 0
-        });
-        return;
-      }
-      
-      // Step 4: Get subscription counts (parallel with cost calculation)
-      const subscriptionPromise = supabase
+      // 2. Get count of users with active subscriptions by plan
+      const { data: subscriptionCounts, error: subCountError } = await supabase
         .from('user_subscriptions')
         .select('plan')
-        .in('user_id', filteredProfileUserIds)
         .eq('status', 'active');
       
-      // Step 5: For cost/tokens - ONLY fetch model and token counts, limit to reasonable batch
-      // If there are many users, we'll estimate or skip for performance
-      let totalCost = 0;
-      let totalTokens = 0;
-      
-      const costPromise = filteredProfileUserIds.length > 100 
-        ? Promise.resolve({ data: null, error: null }) // Skip cost calc for large datasets
-        : supabase
-            .from('token_usage')
-            .select('model, input_tokens, output_tokens')
-            .in('user_id', filteredProfileUserIds)
-            .limit(10000); // Limit to prevent massive queries
-      
-      const [subscriptionResult, costResult] = await Promise.all([
-        subscriptionPromise,
-        costPromise
-      ]);
-      
-      const { data: subscriptionCounts, error: subCountError } = subscriptionResult;
-      const { data: costData, error: costError } = costResult;
-      
       if (subCountError) throw subCountError;
-      if (costError && filteredProfileUserIds.length <= 100) throw costError;
       
       // Count by plan type
       const proCount = subscriptionCounts?.filter(s => s.plan === 'pro').length || 0;
@@ -557,14 +411,22 @@ export default function Admin() {
       const subscribedCount = proCount + ultraProCount;
       const freeCount = (totalCount || 0) - subscribedCount;
       
-      // Calculate total cost only if we have data
-      if (costData && filteredProfileUserIds.length <= 100) {
-        costData.forEach(usage => {
-          const cost = calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0);
-          totalCost += cost;
-          totalTokens += (usage.input_tokens || 0) + (usage.output_tokens || 0);
-        });
-      }
+      // 3. Get total cost from token_usage (aggregate sum)
+      const { data: costData, error: costError } = await supabase
+        .from('token_usage')
+        .select('model, input_tokens, output_tokens');
+      
+      if (costError) throw costError;
+      
+      // Calculate total cost
+      let totalCost = 0;
+      let totalTokens = 0;
+      
+      costData?.forEach(usage => {
+        const cost = calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0);
+        totalCost += cost;
+        totalTokens += (usage.input_tokens || 0) + (usage.output_tokens || 0);
+      });
       
       // Update aggregate stats
       setAggregateStats({
@@ -581,8 +443,7 @@ export default function Admin() {
         freeUsers: freeCount,
         proUsers: proCount,
         ultraProUsers: ultraProCount,
-        totalCost: totalCost.toFixed(2),
-        note: filteredProfileUserIds.length > 100 ? 'Cost calculation skipped for performance' : 'Full cost calculated'
+        totalCost: totalCost.toFixed(2)
       });
     } catch (error) {
       console.error('Error fetching aggregate stats:', error);
