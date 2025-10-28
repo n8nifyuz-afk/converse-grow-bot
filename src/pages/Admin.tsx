@@ -351,20 +351,20 @@ export default function Admin() {
         setLoading(true);
       }
 
-      // Fetch ALL profiles in batches (Supabase default limit is 1000)
+      // Fetch ONLY basic profile info for initial load (optimized)
       let allProfilesData: any[] = [];
       let from = 0;
       const batchSize = 1000;
       let hasMore = true;
 
-      console.log('Fetching all user profiles...');
+      console.log('Fetching basic user profiles...');
       while (hasMore) {
         const {
           data: batchData,
           error: batchError
         } = await supabase
           .from('profiles')
-          .select('user_id, email, display_name, signup_method, created_at, ip_address, country, avatar_url, oauth_provider, phone_number, gender, date_of_birth, locale, timezone, oauth_metadata')
+          .select('user_id, email, display_name, created_at, ip_address, country')
           .order('created_at', { ascending: false })
           .range(from, from + batchSize - 1);
         
@@ -374,7 +374,7 @@ export default function Admin() {
           allProfilesData = [...allProfilesData, ...batchData];
           console.log(`Fetched ${batchData.length} profiles (total so far: ${allProfilesData.length})`);
           from += batchSize;
-          hasMore = batchData.length === batchSize; // Continue if we got a full batch
+          hasMore = batchData.length === batchSize;
         } else {
           hasMore = false;
         }
