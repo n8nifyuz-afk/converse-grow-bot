@@ -728,7 +728,7 @@ serve(async (req) => {
                             <tr>
                               <td style="padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
                                 <p style="margin: 0; font-size: 13px; line-height: 20px; color: #666666;">
-                                  If you have any questions, please contact us through our <a href="https://www.chatl.ai/help-center/" style="color: #000000; text-decoration: underline;">help center</a>.
+                                  If you have any questions, please contact us at <a href="mailto:support@chatl.ai" style="color: #000000; text-decoration: underline;">support@chatl.ai</a>.
                                 </p>
                               </td>
                             </tr>
