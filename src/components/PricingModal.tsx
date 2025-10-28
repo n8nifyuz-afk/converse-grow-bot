@@ -134,19 +134,42 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const [snapPoint, setSnapPoint] = useState<number | string | null>(1);
   const [showCloseButton, setShowCloseButton] = useState(false);
   
-  // Show X button when drawer is at 50% snap point
-  React.useEffect(() => {
-    if (isMobile && snapPoint === 0.5) {
-      setShowCloseButton(true);
-    } else if (isMobile) {
-      setShowCloseButton(false);
-    } else {
-      setShowCloseButton(true);
-    }
-  }, [snapPoint, isMobile]);
-  
   const allFeatures = getFeatures(t, selectedPlan);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  // Hide close button for first 3 seconds on mobile
+  React.useEffect(() => {
+    if (open && isMobile) {
+      setShowCloseButton(false);
+      const timer = setTimeout(() => {
+        setShowCloseButton(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else if (open && !isMobile) {
+      setShowCloseButton(true);
+    }
+  }, [open, isMobile]);
+
+  // Scroll to show terms text and subscribe button on mobile when modal opens
+  React.useEffect(() => {
+    if (open && isMobile && scrollRef.current) {
+      // Immediate scroll to bottom
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      
+      // Multiple aggressive scroll attempts to ensure bottom stays visible
+      const scrollToBottom = () => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      };
+      
+      // Rapid scroll attempts
+      const timeouts = [0, 50, 100, 200, 300, 500, 800];
+      timeouts.forEach(delay => {
+        setTimeout(scrollToBottom, delay);
+      });
+    }
+  }, [open, isMobile, checkingEligibility, isTrialEligible, selectedPeriod]);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
@@ -285,23 +308,27 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   const modalContent = (
     <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative">
-            {/* Mobile Drag Handle & Close Button */}
+            {/* Mobile Close Button - Space and button fade in together */}
             {isMobile && (
-              <div className="bg-white border-b border-zinc-200 flex flex-col items-center px-4 flex-shrink-0 pt-3 pb-2">
-                {/* Drag Handle */}
-                <div className="w-12 h-1.5 bg-zinc-300 rounded-full mb-3" />
-                
-                {/* Close Button - appears when at 50% snap point */}
-                {showCloseButton && (
-                  <button
-                    onClick={() => onOpenChange(false)}
-                    className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer animate-fade-in"
-                    aria-label="Close"
-                  >
-                    <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
-                    <span className="sr-only">Close</span>
-                  </button>
-                )}
+              <div 
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0 transition-all duration-300"
+                style={{ 
+                  paddingTop: showCloseButton ? 'max(3rem, env(safe-area-inset-top))' : '0',
+                  paddingBottom: showCloseButton ? '1rem' : '0',
+                  opacity: showCloseButton ? 1 : 0
+                }}
+              >
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
+                  style={{
+                    pointerEvents: showCloseButton ? 'auto' : 'none'
+                  }}
+                  aria-label="Close"
+                >
+                  <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
+                  <span className="sr-only">Close</span>
+                </button>
               </div>
             )}
             
@@ -357,7 +384,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
             </div>
 
             {/* Right Panel - Pricing */}
-            <div ref={scrollRef} className="w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible pb-5 sm:pb-6">
+            <div ref={scrollRef} className={`w-full md:w-5/12 p-4 sm:p-5 md:p-5 flex flex-col bg-gradient-to-br from-white to-zinc-50/50 justify-between min-h-0 overflow-y-auto md:overflow-visible ${isMobile ? 'pb-32' : 'pb-5 sm:pb-6'}`}>
               <div className="mb-6 sm:mb-2.5 flex-shrink-0">
                 <h2 className="text-xl sm:text-2xl md:text-2xl font-bold mb-1 sm:mb-1 bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent leading-tight">
                   {t('pricingModal.chooseYourPlan')}
