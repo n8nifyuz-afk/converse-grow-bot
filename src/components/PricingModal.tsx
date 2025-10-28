@@ -137,17 +137,35 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const allFeatures = getFeatures(t, selectedPlan);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // Hide close button for first 3 seconds on mobile
+  // Show close button when user scrolls up on mobile
   React.useEffect(() => {
-    if (open && isMobile) {
-      setShowCloseButton(false);
-      const timer = setTimeout(() => {
-        setShowCloseButton(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    } else if (open && !isMobile) {
+    if (!open) return;
+    
+    if (!isMobile) {
       setShowCloseButton(true);
+      return;
     }
+
+    // On mobile, show button only when scrolled up
+    const handleScroll = () => {
+      if (scrollRef.current) {
+        // Show button if scrolled up from initial position (less than 50px from top)
+        setShowCloseButton(scrollRef.current.scrollTop < 50);
+      }
+    };
+
+    const scrollElement = scrollRef.current;
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', handleScroll);
+      // Initial state - hidden
+      setShowCloseButton(false);
+    }
+
+    return () => {
+      if (scrollElement) {
+        scrollElement.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, [open, isMobile]);
 
   // Scroll to show terms text and subscribe button on mobile when modal opens
