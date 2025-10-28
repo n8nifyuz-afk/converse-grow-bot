@@ -365,7 +365,7 @@ export default function Admin() {
       if (profilesError) throw profilesError;
       console.log('Loaded profiles:', allProfilesData?.length);
 
-      // Fetch ONLY subscriptions for the loaded users
+      // Fetch subscriptions for loaded users (parallel to speed up)
       const userIds = allProfilesData?.map(p => p.user_id) || [];
       const {
         data: subscriptionsData,
@@ -377,36 +377,8 @@ export default function Admin() {
       
       if (subscriptionsError) console.error('Error fetching subscriptions:', subscriptionsError);
 
-      // Fetch ONLY token usage for the loaded users (last 5000 records)
-      const {
-        data: tokenData,
-        error: tokenError
-      } = await supabase
-        .from('token_usage')
-        .select('user_id, model, input_tokens, output_tokens')
-        .in('user_id', userIds)
-        .order('created_at', { ascending: false })
-        .limit(5000); // Only fetch recent records for loaded users
-      
-      if (tokenError) console.error('Error fetching token usage:', tokenError);
-
-      // Create maps for quick lookup
+      // DON'T load token usage on initial load - only when "Cost View" is clicked
       const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
-
-      // Aggregate token usage by user
-      const userTokenMap = new Map();
-      tokenData?.forEach((usage: any) => {
-        const cost = calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0);
-        if (!userTokenMap.has(usage.user_id)) {
-          userTokenMap.set(usage.user_id, []);
-        }
-        userTokenMap.get(usage.user_id).push({
-          model: usage.model,
-          input_tokens: usage.input_tokens || 0,
-          output_tokens: usage.output_tokens || 0,
-          cost
-        });
-      });
 
       // Initialize userMap with ALL users from profiles
       const userMap = new Map<string, UserTokenUsage>();
@@ -419,7 +391,7 @@ export default function Admin() {
           created_at: profile.created_at,
           ip_address: profile.ip_address,
           country: profile.country,
-          model_usages: userTokenMap.get(profile.user_id) || [],
+          model_usages: [], // Don't load token usage initially - load on demand
           subscription_status: subscription && subscription.status === 'active' ? {
             subscribed: true,
             product_id: subscription.product_id,
@@ -753,6 +725,43 @@ export default function Admin() {
   useEffect(() => {
     setCurrentPage(1);
   }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]);
+
+  // Fetch cost/token usage data for a specific user when "Cost View" is clicked
+  const fetchUserCostData = async (userId: string) => {
+    try {
+      console.log('Fetching cost data for user:', userId);
+      
+      // Fetch token usage for this specific user only
+      const { data: tokenData, error: tokenError } = await supabase
+        .from('token_usage')
+        .select('model, input_tokens, output_tokens')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1000); // Last 1000 records for this user
+      
+      if (tokenError) throw tokenError;
+      
+      // Calculate costs
+      const modelUsages = tokenData?.map(usage => ({
+        model: usage.model,
+        input_tokens: usage.input_tokens || 0,
+        output_tokens: usage.output_tokens || 0,
+        cost: calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0)
+      })) || [];
+      
+      // Update the user's model_usages in state
+      setUserUsages(prev => prev.map(u => 
+        u.user_id === userId 
+          ? { ...u, model_usages: modelUsages }
+          : u
+      ));
+      
+      console.log('Loaded cost data:', modelUsages.length, 'records');
+    } catch (error) {
+      console.error('Error fetching user cost data:', error);
+      toast.error('Failed to load cost data');
+    }
+  };
 
   // Fetch subscription status for a specific user
   const fetchUserSubscription = async (userId: string) => {
@@ -1539,7 +1548,9 @@ export default function Admin() {
                   ) : (
                     <div className="space-y-3 p-4">
                       {paginatedUsers.map(usage => {
-                        const totalCost = usage.model_usages.reduce((sum, m) => sum + m.cost, 0);
+                        const totalCost = usage.model_usages.length > 0 
+                          ? usage.model_usages.reduce((sum, m) => sum + m.cost, 0)
+                          : null; // null means not loaded yet
                         const plan = getUserPlan(usage);
                         return (
                           <Card key={usage.user_id} className="border-border/50 hover:border-primary/30 transition-all">
@@ -1592,8 +1603,11 @@ export default function Admin() {
                                   onClick={async () => {
                                     setSelectedUser(usage);
                                     setIsModalOpen(true);
-                                    await fetchUserSubscription(usage.user_id);
-                                    await fetchUserChats(usage.user_id);
+                                    // Load cost data and chats in parallel
+                                    await Promise.all([
+                                      fetchUserCostData(usage.user_id),
+                                      fetchUserChats(usage.user_id)
+                                    ]);
                                   }}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
@@ -1677,7 +1691,9 @@ export default function Admin() {
                     </TableHeader>
                     <TableBody>
                       {paginatedUsers.map(usage => {
-                        const totalCost = usage.model_usages.reduce((sum, m) => sum + m.cost, 0);
+                        const totalCost = usage.model_usages.length > 0 
+                          ? usage.model_usages.reduce((sum, m) => sum + m.cost, 0)
+                          : null; // null means not loaded yet
                         return (
                           <TableRow 
                             key={usage.user_id} 
@@ -1696,7 +1712,11 @@ export default function Admin() {
                               {getPlanBadge(usage)}
                             </TableCell>
                             <TableCell className="text-right font-mono font-bold text-foreground text-sm whitespace-nowrap">
-                              ${totalCost.toFixed(4)}
+                              {totalCost === null ? (
+                                <span className="text-muted-foreground text-xs">Click Cost View</span>
+                              ) : (
+                                `$${totalCost.toFixed(4)}`
+                              )}
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                               {usage.created_at ? new Date(usage.created_at).toLocaleString('en-US', {
@@ -1801,8 +1821,11 @@ export default function Admin() {
                                     e.stopPropagation();
                                     setSelectedUser(usage);
                                     setIsModalOpen(true);
-                                    await fetchUserSubscription(usage.user_id);
-                                    await fetchUserChats(usage.user_id);
+                                    // Load cost data and chats in parallel
+                                    await Promise.all([
+                                      fetchUserCostData(usage.user_id),
+                                      fetchUserChats(usage.user_id)
+                                    ]);
                                   }}
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
