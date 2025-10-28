@@ -3,8 +3,8 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
 
-const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
+const Drawer = ({ shouldScaleBackground = true, modal = true, dismissible = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} modal={modal} dismissible={dismissible} {...props} />
 );
 Drawer.displayName = "Drawer";
 
@@ -31,9 +31,10 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 flex h-auto min-h-[50vh] max-h-[95vh] flex-col rounded-t-[10px] border bg-background",
+        "fixed inset-x-0 bottom-0 z-50 flex h-auto min-h-[50vh] max-h-[95vh] flex-col rounded-t-[10px] border bg-background [&>div[vaul-drawer-visible]]:!hidden",
         className,
       )}
+      style={{ touchAction: 'none' }}
       {...props}
     >
       <div className="flex-1 overflow-y-auto overscroll-contain">
