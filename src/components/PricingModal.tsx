@@ -309,12 +309,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const modalContent = (
     <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative ${isMobile ? 'pt-16' : ''}`}>
             {/* Mobile Close Button - Scrolls with content */}
-            {isMobile && showCloseButton && (
+            {isMobile && (
               <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0 mb-4"
+                className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0 mb-4 transition-opacity duration-300"
                 style={{ 
                   paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
-                  paddingBottom: '0.75rem'
+                  paddingBottom: '0.75rem',
+                  opacity: showCloseButton ? 1 : 0,
+                  pointerEvents: showCloseButton ? 'auto' : 'none'
                 }}
               >
                 <button
