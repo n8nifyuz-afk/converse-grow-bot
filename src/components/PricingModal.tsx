@@ -139,28 +139,24 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
 
   // Scroll to show the bottom of the modal (hide X button) on mobile when modal opens
   React.useEffect(() => {
-    if (open && isMobile && drawerContentRef.current) {
+    if (open && isMobile) {
+      // Wait for drawer to fully render and animate
       const scrollToBottom = () => {
         if (drawerContentRef.current) {
-          // Force scroll to the absolute bottom to hide X button
-          drawerContentRef.current.scrollTop = drawerContentRef.current.scrollHeight;
+          // Scroll to bottom to hide the X button above the viewport
+          const scrollHeight = drawerContentRef.current.scrollHeight;
+          const clientHeight = drawerContentRef.current.clientHeight;
+          drawerContentRef.current.scrollTop = scrollHeight - clientHeight;
         }
       };
       
-      // Wait for drawer animation to complete, then scroll aggressively
-      const timeouts = [300, 350, 400, 450, 500, 600, 700, 800, 1000, 1200, 1500];
-      const intervals: NodeJS.Timeout[] = [];
+      // Multiple attempts with increasing delays to handle animation timing
+      const delays = [100, 200, 300, 400, 500, 700, 900, 1200];
+      const timeouts = delays.map(delay => setTimeout(scrollToBottom, delay));
       
-      timeouts.forEach(delay => {
-        intervals.push(setTimeout(scrollToBottom, delay));
-      });
-      
-      // Cleanup timeouts
-      return () => {
-        intervals.forEach(interval => clearTimeout(interval));
-      };
+      return () => timeouts.forEach(clearTimeout);
     }
-  }, [open, isMobile, checkingEligibility, isTrialEligible, selectedPeriod]);
+  }, [open, isMobile]);
 
   // Check trial eligibility when modal opens
   React.useEffect(() => {
@@ -298,19 +294,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   const savings = selectedPeriod === 'yearly' && 'savings' in basePricing ? basePricing.savings : 0;
 
   const modalContent = (
-    <div className={`light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden relative`}>
-            {/* Mobile Close Button - Positioned at top with large padding to be above viewport */}
+    <div className="light flex flex-col md:flex-row h-full bg-white md:bg-transparent md:overflow-hidden">
+            {/* Mobile Close Button - At top, will scroll out of view */}
             {isMobile && (
-              <div 
-                className="bg-white border-b border-zinc-200 flex justify-end px-4 flex-shrink-0"
-                style={{ 
-                  paddingTop: 'calc(100vh - 100px)',
-                  paddingBottom: '1.5rem'
-                }}
-              >
+              <div className="bg-white border-b border-zinc-200 flex justify-end px-4 py-3 flex-shrink-0">
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100 touch-manipulation cursor-pointer"
+                  className="transition-all hover:scale-110 focus:outline-none opacity-70 hover:opacity-100"
                   aria-label="Close"
                 >
                   <X className="h-6 w-6 text-zinc-600 hover:text-zinc-800" />
