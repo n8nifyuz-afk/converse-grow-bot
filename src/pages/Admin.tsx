@@ -464,25 +464,32 @@ export default function Admin() {
       // Calculate offset based on current page
       const offset = (currentPage - 1) * usersPerPage;
       
-      // Step 1: Get filtered user_ids based on plan filter if needed
-      let filteredUserIds: string[] | null = null;
+      // Step 1: Build base query and apply plan filter
+      let query = supabase
+        .from('profiles')
+        .select('user_id, email, display_name, created_at, ip_address, country', { count: 'exact' });
       
+      // For plan filters, we need to handle them differently
       if (planFilter !== 'all') {
         if (planFilter === 'free') {
-          // Get all user_ids that DON'T have active subscriptions
-          const { data: allProfiles } = await supabase
-            .from('profiles')
-            .select('user_id');
-          
+          // For free users: First get all subscribed user IDs, then exclude them
+          console.log('[ADMIN] Fetching subscribed users to filter free users...');
           const { data: activeSubscriptions } = await supabase
             .from('user_subscriptions')
             .select('user_id')
             .eq('status', 'active');
           
-          const subscribedUserIds = new Set(activeSubscriptions?.map(s => s.user_id) || []);
-          filteredUserIds = allProfiles?.filter(p => !subscribedUserIds.has(p.user_id)).map(p => p.user_id) || [];
+          const subscribedUserIds = activeSubscriptions?.map(s => s.user_id) || [];
+          
+          if (subscribedUserIds.length > 0) {
+            // Exclude subscribed users (this is more efficient than loading all profiles)
+            query = query.not('user_id', 'in', `(${subscribedUserIds.map(id => `'${id}'`).join(',')})`);
+          }
+          // If no subscribed users, all users are free (no filter needed)
+          
+          console.log('[ADMIN] Excluding', subscribedUserIds.length, 'subscribed users');
         } else {
-          // Get user_ids with specific plan (pro or ultra)
+          // For paid plans, get user_ids with specific plan
           const planValue = planFilter === 'ultra' ? 'ultra_pro' : planFilter;
           const { data: subscriptions } = await supabase
             .from('user_subscriptions')
@@ -490,31 +497,24 @@ export default function Admin() {
             .eq('status', 'active')
             .eq('plan', planValue);
           
-          filteredUserIds = subscriptions?.map(s => s.user_id) || [];
-        }
-        
-        console.log('[ADMIN] Filtered user_ids by plan:', filteredUserIds.length);
-        
-        // If no users match the plan filter, return empty
-        if (filteredUserIds.length === 0) {
-          setUserUsages([]);
-          setModelUsages([]);
-          (window as any).__adminTotalUsers = 0;
-          setLoading(false);
-          setRefreshing(false);
-          return;
+          const filteredUserIds = subscriptions?.map(s => s.user_id) || [];
+          console.log('[ADMIN] Filtered user_ids by plan:', filteredUserIds.length);
+          
+          // If no users match the plan filter, return empty
+          if (filteredUserIds.length === 0) {
+            setUserUsages([]);
+            setModelUsages([]);
+            (window as any).__adminTotalUsers = 0;
+            setLoading(false);
+            setRefreshing(false);
+            return;
+          }
+          
+          query = query.in('user_id', filteredUserIds);
         }
       }
       
-      // Step 2: Build query with all filters
-      let query = supabase
-        .from('profiles')
-        .select('user_id, email, display_name, created_at, ip_address, country', { count: 'exact' });
-      
-      // Apply plan filter user_ids
-      if (filteredUserIds !== null) {
-        query = query.in('user_id', filteredUserIds);
-      }
+      // Step 2: Apply additional filters
       
       // Apply search filter (name or email)
       if (searchQuery.trim()) {
