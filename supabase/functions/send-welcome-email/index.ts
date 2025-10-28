@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email using Resend with inline HTML
     const emailResponse = await resend.emails.send({
-      from: "ChatL <no-reply@chatl.ai>",
+      from: "ChatLearn <no-reply@chatl.ai>",
       to: [userEmail],
       subject: "Welcome to ChatLearn",
       html: `
