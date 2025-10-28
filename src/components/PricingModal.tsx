@@ -153,14 +153,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
   // Scroll to hide close button area initially on mobile
   React.useEffect(() => {
     if (open && isMobile && scrollRef.current) {
-      // Scroll down by 100px to hide the close button area
+      // Scroll down by 150px to completely hide the close button area
       const scrollDown = () => {
         if (scrollRef.current) {
-          scrollRef.current.scrollTop = 100;
+          scrollRef.current.scrollTop = 150;
         }
       };
       
-      // Immediate and delayed scroll to ensure it stays at 100px
+      // Immediate and delayed scroll to ensure it stays at 150px
       scrollDown();
       const timeouts = [0, 50, 100, 200, 300];
       timeouts.forEach(delay => {
@@ -313,7 +313,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                 style={{ 
                   paddingTop: 'max(3rem, env(safe-area-inset-top))',
                   paddingBottom: '1rem',
-                  minHeight: '100px'
+                  minHeight: '150px'
                 }}
               >
                 <button
