@@ -53,7 +53,9 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Parse initial value if provided
@@ -68,7 +70,8 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+          containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
@@ -76,6 +79,17 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (isDropdownOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+  }, [isDropdownOpen]);
 
   const validatePhoneNumber = (number: string, country: Country): boolean => {
     if (!number) return false;
@@ -116,7 +130,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   );
 
   return (
-    <div className={`country-phone-input-container ${className}`} ref={dropdownRef}>
+    <div className={`country-phone-input-container ${className}`} ref={containerRef}>
       <div className="country-phone-input-wrapper">
         {/* Country Code Selector */}
         <button
@@ -150,7 +164,15 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
       {/* Dropdown */}
       {isDropdownOpen && (
-        <div className="country-dropdown">
+        <div 
+          ref={dropdownRef}
+          className="country-dropdown"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`
+          }}
+        >
           <input
             type="text"
             placeholder="Search country..."

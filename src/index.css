@@ -95,18 +95,15 @@
 
 /* Country Dropdown */
 .country-dropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  right: 0;
+  position: fixed;
   background: hsl(var(--background));
   border: 2px solid hsl(var(--border));
   border-radius: 0.5rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-  z-index: 9999;
-  max-height: min(320px, 50vh);
+  z-index: 99999;
   display: flex;
   flex-direction: column;
+  min-width: 280px;
 }
 
 .country-search {
