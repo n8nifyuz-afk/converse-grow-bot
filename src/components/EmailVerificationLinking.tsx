@@ -118,7 +118,7 @@ export function EmailVerificationLinking() {
 
   if (step === 'verify') {
     return (
-      <div className="space-y-4 pl-11">
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="code" className="flex items-center gap-2">
             <Key className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function EmailVerificationLinking() {
   }
 
   return (
-    <div className="space-y-4 pl-11">
+    <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email" className="flex items-center gap-2">
           <Mail className="h-4 w-4" />
