@@ -1231,7 +1231,7 @@ export default function Admin() {
                     {/* Date Picker View */}
                     <div className="flex flex-col">
                       <div className="flex flex-col sm:flex-row">
-                        <div className="border-b sm:border-b-0 sm:border-r border-border/50 p-3 space-y-1.5 bg-gradient-to-b from-muted/30 to-muted/10 w-full sm:min-w-[160px]">
+                        <div className="border-b sm:border-b-0 sm:border-r border-border/50 p-3 space-y-1.5 bg-gradient-to-b from-muted/30 to-muted/10 w-full sm:w-[220px]">
                           <div className="px-2 py-1.5">
                             <p className="text-xs font-bold text-foreground uppercase tracking-wider">Quick Select</p>
                           </div>
@@ -1279,7 +1279,7 @@ export default function Admin() {
                             </Button>
                           </div>
                         </div>
-                        <div className="p-3 sm:p-4 flex justify-center">
+                        <div className="p-2 sm:p-3 flex justify-center flex-1">
                           <Calendar
                             mode="range"
                             selected={{ from: tempDateFilter.from, to: tempDateFilter.to }}
