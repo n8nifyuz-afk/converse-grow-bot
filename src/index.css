@@ -105,7 +105,7 @@
   border-radius: 0.75rem;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
   z-index: 9999;
-  max-height: 240px;
+  max-height: 180px;
   display: flex;
   flex-direction: column;
 }
