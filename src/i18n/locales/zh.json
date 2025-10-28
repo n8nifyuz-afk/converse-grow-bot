@@ -889,5 +889,58 @@
     "companyEmailValue": "support@chatl.ai",
     "companyWebsite": "网站：",
     "companyWebsiteValue": "https://chatl.ai"
+  },
+  "suggestions": {
+    "documentSummary": "文档摘要",
+    "emailResponse": "电子邮件回复",
+    "improveWriting": "改进写作",
+    "knowledgeBoost": "学习帮助",
+    "businessIdeas": "商业创意",
+    "textSummary": "文本摘要",
+    "calorieCheck": "卡路里检查"
+  },
+  "prompts": {
+    "documentSummary": {
+      "1": "总结此文档",
+      "2": "从文档中提取要点",
+      "3": "提供文档概述",
+      "4": "分析文档内容"
+    },
+    "emailResponse": {
+      "1": "起草专业电子邮件",
+      "2": "回复此电子邮件",
+      "3": "撰写正式回复",
+      "4": "撰写电子邮件回复"
+    },
+    "improveWriting": {
+      "1": "优化此文本",
+      "2": "改进我的写作",
+      "3": "提高清晰度和风格",
+      "4": "使其更专业"
+    },
+    "learningHelp": {
+      "1": "简单解释此概念",
+      "2": "创建学习材料",
+      "3": "测试我对此主题的了解",
+      "4": "提供示例"
+    },
+    "businessIdeas": {
+      "1": "生成商业创意",
+      "2": "头脑风暴创业概念",
+      "3": "建议商业策略",
+      "4": "创建商业计划"
+    },
+    "textSummary": {
+      "1": "简要总结此文本",
+      "2": "浓缩为要点",
+      "3": "提供简短概述",
+      "4": "提取关键要点"
+    },
+    "calorieCheck": {
+      "1": "估算此食物的卡路里",
+      "2": "分析营养成分",
+      "3": "检查饮食信息",
+      "4": "计算餐食卡路里"
+    }
   }
 }

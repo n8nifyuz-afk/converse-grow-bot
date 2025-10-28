@@ -922,5 +922,58 @@
     "companyEmailValue": "support@chatl.ai",
     "companyWebsite": "Sitio Web:",
     "companyWebsiteValue": "https://chatl.ai"
+  },
+  "suggestions": {
+    "documentSummary": "Resumen de Documento",
+    "emailResponse": "Respuesta por Correo",
+    "improveWriting": "Mejorar Escritura",
+    "knowledgeBoost": "Ayuda de Aprendizaje",
+    "businessIdeas": "Ideas de Negocio",
+    "textSummary": "Resumen de Texto",
+    "calorieCheck": "Verificación de Calorías"
+  },
+  "prompts": {
+    "documentSummary": {
+      "1": "Resumir este documento",
+      "2": "Extraer puntos clave del documento",
+      "3": "Proporcionar resumen del documento",
+      "4": "Analizar contenido del documento"
+    },
+    "emailResponse": {
+      "1": "Redactar un correo profesional",
+      "2": "Responder a este correo",
+      "3": "Escribir una respuesta formal",
+      "4": "Componer una respuesta por correo"
+    },
+    "improveWriting": {
+      "1": "Refinar este texto",
+      "2": "Mejorar mi escritura",
+      "3": "Mejorar claridad y estilo",
+      "4": "Hacer esto más profesional"
+    },
+    "learningHelp": {
+      "1": "Explicar este concepto simplemente",
+      "2": "Crear materiales de estudio",
+      "3": "Hacerme un cuestionario sobre este tema",
+      "4": "Proporcionar ejemplos"
+    },
+    "businessIdeas": {
+      "1": "Generar ideas de negocio",
+      "2": "Lluvia de ideas para startups",
+      "3": "Sugerir estrategias de negocio",
+      "4": "Crear planes de negocio"
+    },
+    "textSummary": {
+      "1": "Resumir este texto brevemente",
+      "2": "Condensar en puntos principales",
+      "3": "Proporcionar un resumen breve",
+      "4": "Extraer conclusiones clave"
+    },
+    "calorieCheck": {
+      "1": "Estimar calorías en esta comida",
+      "2": "Analizar contenido nutricional",
+      "3": "Verificar información dietética",
+      "4": "Calcular calorías de la comida"
+    }
   }
 }

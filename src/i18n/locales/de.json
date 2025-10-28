@@ -889,5 +889,58 @@
     "companyEmailValue": "support@chatl.ai",
     "companyWebsite": "Webseite:",
     "companyWebsiteValue": "https://chatl.ai"
+  },
+  "suggestions": {
+    "documentSummary": "Dokumentzusammenfassung",
+    "emailResponse": "E-Mail-Antwort",
+    "improveWriting": "Schreibweise Verbessern",
+    "knowledgeBoost": "Lernhilfe",
+    "businessIdeas": "Geschäftsideen",
+    "textSummary": "Textzusammenfassung",
+    "calorieCheck": "Kalorienprüfung"
+  },
+  "prompts": {
+    "documentSummary": {
+      "1": "Dieses Dokument zusammenfassen",
+      "2": "Schlüsselpunkte aus Dokument extrahieren",
+      "3": "Dokumentübersicht bereitstellen",
+      "4": "Dokumentinhalt analysieren"
+    },
+    "emailResponse": {
+      "1": "Eine professionelle E-Mail verfassen",
+      "2": "Auf diese E-Mail antworten",
+      "3": "Eine formelle Antwort schreiben",
+      "4": "Eine E-Mail-Antwort verfassen"
+    },
+    "improveWriting": {
+      "1": "Diesen Text verfeinern",
+      "2": "Meine Schreibweise verbessern",
+      "3": "Klarheit und Stil verbessern",
+      "4": "Dies professioneller gestalten"
+    },
+    "learningHelp": {
+      "1": "Dieses Konzept einfach erklären",
+      "2": "Lernmaterialien erstellen",
+      "3": "Mich zu diesem Thema abfragen",
+      "4": "Beispiele liefern"
+    },
+    "businessIdeas": {
+      "1": "Geschäftsideen generieren",
+      "2": "Startup-Konzepte brainstormen",
+      "3": "Geschäftsstrategien vorschlagen",
+      "4": "Geschäftspläne erstellen"
+    },
+    "textSummary": {
+      "1": "Diesen Text kurz zusammenfassen",
+      "2": "In Hauptpunkte kondensieren",
+      "3": "Einen kurzen Überblick geben",
+      "4": "Wichtige Erkenntnisse extrahieren"
+    },
+    "calorieCheck": {
+      "1": "Kalorien in diesem Essen schätzen",
+      "2": "Nährwertgehalt analysieren",
+      "3": "Diätinformationen überprüfen",
+      "4": "Mahlzeitkalorien berechnen"
+    }
   }
 }

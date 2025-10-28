@@ -889,5 +889,58 @@
     "companyEmailValue": "support@chatl.ai",
     "companyWebsite": "Site Web :",
     "companyWebsiteValue": "https://chatl.ai"
+  },
+  "suggestions": {
+    "documentSummary": "Résumé de Document",
+    "emailResponse": "Réponse par E-mail",
+    "improveWriting": "Améliorer l'Écriture",
+    "knowledgeBoost": "Aide à l'Apprentissage",
+    "businessIdeas": "Idées d'Affaires",
+    "textSummary": "Résumé de Texte",
+    "calorieCheck": "Vérification Calorique"
+  },
+  "prompts": {
+    "documentSummary": {
+      "1": "Résumer ce document",
+      "2": "Extraire les points clés du document",
+      "3": "Fournir un aperçu du document",
+      "4": "Analyser le contenu du document"
+    },
+    "emailResponse": {
+      "1": "Rédiger un e-mail professionnel",
+      "2": "Répondre à cet e-mail",
+      "3": "Écrire une réponse formelle",
+      "4": "Composer une réponse par e-mail"
+    },
+    "improveWriting": {
+      "1": "Affiner ce texte",
+      "2": "Améliorer mon écriture",
+      "3": "Améliorer la clarté et le style",
+      "4": "Rendre cela plus professionnel"
+    },
+    "learningHelp": {
+      "1": "Expliquer ce concept simplement",
+      "2": "Créer du matériel d'étude",
+      "3": "Me tester sur ce sujet",
+      "4": "Fournir des exemples"
+    },
+    "businessIdeas": {
+      "1": "Générer des idées d'affaires",
+      "2": "Brainstormer des concepts de startup",
+      "3": "Suggérer des stratégies d'affaires",
+      "4": "Créer des plans d'affaires"
+    },
+    "textSummary": {
+      "1": "Résumer brièvement ce texte",
+      "2": "Condenser en points principaux",
+      "3": "Fournir un bref aperçu",
+      "4": "Extraire les points clés"
+    },
+    "calorieCheck": {
+      "1": "Estimer les calories dans cet aliment",
+      "2": "Analyser le contenu nutritionnel",
+      "3": "Vérifier les informations diététiques",
+      "4": "Calculer les calories du repas"
+    }
   }
 }
