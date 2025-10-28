@@ -27,7 +27,10 @@ export default function AuthModal({
   const [otp, setOtp] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
-  const [mode, setMode] = useState<'signin' | 'signup' | 'reset' | 'phone' | 'verify' | 'verify-email'>('signin');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'reset' | 'phone' | 'verify' | 'verify-email' | 'complete-profile'>('signin');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
@@ -92,6 +95,9 @@ export default function AuthModal({
       setPassword('');
       setPhone('');
       setOtp('');
+      setFirstName('');
+      setLastName('');
+      setDateOfBirth('');
       setMode('signin');
       setSignupCooldown(0);
       setOtpTimer(0);
@@ -389,8 +395,66 @@ export default function AuthModal({
       
       if (error) {
         setError("Invalid verification code. Please try again.");
+      } else {
+        // Check if user has profile info, if not show profile completion
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, date_of_birth')
+            .eq('user_id', user.id)
+            .single();
+          
+          // If no display name or date of birth, show profile completion
+          if (!profile?.display_name || !profile?.date_of_birth) {
+            setMode('complete-profile');
+            setLoading(false);
+            return;
+          }
+        }
       }
-      // If success, the useEffect will handle closing the modal
+      // If success and profile complete, the useEffect will handle closing the modal
+    } catch (error) {
+      setError("An error occurred. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName || !lastName || !dateOfBirth) return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Unable to get user information. Please try again.");
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          display_name: `${firstName} ${lastName}`,
+          date_of_birth: dateOfBirth,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        setError("Failed to save profile. Please try again.");
+      } else {
+        toast({
+          title: "Profile completed!",
+          description: "Your account is now set up."
+        });
+        // Close modal and trigger success
+        onClose();
+        onSuccess?.();
+      }
     } catch (error) {
       setError("An error occurred. Please try again later.");
     } finally {
@@ -527,6 +591,49 @@ export default function AuthModal({
                       Change number
                     </button>
                   </div>
+                </form> : mode === 'complete-profile' ? <form onSubmit={handleCompleteProfile} className="space-y-5">
+                  <div className="text-center mb-2">
+                    <h3 className="text-xl font-bold mb-1">Complete Your Profile</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Help us personalize your experience
+                    </p>
+                  </div>
+                  <Input 
+                    type="text" 
+                    placeholder="First Name" 
+                    value={firstName} 
+                    onChange={e => setFirstName(e.target.value)} 
+                    required 
+                    className="h-11 md:h-12 text-base"
+                  />
+                  <Input 
+                    type="text" 
+                    placeholder="Last Name" 
+                    value={lastName} 
+                    onChange={e => setLastName(e.target.value)} 
+                    required 
+                    className="h-11 md:h-12 text-base"
+                  />
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Date of Birth</label>
+                    <Input 
+                      type="date" 
+                      value={dateOfBirth} 
+                      onChange={e => setDateOfBirth(e.target.value)} 
+                      required 
+                      max={new Date().toISOString().split('T')[0]}
+                      className="h-11 md:h-12 text-base"
+                    />
+                  </div>
+                  {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                     {error}
+                   </div>}
+                  <Button type="submit" disabled={loading || !firstName || !lastName || !dateOfBirth} className="w-full h-11 md:h-12 text-base">
+                    {loading ? <>
+                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                        Saving...
+                      </> : 'Complete Profile'}
+                  </Button>
                 </form> : mode === 'verify-email' ? <form onSubmit={handleVerifyEmailCode} className="space-y-6">
                   {/* Header with icon */}
                   <div className="flex flex-col items-center gap-4">
