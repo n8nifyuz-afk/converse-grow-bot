@@ -72,6 +72,12 @@ export async function fetchIPAndCountry(): Promise<{ ip: string | null; country:
 export async function getWebhookMetadata(): Promise<WebhookMetadata> {
   const urlParams = getUrlParams();
   const { ip, country } = await getIPMetadata();
+  
+  // CRITICAL: Check localStorage for persisted GCLID (like AuthContext does)
+  // Users may have signed up with ?gclid=ABC but current URL doesn't have it
+  const gclidFromUrl = urlParams['gclid'] || null;
+  const gclidFromStorage = typeof window !== 'undefined' ? localStorage.getItem('gclid') : null;
+  const finalGclid = gclidFromUrl || gclidFromStorage || null;
 
   return {
     sessionId: getSessionId(),
@@ -80,6 +86,6 @@ export async function getWebhookMetadata(): Promise<WebhookMetadata> {
     isMobile: isMobileDevice(),
     referer: document.referrer || null,
     urlParams,
-    gclid: urlParams.gclid || null,
+    gclid: finalGclid,
   };
 }

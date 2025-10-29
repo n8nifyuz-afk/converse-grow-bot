@@ -347,8 +347,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (profile) {
               const profileCreated = new Date(session.user.created_at).getTime();
               const now = Date.now();
-              // Profile created within last 10 seconds = new signup
-              if ((now - profileCreated) < 10000) {
+              // Profile created within last 60 seconds = new signup (increased from 10s to be more reliable)
+              const isNewSignup = (now - profileCreated) < 60000;
+              
+              if (isNewSignup) {
                 trackRegistrationComplete();
                 
                 // Send subscriber webhook for new user with IP/country from client
@@ -430,41 +432,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 } catch (webhookError) {
                   console.error('Failed to send subscriber webhook:', webhookError);
                 }
+              }
+              
+              // IMPORTANT: Always try to capture GCLID for ALL logins (not just new signups)
+              // This handles cases where user signs up without params, then returns with ?gclid=ABC
+              try {
+                const { data: existingProfile } = await supabase
+                  .from('profiles')
+                  .select('gclid, url_params, initial_referer')
+                  .eq('user_id', session.user.id)
+                  .single();
                 
-                // For existing users who log in: capture GCLID/URL params if not already saved
-                try {
-                  const { data: existingProfile } = await supabase
-                    .from('profiles')
-                    .select('gclid, url_params')
-                    .eq('user_id', session.user.id)
-                    .single();
+                // Capture current URL params and GCLID from URL or localStorage
+                const currentUrlParams = new URLSearchParams(window.location.search);
+                const currentGclid = currentUrlParams.get('gclid') || localStorage.getItem('gclid') || null;
+                
+                // Update if we have a NEW gclid OR if profile has no gclid yet
+                const shouldUpdate = (currentGclid && !existingProfile?.gclid) || 
+                                    (currentGclid && currentGclid !== existingProfile?.gclid);
+                
+                if (shouldUpdate && currentGclid) {
+                  const urlParamsObj: Record<string, string> = {};
+                  currentUrlParams.forEach((value, key) => {
+                    urlParamsObj[key] = value;
+                  });
                   
-                  // Only update if GCLID/params not already saved
-                  if (existingProfile && !existingProfile.gclid) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const gclid = urlParams.get('gclid') || localStorage.getItem('gclid') || null;
-                    
-                    if (gclid) {
-                      const urlParamsObj: Record<string, string> = {};
-                      urlParams.forEach((value, key) => {
-                        urlParamsObj[key] = value;
-                      });
-                      
-                      await supabase
-                        .from('profiles')
-                        .update({
-                          gclid: gclid,
-                          url_params: urlParamsObj,
-                          initial_referer: document.referrer || null
-                        })
-                        .eq('user_id', session.user.id);
-                      
-                      console.log('[LOGIN] Saved GCLID for existing user:', gclid);
-                    }
+                  // Store in localStorage for persistence
+                  if (!localStorage.getItem('gclid')) {
+                    localStorage.setItem('gclid', currentGclid);
                   }
-                } catch (err) {
-                  console.warn('Failed to update existing user GCLID:', err);
+                  
+                  await supabase
+                    .from('profiles')
+                    .update({
+                      gclid: currentGclid,
+                      url_params: Object.keys(urlParamsObj).length > 0 ? urlParamsObj : existingProfile?.url_params,
+                      initial_referer: document.referrer || existingProfile?.initial_referer || null
+                    })
+                    .eq('user_id', session.user.id);
+                  
+                  console.log('[LOGIN] Updated GCLID for user:', currentGclid, 'New signup:', isNewSignup);
                 }
+              } catch (err) {
+                console.warn('Failed to update user GCLID on login:', err);
               }
             }
             
