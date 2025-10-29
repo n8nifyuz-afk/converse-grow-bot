@@ -203,10 +203,11 @@ serve(async (req) => {
     const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : (user.email || undefined),
-      // Add metadata for the session
+      // CRITICAL: Add metadata for proper user tracking
       metadata: {
         user_id: user.id,
         phone: user.phone || '',
+        email: user.email || '',
       },
       line_items: [
         {
@@ -229,8 +230,9 @@ serve(async (req) => {
       subscription_data: {
         metadata: {
           plan: targetPlan,
-          user_id: user.id,
+          user_id: user.id,  // CRITICAL: This ensures webhook assigns to correct user
           phone: user.phone || '',
+          email: user.email || '',
         }
       }
     };
