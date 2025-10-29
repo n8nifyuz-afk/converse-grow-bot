@@ -416,10 +416,6 @@ export default function AuthModal({
         setMode('complete-profile');
         setProfileStep(1);
         setLoading(false);
-        toast({
-          title: "Phone verified!",
-          description: "Let's complete your profile to get started."
-        });
       }
     } catch (error) {
       setError("An error occurred. Please try again later.");
