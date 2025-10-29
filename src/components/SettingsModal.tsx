@@ -55,6 +55,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const [isLoadingPortal, setIsLoadingPortal] = React.useState(false);
   const [displayName, setDisplayName] = React.useState('');
   const [isUpdatingName, setIsUpdatingName] = React.useState(false);
+  const [birthDate, setBirthDate] = React.useState('');
+  const [isUpdatingBirthDate, setIsUpdatingBirthDate] = React.useState(false);
   const { theme, accentColor, setTheme, setAccentColor } = useTheme();
   const { toast } = useToast();
   const { user, signOut, userProfile, subscriptionStatus, checkSubscription } = useAuth();
@@ -62,10 +64,13 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
   const { i18n, t } = useTranslation();
 
-  // Initialize display name from profile
+  // Initialize display name and birth date from profile
   React.useEffect(() => {
     if (userProfile?.display_name) {
       setDisplayName(userProfile.display_name);
+    }
+    if (userProfile?.date_of_birth) {
+      setBirthDate(userProfile.date_of_birth);
     }
   }, [userProfile]);
 
@@ -160,6 +165,39 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       });
     } finally {
       setIsUpdatingName(false);
+    }
+  };
+
+  const handleUpdateBirthDate = async () => {
+    if (!user || !birthDate) return;
+    
+    setIsUpdatingBirthDate(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ date_of_birth: birthDate })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Birth Date Updated',
+        description: 'Your birth date has been updated successfully.',
+      });
+      
+      // Refresh the page to update the profile
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error: any) {
+      console.error('Update birth date error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update birth date. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdatingBirthDate(false);
     }
   };
 
@@ -705,8 +743,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <User className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm">{t('profile.displayName')}</p>
-                        <p className="text-xs text-muted-foreground">{t('profile.yourProfileName')}</p>
+                        <p className="font-semibold text-foreground text-sm">Full Name</p>
+                        <p className="text-xs text-muted-foreground">Your display name</p>
                       </div>
                     </div>
                     <div className="ml-0 md:ml-9 space-y-2">
@@ -714,7 +752,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder={t('profile.enterFullName')}
+                        placeholder="Enter your full name"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                       <Button 
@@ -723,7 +761,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         size="sm"
                         className="w-full sm:w-auto h-8 text-xs"
                       >
-                        {isUpdatingName ? t('profile.updating') : t('profile.updateName')}
+                        {isUpdatingName ? 'Updating...' : 'Update Name'}
                       </Button>
                     </div>
                   </div>
@@ -739,16 +777,25 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <User className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm">{t('profile.birthDate')}</p>
-                        <p className="text-xs text-muted-foreground">{t('profile.yourBirthDate')}</p>
+                        <p className="font-semibold text-foreground text-sm">Birth Date</p>
+                        <p className="text-xs text-muted-foreground">Your date of birth</p>
                       </div>
                     </div>
-                    <div className="ml-0 md:ml-9">
-                      <p className="font-medium text-foreground bg-muted/40 px-2.5 py-1.5 rounded-lg border border-border/30 text-sm">
-                        {userProfile?.date_of_birth 
-                          ? new Date(userProfile.date_of_birth).toLocaleDateString() 
-                          : t('profile.notSet')}
-                      </p>
+                    <div className="ml-0 md:ml-9 space-y-2">
+                      <input
+                        type="date"
+                        value={birthDate}
+                        onChange={(e) => setBirthDate(e.target.value)}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                      <Button 
+                        onClick={handleUpdateBirthDate}
+                        disabled={isUpdatingBirthDate || !birthDate || birthDate === userProfile?.date_of_birth}
+                        size="sm"
+                        className="w-full sm:w-auto h-8 text-xs"
+                      >
+                        {isUpdatingBirthDate ? 'Updating...' : 'Update Birth Date'}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
