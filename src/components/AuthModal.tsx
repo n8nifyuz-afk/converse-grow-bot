@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
@@ -372,9 +373,9 @@ export default function AuthModal({
         setMode('verify');
         setOtpTimer(60); // 60 seconds countdown
         setShowPhoneValidation(false); // Reset validation state
-        toast({
-          title: "Code sent!",
-          description: "Please check your phone for the verification code."
+        sonnerToast.success("Code sent!", {
+          description: "Please check your phone for the verification code.",
+          duration: 3000
         });
       }
     } catch (error) {
@@ -536,9 +537,9 @@ export default function AuthModal({
         });
       } else {
         setOtpTimer(60);
-        toast({
-          title: "Code sent!",
-          description: "A new verification code has been sent."
+        sonnerToast.success("Code sent!", {
+          description: "A new verification code has been sent.",
+          duration: 3000
         });
       }
     } catch (error) {
