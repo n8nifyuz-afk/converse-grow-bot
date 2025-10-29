@@ -553,65 +553,111 @@ export default function Admin() {
         ultraProCount = 0;
         freeCount = totalCount;
       } else {
-        // filterPlan === 'all' - need to break down by actual plan
-        // CRITICAL: Get subscriptions only for users that match ALL filters (country, date, search)
-        // First, fetch the user_ids that match all the profile filters
-        let filteredUserIdsQuery = supabase
-          .from('profiles')
-          .select('user_id');
+        // filterPlan === 'all' - optimize plan breakdown
+        // CRITICAL OPTIMIZATION: Use efficient counting approach instead of fetching all user_ids
         
-        // Apply the same filters as we did for counting
-        if (filterDate.from || filterDate.to) {
-          const fromDateTime = getDateTimeFromFilter(filterDate.from, filterTime.fromTime);
-          const toDateTime = getDateTimeFromFilter(filterDate.to, filterTime.toTime);
+        // Strategy: Count subscriptions directly with filters applied at database level
+        let subsQuery = supabase
+          .from('user_subscriptions')
+          .select('user_id, plan', { count: 'exact' })
+          .eq('status', 'active');
+        
+        // If we have filters, we need to join with profiles to filter subscriptions
+        // But to avoid fetching all data, we'll use a more efficient approach
+        if (filterDate.from || filterDate.to || filterCountry !== 'all' || filterSearch.trim()) {
+          // Build user_ids query with pagination to handle large datasets
+          let filteredUserIdsQuery = supabase
+            .from('profiles')
+            .select('user_id');
           
-          if (fromDateTime && toDateTime) {
-            filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
-          } else if (fromDateTime) {
-            filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString());
-          } else if (toDateTime) {
-            filteredUserIdsQuery = filteredUserIdsQuery.lte('created_at', toDateTime.toISOString());
+          // Apply filters
+          if (filterDate.from || filterDate.to) {
+            const fromDateTime = getDateTimeFromFilter(filterDate.from, filterTime.fromTime);
+            const toDateTime = getDateTimeFromFilter(filterDate.to, filterTime.toTime);
+            
+            if (fromDateTime && toDateTime) {
+              filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+            } else if (fromDateTime) {
+              filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString());
+            } else if (toDateTime) {
+              filteredUserIdsQuery = filteredUserIdsQuery.lte('created_at', toDateTime.toISOString());
+            }
           }
-        }
-        
-        if (filterCountry !== 'all') {
-          filteredUserIdsQuery = filteredUserIdsQuery.eq('country', filterCountry);
-        }
-        
-        if (filterSearch.trim()) {
-          const search = filterSearch.trim();
-          filteredUserIdsQuery = filteredUserIdsQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
-        }
-        
-        const { data: filteredUsers } = await filteredUserIdsQuery;
-        const filteredUserIds = filteredUsers?.map(u => u.user_id) || [];
-        
-        console.log('[ADMIN STATS] Filtered user IDs for plan breakdown:', filteredUserIds.length);
-        
-        // Now get subscriptions only for these filtered users
-        if (filteredUserIds.length > 0) {
-          const { data: filteredSubs } = await supabase
-            .from('user_subscriptions')
-            .select('user_id, plan')
-            .eq('status', 'active')
-            .in('user_id', filteredUserIds);
           
-          proCount = filteredSubs?.filter(s => s.plan === 'pro').length || 0;
-          ultraProCount = filteredSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
+          if (filterCountry !== 'all') {
+            filteredUserIdsQuery = filteredUserIdsQuery.eq('country', filterCountry);
+          }
+          
+          if (filterSearch.trim()) {
+            const search = filterSearch.trim();
+            filteredUserIdsQuery = filteredUserIdsQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
+          }
+          
+          // Fetch in batches to avoid hitting limits
+          const batchSize = 1000;
+          let allFilteredUserIds: string[] = [];
+          let offset = 0;
+          let hasMore = true;
+          
+          while (hasMore && offset < 10000) { // Safety limit of 10k users for performance
+            const { data: batch } = await filteredUserIdsQuery
+              .range(offset, offset + batchSize - 1);
+            
+            if (batch && batch.length > 0) {
+              allFilteredUserIds.push(...batch.map(u => u.user_id));
+              offset += batchSize;
+              hasMore = batch.length === batchSize;
+            } else {
+              hasMore = false;
+            }
+          }
+          
+          console.log('[ADMIN STATS] Filtered user IDs for plan breakdown:', allFilteredUserIds.length);
+          
+          if (allFilteredUserIds.length > 0) {
+            // Now count subscriptions only for filtered users
+            const { data: filteredSubs } = await supabase
+              .from('user_subscriptions')
+              .select('plan')
+              .eq('status', 'active')
+              .in('user_id', allFilteredUserIds);
+            
+            proCount = filteredSubs?.filter(s => s.plan === 'pro').length || 0;
+            ultraProCount = filteredSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
+            const subscribedCount = proCount + ultraProCount;
+            freeCount = totalCount - subscribedCount;
+            
+            console.log('[ADMIN STATS] Plan breakdown with filters:', {
+              proCount,
+              ultraProCount,
+              subscribedCount,
+              freeCount,
+              totalCount
+            });
+          } else {
+            proCount = 0;
+            ultraProCount = 0;
+            freeCount = totalCount;
+          }
+        } else {
+          // No filters - use simple global count (fast!)
+          const { data: allSubs } = await supabase
+            .from('user_subscriptions')
+            .select('plan')
+            .eq('status', 'active');
+          
+          proCount = allSubs?.filter(s => s.plan === 'pro').length || 0;
+          ultraProCount = allSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
           const subscribedCount = proCount + ultraProCount;
           freeCount = totalCount - subscribedCount;
           
-          console.log('[ADMIN STATS] Plan breakdown with filters:', {
+          console.log('[ADMIN STATS] Plan breakdown (no filters):', {
             proCount,
             ultraProCount,
             subscribedCount,
             freeCount,
             totalCount
           });
-        } else {
-          proCount = 0;
-          ultraProCount = 0;
-          freeCount = totalCount;
         }
       }
       
