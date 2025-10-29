@@ -353,22 +353,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 
                 // Send subscriber webhook for new user with IP/country from client
                 try {
-                  // Get IP and country from Cloudflare trace
+                  // Get IPv4 address and country using ipapi.co (returns IPv4 only)
                   let ipAddress = 'Unknown';
                   let country = 'Unknown';
                   
                   try {
-                    const traceResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
-                    if (traceResponse.ok) {
-                      const traceText = await traceResponse.text();
-                      const traceData = Object.fromEntries(
-                        traceText.split('\n').map(line => line.split('='))
-                      );
-                      ipAddress = traceData.ip || 'Unknown';
-                      country = traceData.loc || 'Unknown';
+                    // Use ipapi.co which returns only IPv4 addresses
+                    const ipResponse = await fetch('https://ipapi.co/json/');
+                    if (ipResponse.ok) {
+                      const ipData = await ipResponse.json();
+                      ipAddress = ipData.ip || 'Unknown'; // This will be IPv4
+                      country = ipData.country_code || ipData.country || 'Unknown';
+                      console.log('[SIGNUP-WEBHOOK] Got IPv4 address:', ipAddress, 'Country:', country);
+                    } else {
+                      // Fallback to ip-api.com which also returns IPv4
+                      const fallbackResponse = await fetch('https://api.ipify.org?format=json');
+                      if (fallbackResponse.ok) {
+                        const fallbackData = await fallbackResponse.json();
+                        ipAddress = fallbackData.ip || 'Unknown';
+                        // Get country separately
+                        const geoResponse = await fetch(`https://ipapi.co/${ipAddress}/country/`);
+                        if (geoResponse.ok) {
+                          country = await geoResponse.text();
+                        }
+                      }
                     }
                   } catch (traceError) {
-                    console.warn('Failed to get IP/country from Cloudflare:', traceError);
+                    console.warn('Failed to get IPv4 address:', traceError);
                   }
                   
                   // Capture URL parameters (GCLID, UTM params, etc.)
@@ -993,6 +1004,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             console.log('📊 Tracking data:', { planType, planDuration, planPrice, product_id: dbSub.product_id, plan_name: dbSub.plan_name });
             trackPaymentComplete(planType, planDuration, planPrice);
+            
+            // Send payment webhook to n8n with IPv4 address
+            (async () => {
+              try {
+                let ipAddress = 'Unknown';
+                let country = 'Unknown';
+                
+                // Get IPv4 address using ipapi.co
+                try {
+                  const ipResponse = await fetch('https://ipapi.co/json/');
+                  if (ipResponse.ok) {
+                    const ipData = await ipResponse.json();
+                    ipAddress = ipData.ip || 'Unknown';
+                    country = ipData.country_code || ipData.country || 'Unknown';
+                  }
+                } catch (err) {
+                  console.warn('Failed to get IP for payment webhook:', err);
+                }
+                
+                // Capture URL parameters (GCLID, UTM params)
+                const urlParams = new URLSearchParams(window.location.search);
+                const gclid = urlParams.get('gclid') || localStorage.getItem('gclid') || null;
+                const urlParamsObj: Record<string, string> = {};
+                urlParams.forEach((value, key) => {
+                  urlParamsObj[key] = value;
+                });
+                
+                // Send payment webhook
+                const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/payment', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    email: user.email,
+                    username: userProfile?.display_name || user.email?.split('@')[0],
+                    country: country,
+                    ip_address: ipAddress,
+                    user_id: user.id,
+                    plan_type: planType,
+                    plan_duration: planDuration,
+                    plan_price: planPrice,
+                    product_id: dbSub.product_id,
+                    plan_name: dbSub.plan_name,
+                    gclid: gclid,
+                    url_params: urlParamsObj,
+                    referer: document.referrer || null,
+                    timestamp: new Date().toISOString(),
+                  }),
+                });
+                
+                if (webhookResponse.ok) {
+                  console.log('✅ Payment webhook sent successfully');
+                } else {
+                  console.warn('⚠️ Payment webhook failed:', webhookResponse.status);
+                }
+              } catch (webhookError) {
+                console.error('❌ Failed to send payment webhook:', webhookError);
+              }
+            })();
             
             // Mark as tracked in localStorage to prevent duplicates
             localStorage.setItem(trackedKey, 'true');
