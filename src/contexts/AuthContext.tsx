@@ -409,18 +409,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   
                   console.log('[SIGNUP] Saved GCLID and URL params to database:', { gclid, urlParamsObj });
                   
-                  // Fetch signup method from profiles
+                  // Fetch profile data including phone_number and display_name
                   const { data: profileData } = await supabase
                     .from('profiles')
-                    .select('signup_method')
+                    .select('signup_method, phone_number, display_name')
                     .eq('user_id', session.user.id)
                     .single();
+
+                  // For phone signups: use phone_number when email is null
+                  const emailOrPhone = session.user.email || profileData?.phone_number || '';
+                  // For username: use display_name from profile
+                  const username = profileData?.display_name || 
+                                   session.user.user_metadata?.name || 
+                                   session.user.user_metadata?.display_name || 
+                                   session.user.email?.split('@')[0] || 
+                                   'User';
 
                   await supabase.functions.invoke('send-subscriber-webhook', {
                     body: {
                       userId: session.user.id,
-                      email: session.user.email,
-                      username: session.user.user_metadata?.name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
+                      email: emailOrPhone,
+                      username: username,
                       ipAddress,
                       country,
                       signupMethod: profileData?.signup_method || 'email',
@@ -1095,8 +1104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
-                    email: user.email,
-                    username: userProfile?.display_name || user.email?.split('@')[0],
+                    email: user.email || userProfile?.phone_number || '',
+                    username: userProfile?.display_name || user.email?.split('@')[0] || 'User',
                     country: country,
                     ip_address: ipAddress,
                     user_id: user.id,

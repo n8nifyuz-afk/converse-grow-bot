@@ -592,17 +592,23 @@ serve(async (req) => {
 
           // Send subscription purchase webhook
           try {
-            // Fetch user profile for IP, country, GCLID and URL params
+            // Fetch user profile including phone_number and display_name
             const { data: userProfile } = await supabaseClient
               .from('profiles')
-              .select('ip_address, country, gclid, url_params, initial_referer')
+              .select('ip_address, country, gclid, url_params, initial_referer, phone_number, display_name')
               .eq('user_id', user.id)
               .single();
+
+            // For phone signups: use phone_number when email is null
+            const emailOrPhone = user.email || userProfile?.phone_number || '';
+            // For username: use display_name from profile
+            const username = userProfile?.display_name || user.email?.split('@')[0] || 'User';
 
             const webhookPayload = {
               plan_name: subscription.plan_name || planType,
               user_id: user.id,
-              email: user.email,
+              email: emailOrPhone,
+              username: username,
               price: planPrice,
               currency: currency,
               plan_duration: planDuration,
