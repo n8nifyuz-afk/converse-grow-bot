@@ -135,15 +135,25 @@ serve(async (req) => {
       // For phone-only users, create customer manually with metadata
       if (!user.email && user.phone) {
         logStep("Creating customer for phone-only user", { phone: user.phone });
+        
+        // Use system-generated email to prevent Stripe from asking for one during checkout
+        // Format: user-{user_id}@phone.chatl.ai
+        const systemEmail = `user-${user.id}@phone.chatl.ai`;
+        
         const newCustomer = await stripe.customers.create({
+          email: systemEmail, // Prevents Stripe from asking for email in checkout
           phone: user.phone,
           metadata: {
             user_id: user.id,
             phone: user.phone,
+            is_phone_user: 'true', // Flag to identify phone-only users
           }
         });
         customerId = newCustomer.id;
-        logStep("Created new customer for phone user", { customerId });
+        logStep("Created new customer for phone user with system email", { 
+          customerId, 
+          systemEmail 
+        });
       }
     }
 
