@@ -395,6 +395,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     localStorage.setItem('gclid', gclid);
                   }
                   
+                  // Save GCLID and URL params to database
+                  await supabase
+                    .from('profiles')
+                    .update({
+                      gclid: gclid,
+                      url_params: urlParamsObj,
+                      initial_referer: document.referrer || null
+                    })
+                    .eq('user_id', session.user.id);
+                  
+                  console.log('[SIGNUP] Saved GCLID and URL params to database:', { gclid, urlParamsObj });
+                  
                   // Fetch signup method from profiles
                   const { data: profileData } = await supabase
                     .from('profiles')
@@ -417,6 +429,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   });
                 } catch (webhookError) {
                   console.error('Failed to send subscriber webhook:', webhookError);
+                }
+                
+                // For existing users who log in: capture GCLID/URL params if not already saved
+                try {
+                  const { data: existingProfile } = await supabase
+                    .from('profiles')
+                    .select('gclid, url_params')
+                    .eq('user_id', session.user.id)
+                    .single();
+                  
+                  // Only update if GCLID/params not already saved
+                  if (existingProfile && !existingProfile.gclid) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const gclid = urlParams.get('gclid') || localStorage.getItem('gclid') || null;
+                    
+                    if (gclid) {
+                      const urlParamsObj: Record<string, string> = {};
+                      urlParams.forEach((value, key) => {
+                        urlParamsObj[key] = value;
+                      });
+                      
+                      await supabase
+                        .from('profiles')
+                        .update({
+                          gclid: gclid,
+                          url_params: urlParamsObj,
+                          initial_referer: document.referrer || null
+                        })
+                        .eq('user_id', session.user.id);
+                      
+                      console.log('[LOGIN] Saved GCLID for existing user:', gclid);
+                    }
+                  }
+                } catch (err) {
+                  console.warn('Failed to update existing user GCLID:', err);
                 }
               }
             }

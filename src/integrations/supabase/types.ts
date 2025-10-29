@@ -262,8 +262,10 @@ export type Database = {
           display_name: string | null
           email: string | null
           external_id: string | null
+          gclid: string | null
           gender: string | null
           id: string
+          initial_referer: string | null
           ip_address: string | null
           language: string | null
           last_login_at: string | null
@@ -275,6 +277,7 @@ export type Database = {
           signup_method: string | null
           timezone: string | null
           updated_at: string
+          url_params: Json | null
           user_id: string
         }
         Insert: {
@@ -287,8 +290,10 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           external_id?: string | null
+          gclid?: string | null
           gender?: string | null
           id?: string
+          initial_referer?: string | null
           ip_address?: string | null
           language?: string | null
           last_login_at?: string | null
@@ -300,6 +305,7 @@ export type Database = {
           signup_method?: string | null
           timezone?: string | null
           updated_at?: string
+          url_params?: Json | null
           user_id: string
         }
         Update: {
@@ -312,8 +318,10 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           external_id?: string | null
+          gclid?: string | null
           gender?: string | null
           id?: string
+          initial_referer?: string | null
           ip_address?: string | null
           language?: string | null
           last_login_at?: string | null
@@ -325,6 +333,7 @@ export type Database = {
           signup_method?: string | null
           timezone?: string | null
           updated_at?: string
+          url_params?: Json | null
           user_id?: string
         }
         Relationships: []
