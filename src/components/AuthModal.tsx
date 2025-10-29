@@ -397,17 +397,10 @@ export default function AuthModal({
     setError('');
     
     try {
-      // CRITICAL: Set mode to 'complete-profile' BEFORE verifyOtp to prevent race condition
-      // The useEffect that auto-closes on authentication checks for mode !== 'complete-profile'
-      // We need to set this mode first, then we'll revert if profile is already complete
-      const tempMode = mode;
-      setMode('complete-profile');
-      
       const { error } = await verifyOtp(phone, otp);
       
       if (error) {
         setError("Invalid verification code. Please try again.");
-        setMode(tempMode); // Revert mode on error
         setLoading(false);
       } else {
         // Check if user already has complete profile
@@ -419,26 +412,24 @@ export default function AuthModal({
             .eq('user_id', user.id)
             .single();
           
-          // If profile is complete, allow modal to close
+          // If profile is complete, close modal. Otherwise show profile completion
           if (profile?.display_name && profile?.date_of_birth) {
             setLoading(false);
-            setMode(tempMode); // Revert mode to allow auto-close
             onClose();
             onSuccess?.();
           } else {
-            // Profile incomplete - stay in complete-profile mode and show form
+            setMode('complete-profile');
             setProfileStep(1);
             setLoading(false);
           }
         } else {
-          // New user - show profile completion form
+          setMode('complete-profile');
           setProfileStep(1);
           setLoading(false);
         }
       }
     } catch (error) {
       setError("An error occurred. Please try again later.");
-      setMode('verify'); // Revert to verify mode on error
       setLoading(false);
     }
   };
