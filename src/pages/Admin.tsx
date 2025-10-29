@@ -708,6 +708,8 @@ export default function Admin() {
       console.log('[ADMIN] Starting to fetch page data with filters...');
       console.log('[ADMIN] Active planFilter:', activePlanFilter);
       console.log('[ADMIN] Current page:', currentPage);
+      console.log('[ADMIN] Sort field:', sortField, 'direction:', sortDirection);
+      console.log('[ADMIN] Search query:', searchQuery);
 
       // Calculate offset based on current page
       const offset = (currentPage - 1) * usersPerPage;
@@ -785,13 +787,189 @@ export default function Admin() {
       
       // Apply country filter
       if (countryFilter !== 'all') {
+        console.log('[ADMIN] Applying country filter:', countryFilter);
         query = query.eq('country', countryFilter);
       }
       
-      // Step 3: Apply pagination and fetch
+      // Step 3: Handle plan sorting specially - it requires sorting ALL filtered users
+      // then paginating, not the other way around
+      let resultCount: number | null = null;
+      let resultProfiles: any[] | null = null;
+      
+      if (sortField === 'plan') {
+        console.log('[ADMIN] Applying plan-based sorting across ALL filtered users...');
+        
+        // First, get ALL user_ids that match current filters (lightweight query)
+        let allUsersQuery = supabase
+          .from('profiles')
+          .select('user_id');
+        
+        // Re-apply all the same filters
+        if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
+          allUsersQuery = allUsersQuery.in('user_id', filteredUserIdsForPaidPlans || []);
+        } else if (activePlanFilter === 'free') {
+          const { data: subs } = await supabase
+            .from('user_subscriptions')
+            .select('user_id')
+            .eq('status', 'active');
+          const subscribedIds = subs?.map(s => s.user_id) || [];
+          if (subscribedIds.length > 0) {
+            allUsersQuery = allUsersQuery.not('user_id', 'in', `(${subscribedIds.join(',')})`);
+          }
+        }
+        
+        if (searchQuery.trim()) {
+          const search = searchQuery.trim();
+          allUsersQuery = allUsersQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
+        }
+        
+        if (dateFilter.from || dateFilter.to) {
+          const fromDateTime = dateFilter.from ? getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime) : null;
+          const toDateTime = dateFilter.to ? getDateTimeFromFilter(dateFilter.to, timeFilter.toTime) : null;
+          
+          if (fromDateTime && toDateTime) {
+            allUsersQuery = allUsersQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+          } else if (fromDateTime) {
+            allUsersQuery = allUsersQuery.gte('created_at', fromDateTime.toISOString());
+          } else if (toDateTime) {
+            allUsersQuery = allUsersQuery.lte('created_at', toDateTime.toISOString());
+          }
+        }
+        
+        if (countryFilter !== 'all') {
+          allUsersQuery = allUsersQuery.eq('country', countryFilter);
+        }
+        
+        // Fetch all matching user IDs
+        const { data: allMatchingUsers, count: totalFiltered } = await allUsersQuery;
+        resultCount = totalFiltered || 0;
+        
+        if (allMatchingUsers && allMatchingUsers.length > 0) {
+          const allUserIds = allMatchingUsers.map(u => u.user_id);
+          
+          // Get subscriptions for ALL these users
+          const { data: allSubscriptions } = await supabase
+            .from('user_subscriptions')
+            .select('user_id, plan')
+            .eq('status', 'active')
+            .in('user_id', allUserIds);
+          
+          // Create plan map
+          const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
+          
+          // Sort all user IDs by plan
+          const sortedUserIds = [...allUserIds].sort((a, b) => {
+            const planA = userPlanMap.get(a) || 'free';
+            const planB = userPlanMap.get(b) || 'free';
+            const planOrder: Record<string, number> = { free: 0, pro: 1, ultra_pro: 2 };
+            const valueA = planOrder[planA] || 0;
+            const valueB = planOrder[planB] || 0;
+            
+            if (sortDirection === 'asc') {
+              return valueA - valueB;
+            } else {
+              return valueB - valueA;
+            }
+          });
+          
+          // Take only the user IDs for current page
+          const paginatedUserIds = sortedUserIds.slice(offset, offset + usersPerPage);
+          
+          // Now fetch full profile data for just these users
+          // Note: We need to preserve the sort order, so we'll sort client-side after fetch
+          const { data: paginatedProfiles } = await supabase
+            .from('profiles')
+            .select('user_id, email, display_name, created_at, ip_address, country, phone_number')
+            .in('user_id', paginatedUserIds);
+          
+          // Restore the sort order
+          const profilesData = paginatedUserIds
+            .map(id => paginatedProfiles?.find(p => p.user_id === id))
+            .filter(Boolean);
+          
+          console.log('[ADMIN] Plan sorting: sorted', allUserIds.length, 'users, showing', profilesData.length);
+          
+          // Continue with these sorted profiles (skip the normal query)
+          if (profilesData && profilesData.length > 0) {
+            // Jump to subscription fetching (reuse existing code path)
+            const userIds = profilesData.map(p => p.user_id);
+            
+            const { data: subscriptionsData } = await supabase
+              .from('user_subscriptions')
+              .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
+              .in('user_id', userIds)
+              .eq('status', 'active');
+            
+            const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
+            
+            let users: UserTokenUsage[] = profilesData.map((profile: any) => {
+              const subscription = subscriptionsMap.get(profile.user_id);
+              const emailDisplay = profile.email || (profile.phone_number ? profile.phone_number : 'Unknown');
+              const displayName = profile.display_name || 
+                                 (profile.email ? profile.email.split('@')[0] : null) || 
+                                 (profile.phone_number ? profile.phone_number : 'Unknown User');
+              
+              return {
+                user_id: profile.user_id,
+                email: emailDisplay,
+                display_name: displayName,
+                created_at: profile.created_at,
+                ip_address: profile.ip_address,
+                country: profile.country,
+                model_usages: [],
+                subscription_status: subscription && subscription.status === 'active' ? {
+                  subscribed: true,
+                  product_id: subscription.product_id,
+                  plan: subscription.plan,
+                  subscription_end: subscription.current_period_end,
+                  stripe_subscription_id: subscription.stripe_subscription_id,
+                  stripe_customer_id: subscription.stripe_customer_id
+                } : {
+                  subscribed: false,
+                  product_id: null,
+                  plan: null,
+                  subscription_end: null,
+                  stripe_subscription_id: null,
+                  stripe_customer_id: null
+                }
+              };
+            });
+            
+            setUserUsages(users);
+            setModelUsages([]);
+            (window as any).__adminTotalUsers = resultCount;
+            setLoading(false);
+            setRefreshing(false);
+            return; // Exit early, we're done
+          }
+        }
+        
+        // If we got here, no users matched - clear and return
+        setUserUsages([]);
+        setModelUsages([]);
+        (window as any).__adminTotalUsers = 0;
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+      
+      // Step 3b: Apply normal sorting at database level (for non-plan fields)
+      if (sortField === 'name') {
+        query = query.order('display_name', { ascending: sortDirection === 'asc', nullsFirst: false });
+      } else if (sortField === 'email') {
+        query = query.order('email', { ascending: sortDirection === 'asc', nullsFirst: false });
+      } else if (sortField === 'registered') {
+        query = query.order('created_at', { ascending: sortDirection === 'asc' });
+      } else {
+        // Default ordering for cost (cost sorting still client-side due to complexity)
+        query = query.order('created_at', { ascending: false });
+      }
+      
+      // Step 4: Apply pagination and execute query
       const { data: profilesData, error: profilesError, count } = await query
-        .order('created_at', { ascending: false })
         .range(offset, offset + usersPerPage - 1);
+      
+      resultCount = count || 0;
       
       if (profilesError) throw profilesError;
       
@@ -987,51 +1165,37 @@ export default function Admin() {
     return dateTime;
   };
 
-  // Users are already filtered server-side, so use them directly
+  // Users are already filtered and sorted server-side
   const filteredUsers = userUsages;
 
-  // Sort filtered users
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    let aValue: any;
-    let bValue: any;
+  // Apply client-side sorting only for complex fields (plan, cost) that couldn't be sorted at DB level
+  // Simple fields (name, email, registered) are already sorted by the database query
+  const sortedUsers = (sortField === 'plan' || sortField === 'cost') 
+    ? [...filteredUsers].sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
 
-    switch (sortField) {
-      case 'name':
-        aValue = a.display_name?.toLowerCase() || '';
-        bValue = b.display_name?.toLowerCase() || '';
-        break;
-      case 'email':
-        aValue = a.email?.toLowerCase() || '';
-        bValue = b.email?.toLowerCase() || '';
-        break;
-      case 'plan':
-        const planOrder = { free: 0, pro: 1, ultra: 2 };
-        aValue = planOrder[getUserPlan(a)];
-        bValue = planOrder[getUserPlan(b)];
-        break;
-      case 'cost':
-        aValue = a.model_usages.reduce((sum, m) => sum + m.cost, 0);
-        bValue = b.model_usages.reduce((sum, m) => sum + m.cost, 0);
-        break;
-      case 'registered':
-        aValue = new Date(a.created_at).getTime();
-        bValue = new Date(b.created_at).getTime();
-        break;
-      default:
-        return 0;
-    }
+        if (sortField === 'plan') {
+          const planOrder = { free: 0, pro: 1, ultra: 2 };
+          aValue = planOrder[getUserPlan(a)];
+          bValue = planOrder[getUserPlan(b)];
+        } else if (sortField === 'cost') {
+          aValue = a.model_usages.reduce((sum, m) => sum + m.cost, 0);
+          bValue = b.model_usages.reduce((sum, m) => sum + m.cost, 0);
+        }
 
-    if (sortDirection === 'asc') {
-      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-    } else {
-      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-    }
-  });
+        if (sortDirection === 'asc') {
+          return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+        } else {
+          return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+        }
+      })
+    : filteredUsers; // For name, email, registered - already sorted by database
 
   // Pagination - use sorted data
   const totalUsers = (window as any).__adminTotalUsers || userUsages.length;
   const totalPages = Math.ceil(totalUsers / usersPerPage);
-  const paginatedUsers = sortedUsers; // Use sorted data instead of raw userUsages
+  const paginatedUsers = sortedUsers;
 
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
@@ -1174,10 +1338,20 @@ export default function Admin() {
     setIsRefreshing(false);
   };
 
-  // Reset to page 1 when filter, search, or sort changes (before fetching data)
+  // Reset to page 1 and refetch when filter, search, or sort changes
   useEffect(() => {
-    setCurrentPage(1);
-  }, [planFilter, searchQuery, sortField, sortDirection, dateFilter, timeFilter, countryFilter, subscriptionStatusFilter]);
+    if (isAdmin) {
+      setCurrentPage(1);
+      // Trigger data fetch when sort changes
+      setIsRefreshing(true);
+      Promise.all([
+        fetchTokenUsageData(),
+        fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
+      ]).finally(() => {
+        setIsRefreshing(false);
+      });
+    }
+  }, [sortField, sortDirection]);
 
   // Fetch cost/token usage data for a specific user when "Cost View" is clicked
   const fetchUserCostData = async (userId: string) => {
