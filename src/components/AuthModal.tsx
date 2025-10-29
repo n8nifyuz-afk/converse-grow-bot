@@ -42,7 +42,6 @@ export default function AuthModal({
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
-  const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const {
     user,
     signIn,
@@ -523,55 +522,35 @@ export default function AuthModal({
           }} className="text-sm text-primary hover:underline">
                     {t('authModal.backToSignIn')}
                   </button>
-                 </form> : mode === 'phone' ? <>
-                   {/* Fixed overlay for mobile when input is focused */}
-                   {isMobile && isPhoneInputFocused && (
-                     <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={() => {
-                       setIsPhoneInputFocused(false);
-                       // Blur any focused input
-                       (document.activeElement as HTMLElement)?.blur();
-                     }} />
-                   )}
-                   
-                   <form onSubmit={handlePhoneSignIn} className={`space-y-5 ${isMobile && isPhoneInputFocused ? 'fixed bottom-0 left-0 right-0 z-[9999] bg-background p-4 rounded-t-3xl shadow-2xl' : ''}`}>
-                     <div className="text-sm md:text-base text-muted-foreground mb-2">
-                       {t('authModal.enterPhoneNumber')}
-                     </div>
-                     <div
-                       onFocus={() => isMobile && setIsPhoneInputFocused(true)}
-                       onBlur={() => {
-                         // Delay to allow button clicks to work
-                         setTimeout(() => isMobile && setIsPhoneInputFocused(false), 200);
-                       }}
-                     >
-                       <CountryPhoneInput
-                         value={phone}
-                         onChange={setPhone}
-                         className="w-full"
-                         disabled={phoneLoading}
-                         showValidation={showPhoneValidation}
-                       />
-                     </div>
-                     {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
-                        {error}
-                      </div>}
-                     <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-12 md:h-13 text-base md:text-lg font-medium bg-black hover:bg-black/90 text-white dark:bg-primary dark:hover:bg-primary/90">
-                       {phoneLoading ? <>
-                           <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                           {t('authModal.sendingCode')}
-                         </> : t('authModal.sendVerificationCode')}
-                     </Button>
-                     <button type="button" onClick={() => {
-               setMode('signin');
-               setPhone('');
-               setError('');
-               setShowPhoneValidation(false);
-               setIsPhoneInputFocused(false);
-             }} className="text-sm text-primary hover:underline">
-                       ← Back to sign in
-                     </button>
-                    </form>
-                  </> : mode === 'verify' ? <form onSubmit={handleVerifyOtp} className="space-y-4">
+                 </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-5">
+                  <div className="text-sm md:text-base text-muted-foreground mb-2">
+                    {t('authModal.enterPhoneNumber')}
+                  </div>
+                  <CountryPhoneInput
+                    value={phone}
+                    onChange={setPhone}
+                    className="w-full"
+                    disabled={phoneLoading}
+                    showValidation={showPhoneValidation}
+                  />
+                  {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
+                     {error}
+                   </div>}
+                  <Button type="submit" disabled={phoneLoading || !phone} className="w-full h-12 md:h-13 text-base md:text-lg font-medium bg-black hover:bg-black/90 text-white dark:bg-primary dark:hover:bg-primary/90">
+                    {phoneLoading ? <>
+                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                        {t('authModal.sendingCode')}
+                      </> : t('authModal.sendVerificationCode')}
+                  </Button>
+                  <button type="button" onClick={() => {
+            setMode('signin');
+            setPhone('');
+            setError('');
+            setShowPhoneValidation(false);
+          }} className="text-sm text-primary hover:underline">
+                    ← Back to sign in
+                  </button>
+                </form> : mode === 'verify' ? <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div className="text-sm text-muted-foreground mb-4">
                     Enter the 6-digit code sent to {phone}
                   </div>
