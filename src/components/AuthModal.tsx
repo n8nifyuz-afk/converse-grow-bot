@@ -566,7 +566,7 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className="flex flex-col overflow-y-auto">
+  const authContent = <div className="flex flex-col">
            {/* Auth Form */}
            <div className="w-full p-4 md:p-6 flex flex-col pb-safe">
              {/* Main Heading - Hide during profile completion */}
@@ -1043,14 +1043,15 @@ export default function AuthModal({
       noBodyStyles={true}
     >
         <DrawerContent 
-          className="h-auto p-0 overflow-y-auto" 
+          className="h-auto p-0" 
           style={{ 
             maxHeight: mode === 'complete-profile' ? '75dvh' : '90vh',
             position: 'fixed',
             bottom: 0,
             transform: 'translate3d(0, 0, 0)',
             transition: 'none',
-            paddingBottom: 'env(safe-area-inset-bottom)'
+            paddingBottom: 'env(safe-area-inset-bottom)',
+            overflow: 'visible'
           }}
         >
           <DrawerHeader className="sr-only">
