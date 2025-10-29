@@ -554,16 +554,65 @@ export default function Admin() {
         freeCount = totalCount;
       } else {
         // filterPlan === 'all' - need to break down by actual plan
-        // Get all active subscriptions
-        const { data: allSubs } = await supabase
-          .from('user_subscriptions')
-          .select('user_id, plan')
-          .eq('status', 'active');
+        // CRITICAL: Get subscriptions only for users that match ALL filters (country, date, search)
+        // First, fetch the user_ids that match all the profile filters
+        let filteredUserIdsQuery = supabase
+          .from('profiles')
+          .select('user_id');
         
-        proCount = allSubs?.filter(s => s.plan === 'pro').length || 0;
-        ultraProCount = allSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
-        const subscribedCount = proCount + ultraProCount;
-        freeCount = totalCount - subscribedCount;
+        // Apply the same filters as we did for counting
+        if (filterDate.from || filterDate.to) {
+          const fromDateTime = getDateTimeFromFilter(filterDate.from, filterTime.fromTime);
+          const toDateTime = getDateTimeFromFilter(filterDate.to, filterTime.toTime);
+          
+          if (fromDateTime && toDateTime) {
+            filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+          } else if (fromDateTime) {
+            filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString());
+          } else if (toDateTime) {
+            filteredUserIdsQuery = filteredUserIdsQuery.lte('created_at', toDateTime.toISOString());
+          }
+        }
+        
+        if (filterCountry !== 'all') {
+          filteredUserIdsQuery = filteredUserIdsQuery.eq('country', filterCountry);
+        }
+        
+        if (filterSearch.trim()) {
+          const search = filterSearch.trim();
+          filteredUserIdsQuery = filteredUserIdsQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
+        }
+        
+        const { data: filteredUsers } = await filteredUserIdsQuery;
+        const filteredUserIds = filteredUsers?.map(u => u.user_id) || [];
+        
+        console.log('[ADMIN STATS] Filtered user IDs for plan breakdown:', filteredUserIds.length);
+        
+        // Now get subscriptions only for these filtered users
+        if (filteredUserIds.length > 0) {
+          const { data: filteredSubs } = await supabase
+            .from('user_subscriptions')
+            .select('user_id, plan')
+            .eq('status', 'active')
+            .in('user_id', filteredUserIds);
+          
+          proCount = filteredSubs?.filter(s => s.plan === 'pro').length || 0;
+          ultraProCount = filteredSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
+          const subscribedCount = proCount + ultraProCount;
+          freeCount = totalCount - subscribedCount;
+          
+          console.log('[ADMIN STATS] Plan breakdown with filters:', {
+            proCount,
+            ultraProCount,
+            subscribedCount,
+            freeCount,
+            totalCount
+          });
+        } else {
+          proCount = 0;
+          ultraProCount = 0;
+          freeCount = totalCount;
+        }
       }
       
       // For cost calculation, we'll use a simplified approach
@@ -1051,7 +1100,8 @@ export default function Admin() {
   ].filter(Boolean).length;
 
   // Clear all filters
-  const clearAllFilters = () => {
+  const clearAllFilters = async () => {
+    // Reset all filter states
     setPlanFilter('all');
     setSearchQuery('');
     setDateFilter({ from: undefined, to: undefined });
@@ -1063,6 +1113,19 @@ export default function Admin() {
     setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setPendingCountryFilter('all');
     setPendingSubscriptionStatusFilter('all');
+    setShowFilters(false);
+    
+    // Reset to page 1 and refresh data with default filters
+    isApplyingFilters.current = true;
+    setCurrentPage(1);
+    setIsRefreshing(true);
+    
+    await Promise.all([
+      fetchTokenUsageData(false, 'all'),
+      fetchAggregateStats('all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', '')
+    ]);
+    
+    setIsRefreshing(false);
   };
 
   // Reset to page 1 when filter, search, or sort changes (before fetching data)
