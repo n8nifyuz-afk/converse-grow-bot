@@ -63,12 +63,13 @@ export default function AuthModal({
   const { t } = useTranslation();
 
   // Close modal and call onSuccess when user is authenticated
+  // BUT NOT if we're in complete-profile mode (collecting profile info after phone verification)
   useEffect(() => {
-    if (user && isOpen) {
+    if (user && isOpen && mode !== 'complete-profile') {
       onClose();
       onSuccess?.();
     }
-  }, [user, isOpen, onClose, onSuccess]);
+  }, [user, isOpen, mode, onClose, onSuccess]);
 
   // Countdown timer for signup cooldown
   useEffect(() => {

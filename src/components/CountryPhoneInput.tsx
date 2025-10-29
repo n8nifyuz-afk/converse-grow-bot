@@ -86,6 +86,23 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     }
   }, []);
 
+  // Update when value changes externally (e.g., when country is changed)
+  useEffect(() => {
+    if (value && value.startsWith('+')) {
+      // Find the country that matches the current value's dial code
+      const matchingCountry = allCountries.find(c => value.startsWith(c.dialCode));
+      if (matchingCountry) {
+        setSelectedCountry(matchingCountry);
+        // Extract phone number without dial code
+        const numberWithoutCode = value.substring(matchingCountry.dialCode.length);
+        setPhoneNumber(numberWithoutCode);
+      }
+    } else if (!value) {
+      // If value is cleared, reset phone number
+      setPhoneNumber('');
+    }
+  }, [value]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -127,12 +144,15 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     setIsDropdownOpen(false);
     setSearchQuery('');
     
+    // Keep the existing phone number (without old dial code) and add new dial code
+    const newFullNumber = country.dialCode + phoneNumber;
+    onChange(newFullNumber);
+    
     // Revalidate with new country
     if (phoneNumber) {
       const valid = validatePhoneNumber(phoneNumber, country);
       setIsValid(valid);
       onValidation?.(valid);
-      onChange(country.dialCode + phoneNumber);
     }
   };
 
