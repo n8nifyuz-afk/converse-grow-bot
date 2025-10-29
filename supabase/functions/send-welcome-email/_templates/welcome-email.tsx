@@ -80,11 +80,11 @@ export const WelcomeEmail = ({
           </Section>
 
           <Text style={text}>
-            Need help getting started? Check out our{' '}
-            <Link href="https://www.chatl.ai/help" style={link}>
-              Help Center
-            </Link>{' '}
-            or contact our support team.
+            If you have any questions, please contact us at{' '}
+            <Link href="mailto:support@chatl.ai" style={link}>
+              support@chatl.ai
+            </Link>
+            .
           </Text>
 
           {/* Footer */}
