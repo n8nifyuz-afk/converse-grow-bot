@@ -412,10 +412,30 @@ export default function AuthModal({
         setError("Invalid verification code. Please try again.");
         setLoading(false);
       } else {
-        // Don't close modal or redirect, show profile completion
-        setMode('complete-profile');
-        setProfileStep(1);
-        setLoading(false);
+        // Check if user already has complete profile
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, date_of_birth')
+            .eq('user_id', user.id)
+            .single();
+          
+          // If profile is complete, close modal. Otherwise show profile completion
+          if (profile?.display_name && profile?.date_of_birth) {
+            setLoading(false);
+            onClose();
+            onSuccess?.();
+          } else {
+            setMode('complete-profile');
+            setProfileStep(1);
+            setLoading(false);
+          }
+        } else {
+          setMode('complete-profile');
+          setProfileStep(1);
+          setLoading(false);
+        }
       }
     } catch (error) {
       setError("An error occurred. Please try again later.");
@@ -547,14 +567,16 @@ export default function AuthModal({
   };
 
   const authContent = <div className="flex flex-col">
-          {/* Auth Form */}
-          <div className="w-full p-4 md:p-6 flex flex-col">
-            {/* Main Heading */}
-            <div className="mb-6 md:mb-7 text-center">
-              <h2 className="text-2xl md:text-3xl font-bold leading-tight">
-                {t('authModal.title')}
-              </h2>
-            </div>
+           {/* Auth Form */}
+           <div className="w-full p-4 md:p-6 flex flex-col">
+             {/* Main Heading - Hide during profile completion */}
+             {mode !== 'complete-profile' && (
+               <div className="mb-6 md:mb-7 text-center">
+                 <h2 className="text-2xl md:text-3xl font-bold leading-tight">
+                   {t('authModal.title')}
+                 </h2>
+               </div>
+             )}
 
             {/* Auth Buttons */}
             <div className="flex-1 flex flex-col">
