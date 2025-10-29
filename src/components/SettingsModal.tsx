@@ -151,11 +151,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         title: 'Name Updated',
         description: 'Your display name has been updated successfully.',
       });
-      
-      // Refresh the page to update the display name everywhere
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
     } catch (error: any) {
       console.error('Update name error:', error);
       toast({
@@ -184,11 +179,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         title: 'Birth Date Updated',
         description: 'Your birth date has been updated successfully.',
       });
-      
-      // Refresh the page to update the profile
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
     } catch (error: any) {
       console.error('Update birth date error:', error);
       toast({
