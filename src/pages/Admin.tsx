@@ -452,6 +452,7 @@ export default function Admin() {
       console.log('[ADMIN STATS] Total users matching filters:', totalCount);
       
       if (!totalCount || totalCount === 0) {
+        // No users match the filters - clear everything
         setAggregateStats({
           totalUsers: 0,
           freeUsers: 0,
@@ -460,6 +461,13 @@ export default function Admin() {
           totalCost: 0,
           totalTokens: 0
         });
+        
+        // CRITICAL: Also clear the user list
+        setUserUsages([]);
+        setModelUsages([]);
+        (window as any).__adminTotalUsers = 0;
+        
+        console.log('[ADMIN STATS] No users match filters - cleared all data');
         return;
       }
       
@@ -705,6 +713,17 @@ export default function Admin() {
       if (profilesError) throw profilesError;
       
       console.log('[ADMIN] Loaded profiles for page:', profilesData?.length, 'Total filtered:', count);
+
+      // CRITICAL: If no users match the filters, clear everything
+      if (count === 0 || !profilesData || profilesData.length === 0) {
+        console.log('[ADMIN] No users found matching filters - clearing user list');
+        setUserUsages([]);
+        setModelUsages([]);
+        (window as any).__adminTotalUsers = 0;
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
 
       // Fetch subscriptions only for these users
       const userIds = profilesData?.map(p => p.user_id) || [];
