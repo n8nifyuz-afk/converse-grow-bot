@@ -461,7 +461,7 @@ export default function Admin() {
     }
   };
   
-  const fetchTokenUsageData = async (isRefresh = false) => {
+  const fetchTokenUsageData = async (isRefresh = false, overridePlanFilter?: 'all' | 'free' | 'pro' | 'ultra') => {
     try {
       if (isRefresh) {
         setRefreshing(true);
@@ -469,7 +469,12 @@ export default function Admin() {
         setLoading(true);
       }
 
+      // Use override filter if provided, otherwise use state
+      const activePlanFilter = overridePlanFilter ?? planFilter;
+
       console.log('[ADMIN] Starting to fetch page data with filters...');
+      console.log('[ADMIN] Active planFilter:', activePlanFilter);
+      console.log('[ADMIN] Current page:', currentPage);
 
       // Calculate offset based on current page
       const offset = (currentPage - 1) * usersPerPage;
@@ -483,8 +488,10 @@ export default function Admin() {
       let filteredUserIdsForPaidPlans: string[] | null = null;
       
       // For paid plans (pro/ultra), filter by user_id
-      if (planFilter === 'pro' || planFilter === 'ultra') {
-        const planValue = planFilter === 'ultra' ? 'ultra_pro' : planFilter;
+      if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
+        const planValue = activePlanFilter === 'ultra' ? 'ultra_pro' : activePlanFilter;
+        console.log('[ADMIN] Querying for plan:', planValue);
+        
         const { data: subscriptions } = await supabase
           .from('user_subscriptions')
           .select('user_id')
@@ -505,7 +512,7 @@ export default function Admin() {
         }
         
         query = query.in('user_id', filteredUserIdsForPaidPlans);
-      } else if (planFilter === 'free') {
+      } else if (activePlanFilter === 'free') {
         // For free users, get all active subscription user_ids and exclude them
         const { data: subscriptions } = await supabase
           .from('user_subscriptions')
@@ -830,6 +837,8 @@ export default function Admin() {
   
   // Apply filters function
   const applyFilters = async () => {
+    console.log('[ADMIN FILTER] Applying filters - pendingPlanFilter:', pendingPlanFilter);
+    
     // Reset to page 1 when applying new filters
     isApplyingFilters.current = true;
     setCurrentPage(1);
@@ -843,10 +852,12 @@ export default function Admin() {
     setTimezone(pendingTimezone);
     setShowFilters(false);
     
-    // Fetch data with new filters
+    console.log('[ADMIN FILTER] Applied planFilter:', pendingPlanFilter);
+    
+    // Fetch data with new filters - CRITICAL: Pass the pending filter directly to avoid race condition
     setIsRefreshing(true);
     await Promise.all([
-      fetchTokenUsageData(),
+      fetchTokenUsageData(false, pendingPlanFilter),  // Pass the new filter value directly
       fetchAggregateStats()
     ]);
     setIsRefreshing(false);
