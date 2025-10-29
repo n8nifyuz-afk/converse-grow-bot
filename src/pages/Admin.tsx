@@ -2130,7 +2130,7 @@ export default function Admin() {
           </CardHeader>
           <CardContent className="p-0 w-full overflow-hidden">
             {/* Mobile/Tablet Card Layout */}
-            <div className={`lg:hidden transition-opacity duration-200 ${isRefreshing ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            <div className="lg:hidden">
                   {/* Mobile Sort Controls */}
                   <div className="border-b border-border/50 p-4 bg-muted/20">
                     <p className="text-xs font-medium text-muted-foreground mb-3">Sort by:</p>
@@ -2279,7 +2279,7 @@ export default function Admin() {
               </div>
 
               {/* Desktop Table Layout */}
-              <div className={`hidden lg:block overflow-x-auto transition-opacity duration-200 ${isRefreshing ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+              <div className="hidden lg:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50 hover:bg-muted/50">
