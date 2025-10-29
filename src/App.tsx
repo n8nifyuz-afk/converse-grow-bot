@@ -14,7 +14,6 @@ import ResetPassword from '@/pages/ResetPassword';
 import Index from '@/pages/Index';
 import Chat from '@/pages/Chat';
 import ProjectPage from '@/pages/ProjectPage';
-import Help from '@/pages/Help';
 import Home from '@/pages/Home';
 import Pricing from '@/pages/Pricing';
 import Privacy from '@/pages/Privacy';
@@ -127,13 +126,6 @@ function AppContent() {
             <ProtectedRoute>
               <MainLayout>
                 <ProjectPage />
-              </MainLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/help" element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Help />
               </MainLayout>
             </ProtectedRoute>
           } />

@@ -182,8 +182,8 @@ serve(async (req) => {
               <!-- Footer -->
               <tr>
                 <td style="border-top: 1px solid #eee; padding-top: 20px; font-size: 13px; color: #777;">
-                  If you have any questions, please contact us through our 
-                  <a href="https://www.chatl.ai/help-center/" style="color: #10a37f; text-decoration: none;">help center</a>.
+                  If you have any questions, please contact us at 
+                  <a href="mailto:support@chatl.ai" style="color: #10a37f; text-decoration: none;">support@chatl.ai</a>.
                 </td>
               </tr>
 
