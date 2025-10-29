@@ -569,10 +569,21 @@ export default function Admin() {
         return;
       }
       
+      // Fetch subscriptions only for these users - CRITICAL: Only fetch ACTIVE subscriptions
       const { data: subscriptionsData } = await supabase
         .from('user_subscriptions')
         .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
-        .in('user_id', userIds);
+        .in('user_id', userIds)
+        .eq('status', 'active'); // CRITICAL: Only active subscriptions
+
+      console.log('[ADMIN] Fetched active subscriptions:', subscriptionsData?.length, 'for', userIds.length, 'users');
+      
+      // Log plan distribution in fetched subscriptions
+      const planCounts = subscriptionsData?.reduce((acc, sub) => {
+        acc[sub.plan || 'unknown'] = (acc[sub.plan || 'unknown'] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      console.log('[ADMIN] Active subscription plan distribution:', planCounts);
 
       const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
 
@@ -612,7 +623,13 @@ export default function Admin() {
         };
       }) || [];
       
-      console.log('[ADMIN] Loaded users after server-side filters:', users.length);
+      console.log('[ADMIN] Final user list after all filters:', users.length);
+      console.log('[ADMIN] Sample users (first 3):', users.slice(0, 3).map(u => ({
+        email: u.email,
+        plan: u.subscription_status?.plan,
+        subscribed: u.subscription_status?.subscribed
+      })));
+      
       setUserUsages(users);
       setModelUsages([]);
       
@@ -649,18 +666,26 @@ export default function Admin() {
     
     // Use the plan directly from the subscription data
     const plan = (usage.subscription_status as any).plan;
-    console.log('User plan from subscription:', plan, 'for user:', usage.user_id);
     
+    // Map plan names to return values
     if (plan === 'pro') return 'pro';
     if (plan === 'ultra_pro') return 'ultra';
     
-    // Fallback to product_id matching if plan is not set
+    // Fallback to product_id matching if plan is not set (should not happen with proper data)
     const productId = usage.subscription_status.product_id;
-    if (['prod_TGsOnuDkIh9hVG', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a', 'prod_TIHYThP5XmWyWy'].includes(productId)) return 'pro';
-    if (['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U', 'prod_TIHZLvUNMqIiCj'].includes(productId)) return 'ultra';
+    if (productId) {
+      if (['prod_TGsOnuDkIh9hVG', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a', 'prod_TIHYThP5XmWyWy'].includes(productId)) {
+        console.warn('[ADMIN] Using product_id fallback for Pro plan, user:', usage.user_id);
+        return 'pro';
+      }
+      if (['prod_TGqs5r2udThT0t', 'prod_TGquGexHO44m4T', 'prod_TGqwVIWObYLt6U', 'prod_TIHZLvUNMqIiCj'].includes(productId)) {
+        console.warn('[ADMIN] Using product_id fallback for Ultra plan, user:', usage.user_id);
+        return 'ultra';
+      }
+    }
     
-    console.log('Unknown plan/product_id:', plan, productId);
-    return 'free';
+    console.error('[ADMIN] Unknown plan/product_id:', { plan, productId, userId: usage.user_id });
+    return 'free'; // Fallback to free if we can't determine the plan
   };
 
   // Toggle sort
