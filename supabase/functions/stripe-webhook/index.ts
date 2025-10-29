@@ -609,9 +609,10 @@ serve(async (req) => {
               ip_address: userProfile?.ip_address || null,
               country: userProfile?.country || null,
               gclid: userProfile?.gclid || null,
-              url_params: userProfile?.url_params || {},
-              referer: userProfile?.initial_referer || null,
-              timestamp: new Date().toISOString()
+              urlParams: JSON.stringify(userProfile?.url_params || {}), // Stringified JSON
+              referer: userProfile?.initial_referer ? String(userProfile.initial_referer) : "null", // String format
+              timestamp: new Date().toISOString(),
+              hasDocument: "false"
             };
 
             logStep("Sending subscription webhook", webhookPayload);

@@ -1065,7 +1065,14 @@ export default function Chat() {
           isFirstMessage,
           externalId,
           userEmail,
-          ...metadata
+          sessionId: metadata.sessionId,
+          userIP: metadata.userIP,
+          countryCode: metadata.countryCode,
+          isMobile: metadata.isMobile,
+          gclid: metadata.gclid,
+          urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+          referer: metadata.referer ? String(metadata.referer) : "null", // String format
+          hasDocument: "false"
         })
       });
       
@@ -1304,7 +1311,14 @@ export default function Chat() {
           isFirstMessage,
           externalId,
           userEmail,
-          ...metadata
+          sessionId: metadata.sessionId,
+          userIP: metadata.userIP,
+          countryCode: metadata.countryCode,
+          isMobile: metadata.isMobile,
+          gclid: metadata.gclid,
+          urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+          referer: metadata.referer ? String(metadata.referer) : "null", // String format
+          hasDocument: "false"
         })
       });
       
@@ -2055,7 +2069,14 @@ export default function Chat() {
             isFirstMessage,
             externalId,
             userEmail,
-            ...metadata
+            sessionId: metadata.sessionId,
+            userIP: metadata.userIP,
+            countryCode: metadata.countryCode,
+            isMobile: metadata.isMobile,
+            gclid: metadata.gclid,
+            urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+            referer: metadata.referer ? String(metadata.referer) : "null", // String format
+            hasDocument: "false"
           })
         });
         
@@ -2455,7 +2476,7 @@ export default function Chat() {
               console.error('[WEBHOOK] Error fetching email:', error);
             }
             
-            // Build webhook body conditionally based on model
+            // Build webhook body conditionally based on model with proper format
             const webhookBody: any = {
               fileName: attachment.name,
               fileSize: file.size,
@@ -2466,7 +2487,14 @@ export default function Chat() {
               message: userMessage,
               model: selectedModel,
               userEmail,
-              ...metadata
+              sessionId: metadata.sessionId,
+              userIP: metadata.userIP,
+              countryCode: metadata.countryCode,
+              isMobile: metadata.isMobile,
+              gclid: metadata.gclid,
+              urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+              referer: metadata.referer ? String(metadata.referer) : "null", // String format
+              hasDocument: "true"
             };
             
             // Only add type field if not edit-image model

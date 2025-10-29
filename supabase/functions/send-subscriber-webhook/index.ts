@@ -98,7 +98,7 @@ serve(async (req) => {
     console.log(`[SUBSCRIBER-WEBHOOK] GCLID: ${gclid}, Referer: ${referer}`);
     console.log(`[SUBSCRIBER-WEBHOOK] URL Params:`, urlParams);
 
-    // Prepare webhook payload
+    // Prepare webhook payload with proper formatting
     const webhookPayload = {
       email,
       username,
@@ -107,9 +107,10 @@ serve(async (req) => {
       user_id: userId,
       signup_method: signupMethod || 'email',
       gclid: gclid || null,
-      url_params: urlParams || {},
-      referer: referer || null,
+      urlParams: JSON.stringify(urlParams || {}), // Stringified JSON
+      referer: referer ? String(referer) : "null", // String, not null
       timestamp: new Date().toISOString(),
+      hasDocument: "false"
     };
     
     console.log(`[SUBSCRIBER-WEBHOOK] Sending payload:`, JSON.stringify(webhookPayload, null, 2));

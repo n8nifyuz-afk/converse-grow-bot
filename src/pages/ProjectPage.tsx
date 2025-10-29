@@ -641,7 +641,14 @@ export default function ProjectPage() {
                   chatId: newChat.id,
                   userId: user.id,
                   model: selectedModel,
-                  ...metadata
+                  sessionId: metadata.sessionId,
+                  userIP: metadata.userIP,
+                  countryCode: metadata.countryCode,
+                  isMobile: metadata.isMobile,
+                  gclid: metadata.gclid,
+                  urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+                  referer: metadata.referer ? String(metadata.referer) : "null", // String format
+                  hasDocument: "false"
                 })
               });
               console.log('[PROJECT-WEBHOOK] Image generation request sent to webhook');
@@ -701,7 +708,14 @@ export default function ProjectPage() {
                 fileType: file.type.startsWith('image/') ? 'image/png' : file.type,
                 fileData: base64Data,
                 model: selectedModel,
-                ...metadata
+                sessionId: metadata.sessionId,
+                userIP: metadata.userIP,
+                countryCode: metadata.countryCode,
+                isMobile: metadata.isMobile,
+                gclid: metadata.gclid,
+                urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+                referer: metadata.referer ? String(metadata.referer) : "null", // String format
+                hasDocument: "true"
               })
             });
             console.log('[PROJECT-WEBHOOK] File sent to webhook, AI response will arrive via realtime');

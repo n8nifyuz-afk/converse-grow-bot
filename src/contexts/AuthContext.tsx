@@ -1088,7 +1088,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   urlParamsObj[key] = value;
                 });
                 
-                // Send payment webhook
+                // Send payment webhook with proper format
                 const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/payment', {
                   method: 'POST',
                   headers: {
@@ -1106,9 +1106,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     product_id: dbSub.product_id,
                     plan_name: dbSub.plan_name,
                     gclid: gclid,
-                    url_params: urlParamsObj,
-                    referer: document.referrer || null,
+                    urlParams: JSON.stringify(urlParamsObj), // Stringified JSON
+                    referer: document.referrer ? String(document.referrer) : "null", // String format
                     timestamp: new Date().toISOString(),
+                    hasDocument: "false"
                   }),
                 });
                 
