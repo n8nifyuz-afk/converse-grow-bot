@@ -695,41 +695,64 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               <p className="text-sm md:text-base text-muted-foreground">{t('profile.manageAccount')}</p>
             </div>
             
-            <div className="space-y-3 md:space-y-4">{/* Full Name Section - Only for Phone Users */}
-              {userProfile?.signup_method === 'phone' && (
-                <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                  <CardContent className="p-3 md:p-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 md:gap-2.5">
-                        <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
-                          <User className="h-3.5 w-3.5 text-primary" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-foreground text-sm">Full Name</p>
-                          <p className="text-xs text-muted-foreground">Your display name</p>
-                        </div>
+            <div className="space-y-3 md:space-y-4">
+              {/* Profile Name Section */}
+              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
+                <CardContent className="p-3 md:p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 md:gap-2.5">
+                      <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
+                        <User className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <div className="ml-0 md:ml-9 space-y-2">
-                        <input
-                          type="text"
-                          value={displayName}
-                          onChange={(e) => setDisplayName(e.target.value)}
-                          placeholder="Enter your full name"
-                          className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                        <Button 
-                          onClick={handleUpdateDisplayName}
-                          disabled={isUpdatingName || !displayName.trim() || displayName === userProfile?.display_name}
-                          size="sm"
-                          className="w-full sm:w-auto h-8 text-xs"
-                        >
-                          {isUpdatingName ? 'Updating...' : 'Update Name'}
-                        </Button>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground text-sm">{t('profile.displayName')}</p>
+                        <p className="text-xs text-muted-foreground">{t('profile.yourProfileName')}</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                    <div className="ml-0 md:ml-9 space-y-2">
+                      <input
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder={t('profile.enterFullName')}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                      <Button 
+                        onClick={handleUpdateDisplayName}
+                        disabled={isUpdatingName || !displayName.trim() || displayName === userProfile?.display_name}
+                        size="sm"
+                        className="w-full sm:w-auto h-8 text-xs"
+                      >
+                        {isUpdatingName ? t('profile.updating') : t('profile.updateName')}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Birth Date Section */}
+              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
+                <CardContent className="p-3 md:p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 md:gap-2.5">
+                      <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
+                        <User className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground text-sm">{t('profile.birthDate')}</p>
+                        <p className="text-xs text-muted-foreground">{t('profile.yourBirthDate')}</p>
+                      </div>
+                    </div>
+                    <div className="ml-0 md:ml-9">
+                      <p className="font-medium text-foreground bg-muted/40 px-2.5 py-1.5 rounded-lg border border-border/30 text-sm">
+                        {userProfile?.date_of_birth 
+                          ? new Date(userProfile.date_of_birth).toLocaleDateString() 
+                          : t('profile.notSet')}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Email/Phone Section */}
               <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
