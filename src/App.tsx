@@ -23,7 +23,6 @@ import Cookies from '@/pages/Cookies';
 import NotFound from '@/pages/NotFound';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
-import HelpCenter from '@/pages/HelpCenter';
 import RefundPolicy from '@/pages/RefundPolicy';
 import CancelSubscription from '@/pages/CancelSubscription';
 import Admin from '@/pages/Admin';
@@ -89,11 +88,6 @@ function AppContent() {
           <Route path="/contact" element={
             <PublicLayout>
               <Contact />
-            </PublicLayout>
-          } />
-          <Route path="/help-center" element={
-            <PublicLayout>
-              <HelpCenter />
             </PublicLayout>
           } />
           <Route path="/terms" element={

@@ -64,6 +64,7 @@ const Footer = () => {
                 {t('nav.whatYouCanDo')}
               </button>
               <a href="/about" className="block text-muted-foreground hover:text-primary transition-colors">{t('footer.aboutUs')}</a>
+              <a href="/help" className="block text-muted-foreground hover:text-primary transition-colors">{t('footer.helpCenter')}</a>
             </div>
           </div>
           
