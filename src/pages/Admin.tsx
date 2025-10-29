@@ -288,7 +288,7 @@ export default function Admin() {
     if (isAdmin && userUsages.length === 0) {
       setLoading(true);
       Promise.all([
-        fetchTokenUsageData(),
+        fetchTokenUsageData(false, 'all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', ''),
         fetchAggregateStats('all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', '')
       ]).finally(() => {
         setLoading(false);
@@ -303,7 +303,7 @@ export default function Admin() {
   useEffect(() => {
     if (isAdmin && userUsages.length > 0 && !isApplyingFilters.current) {
       setIsRefreshing(true);
-      fetchTokenUsageData().finally(() => {
+      fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery).finally(() => {
         setIsRefreshing(false);
       });
     }
@@ -318,7 +318,7 @@ export default function Admin() {
       setCurrentPage(1); // Reset to first page on search
       setIsRefreshing(true);
       Promise.all([
-        fetchTokenUsageData(),
+        fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery),
         fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
       ]).finally(() => {
         setIsRefreshing(false);
@@ -694,7 +694,14 @@ export default function Admin() {
     }
   };
   
-  const fetchTokenUsageData = async (isRefresh = false, overridePlanFilter?: 'all' | 'free' | 'pro' | 'ultra') => {
+  const fetchTokenUsageData = async (
+    isRefresh = false, 
+    overridePlanFilter?: 'all' | 'free' | 'pro' | 'ultra',
+    overrideDateFilter?: { from: Date | undefined; to: Date | undefined },
+    overrideTimeFilter?: { fromTime: string; toTime: string },
+    overrideCountryFilter?: string,
+    overrideSearchQuery?: string
+  ) => {
     try {
       if (isRefresh) {
         setRefreshing(true);
@@ -702,8 +709,12 @@ export default function Admin() {
         setLoading(true);
       }
 
-      // Use override filter if provided, otherwise use state
+      // Use override filters if provided, otherwise use state
       const activePlanFilter = overridePlanFilter ?? planFilter;
+      const activeDateFilter = overrideDateFilter ?? dateFilter;
+      const activeTimeFilter = overrideTimeFilter ?? timeFilter;
+      const activeCountryFilter = overrideCountryFilter ?? countryFilter;
+      const activeSearchQuery = overrideSearchQuery ?? searchQuery;
 
       console.log('[ADMIN] Starting to fetch page data with filters...');
       console.log('[ADMIN] Active planFilter:', activePlanFilter);
@@ -766,15 +777,15 @@ export default function Admin() {
       // Step 2: Apply additional filters
       
       // Apply search filter (name or email)
-      if (searchQuery.trim()) {
-        const search = searchQuery.trim();
+      if (activeSearchQuery.trim()) {
+        const search = activeSearchQuery.trim();
         query = query.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
       }
       
       // Apply date filter
-      if (dateFilter.from || dateFilter.to) {
-        const fromDateTime = getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime);
-        const toDateTime = getDateTimeFromFilter(dateFilter.to, timeFilter.toTime);
+      if (activeDateFilter.from || activeDateFilter.to) {
+        const fromDateTime = getDateTimeFromFilter(activeDateFilter.from, activeTimeFilter.fromTime);
+        const toDateTime = getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime);
         
         if (fromDateTime && toDateTime) {
           query = query.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
@@ -786,9 +797,9 @@ export default function Admin() {
       }
       
       // Apply country filter
-      if (countryFilter !== 'all') {
-        console.log('[ADMIN] Applying country filter:', countryFilter);
-        query = query.eq('country', countryFilter);
+      if (activeCountryFilter !== 'all') {
+        console.log('[ADMIN] Applying country filter:', activeCountryFilter);
+        query = query.eq('country', activeCountryFilter);
       }
       
       // Step 3: Handle plan sorting specially - it requires sorting ALL filtered users
@@ -818,14 +829,14 @@ export default function Admin() {
           }
         }
         
-        if (searchQuery.trim()) {
-          const search = searchQuery.trim();
+        if (activeSearchQuery.trim()) {
+          const search = activeSearchQuery.trim();
           allUsersQuery = allUsersQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
         }
         
-        if (dateFilter.from || dateFilter.to) {
-          const fromDateTime = dateFilter.from ? getDateTimeFromFilter(dateFilter.from, timeFilter.fromTime) : null;
-          const toDateTime = dateFilter.to ? getDateTimeFromFilter(dateFilter.to, timeFilter.toTime) : null;
+        if (activeDateFilter.from || activeDateFilter.to) {
+          const fromDateTime = activeDateFilter.from ? getDateTimeFromFilter(activeDateFilter.from, activeTimeFilter.fromTime) : null;
+          const toDateTime = activeDateFilter.to ? getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime) : null;
           
           if (fromDateTime && toDateTime) {
             allUsersQuery = allUsersQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
@@ -836,8 +847,8 @@ export default function Admin() {
           }
         }
         
-        if (countryFilter !== 'all') {
-          allUsersQuery = allUsersQuery.eq('country', countryFilter);
+        if (activeCountryFilter !== 'all') {
+          allUsersQuery = allUsersQuery.eq('country', activeCountryFilter);
         }
         
         // Fetch all matching user IDs
@@ -1262,10 +1273,10 @@ export default function Admin() {
     
     console.log('[ADMIN FILTER] Applied planFilter:', pendingPlanFilter);
     
-    // Fetch data with new filters - CRITICAL: Pass the pending filter values directly to avoid race condition
+    // Fetch data with new filters - CRITICAL: Pass ALL pending filter values directly to avoid race condition
     setIsRefreshing(true);
     await Promise.all([
-      fetchTokenUsageData(false, pendingPlanFilter),
+      fetchTokenUsageData(false, pendingPlanFilter, pendingDateFilter, pendingTimeFilter, pendingCountryFilter, searchQuery),
       fetchAggregateStats(
         pendingPlanFilter,
         pendingDateFilter,
@@ -1281,7 +1292,7 @@ export default function Admin() {
   const handleRefresh = async () => {
     setRefreshing(true);
     await Promise.all([
-      fetchTokenUsageData(),
+      fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery),
       fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
     ]);
     setRefreshing(false);
@@ -1331,7 +1342,7 @@ export default function Admin() {
     setIsRefreshing(true);
     
     await Promise.all([
-      fetchTokenUsageData(false, 'all'),
+      fetchTokenUsageData(false, 'all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', ''),
       fetchAggregateStats('all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', '')
     ]);
     
@@ -1345,7 +1356,7 @@ export default function Admin() {
       // Trigger data fetch when sort changes
       setIsRefreshing(true);
       Promise.all([
-        fetchTokenUsageData(),
+        fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery),
         fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
       ]).finally(() => {
         setIsRefreshing(false);
