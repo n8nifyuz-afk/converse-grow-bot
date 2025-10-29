@@ -42,6 +42,7 @@ export default function AuthModal({
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
+  const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const {
     user,
     signIn,
@@ -493,7 +494,7 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className="flex flex-col min-h-[500px] md:min-h-[420px]">
+  const authContent = <div className={`flex flex-col ${isPhoneInputFocused && isMobile && mode === 'phone' ? 'min-h-0' : 'min-h-[500px] md:min-h-[420px]'}`}>
           {/* Auth Form */}
           <div className="w-full p-4 md:p-6 flex flex-col">
             {/* Main Heading */}
@@ -526,13 +527,18 @@ export default function AuthModal({
                   <div className="text-sm md:text-base text-muted-foreground mb-2">
                     {t('authModal.enterPhoneNumber')}
                   </div>
-                  <CountryPhoneInput
-                    value={phone}
-                    onChange={setPhone}
-                    className="w-full"
-                    disabled={phoneLoading}
-                    showValidation={showPhoneValidation}
-                  />
+                  <div
+                    onFocus={() => isMobile && setIsPhoneInputFocused(true)}
+                    onBlur={() => isMobile && setIsPhoneInputFocused(false)}
+                  >
+                    <CountryPhoneInput
+                      value={phone}
+                      onChange={setPhone}
+                      className="w-full"
+                      disabled={phoneLoading}
+                      showValidation={showPhoneValidation}
+                    />
+                  </div>
                   {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
                      {error}
                    </div>}
