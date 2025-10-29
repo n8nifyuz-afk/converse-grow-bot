@@ -622,49 +622,54 @@ All colors MUST be HSL.
     position: fixed !important;
     bottom: 0 !important;
     transform: none !important;
+    transition: none !important;
+  }
+  
+  /* Prevent input focus from causing any movement */
+  [data-vaul-drawer] input:focus,
+  [data-vaul-drawer] textarea:focus {
+    transform: none !important;
   }
 }
 
 @media (max-width: 767px) {
-  /* Prevent body scroll when drawer is open */
-  body:has([data-vaul-drawer][data-vaul-drawer-visible]) {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
-  }
-  
   /* Keep drawer at bottom with fixed positioning */
   [data-vaul-drawer][data-vaul-drawer-visible] {
     position: fixed !important;
     bottom: 0 !important;
     transform: translateY(0) !important;
-    max-height: 80vh !important;
+    transition: none !important;
+    will-change: auto !important;
   }
   
   /* Prevent drawer content from changing height */
   [data-vaul-drawer-content] {
-    max-height: 80vh !important;
     overflow-y: auto;
   }
   
-  /* Prevent scroll-into-view behavior */
+  /* Prevent scroll-into-view behavior that causes jumping */
   [data-vaul-drawer] input:focus,
   [data-vaul-drawer] textarea:focus {
-    scroll-margin: 0;
+    scroll-margin: 0 !important;
     transform: translateY(0) !important;
+    transition: none !important;
   }
   
-  /* Prevent any transitions that might cause jumping */
-  [data-vaul-drawer] input,
-  [data-vaul-drawer] textarea {
-    transition: none;
+  /* Remove all transitions during input focus */
+  [data-vaul-drawer]:has(input:focus),
+  [data-vaul-drawer]:has(textarea:focus) {
+    transform: none !important;
+    transition: none !important;
   }
   
-  /* Prevent viewport changes from affecting drawer */
+  /* Prevent any hardware acceleration issues */
   [data-vaul-drawer] * {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
+  }
+  
+  /* Disable smooth scroll when keyboard opens */
+  [data-vaul-drawer] {
+    scroll-behavior: auto !important;
   }
 }

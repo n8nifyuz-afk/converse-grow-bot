@@ -118,16 +118,6 @@ export default function AuthModal({
       setIsPhoneInputFocused(false);
     }
   }, [mode]);
-
-  // Prevent body scroll when phone input is focused on mobile
-  useEffect(() => {
-    if (isPhoneInputFocused && isMobile) {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = '';
-      };
-    }
-  }, [isPhoneInputFocused, isMobile]);
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -1017,7 +1007,7 @@ export default function AuthModal({
         </div>;
   if (isMobile) {
     return <Drawer open={isOpen} onOpenChange={onClose} dismissible={mode !== 'phone' && mode !== 'verify'}>
-        <DrawerContent className="h-auto max-h-[85vh] p-0">
+        <DrawerContent className="h-auto p-0" style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}>
           <DrawerHeader className="sr-only">
             <DrawerTitle>ChatLearn Authentication</DrawerTitle>
             <DrawerDescription>
