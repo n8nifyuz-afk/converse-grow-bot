@@ -534,8 +534,8 @@ export default function AuthModal({
           }} className="text-sm text-primary hover:underline">
                     {t('authModal.backToSignIn')}
                   </button>
-                 </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-5">
-                  <div className="text-sm md:text-base text-muted-foreground mb-2">
+                 </form> : mode === 'phone' ? <form onSubmit={handlePhoneSignIn} className="space-y-3">
+                  <div className="text-sm md:text-base text-muted-foreground">
                     {t('authModal.enterPhoneNumber')}
                   </div>
                   <CountryPhoneInput
