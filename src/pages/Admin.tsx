@@ -477,7 +477,7 @@ export default function Admin() {
       // Step 1: Build base query
       let query = supabase
         .from('profiles')
-        .select('user_id, email, display_name, created_at, ip_address, country', { count: 'exact' });
+        .select('user_id, email, display_name, created_at, ip_address, country, phone_number', { count: 'exact' });
       
       let needsClientSideFiltering = false;
       let filteredUserIdsForPaidPlans: string[] | null = null;
@@ -492,7 +492,7 @@ export default function Admin() {
           .eq('plan', planValue);
         
         filteredUserIdsForPaidPlans = subscriptions?.map(s => s.user_id) || [];
-        console.log('[ADMIN] Filtered user_ids by plan:', filteredUserIdsForPaidPlans.length);
+        console.log('[ADMIN] Filtered user_ids for plan', planValue, ':', filteredUserIdsForPaidPlans.length);
         
         // If no users match the plan filter, return empty
         if (filteredUserIdsForPaidPlans.length === 0) {
@@ -506,10 +506,19 @@ export default function Admin() {
         
         query = query.in('user_id', filteredUserIdsForPaidPlans);
       } else if (planFilter === 'free') {
-        // For free users, we'll filter client-side after fetching
-        // This is more efficient than trying to exclude all subscribed users in the query
-        needsClientSideFiltering = true;
-        console.log('[ADMIN] Will filter free users client-side');
+        // For free users, get all active subscription user_ids and exclude them
+        const { data: subscriptions } = await supabase
+          .from('user_subscriptions')
+          .select('user_id')
+          .eq('status', 'active');
+        
+        const subscribedUserIds = subscriptions?.map(s => s.user_id) || [];
+        console.log('[ADMIN] Excluding subscribed users:', subscribedUserIds.length);
+        
+        // If there are subscribed users, exclude them
+        if (subscribedUserIds.length > 0) {
+          query = query.not('user_id', 'in', `(${subscribedUserIds.join(',')})`);
+        }
       }
       
       // Step 2: Apply additional filters
@@ -570,10 +579,17 @@ export default function Admin() {
       // Build user data without token usage (load on demand)
       let users: UserTokenUsage[] = profilesData?.map((profile: any) => {
         const subscription = subscriptionsMap.get(profile.user_id);
+        
+        // Determine display values with phone number fallback
+        const emailDisplay = profile.email || (profile.phone_number ? profile.phone_number : 'Unknown');
+        const displayName = profile.display_name || 
+                           (profile.email ? profile.email.split('@')[0] : null) || 
+                           (profile.phone_number ? profile.phone_number : 'Unknown User');
+        
         return {
           user_id: profile.user_id,
-          email: profile.email || 'Unknown',
-          display_name: profile.display_name || profile.email?.split('@')[0] || 'Unknown User',
+          email: emailDisplay,
+          display_name: displayName,
           created_at: profile.created_at,
           ip_address: profile.ip_address,
           country: profile.country,
@@ -596,13 +612,7 @@ export default function Admin() {
         };
       }) || [];
       
-      // If filtering for free users, exclude those with active subscriptions
-      if (needsClientSideFiltering) {
-        users = users.filter(user => !user.subscription_status?.subscribed);
-        console.log('[ADMIN] Filtered to free users client-side:', users.length);
-      }
-      
-      console.log('[ADMIN] Loaded users after filters:', users.length);
+      console.log('[ADMIN] Loaded users after server-side filters:', users.length);
       setUserUsages(users);
       setModelUsages([]);
       
