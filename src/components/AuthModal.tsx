@@ -454,9 +454,32 @@ export default function AuthModal({
     // Step 3: Date of birth - save to profile
     if (profileStep === 3) {
       if (!dateOfBirth) {
-        setError("Please select your date of birth.");
+        setError("Please enter your date of birth.");
         return;
       }
+      
+      // Validate date format DD/MM/YYYY
+      const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+      const match = dateOfBirth.match(dateRegex);
+      
+      if (!match) {
+        setError("Please enter date in DD/MM/YYYY format.");
+        return;
+      }
+      
+      const [, day, month, year] = match;
+      const dayNum = parseInt(day);
+      const monthNum = parseInt(month);
+      const yearNum = parseInt(year);
+      
+      // Basic validation
+      if (dayNum < 1 || dayNum > 31 || monthNum < 1 || monthNum > 12 || yearNum < 1900 || yearNum > new Date().getFullYear()) {
+        setError("Please enter a valid date.");
+        return;
+      }
+      
+      // Convert to YYYY-MM-DD format for database
+      const dbDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
       
       setLoading(true);
       
@@ -472,7 +495,7 @@ export default function AuthModal({
           .from('profiles')
           .update({
             display_name: `${firstName} ${lastName}`,
-            date_of_birth: dateOfBirth,
+            date_of_birth: dbDate,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id);
@@ -664,14 +687,33 @@ export default function AuthModal({
                   {profileStep === 3 && (
                     <div className="space-y-2">
                       <Input 
-                        type="date" 
+                        type="text" 
+                        placeholder="DD/MM/YYYY" 
                         value={dateOfBirth} 
-                        onChange={e => setDateOfBirth(e.target.value)} 
+                        onChange={e => {
+                          // Allow only numbers and slashes
+                          let input = e.target.value.replace(/[^\d/]/g, '');
+                          
+                          // Auto-format as user types
+                          if (input.length === 2 && !input.includes('/')) {
+                            input = input + '/';
+                          } else if (input.length === 5 && input.split('/').length === 2) {
+                            input = input + '/';
+                          }
+                          
+                          // Limit to DD/MM/YYYY format (10 characters)
+                          if (input.length <= 10) {
+                            setDateOfBirth(input);
+                          }
+                        }} 
                         required 
                         autoFocus
-                        max={new Date().toISOString().split('T')[0]}
-                        className="h-12 md:h-13 text-base"
+                        maxLength={10}
+                        className="h-12 md:h-13 text-base tracking-wider"
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Format: DD/MM/YYYY (e.g., 09/02/2005)
+                      </p>
                     </div>
                   )}
                   

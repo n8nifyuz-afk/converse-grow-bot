@@ -86,26 +86,30 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     }
   }, []);
 
-  // Update when value changes externally (e.g., when country is changed)
+  // Update when value changes externally - but skip if we're the ones who changed it
   useEffect(() => {
-    if (value && value.startsWith('+')) {
-      // Find the country that matches the current value's dial code
-      const matchingCountry = allCountries.find(c => value.startsWith(c.dialCode));
-      if (matchingCountry) {
-        setSelectedCountry(matchingCountry);
-        // Extract phone number without dial code
-        const numberWithoutCode = value.substring(matchingCountry.dialCode.length);
-        setPhoneNumber(numberWithoutCode);
+    // Only sync from parent if the value doesn't match what we expect
+    const expectedValue = selectedCountry.dialCode + phoneNumber;
+    if (value !== expectedValue) {
+      if (value && value.startsWith('+')) {
+        // Find the country that matches the current value's dial code
+        const matchingCountry = allCountries.find(c => value.startsWith(c.dialCode));
+        if (matchingCountry && matchingCountry.code !== selectedCountry.code) {
+          setSelectedCountry(matchingCountry);
+          // Extract phone number without dial code
+          const numberWithoutCode = value.substring(matchingCountry.dialCode.length);
+          setPhoneNumber(numberWithoutCode);
+        }
+      } else if (!value) {
+        // If value is cleared, reset phone number
+        setPhoneNumber('');
       }
-    } else if (!value) {
-      // If value is cleared, reset phone number
-      setPhoneNumber('');
     }
   }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
