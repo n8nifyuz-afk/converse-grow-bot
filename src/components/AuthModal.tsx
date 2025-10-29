@@ -42,6 +42,7 @@ export default function AuthModal({
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
+  const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const {
     user,
     signIn,
@@ -111,8 +112,19 @@ export default function AuthModal({
   useEffect(() => {
     if (mode !== 'phone') {
       setShowPhoneValidation(false);
+      setIsPhoneInputFocused(false);
     }
   }, [mode]);
+
+  // Prevent body scroll when phone input is focused on mobile
+  useEffect(() => {
+    if (isPhoneInputFocused && isMobile) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isPhoneInputFocused, isMobile]);
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
