@@ -289,7 +289,7 @@ export default function Admin() {
       setLoading(true);
       Promise.all([
         fetchTokenUsageData(),
-        fetchAggregateStats()
+        fetchAggregateStats('all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', '')
       ]).finally(() => {
         setLoading(false);
       });
@@ -317,7 +317,10 @@ export default function Admin() {
     const debounceTimer = setTimeout(() => {
       setCurrentPage(1); // Reset to first page on search
       setIsRefreshing(true);
-      fetchTokenUsageData().finally(() => {
+      Promise.all([
+        fetchTokenUsageData(),
+        fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
+      ]).finally(() => {
         setIsRefreshing(false);
       });
     }, 500); // 500ms debounce
@@ -395,40 +398,115 @@ export default function Admin() {
     }
   };
   
-  // Fetch aggregate statistics (counts and totals) - optimized query
-  const fetchAggregateStats = async () => {
+  // Fetch aggregate statistics (counts and totals) - now filter-aware
+  const fetchAggregateStats = async (
+    filterPlan: 'all' | 'free' | 'pro' | 'ultra' = 'all',
+    filterDate: { from: Date | undefined; to: Date | undefined } = { from: undefined, to: undefined },
+    filterTime: { fromTime: string; toTime: string } = { fromTime: '00:00', toTime: '23:59' },
+    filterCountry: string = 'all',
+    filterSearch: string = ''
+  ) => {
     try {
-      console.log('Fetching aggregate statistics...');
+      console.log('[ADMIN STATS] Fetching aggregate statistics with filters:', {
+        plan: filterPlan,
+        dateRange: filterDate,
+        country: filterCountry,
+        search: filterSearch
+      });
       
-      // 1. Get total count of profiles
-      const { count: totalCount, error: countError } = await supabase
+      // Build base query for profiles with filters
+      let profilesQuery = supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true });
+        .select('user_id, created_at, country, email, display_name, phone_number', { count: 'exact' });
+      
+      // Apply date filter
+      if (filterDate.from || filterDate.to) {
+        const fromDateTime = getDateTimeFromFilter(filterDate.from, filterTime.fromTime);
+        const toDateTime = getDateTimeFromFilter(filterDate.to, filterTime.toTime);
+        
+        if (fromDateTime && toDateTime) {
+          profilesQuery = profilesQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+        } else if (fromDateTime) {
+          profilesQuery = profilesQuery.gte('created_at', fromDateTime.toISOString());
+        } else if (toDateTime) {
+          profilesQuery = profilesQuery.lte('created_at', toDateTime.toISOString());
+        }
+      }
+      
+      // Apply country filter
+      if (filterCountry !== 'all') {
+        profilesQuery = profilesQuery.eq('country', filterCountry);
+      }
+      
+      // Apply search filter
+      if (filterSearch.trim()) {
+        const search = filterSearch.trim();
+        profilesQuery = profilesQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
+      }
+      
+      // Get filtered profiles
+      const { data: filteredProfiles, count: totalCount, error: countError } = await profilesQuery;
       
       if (countError) throw countError;
       
-      // 2. Get count of users with active subscriptions by plan
+      const filteredUserIds = filteredProfiles?.map(p => p.user_id) || [];
+      console.log('[ADMIN STATS] Filtered user IDs count:', filteredUserIds.length);
+      
+      if (filteredUserIds.length === 0) {
+        setAggregateStats({
+          totalUsers: 0,
+          freeUsers: 0,
+          proUsers: 0,
+          ultraProUsers: 0,
+          totalCost: 0,
+          totalTokens: 0
+        });
+        return;
+      }
+      
+      // Get subscriptions for filtered users only
       const { data: subscriptionCounts, error: subCountError } = await supabase
         .from('user_subscriptions')
-        .select('plan')
+        .select('user_id, plan')
+        .in('user_id', filteredUserIds)
         .eq('status', 'active');
       
       if (subCountError) throw subCountError;
       
       // Count by plan type
-      const proCount = subscriptionCounts?.filter(s => s.plan === 'pro').length || 0;
-      const ultraProCount = subscriptionCounts?.filter(s => s.plan === 'ultra_pro').length || 0;
-      const subscribedCount = proCount + ultraProCount;
-      const freeCount = (totalCount || 0) - subscribedCount;
+      let proCount = 0;
+      let ultraProCount = 0;
+      let freeCount = 0;
       
-      // 3. Get total cost from token_usage (aggregate sum)
+      if (filterPlan === 'all') {
+        proCount = subscriptionCounts?.filter(s => s.plan === 'pro').length || 0;
+        ultraProCount = subscriptionCounts?.filter(s => s.plan === 'ultra_pro').length || 0;
+        const subscribedCount = proCount + ultraProCount;
+        freeCount = filteredUserIds.length - subscribedCount;
+      } else if (filterPlan === 'pro') {
+        proCount = subscriptionCounts?.filter(s => s.plan === 'pro').length || 0;
+        ultraProCount = 0;
+        freeCount = 0;
+      } else if (filterPlan === 'ultra') {
+        proCount = 0;
+        ultraProCount = subscriptionCounts?.filter(s => s.plan === 'ultra_pro').length || 0;
+        freeCount = 0;
+      } else if (filterPlan === 'free') {
+        proCount = 0;
+        ultraProCount = 0;
+        const subscribedUserIds = subscriptionCounts?.map(s => s.user_id) || [];
+        freeCount = filteredUserIds.filter(uid => !subscribedUserIds.includes(uid)).length;
+      }
+      
+      // Get total cost and tokens from token_usage for filtered users
       const { data: costData, error: costError } = await supabase
         .from('token_usage')
-        .select('model, input_tokens, output_tokens');
+        .select('model, input_tokens, output_tokens, user_id')
+        .in('user_id', filteredUserIds);
       
       if (costError) throw costError;
       
-      // Calculate total cost
+      // Calculate total cost and tokens
       let totalCost = 0;
       let totalTokens = 0;
       
@@ -439,24 +517,27 @@ export default function Admin() {
       });
       
       // Update aggregate stats
-      setAggregateStats({
+      const stats = {
         totalUsers: totalCount || 0,
         freeUsers: freeCount,
         proUsers: proCount,
         ultraProUsers: ultraProCount,
         totalCost,
         totalTokens
-      });
+      };
       
-      console.log('Aggregate stats loaded:', {
-        totalUsers: totalCount,
-        freeUsers: freeCount,
-        proUsers: proCount,
-        ultraProUsers: ultraProCount,
-        totalCost: totalCost.toFixed(2)
+      setAggregateStats(stats);
+      
+      console.log('[ADMIN STATS] Aggregate stats loaded:', {
+        totalUsers: stats.totalUsers,
+        freeUsers: stats.freeUsers,
+        proUsers: stats.proUsers,
+        ultraProUsers: stats.ultraProUsers,
+        totalCost: stats.totalCost.toFixed(2),
+        totalTokens: stats.totalTokens
       });
     } catch (error) {
-      console.error('Error fetching aggregate stats:', error);
+      console.error('[ADMIN STATS] Error fetching aggregate stats:', error);
       toast.error('Failed to load statistics');
     }
   };
@@ -854,11 +935,17 @@ export default function Admin() {
     
     console.log('[ADMIN FILTER] Applied planFilter:', pendingPlanFilter);
     
-    // Fetch data with new filters - CRITICAL: Pass the pending filter directly to avoid race condition
+    // Fetch data with new filters - CRITICAL: Pass the pending filter values directly to avoid race condition
     setIsRefreshing(true);
     await Promise.all([
-      fetchTokenUsageData(false, pendingPlanFilter),  // Pass the new filter value directly
-      fetchAggregateStats()
+      fetchTokenUsageData(false, pendingPlanFilter),
+      fetchAggregateStats(
+        pendingPlanFilter,
+        pendingDateFilter,
+        pendingTimeFilter,
+        pendingCountryFilter,
+        searchQuery
+      )
     ]);
     setIsRefreshing(false);
   };
@@ -868,7 +955,7 @@ export default function Admin() {
     setRefreshing(true);
     await Promise.all([
       fetchTokenUsageData(),
-      fetchAggregateStats()
+      fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
     ]);
     setRefreshing(false);
   };
