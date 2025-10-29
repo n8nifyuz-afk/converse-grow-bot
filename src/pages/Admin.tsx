@@ -499,22 +499,41 @@ export default function Admin() {
       }
       
       // Get total cost and tokens from token_usage for filtered users
-      const { data: costData, error: costError } = await supabase
-        .from('token_usage')
-        .select('model, input_tokens, output_tokens, user_id')
-        .in('user_id', filteredUserIds);
-      
-      if (costError) throw costError;
-      
-      // Calculate total cost and tokens
+      // Use database aggregation for performance (costs are pre-calculated)
+      // Batch queries to avoid "Bad Request" errors with large user lists
       let totalCost = 0;
       let totalTokens = 0;
       
-      costData?.forEach(usage => {
-        const cost = calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0);
-        totalCost += cost;
-        totalTokens += (usage.input_tokens || 0) + (usage.output_tokens || 0);
-      });
+      if (filteredUserIds.length > 0) {
+        // Process in batches of 1000 to avoid query size limits
+        const batchSize = 1000;
+        const batches = [];
+        
+        for (let i = 0; i < filteredUserIds.length; i += batchSize) {
+          batches.push(filteredUserIds.slice(i, i + batchSize));
+        }
+        
+        console.log(`[ADMIN STATS] Processing ${batches.length} batches for cost calculation`);
+        
+        // Fetch cost data in batches
+        for (const batch of batches) {
+          const { data: batchData, error: batchError } = await supabase
+            .from('token_usage')
+            .select('cost, input_tokens, output_tokens')
+            .in('user_id', batch);
+          
+          if (batchError) {
+            console.error('[ADMIN STATS] Error fetching batch:', batchError);
+            continue;
+          }
+          
+          // Sum pre-calculated costs and tokens for this batch
+          batchData?.forEach(usage => {
+            totalCost += Number(usage.cost) || 0;
+            totalTokens += (usage.input_tokens || 0) + (usage.output_tokens || 0);
+          });
+        }
+      }
       
       // Update aggregate stats
       const stats = {
@@ -1010,19 +1029,19 @@ export default function Admin() {
       // Fetch token usage for this specific user only
       const { data: tokenData, error: tokenError } = await supabase
         .from('token_usage')
-        .select('model, input_tokens, output_tokens')
+        .select('model, input_tokens, output_tokens, cost')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(1000); // Last 1000 records for this user
       
       if (tokenError) throw tokenError;
       
-      // Calculate costs
+      // Use pre-calculated costs from database
       const modelUsages = tokenData?.map(usage => ({
         model: usage.model,
         input_tokens: usage.input_tokens || 0,
         output_tokens: usage.output_tokens || 0,
-        cost: calculateCost(usage.model, usage.input_tokens || 0, usage.output_tokens || 0)
+        cost: Number(usage.cost) || 0
       })) || [];
       
       // Update the user's model_usages in state

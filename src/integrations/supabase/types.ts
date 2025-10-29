@@ -424,6 +424,7 @@ export type Database = {
       }
       token_usage: {
         Row: {
+          cost: number | null
           created_at: string
           id: string
           input_tokens: number
@@ -432,6 +433,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cost?: number | null
           created_at?: string
           id?: string
           input_tokens?: number
@@ -440,6 +442,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cost?: number | null
           created_at?: string
           id?: string
           input_tokens?: number
