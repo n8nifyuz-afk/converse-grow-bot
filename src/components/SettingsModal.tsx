@@ -778,14 +778,15 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-foreground text-sm">Birth Date</p>
-                        <p className="text-xs text-muted-foreground">Your date of birth</p>
+                        <p className="text-xs text-muted-foreground">Your date of birth (YYYY-MM-DD)</p>
                       </div>
                     </div>
                     <div className="ml-0 md:ml-9 space-y-2">
                       <input
-                        type="date"
+                        type="text"
                         value={birthDate}
                         onChange={(e) => setBirthDate(e.target.value)}
+                        placeholder="YYYY-MM-DD"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                       <Button 
