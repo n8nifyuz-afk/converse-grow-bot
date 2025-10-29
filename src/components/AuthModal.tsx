@@ -1006,8 +1006,23 @@ export default function AuthModal({
           </div>
         </div>;
   if (isMobile) {
-    return <Drawer open={isOpen} onOpenChange={onClose} dismissible={mode !== 'phone' && mode !== 'verify'}>
-        <DrawerContent className="h-auto p-0" style={{ maxHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}>
+    return <Drawer 
+      open={isOpen} 
+      onOpenChange={onClose} 
+      dismissible={mode !== 'phone' && mode !== 'verify'}
+      modal={true}
+      noBodyStyles={true}
+    >
+        <DrawerContent 
+          className="h-auto p-0" 
+          style={{ 
+            maxHeight: '90vh',
+            position: 'fixed',
+            bottom: 0,
+            transform: 'translate3d(0, 0, 0)',
+            transition: 'none'
+          }}
+        >
           <DrawerHeader className="sr-only">
             <DrawerTitle>ChatLearn Authentication</DrawerTitle>
             <DrawerDescription>

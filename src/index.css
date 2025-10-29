@@ -633,43 +633,82 @@ All colors MUST be HSL.
 }
 
 @media (max-width: 767px) {
-  /* Keep drawer at bottom with fixed positioning */
+  /* Force drawer to stay fixed at bottom - most aggressive approach */
   [data-vaul-drawer][data-vaul-drawer-visible] {
     position: fixed !important;
     bottom: 0 !important;
-    transform: translateY(0) !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: translate3d(0, 0, 0) !important;
     transition: none !important;
     will-change: auto !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
   }
   
-  /* Prevent drawer content from changing height */
+  /* Prevent any position changes on drawer wrapper */
+  [data-vaul-drawer-wrapper] {
+    position: fixed !important;
+    inset: 0 !important;
+  }
+  
+  /* Lock drawer content height and scrolling */
   [data-vaul-drawer-content] {
-    overflow-y: auto;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
   }
   
-  /* Prevent scroll-into-view behavior that causes jumping */
-  [data-vaul-drawer] input:focus,
-  [data-vaul-drawer] textarea:focus {
+  /* Completely disable scroll-into-view on iOS */
+  [data-vaul-drawer] input,
+  [data-vaul-drawer] textarea,
+  [data-vaul-drawer] select {
     scroll-margin: 0 !important;
-    transform: translateY(0) !important;
+    scroll-margin-top: 0 !important;
+    scroll-margin-bottom: 0 !important;
+  }
+  
+  /* Force no transforms on focus */
+  [data-vaul-drawer] input:focus,
+  [data-vaul-drawer] textarea:focus,
+  [data-vaul-drawer] select:focus {
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
     transition: none !important;
   }
   
-  /* Remove all transitions during input focus */
+  /* Lock parent containers when input is focused */
   [data-vaul-drawer]:has(input:focus),
-  [data-vaul-drawer]:has(textarea:focus) {
-    transform: none !important;
+  [data-vaul-drawer]:has(textarea:focus),
+  [data-vaul-drawer]:has(select:focus) {
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
     transition: none !important;
+    position: fixed !important;
+    bottom: 0 !important;
   }
   
-  /* Prevent any hardware acceleration issues */
+  /* Disable all animations and transitions */
+  [data-vaul-drawer],
   [data-vaul-drawer] * {
+    animation: none !important;
+    transition: none !important;
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }
   
-  /* Disable smooth scroll when keyboard opens */
+  /* Prevent viewport changes from affecting layout */
   [data-vaul-drawer] {
     scroll-behavior: auto !important;
+  }
+  
+  /* iOS-specific: prevent any visual viewport changes from affecting positioning */
+  @supports (-webkit-touch-callout: none) {
+    [data-vaul-drawer][data-vaul-drawer-visible] {
+      position: fixed !important;
+      bottom: 0 !important;
+      height: auto !important;
+      max-height: 90vh !important;
+    }
   }
 }
