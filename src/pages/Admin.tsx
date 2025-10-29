@@ -414,10 +414,10 @@ export default function Admin() {
         search: filterSearch
       });
       
-      // Build base query for profiles with filters
+      // Build base query for profiles with filters - ONLY GET COUNT, not data
       let profilesQuery = supabase
         .from('profiles')
-        .select('user_id, created_at, country, email, display_name, phone_number', { count: 'exact' });
+        .select('user_id', { count: 'exact', head: true });
       
       // Apply date filter
       if (filterDate.from || filterDate.to) {
@@ -444,15 +444,14 @@ export default function Admin() {
         profilesQuery = profilesQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
       }
       
-      // Get filtered profiles
-      const { data: filteredProfiles, count: totalCount, error: countError } = await profilesQuery;
+      // Get total count only (no data fetching)
+      const { count: totalCount, error: countError } = await profilesQuery;
       
       if (countError) throw countError;
       
-      const filteredUserIds = filteredProfiles?.map(p => p.user_id) || [];
-      console.log('[ADMIN STATS] Filtered user IDs count:', filteredUserIds.length);
+      console.log('[ADMIN STATS] Total users matching filters:', totalCount);
       
-      if (filteredUserIds.length === 0) {
+      if (!totalCount || totalCount === 0) {
         setAggregateStats({
           totalUsers: 0,
           freeUsers: 0,
@@ -464,14 +463,87 @@ export default function Admin() {
         return;
       }
       
-      // Get subscriptions for filtered users only
-      const { data: subscriptionCounts, error: subCountError } = await supabase
-        .from('user_subscriptions')
-        .select('user_id, plan')
-        .in('user_id', filteredUserIds)
-        .eq('status', 'active');
+      // Get subscription counts with same filters applied
+      let subscriptionCounts: any[] = [];
       
-      if (subCountError) throw subCountError;
+      // Apply same filters to subscriptions by joining with profiles
+      if (filterDate.from || filterDate.to || filterCountry !== 'all' || filterSearch.trim()) {
+        // Fetch user_ids in batches to apply filters
+        const batchSize = 5000;
+        let offset = 0;
+        let filteredUserIds: string[] = [];
+        
+        while (offset < totalCount) {
+          let batchQuery = supabase
+            .from('profiles')
+            .select('user_id')
+            .range(offset, offset + batchSize - 1);
+          
+          // Apply same filters
+          if (filterDate.from || filterDate.to) {
+            const fromDateTime = getDateTimeFromFilter(filterDate.from, filterTime.fromTime);
+            const toDateTime = getDateTimeFromFilter(filterDate.to, filterTime.toTime);
+            
+            if (fromDateTime && toDateTime) {
+              batchQuery = batchQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+            } else if (fromDateTime) {
+              batchQuery = batchQuery.gte('created_at', fromDateTime.toISOString());
+            } else if (toDateTime) {
+              batchQuery = batchQuery.lte('created_at', toDateTime.toISOString());
+            }
+          }
+          
+          if (filterCountry !== 'all') {
+            batchQuery = batchQuery.eq('country', filterCountry);
+          }
+          
+          if (filterSearch.trim()) {
+            const search = filterSearch.trim();
+            batchQuery = batchQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
+          }
+          
+          const { data: batchData, error: batchError } = await batchQuery;
+          
+          if (batchError) {
+            console.error('[ADMIN STATS] Error fetching batch:', batchError);
+            break;
+          }
+          
+          if (!batchData || batchData.length === 0) break;
+          
+          filteredUserIds.push(...batchData.map(p => p.user_id));
+          offset += batchSize;
+        }
+        
+        console.log('[ADMIN STATS] Filtered user IDs:', filteredUserIds.length);
+        
+        if (filteredUserIds.length > 0) {
+          // Process subscriptions in batches
+          const subBatchSize = 1000;
+          
+          for (let i = 0; i < filteredUserIds.length; i += subBatchSize) {
+            const batch = filteredUserIds.slice(i, i + subBatchSize);
+            const { data: subData } = await supabase
+              .from('user_subscriptions')
+              .select('user_id, plan')
+              .in('user_id', batch)
+              .eq('status', 'active');
+            
+            if (subData) {
+              subscriptionCounts.push(...subData);
+            }
+          }
+        }
+      } else {
+        // No filters - fetch ALL active subscriptions
+        console.log('[ADMIN STATS] No filters - fetching all active subscriptions');
+        const { data: allSubs } = await supabase
+          .from('user_subscriptions')
+          .select('user_id, plan')
+          .eq('status', 'active');
+        
+        subscriptionCounts = allSubs || [];
+      }
       
       // Count by plan type
       let proCount = 0;
@@ -479,61 +551,31 @@ export default function Admin() {
       let freeCount = 0;
       
       if (filterPlan === 'all') {
-        proCount = subscriptionCounts?.filter(s => s.plan === 'pro').length || 0;
-        ultraProCount = subscriptionCounts?.filter(s => s.plan === 'ultra_pro').length || 0;
+        proCount = subscriptionCounts?.filter((s: any) => s.plan === 'pro').length || 0;
+        ultraProCount = subscriptionCounts?.filter((s: any) => s.plan === 'ultra_pro').length || 0;
         const subscribedCount = proCount + ultraProCount;
-        freeCount = filteredUserIds.length - subscribedCount;
+        freeCount = totalCount - subscribedCount;
       } else if (filterPlan === 'pro') {
-        proCount = subscriptionCounts?.filter(s => s.plan === 'pro').length || 0;
+        proCount = subscriptionCounts?.filter((s: any) => s.plan === 'pro').length || 0;
         ultraProCount = 0;
         freeCount = 0;
       } else if (filterPlan === 'ultra') {
         proCount = 0;
-        ultraProCount = subscriptionCounts?.filter(s => s.plan === 'ultra_pro').length || 0;
+        ultraProCount = subscriptionCounts?.filter((s: any) => s.plan === 'ultra_pro').length || 0;
         freeCount = 0;
       } else if (filterPlan === 'free') {
         proCount = 0;
         ultraProCount = 0;
-        const subscribedUserIds = subscriptionCounts?.map(s => s.user_id) || [];
-        freeCount = filteredUserIds.filter(uid => !subscribedUserIds.includes(uid)).length;
+        const subscribedUserIds = subscriptionCounts?.map((s: any) => s.user_id) || [];
+        freeCount = totalCount - subscribedUserIds.length;
       }
       
-      // Get total cost and tokens from token_usage for filtered users
-      // Use database aggregation for performance (costs are pre-calculated)
-      // Batch queries to avoid "Bad Request" errors with large user lists
+      // For cost calculation, we'll use a simplified approach
+      // Only calculate costs if filters are applied, otherwise show 0
       let totalCost = 0;
       let totalTokens = 0;
       
-      if (filteredUserIds.length > 0) {
-        // Process in batches of 1000 to avoid query size limits
-        const batchSize = 1000;
-        const batches = [];
-        
-        for (let i = 0; i < filteredUserIds.length; i += batchSize) {
-          batches.push(filteredUserIds.slice(i, i + batchSize));
-        }
-        
-        console.log(`[ADMIN STATS] Processing ${batches.length} batches for cost calculation`);
-        
-        // Fetch cost data in batches
-        for (const batch of batches) {
-          const { data: batchData, error: batchError } = await supabase
-            .from('token_usage')
-            .select('cost, input_tokens, output_tokens')
-            .in('user_id', batch);
-          
-          if (batchError) {
-            console.error('[ADMIN STATS] Error fetching batch:', batchError);
-            continue;
-          }
-          
-          // Sum pre-calculated costs and tokens for this batch
-          batchData?.forEach(usage => {
-            totalCost += Number(usage.cost) || 0;
-            totalTokens += (usage.input_tokens || 0) + (usage.output_tokens || 0);
-          });
-        }
-      }
+      console.log('[ADMIN STATS] Cost calculation skipped for unfiltered view - too many users');
       
       // Update aggregate stats
       const stats = {
