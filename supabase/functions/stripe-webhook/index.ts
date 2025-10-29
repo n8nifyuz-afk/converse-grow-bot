@@ -592,10 +592,10 @@ serve(async (req) => {
 
           // Send subscription purchase webhook
           try {
-            // Fetch user profile for IP and country data
+            // Fetch user profile for IP, country, GCLID and URL params
             const { data: userProfile } = await supabaseClient
               .from('profiles')
-              .select('ip_address, country')
+              .select('ip_address, country, gclid, url_params, initial_referer')
               .eq('user_id', user.id)
               .single();
 
@@ -608,6 +608,9 @@ serve(async (req) => {
               plan_duration: planDuration,
               ip_address: userProfile?.ip_address || null,
               country: userProfile?.country || null,
+              gclid: userProfile?.gclid || null,
+              url_params: userProfile?.url_params || {},
+              referer: userProfile?.initial_referer || null,
               timestamp: new Date().toISOString()
             };
 

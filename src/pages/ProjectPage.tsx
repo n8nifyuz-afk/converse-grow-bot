@@ -10,6 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useMessageLimit } from '@/hooks/useMessageLimit';
 import { supabase } from '@/integrations/supabase/client';
 import { trackChatStart } from '@/utils/gtmTracking';
+import { getWebhookMetadata } from '@/utils/webhookMetadata';
 import { Plus, Paperclip, Mic, MicOff, Edit2, Trash2, FolderOpen, Lightbulb, Target, Briefcase, Rocket, Palette, FileText, Code, Zap, Trophy, Heart, Star, Flame, Gem, Sparkles, MoreHorizontal, FileImage, File as FileIcon, X, Image as ImageIcon2, ImageIcon as ImageIcon, Check, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SendHorizontalIcon } from '@/components/ui/send-horizontal-icon';
@@ -626,6 +627,9 @@ export default function ProjectPage() {
 
             // For image generation without files, send the prompt
             if (selectedModel === 'generate-image' && files.length === 0) {
+              // Get webhook metadata
+              const metadata = await getWebhookMetadata();
+              
               await fetch(webhookUrl, {
                 method: 'POST',
                 headers: {
@@ -636,7 +640,8 @@ export default function ProjectPage() {
                   message: userMessage,
                   chatId: newChat.id,
                   userId: user.id,
-                  model: selectedModel
+                  model: selectedModel,
+                  ...metadata
                 })
               });
               console.log('[PROJECT-WEBHOOK] Image generation request sent to webhook');
@@ -678,6 +683,9 @@ export default function ProjectPage() {
             // Determine correct type based on file type
             const webhookType = file.type.startsWith('image/') ? 'analyse-image' : 'analyse-files';
             
+            // Get webhook metadata
+            const metadata = await getWebhookMetadata();
+            
             await fetch(webhookUrl, {
               method: 'POST',
               headers: {
@@ -692,7 +700,8 @@ export default function ProjectPage() {
                 fileSize: file.size,
                 fileType: file.type.startsWith('image/') ? 'image/png' : file.type,
                 fileData: base64Data,
-                model: selectedModel
+                model: selectedModel,
+                ...metadata
               })
             });
             console.log('[PROJECT-WEBHOOK] File sent to webhook, AI response will arrive via realtime');
