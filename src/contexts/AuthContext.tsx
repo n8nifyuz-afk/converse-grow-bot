@@ -936,57 +936,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         setSubscriptionStatus(newStatus);
         
-        // Track payment complete if user just upgraded
-        if (!previousSubscribed && newStatus.subscribed) {
+        // Check if returning from Stripe checkout (session_id in URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasSessionId = urlParams.has('session_id');
+        
+        // Track payment complete if user just upgraded OR returning from Stripe
+        const shouldTrack = (!previousSubscribed && newStatus.subscribed) || (hasSessionId && newStatus.subscribed);
+        
+        if (shouldTrack) {
           // Check if we've already tracked this subscription to prevent duplicates
           const trackedKey = `payment_tracked_${user.id}_${newStatus.product_id}`;
           const alreadyTracked = localStorage.getItem(trackedKey);
           
-          if (!alreadyTracked) {
-            // Fetch full subscription details for tracking
-            const { data: subDetails, error: subError } = await supabase
-              .from('user_subscriptions')
-              .select('plan, plan_name, product_id')
-              .eq('user_id', user.id)
-              .single();
+          if (!alreadyTracked && dbSub) {
+            console.log('🎯 Tracking payment conversion to Google Analytics...');
             
-            if (!subError && subDetails) {
-              // Map plan to planType
-              const planType = subDetails.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+            // Map plan to planType
+            const planType = dbSub.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+            
+            // Map product_id to actual price and duration
+            let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
+            let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default monthly prices
+            
+            // Determine duration and price from product_id or plan_name
+            if (dbSub.product_id) {
+              const productId = dbSub.product_id;
+              const productIdLower = productId.toLowerCase();
+              const planNameLower = (dbSub.plan_name || '').toLowerCase();
               
-              // Fetch price details from Stripe product
-              try {
-                const { data: productData } = await supabase.functions.invoke('check-subscription', {
-                  headers: {
-                    Authorization: `Bearer ${currentSession.access_token}`,
-                  },
-                });
-                
-                // Default values if we can't get exact details
-                let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
-                let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default prices
-                
-                // Try to determine duration from product_id naming
-                if (subDetails.product_id) {
-                  const productIdLower = subDetails.product_id.toLowerCase();
-                  if (productIdLower.includes('year') || productIdLower.includes('annual')) {
-                    planDuration = 'yearly';
-                    planPrice = planType === 'Ultra' ? 119.99 : 59.99;
-                  } else if (productIdLower.includes('quarter') || productIdLower.includes('3month')) {
-                    planDuration = '3_months';
-                    planPrice = planType === 'Ultra' ? 99.99 : 49.99;
-                  }
-                }
-                
-                trackPaymentComplete(planType, planDuration, planPrice);
-                
-                // Mark as tracked in localStorage to prevent duplicates
-                localStorage.setItem(trackedKey, 'true');
-              } catch (trackError) {
-                // Still track with default values
-                trackPaymentComplete(planType, 'monthly', planType === 'Ultra' ? 39.99 : 19.99);
-                localStorage.setItem(trackedKey, 'true');
+              // Check for duration indicators
+              if (productIdLower.includes('year') || productIdLower.includes('annual') || planNameLower.includes('year') || planNameLower.includes('annual')) {
+                planDuration = 'yearly';
+                planPrice = planType === 'Ultra' ? 119.99 : 59.99;
+              } else if (productIdLower.includes('quarter') || productIdLower.includes('3month') || planNameLower.includes('3 month') || planNameLower.includes('quarter')) {
+                planDuration = '3_months';
+                planPrice = planType === 'Ultra' ? 99.99 : 49.99;
               }
+              // Otherwise keep monthly defaults
+            }
+            
+            console.log('📊 Tracking data:', { planType, planDuration, planPrice, product_id: dbSub.product_id, plan_name: dbSub.plan_name });
+            trackPaymentComplete(planType, planDuration, planPrice);
+            
+            // Mark as tracked in localStorage to prevent duplicates
+            localStorage.setItem(trackedKey, 'true');
+            console.log('✅ Payment conversion tracked successfully');
+            
+            // Clean up URL params after tracking
+            if (hasSessionId) {
+              window.history.replaceState({}, '', window.location.pathname);
             }
           }
         }
