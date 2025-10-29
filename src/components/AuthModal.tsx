@@ -31,6 +31,7 @@ export default function AuthModal({
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [profileStep, setProfileStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
@@ -100,6 +101,7 @@ export default function AuthModal({
       setLastName('');
       setDateOfBirth('');
       setMode('signin');
+      setProfileStep(1);
       setSignupCooldown(0);
       setOtpTimer(0);
       setError('');
@@ -407,70 +409,89 @@ export default function AuthModal({
       
       if (error) {
         setError("Invalid verification code. Please try again.");
+        setLoading(false);
       } else {
-        // Check if user has profile info, if not show profile completion
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('display_name, date_of_birth')
-            .eq('user_id', user.id)
-            .single();
-          
-          // If no display name or date of birth, show profile completion
-          if (!profile?.display_name || !profile?.date_of_birth) {
-            setMode('complete-profile');
-            setLoading(false);
-            return;
-          }
-        }
+        // Don't close modal or redirect, show profile completion
+        setMode('complete-profile');
+        setProfileStep(1);
+        setLoading(false);
+        toast({
+          title: "Phone verified!",
+          description: "Let's complete your profile to get started."
+        });
       }
-      // If success and profile complete, the useEffect will handle closing the modal
     } catch (error) {
       setError("An error occurred. Please try again later.");
-    } finally {
       setLoading(false);
     }
   };
 
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName || !lastName || !dateOfBirth) return;
-    
-    setLoading(true);
     setError('');
     
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError("Unable to get user information. Please try again.");
+    // Step 1: First name
+    if (profileStep === 1) {
+      if (!firstName.trim()) {
+        setError("Please enter your first name.");
         return;
       }
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          display_name: `${firstName} ${lastName}`,
-          date_of_birth: dateOfBirth,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
-
-      if (updateError) {
-        setError("Failed to save profile. Please try again.");
-      } else {
-        toast({
-          title: "Profile completed!",
-          description: "Your account is now set up."
-        });
-        // Close modal and trigger success
-        onClose();
-        onSuccess?.();
+      setProfileStep(2);
+      return;
+    }
+    
+    // Step 2: Last name
+    if (profileStep === 2) {
+      if (!lastName.trim()) {
+        setError("Please enter your last name.");
+        return;
       }
-    } catch (error) {
-      setError("An error occurred. Please try again later.");
-    } finally {
-      setLoading(false);
+      setProfileStep(3);
+      return;
+    }
+    
+    // Step 3: Date of birth - save to profile
+    if (profileStep === 3) {
+      if (!dateOfBirth) {
+        setError("Please select your date of birth.");
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setError("Unable to get user information. Please try again.");
+          setLoading(false);
+          return;
+        }
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            display_name: `${firstName} ${lastName}`,
+            date_of_birth: dateOfBirth,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+
+        if (updateError) {
+          setError("Failed to save profile. Please try again.");
+          setLoading(false);
+        } else {
+          toast({
+            title: "Welcome!",
+            description: "Your account has been created successfully."
+          });
+          // Close modal and trigger success
+          onClose();
+          onSuccess?.();
+        }
+      } catch (error) {
+        setError("An error occurred. Please try again later.");
+        setLoading(false);
+      }
     }
   };
 
@@ -603,50 +624,92 @@ export default function AuthModal({
                       Change number
                     </button>
                   </div>
-                </form> : mode === 'complete-profile' ? <form onSubmit={handleCompleteProfile} className="space-y-5">
+                 </form> : mode === 'complete-profile' ? <form onSubmit={handleCompleteProfile} className="space-y-5">
                   <div className="text-center mb-2">
-                    <h3 className="text-xl font-bold mb-1">Complete Your Profile</h3>
+                    <h3 className="text-xl font-bold mb-1">
+                      {profileStep === 1 && "What's your first name?"}
+                      {profileStep === 2 && "What's your last name?"}
+                      {profileStep === 3 && "When's your birthday?"}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
-                      Help us personalize your experience
+                      Step {profileStep} of 3
                     </p>
                   </div>
-                  <Input 
-                    type="text" 
-                    placeholder="First Name" 
-                    value={firstName} 
-                    onChange={e => setFirstName(e.target.value)} 
-                    required 
-                    className="h-11 md:h-12 text-base"
-                  />
-                  <Input 
-                    type="text" 
-                    placeholder="Last Name" 
-                    value={lastName} 
-                    onChange={e => setLastName(e.target.value)} 
-                    required 
-                    className="h-11 md:h-12 text-base"
-                  />
-                  <div className="space-y-2">
-                    <label className="text-sm text-muted-foreground">Date of Birth</label>
+                  
+                  {profileStep === 1 && (
                     <Input 
-                      type="date" 
-                      value={dateOfBirth} 
-                      onChange={e => setDateOfBirth(e.target.value)} 
+                      type="text" 
+                      placeholder="Enter your first name" 
+                      value={firstName} 
+                      onChange={e => setFirstName(e.target.value)} 
                       required 
-                      max={new Date().toISOString().split('T')[0]}
-                      className="h-11 md:h-12 text-base"
+                      autoFocus
+                      className="h-12 md:h-13 text-base"
                     />
-                  </div>
+                  )}
+                  
+                  {profileStep === 2 && (
+                    <Input 
+                      type="text" 
+                      placeholder="Enter your last name" 
+                      value={lastName} 
+                      onChange={e => setLastName(e.target.value)} 
+                      required 
+                      autoFocus
+                      className="h-12 md:h-13 text-base"
+                    />
+                  )}
+                  
+                  {profileStep === 3 && (
+                    <div className="space-y-2">
+                      <Input 
+                        type="date" 
+                        value={dateOfBirth} 
+                        onChange={e => setDateOfBirth(e.target.value)} 
+                        required 
+                        autoFocus
+                        max={new Date().toISOString().split('T')[0]}
+                        className="h-12 md:h-13 text-base"
+                      />
+                    </div>
+                  )}
+                  
                   {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                      {error}
                    </div>}
-                  <Button type="submit" disabled={loading || !firstName || !lastName || !dateOfBirth} className="w-full h-11 md:h-12 text-base">
-                    {loading ? <>
-                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                        Saving...
-                      </> : 'Complete Profile'}
-                  </Button>
-                </form> : mode === 'verify-email' ? <form onSubmit={handleVerifyEmailCode} className="space-y-6">
+                  
+                  <div className="flex gap-3">
+                    {profileStep > 1 && (
+                      <Button 
+                        type="button" 
+                        onClick={() => {
+                          setProfileStep((profileStep - 1) as 1 | 2 | 3);
+                          setError('');
+                        }}
+                        variant="outline"
+                        className="flex-1 h-12 md:h-13 text-base"
+                      >
+                        Back
+                      </Button>
+                    )}
+                    <Button 
+                      type="submit" 
+                      disabled={loading}
+                      className={`h-12 md:h-13 text-base ${profileStep === 1 ? 'w-full' : 'flex-1'}`}
+                    >
+                      {loading ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                          Creating account...
+                        </>
+                      ) : profileStep === 3 ? (
+                        'Complete'
+                      ) : (
+                        'Next'
+                      )}
+                    </Button>
+                  </div>
+                 </form> : mode === 'verify-email' ? <form onSubmit={handleVerifyEmailCode} className="space-y-6">
                   {/* Header with icon */}
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">

@@ -104,8 +104,9 @@
   border: 2px solid hsl(var(--border));
   border-radius: 0.75rem;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
-  max-height: 30vh;
+  z-index: 99999;
+  max-height: 320px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
