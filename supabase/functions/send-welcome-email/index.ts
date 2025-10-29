@@ -95,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
                           <strong>The ChatLearn Team</strong>
                         </p>
                         <p style="margin: 16px 0 0; font-size: 13px; line-height: 20px; color: #8898aa;">
-                          If you have any questions, please contact us through our <a href="https://www.chatl.ai/help" style="color: #000000; text-decoration: none;">help center</a>.
+                          If you have any questions, please contact us at <a href="mailto:support@chatl.ai" style="color: #000000; text-decoration: none;">support@chatl.ai</a>.
                         </p>
                       </td>
                     </tr>
