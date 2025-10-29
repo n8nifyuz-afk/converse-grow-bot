@@ -520,10 +520,6 @@ export default function AuthModal({
           setError("Failed to save profile. Please try again.");
           setLoading(false);
         } else {
-          toast({
-            title: "Welcome!",
-            description: "Your account has been created successfully."
-          });
           // Close modal and trigger success
           onClose();
           onSuccess?.();
