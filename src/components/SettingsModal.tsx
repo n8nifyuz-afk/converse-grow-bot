@@ -59,7 +59,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const [isUpdatingBirthDate, setIsUpdatingBirthDate] = React.useState(false);
   const { theme, accentColor, setTheme, setAccentColor } = useTheme();
   const { toast } = useToast();
-  const { user, signOut, userProfile, subscriptionStatus, checkSubscription } = useAuth();
+  const { user, signOut, userProfile, subscriptionStatus, checkSubscription, refreshUserProfile } = useAuth();
   const isMobile = useIsMobile();
   const { usageLimits, loading: limitsLoading } = useUsageLimits();
   const { i18n, t } = useTranslation();
@@ -147,6 +147,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
       if (error) throw error;
 
+      // Refresh user profile in context to update UI everywhere
+      await refreshUserProfile();
+
       toast({
         title: 'Name Updated',
         description: 'Your display name has been updated successfully.',
@@ -174,6 +177,9 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         .eq('user_id', user.id);
 
       if (error) throw error;
+
+      // Refresh user profile in context to update UI everywhere
+      await refreshUserProfile();
 
       toast({
         title: 'Birth Date Updated',

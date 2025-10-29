@@ -21,6 +21,7 @@ interface AuthContextType {
   showPricingModal: boolean;
   setShowPricingModal: (show: boolean) => void;
   checkSubscription: () => Promise<void>;
+  refreshUserProfile: () => Promise<void>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -253,6 +254,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       // Silently fail
+    }
+  };
+
+  // Refresh user profile - public method for manual refresh after updates
+  const refreshUserProfile = async () => {
+    if (user) {
+      await fetchUserProfile(user.id);
     }
   };
 
@@ -1037,6 +1045,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     showPricingModal,
     setShowPricingModal,
     checkSubscription,
+    refreshUserProfile,
     signUp,
     signIn,
     signInWithGoogle,

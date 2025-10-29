@@ -54,7 +54,8 @@ export default function AuthModal({
     signInWithMicrosoft,
     signInWithPhone,
     verifyOtp,
-    resetPassword
+    resetPassword,
+    refreshUserProfile
   } = useAuth();
   const {
     toast
@@ -520,6 +521,9 @@ export default function AuthModal({
           setError("Failed to save profile. Please try again.");
           setLoading(false);
         } else {
+          // Refresh user profile in context to update UI everywhere
+          await refreshUserProfile();
+          
           // Close modal and trigger success
           onClose();
           onSuccess?.();
