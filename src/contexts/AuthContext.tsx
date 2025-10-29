@@ -371,6 +371,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     console.warn('Failed to get IP/country from Cloudflare:', traceError);
                   }
                   
+                  // Capture URL parameters (GCLID, UTM params, etc.)
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const gclid = urlParams.get('gclid') || localStorage.getItem('gclid') || null;
+                  const urlParamsObj: Record<string, string> = {};
+                  urlParams.forEach((value, key) => {
+                    urlParamsObj[key] = value;
+                  });
+                  
+                  // Store GCLID in localStorage for future use (Google Click ID should persist)
+                  if (gclid && !localStorage.getItem('gclid')) {
+                    localStorage.setItem('gclid', gclid);
+                  }
+                  
                   // Fetch signup method from profiles
                   const { data: profileData } = await supabase
                     .from('profiles')
@@ -386,6 +399,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       ipAddress,
                       country,
                       signupMethod: profileData?.signup_method || 'email',
+                      gclid: gclid,
+                      urlParams: urlParamsObj,
+                      referer: document.referrer || null,
                     }
                   });
                 } catch (webhookError) {
