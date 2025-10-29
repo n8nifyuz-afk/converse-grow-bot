@@ -1815,15 +1815,6 @@ export default function Admin() {
                             {getSortIcon('plan')}
                           </div>
                         </TableHead>
-                        <TableHead 
-                          className="text-right font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
-                          onClick={() => handleSort('cost')}
-                        >
-                          <div className="flex items-center gap-1 justify-end">
-                            Cost
-                            {getSortIcon('cost')}
-                          </div>
-                        </TableHead>
                         <TableHead
                           className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
                           onClick={() => handleSort('registered')}
@@ -1839,9 +1830,6 @@ export default function Admin() {
                     </TableHeader>
                     <TableBody>
                       {paginatedUsers.map(usage => {
-                        const totalCost = usage.model_usages.length > 0 
-                          ? usage.model_usages.reduce((sum, m) => sum + m.cost, 0)
-                          : null; // null means not loaded yet
                         return (
                           <TableRow 
                             key={usage.user_id} 
@@ -1858,13 +1846,6 @@ export default function Admin() {
                             </TableCell>
                             <TableCell className="text-sm">
                               {getPlanBadge(usage)}
-                            </TableCell>
-                            <TableCell className="text-right font-mono font-bold text-foreground text-sm whitespace-nowrap">
-                              {totalCost === null ? (
-                                <span className="text-muted-foreground text-xs">Click Cost View</span>
-                              ) : (
-                                `$${totalCost.toFixed(4)}`
-                              )}
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                               {usage.created_at ? new Date(usage.created_at).toLocaleString('en-US', {
