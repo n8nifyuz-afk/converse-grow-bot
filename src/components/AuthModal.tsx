@@ -566,9 +566,9 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className="flex flex-col">
+  const authContent = <div className="flex flex-col overflow-y-auto">
            {/* Auth Form */}
-           <div className="w-full p-4 md:p-6 flex flex-col">
+           <div className="w-full p-4 md:p-6 flex flex-col pb-safe">
              {/* Main Heading - Hide during profile completion */}
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
@@ -666,7 +666,7 @@ export default function AuthModal({
                       Change number
                     </button>
                   </div>
-                 </form> : mode === 'complete-profile' ? <form onSubmit={handleCompleteProfile} className="space-y-5">
+                 </form> : mode === 'complete-profile' ? <form onSubmit={handleCompleteProfile} className="space-y-5 pb-safe">
                   <div className="text-center mb-2">
                     <h3 className="text-xl font-bold mb-1">
                       {profileStep === 1 && "What's your first name?"}
@@ -684,6 +684,11 @@ export default function AuthModal({
                       placeholder="Enter your first name" 
                       value={firstName} 
                       onChange={e => setFirstName(e.target.value)} 
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                      }}
                       required 
                       autoFocus
                       className="h-12 md:h-13 text-base"
@@ -696,6 +701,11 @@ export default function AuthModal({
                       placeholder="Enter your last name" 
                       value={lastName} 
                       onChange={e => setLastName(e.target.value)} 
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                      }}
                       required 
                       autoFocus
                       className="h-12 md:h-13 text-base"
@@ -724,6 +734,11 @@ export default function AuthModal({
                             setDateOfBirth(input);
                           }
                         }} 
+                        onFocus={(e) => {
+                          setTimeout(() => {
+                            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }, 300);
+                        }}
                         required 
                         autoFocus
                         maxLength={10}
@@ -1023,18 +1038,19 @@ export default function AuthModal({
     return <Drawer 
       open={isOpen} 
       onOpenChange={onClose} 
-      dismissible={mode !== 'phone' && mode !== 'verify'}
+      dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'}
       modal={true}
       noBodyStyles={true}
     >
         <DrawerContent 
-          className="h-auto p-0" 
+          className="h-auto p-0 overflow-y-auto" 
           style={{ 
-            maxHeight: '90vh',
+            maxHeight: mode === 'complete-profile' ? '75dvh' : '90vh',
             position: 'fixed',
             bottom: 0,
             transform: 'translate3d(0, 0, 0)',
-            transition: 'none'
+            transition: 'none',
+            paddingBottom: 'env(safe-area-inset-bottom)'
           }}
         >
           <DrawerHeader className="sr-only">

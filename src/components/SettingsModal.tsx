@@ -748,6 +748,13 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
+                        onFocus={(e) => {
+                          if (isMobile) {
+                            setTimeout(() => {
+                              e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300);
+                          }
+                        }}
                         placeholder="Enter your full name"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
@@ -782,6 +789,13 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         type="text"
                         value={birthDate}
                         onChange={(e) => setBirthDate(e.target.value)}
+                        onFocus={(e) => {
+                          if (isMobile) {
+                            setTimeout(() => {
+                              e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300);
+                          }
+                        }}
                         placeholder="YYYY-MM-DD"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
@@ -1338,7 +1352,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           </div>
 
           {/* Mobile Content */}
-          <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-background/98">
+          <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-background/98" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
             <div className="p-4 pb-8">
               {renderContent()}
             </div>
