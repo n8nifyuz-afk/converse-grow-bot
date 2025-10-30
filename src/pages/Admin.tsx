@@ -806,10 +806,10 @@ export default function Admin() {
       if (sortField === 'plan') {
         console.log('[ADMIN] Applying plan-based sorting across ALL filtered users...');
         
-        // First, get ALL user_ids that match current filters (lightweight query)
+        // First, get ALL user_ids that match current filters (lightweight query with count)
         let allUsersQuery = supabase
           .from('profiles')
-          .select('user_id');
+          .select('user_id', { count: 'exact' });
         
         // Re-apply all the same filters
         if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
@@ -851,15 +851,32 @@ export default function Admin() {
         const { data: allMatchingUsers, count: totalFiltered } = await allUsersQuery;
         resultCount = totalFiltered || 0;
         
+        console.log('[ADMIN] Plan sorting: Found', resultCount, 'total users matching filters');
+        
         if (allMatchingUsers && allMatchingUsers.length > 0) {
           const allUserIds = allMatchingUsers.map(u => u.user_id);
           
-          // Get subscriptions for ALL these users
-          const { data: allSubscriptions } = await supabase
+          console.log('[ADMIN] Plan sorting: Fetching subscriptions for', allUserIds.length, 'users');
+          
+          // Get subscriptions for ALL these users (handle large datasets with batching if needed)
+          const { data: allSubscriptions, error: subsError } = await supabase
             .from('user_subscriptions')
             .select('user_id, plan')
             .eq('status', 'active')
             .in('user_id', allUserIds);
+          
+          if (subsError) {
+            console.error('[ADMIN] Error fetching subscriptions:', subsError);
+          }
+          
+          console.log('[ADMIN] Plan sorting: Found', allSubscriptions?.length || 0, 'active subscriptions');
+          
+          // Debug: Log plan distribution
+          const planCounts = allSubscriptions?.reduce((acc, sub) => {
+            acc[sub.plan] = (acc[sub.plan] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+          console.log('[ADMIN] Plan distribution in subscriptions:', planCounts);
           
           // Create plan map
           const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
@@ -873,14 +890,19 @@ export default function Admin() {
             const valueB = planOrder[planB] || 0;
             
             if (sortDirection === 'asc') {
-              return valueA - valueB;
+              return valueA - valueB; // free -> pro -> ultra_pro
             } else {
-              return valueB - valueA;
+              return valueB - valueA; // ultra_pro -> pro -> free
             }
           });
           
+          console.log('[ADMIN] Plan sorting direction:', sortDirection);
+          console.log('[ADMIN] First 10 sorted user plans:', sortedUserIds.slice(0, 10).map(id => userPlanMap.get(id) || 'free'));
+          
           // Take only the user IDs for current page
           const paginatedUserIds = sortedUserIds.slice(offset, offset + usersPerPage);
+          
+          console.log('[ADMIN] Plan sorting: Showing users', offset, 'to', offset + usersPerPage, 'from', sortedUserIds.length, 'total sorted users');
           
           // Now fetch full profile data for just these users
           // Note: We need to preserve the sort order, so we'll sort client-side after fetch
