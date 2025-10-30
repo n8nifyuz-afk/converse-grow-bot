@@ -8,6 +8,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
+const SUBSCRIPTION_WEBHOOK_URL = "https://adsgbt.app.n8n.cloud/webhook/subscription";
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
@@ -405,6 +407,62 @@ serve(async (req) => {
           periodEnd: periodEndDate.toISOString(),
           imageLimit
         });
+
+        // Send subscription webhook to n8n
+        try {
+          // Get user profile data for webhook metadata
+          const { data: userProfile } = await supabaseClient
+            .from('profiles')
+            .select('ip_address, country, gclid, url_params, initial_referer')
+            .eq('user_id', user.id)
+            .single();
+
+          // Clean IP address (remove proxy IPs)
+          const cleanIP = userProfile?.ip_address 
+            ? userProfile.ip_address.split(',')[0].trim() 
+            : 'Unknown';
+
+          const webhookPayload = {
+            plan_name: planMapping.name,
+            user_id: user.id,
+            email: user.email,
+            price: planPrice,
+            currency: priceData.currency || 'usd',
+            plan_duration: planDuration,
+            ip_address: cleanIP,
+            country: userProfile?.country || 'Unknown',
+            timestamp: new Date().toISOString(),
+            gclid: userProfile?.gclid || null,
+            urlParams: userProfile?.url_params ? JSON.stringify(userProfile.url_params) : '{}',
+            referer: userProfile?.initial_referer || null
+          };
+
+          logStep("Sending subscription webhook", webhookPayload);
+
+          const webhookResponse = await fetch(SUBSCRIPTION_WEBHOOK_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(webhookPayload),
+          });
+
+          if (webhookResponse.ok) {
+            logStep("✅ Subscription webhook sent successfully");
+          } else {
+            const errorText = await webhookResponse.text();
+            logStep("⚠️ Subscription webhook failed", { 
+              status: webhookResponse.status, 
+              error: errorText 
+            });
+          }
+        } catch (webhookError) {
+          logStep("⚠️ Subscription webhook error", { 
+            error: webhookError instanceof Error ? webhookError.message : String(webhookError) 
+          });
+          // Don't fail the entire webhook if n8n call fails
+        }
+
         break;
       }
 
