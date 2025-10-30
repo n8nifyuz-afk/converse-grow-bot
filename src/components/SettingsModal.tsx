@@ -1352,8 +1352,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           </div>
 
           {/* Mobile Content */}
-          <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-background/98" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-            <div className="p-4 pb-8">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-background to-background/98 max-h-full" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+            <div className="p-4 pb-8 min-h-0">
               {renderContent()}
             </div>
           </div>
@@ -1364,8 +1364,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-3xl lg:max-w-4xl h-[85vh] md:h-[80vh] p-0 bg-background border border-border/50 shadow-xl">
-        <div className="flex h-full">
+      <DialogContent className="max-w-[95vw] md:max-w-3xl lg:max-w-4xl max-h-[85vh] md:max-h-[80vh] h-auto p-0 bg-background border border-border/50 shadow-xl overflow-hidden">
+        <div className="flex h-full max-h-[calc(85vh-2rem)] md:max-h-[calc(80vh-2rem)]">
           {/* Desktop Sidebar */}
           <div className="w-48 md:w-56 lg:w-64 bg-gradient-to-b from-muted/30 to-muted/10 border-r border-border/40 backdrop-blur-sm">
             <div className="px-3 md:px-4 lg:px-6 py-3 md:py-4 border-b border-border/40 bg-gradient-to-r from-background/50 to-background/30">
@@ -1406,8 +1406,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           </div>
 
           {/* Desktop Content */}
-          <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-background/98">
-            <div className="p-3 md:p-4 lg:p-5">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-background to-background/98 max-h-full">
+            <div className="p-3 md:p-4 lg:p-5 min-h-0">
               {renderContent()}
             </div>
           </div>
