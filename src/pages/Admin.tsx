@@ -810,25 +810,16 @@ export default function Admin() {
       let resultProfiles: any[] | null = null;
       
       if (sortField === 'plan') {
-        console.log('[ADMIN] ⚡ FAST plan sorting: Using server-side JOIN...');
+        console.log('[ADMIN] ⚡ FAST plan sorting: 2-query approach...');
         
-        // FAST APPROACH: Single query with JOIN to get profiles + subscriptions
-        let fastQuery = supabase
+        // QUERY 1: Get ALL profiles matching filters
+        let allProfilesQuery = supabase
           .from('profiles')
-          .select(`
-            user_id,
-            email,
-            display_name,
-            created_at,
-            ip_address,
-            country,
-            phone_number,
-            user_subscriptions!left(plan, status)
-          `, { count: 'exact' });
+          .select('user_id, email, display_name, created_at, ip_address, country, phone_number', { count: 'exact' });
         
         // Apply all filters
         if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
-          fastQuery = fastQuery.in('user_id', filteredUserIdsForPaidPlans || []);
+          allProfilesQuery = allProfilesQuery.in('user_id', filteredUserIdsForPaidPlans || []);
         } else if (activePlanFilter === 'free') {
           const { data: subs } = await supabase
             .from('user_subscriptions')
@@ -836,13 +827,13 @@ export default function Admin() {
             .eq('status', 'active');
           const subscribedIds = subs?.map(s => s.user_id) || [];
           if (subscribedIds.length > 0) {
-            fastQuery = fastQuery.not('user_id', 'in', `(${subscribedIds.join(',')})`);
+            allProfilesQuery = allProfilesQuery.not('user_id', 'in', `(${subscribedIds.join(',')})`);
           }
         }
         
         if (activeSearchQuery.trim()) {
           const search = activeSearchQuery.trim();
-          fastQuery = fastQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
+          allProfilesQuery = allProfilesQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
         }
         
         if (activeDateFilter.from || activeDateFilter.to) {
@@ -850,40 +841,56 @@ export default function Admin() {
           const toDateTime = activeDateFilter.to ? getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime) : null;
           
           if (fromDateTime && toDateTime) {
-            fastQuery = fastQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+            allProfilesQuery = allProfilesQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
           } else if (fromDateTime) {
-            fastQuery = fastQuery.gte('created_at', fromDateTime.toISOString());
+            allProfilesQuery = allProfilesQuery.gte('created_at', fromDateTime.toISOString());
           } else if (toDateTime) {
-            fastQuery = fastQuery.lte('created_at', toDateTime.toISOString());
+            allProfilesQuery = allProfilesQuery.lte('created_at', toDateTime.toISOString());
           }
         }
         
         if (activeCountryFilter !== 'all') {
-          fastQuery = fastQuery.eq('country', activeCountryFilter);
+          allProfilesQuery = allProfilesQuery.eq('country', activeCountryFilter);
         }
         
-        // CRITICAL: No limit - get all matching records in ONE query
-        const { data: allProfilesWithSubs, count: totalFiltered } = await fastQuery;
+        const { data: allProfiles, count: totalFiltered, error: profilesError } = await allProfilesQuery;
+        
+        if (profilesError) {
+          console.error('[ADMIN] Error fetching profiles:', profilesError);
+          throw profilesError;
+        }
         
         resultCount = totalFiltered || 0;
-        console.log('[ADMIN] ⚡ Fast query returned', allProfilesWithSubs?.length, 'profiles with subscriptions in ONE query');
+        console.log('[ADMIN] ⚡ Query 1: Fetched', allProfiles?.length, 'profiles matching filters');
         
-        if (allProfilesWithSubs && allProfilesWithSubs.length > 0) {
-          // Map profiles to include plan
-          const profilesWithPlans = allProfilesWithSubs.map((profile: any) => {
-            // Handle both array and single object from LEFT JOIN
-            const subscription = Array.isArray(profile.user_subscriptions) 
-              ? profile.user_subscriptions.find((s: any) => s?.status === 'active')
-              : (profile.user_subscriptions?.status === 'active' ? profile.user_subscriptions : null);
-            
-            return {
-              ...profile,
-              subscription_plan: subscription?.plan || 'free'
-            };
-          });
+        if (allProfiles && allProfiles.length > 0) {
+          const allUserIds = allProfiles.map(p => p.user_id);
+          
+          // QUERY 2: Get ALL subscriptions in ONE query (no batching!)
+          const { data: allSubscriptions, error: subsError } = await supabase
+            .from('user_subscriptions')
+            .select('user_id, plan, status')
+            .eq('status', 'active')
+            .in('user_id', allUserIds);
+          
+          if (subsError) {
+            console.error('[ADMIN] Error fetching subscriptions:', subsError);
+            throw subsError;
+          }
+          
+          console.log('[ADMIN] ⚡ Query 2: Fetched', allSubscriptions?.length, 'active subscriptions');
+          
+          // Create plan map
+          const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
+          
+          // Map profiles with plans
+          const profilesWithPlans = allProfiles.map(profile => ({
+            ...profile,
+            subscription_plan: userPlanMap.get(profile.user_id) || 'free'
+          }));
           
           // Log plan distribution
-          const planCounts = profilesWithPlans.reduce((acc: any, p: any) => {
+          const planCounts = profilesWithPlans.reduce((acc: any, p) => {
             acc[p.subscription_plan] = (acc[p.subscription_plan] || 0) + 1;
             return acc;
           }, {});
@@ -891,19 +898,19 @@ export default function Admin() {
           
           // Sort by plan
           const planOrder: Record<string, number> = { free: 0, pro: 1, ultra_pro: 2 };
-          profilesWithPlans.sort((a: any, b: any) => {
+          profilesWithPlans.sort((a, b) => {
             const valueA = planOrder[a.subscription_plan] || 0;
             const valueB = planOrder[b.subscription_plan] || 0;
             
             return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
           });
           
-          console.log('[ADMIN] ⚡ First 10 sorted plans:', profilesWithPlans.slice(0, 10).map((p: any) => p.subscription_plan));
+          console.log('[ADMIN] ⚡ First 10 sorted plans:', profilesWithPlans.slice(0, 10).map(p => p.subscription_plan));
           
           // Paginate
           const profilesData = profilesWithPlans.slice(offset, offset + usersPerPage);
           
-          console.log('[ADMIN] ⚡ Plan sorting complete: sorted', profilesWithPlans.length, 'users, showing', profilesData.length, 'on page', currentPage);
+          console.log('[ADMIN] ⚡ Plan sorting complete: 2 queries, sorted', profilesWithPlans.length, 'users, showing', profilesData.length, 'on page', currentPage);
           
           // Continue with these sorted profiles (skip the normal query)
           if (profilesData && profilesData.length > 0) {
