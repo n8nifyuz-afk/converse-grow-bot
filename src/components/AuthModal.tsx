@@ -762,6 +762,7 @@ export default function AuthModal({
                           setProfileStep((profileStep - 1) as 1 | 2 | 3);
                           setError('');
                         }}
+                        onPointerDown={(e) => e.preventDefault()}
                         variant="outline"
                         className="flex-1 h-12 md:h-13 text-base"
                       >
@@ -771,6 +772,7 @@ export default function AuthModal({
                     <Button 
                       type="submit" 
                       disabled={loading}
+                      onPointerDown={(e) => e.preventDefault()}
                       className={`h-12 md:h-13 text-base ${profileStep === 1 ? 'w-full' : 'flex-1'}`}
                     >
                       {loading ? (
