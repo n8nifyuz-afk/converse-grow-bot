@@ -2045,7 +2045,7 @@ export default function Admin() {
                         <TableHead className="font-semibold text-foreground text-sm">
                           Registered
                         </TableHead>
-                        <TableHead className="font-semibold text-foreground text-sm">Actions</TableHead>
+                        <TableHead className="font-semibold text-foreground text-sm"></TableHead>
                         <TableHead className="w-[100px]"></TableHead>
                       </TableRow>
                     </TableHeader>
