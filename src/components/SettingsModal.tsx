@@ -1313,7 +1313,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[92vh] md:h-[88vh] p-0 flex flex-col bg-background">
+        <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col bg-background">
           <SheetHeader className="px-4 md:px-6 py-3 md:py-4 border-b border-border/40 flex-shrink-0 bg-gradient-to-r from-background to-background/95">
             <SheetTitle className="text-lg md:text-xl font-semibold text-left text-foreground">{t('settingsModal.title')}</SheetTitle>
           </SheetHeader>
