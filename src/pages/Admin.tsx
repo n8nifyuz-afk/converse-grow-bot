@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin, RefreshCw } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -241,8 +241,6 @@ export default function Admin() {
   const [currentPage, setCurrentPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortField, setSortField] = useState<'name' | 'email' | 'plan' | 'cost' | 'registered'>('registered');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [userChats, setUserChats] = useState<UserChat[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [selectedChatForMessages, setSelectedChatForMessages] = useState<UserChat | null>(null);
@@ -298,18 +296,16 @@ export default function Admin() {
     }
   }, [isAdmin]);
   
-  // Fetch data when page or sort changes
+  // Fetch data when page changes
   // Use a ref to track if this is from applying filters to avoid double fetch
   const isApplyingFilters = useRef(false);
   
   useEffect(() => {
-    console.log('[ADMIN SORT] useEffect triggered - sortField:', sortField, 'sortDirection:', sortDirection, 'currentPage:', currentPage);
     if (isAdmin && userUsages.length > 0 && !isApplyingFilters.current) {
-      console.log('[ADMIN SORT] Calling fetchTokenUsageData with sortField:', sortField);
       fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery);
     }
     isApplyingFilters.current = false;
-  }, [currentPage, sortField, sortDirection]);
+  }, [currentPage]);
 
   // Real-time search with debounce
   useEffect(() => {
@@ -718,10 +714,7 @@ export default function Admin() {
       console.log('[ADMIN] Starting to fetch page data with filters...');
       console.log('[ADMIN] Active planFilter:', activePlanFilter);
       console.log('[ADMIN] Current page:', currentPage);
-      console.log('[ADMIN] Sort field:', sortField, 'direction:', sortDirection);
       console.log('[ADMIN] Search query:', activeSearchQuery);
-      console.log('[ADMIN] sortField === "plan"?', sortField === 'plan');
-      console.log('[ADMIN] sortField type:', typeof sortField, 'value:', JSON.stringify(sortField));
       console.log('[ADMIN] ========================================');
 
       // Calculate offset based on current page
@@ -804,189 +797,8 @@ export default function Admin() {
         query = query.eq('country', activeCountryFilter);
       }
       
-      // Step 3: Handle plan sorting specially - it requires sorting ALL filtered users
-      // then paginating, not the other way around
-      let resultCount: number | null = null;
-      let resultProfiles: any[] | null = null;
-      
-      if (sortField === 'plan') {
-        console.log('[ADMIN] ⚡ FAST plan sorting: 2-query approach...');
-        
-        // QUERY 1: Get ALL profiles matching filters
-        let allProfilesQuery = supabase
-          .from('profiles')
-          .select('user_id, email, display_name, created_at, ip_address, country, phone_number', { count: 'exact' });
-        
-        // Apply all filters
-        if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
-          allProfilesQuery = allProfilesQuery.in('user_id', filteredUserIdsForPaidPlans || []);
-        } else if (activePlanFilter === 'free') {
-          const { data: subs } = await supabase
-            .from('user_subscriptions')
-            .select('user_id')
-            .eq('status', 'active');
-          const subscribedIds = subs?.map(s => s.user_id) || [];
-          if (subscribedIds.length > 0) {
-            allProfilesQuery = allProfilesQuery.not('user_id', 'in', `(${subscribedIds.join(',')})`);
-          }
-        }
-        
-        if (activeSearchQuery.trim()) {
-          const search = activeSearchQuery.trim();
-          allProfilesQuery = allProfilesQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
-        }
-        
-        if (activeDateFilter.from || activeDateFilter.to) {
-          const fromDateTime = activeDateFilter.from ? getDateTimeFromFilter(activeDateFilter.from, activeTimeFilter.fromTime) : null;
-          const toDateTime = activeDateFilter.to ? getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime) : null;
-          
-          if (fromDateTime && toDateTime) {
-            allProfilesQuery = allProfilesQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
-          } else if (fromDateTime) {
-            allProfilesQuery = allProfilesQuery.gte('created_at', fromDateTime.toISOString());
-          } else if (toDateTime) {
-            allProfilesQuery = allProfilesQuery.lte('created_at', toDateTime.toISOString());
-          }
-        }
-        
-        if (activeCountryFilter !== 'all') {
-          allProfilesQuery = allProfilesQuery.eq('country', activeCountryFilter);
-        }
-        
-        const { data: allProfiles, count: totalFiltered, error: profilesError } = await allProfilesQuery;
-        
-        if (profilesError) {
-          console.error('[ADMIN] Error fetching profiles:', profilesError);
-          throw profilesError;
-        }
-        
-        resultCount = totalFiltered || 0;
-        console.log('[ADMIN] ⚡ Query 1: Fetched', allProfiles?.length, 'profiles matching filters');
-        
-        if (allProfiles && allProfiles.length > 0) {
-          const allUserIds = allProfiles.map(p => p.user_id);
-          
-          // QUERY 2: Get ALL subscriptions in ONE query (no batching!)
-          const { data: allSubscriptions, error: subsError } = await supabase
-            .from('user_subscriptions')
-            .select('user_id, plan, status')
-            .eq('status', 'active')
-            .in('user_id', allUserIds);
-          
-          if (subsError) {
-            console.error('[ADMIN] Error fetching subscriptions:', subsError);
-            throw subsError;
-          }
-          
-          console.log('[ADMIN] ⚡ Query 2: Fetched', allSubscriptions?.length, 'active subscriptions');
-          
-          // Create plan map
-          const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
-          
-          // Map profiles with plans
-          const profilesWithPlans = allProfiles.map(profile => ({
-            ...profile,
-            subscription_plan: userPlanMap.get(profile.user_id) || 'free'
-          }));
-          
-          // Log plan distribution
-          const planCounts = profilesWithPlans.reduce((acc: any, p) => {
-            acc[p.subscription_plan] = (acc[p.subscription_plan] || 0) + 1;
-            return acc;
-          }, {});
-          console.log('[ADMIN] ⚡ Plan distribution:', planCounts);
-          
-          // Sort by plan
-          const planOrder: Record<string, number> = { free: 0, pro: 1, ultra_pro: 2 };
-          profilesWithPlans.sort((a, b) => {
-            const valueA = planOrder[a.subscription_plan] || 0;
-            const valueB = planOrder[b.subscription_plan] || 0;
-            
-            return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
-          });
-          
-          console.log('[ADMIN] ⚡ First 10 sorted plans:', profilesWithPlans.slice(0, 10).map(p => p.subscription_plan));
-          
-          // Paginate
-          const profilesData = profilesWithPlans.slice(offset, offset + usersPerPage);
-          
-          console.log('[ADMIN] ⚡ Plan sorting complete: 2 queries, sorted', profilesWithPlans.length, 'users, showing', profilesData.length, 'on page', currentPage);
-          
-          // Continue with these sorted profiles (skip the normal query)
-          if (profilesData && profilesData.length > 0) {
-            // Jump to subscription fetching (reuse existing code path)
-            const userIds = profilesData.map(p => p.user_id);
-            
-            const { data: subscriptionsData } = await supabase
-              .from('user_subscriptions')
-              .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
-              .in('user_id', userIds)
-              .eq('status', 'active');
-            
-            const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
-            
-            let users: UserTokenUsage[] = profilesData.map((profile: any) => {
-              const subscription = subscriptionsMap.get(profile.user_id);
-              const emailDisplay = profile.email || (profile.phone_number ? profile.phone_number : 'Unknown');
-              const displayName = profile.display_name || 
-                                 (profile.email ? profile.email.split('@')[0] : null) || 
-                                 (profile.phone_number ? profile.phone_number : 'Unknown User');
-              
-              return {
-                user_id: profile.user_id,
-                email: emailDisplay,
-                display_name: displayName,
-                created_at: profile.created_at,
-                ip_address: profile.ip_address,
-                country: profile.country,
-                model_usages: [],
-                subscription_status: subscription && subscription.status === 'active' ? {
-                  subscribed: true,
-                  product_id: subscription.product_id,
-                  plan: subscription.plan,
-                  subscription_end: subscription.current_period_end,
-                  stripe_subscription_id: subscription.stripe_subscription_id,
-                  stripe_customer_id: subscription.stripe_customer_id
-                } : {
-                  subscribed: false,
-                  product_id: null,
-                  plan: null,
-                  subscription_end: null,
-                  stripe_subscription_id: null,
-                  stripe_customer_id: null
-                }
-              };
-            });
-            
-            setUserUsages(users);
-            setModelUsages([]);
-            setTotalUsersCount(resultCount);
-            setLoading(false);
-            setRefreshing(false);
-            return; // Exit early, we're done
-          }
-        }
-        
-        // If we got here, no users matched - clear and return
-        setUserUsages([]);
-        setModelUsages([]);
-        setTotalUsersCount(0);
-        setLoading(false);
-        setRefreshing(false);
-        return;
-      }
-      
-      // Step 3b: Apply normal sorting at database level (for non-plan fields)
-      if (sortField === 'name') {
-        query = query.order('display_name', { ascending: sortDirection === 'asc', nullsFirst: false });
-      } else if (sortField === 'email') {
-        query = query.order('email', { ascending: sortDirection === 'asc', nullsFirst: false });
-      } else if (sortField === 'registered') {
-        query = query.order('created_at', { ascending: sortDirection === 'asc' });
-      } else {
-        // Default ordering for cost (cost sorting still client-side due to complexity)
-        query = query.order('created_at', { ascending: false });
-      }
+      // Step 3: Apply default ordering
+      query = query.order('created_at', { ascending: false });
       
       // Step 4: Apply pagination and execute query
       // Database has sorted ALL filtered users, now get page slice
@@ -1132,31 +944,6 @@ export default function Admin() {
     return 'free'; // Fallback to free if we can't determine the plan
   };
 
-  // Toggle sort - refetch data with new sort order
-  const handleSort = (field: 'name' | 'email' | 'plan' | 'cost' | 'registered') => {
-    console.log('[ADMIN SORT] handleSort called with field:', field);
-    console.log('[ADMIN SORT] Current sortField:', sortField, 'sortDirection:', sortDirection);
-    
-    const newDirection = sortField === field 
-      ? (sortDirection === 'asc' ? 'desc' : 'asc')
-      : 'asc';
-    
-    console.log('[ADMIN SORT] Setting new sortField:', field, 'newDirection:', newDirection);
-    
-    setSortField(field);
-    setSortDirection(newDirection);
-    setCurrentPage(1); // Reset to first page when sorting changes
-  };
-
-  // Get sort icon
-  const getSortIcon = (field: 'name' | 'email' | 'plan' | 'cost' | 'registered') => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-50" />;
-    }
-    return sortDirection === 'asc' 
-      ? <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4" />
-      : <ArrowDown className="h-3 w-3 sm:h-4 sm:w-4" />;
-  };
 
   // Get unique countries - fetch from all profiles for filter dropdown
   const [uniqueCountries, setUniqueCountries] = useState<string[]>([]);
@@ -1186,24 +973,9 @@ export default function Admin() {
     return dateTime;
   };
 
-  // Users are already filtered and sorted by database (including plan sort above)
-  // Only cost sorting needs client-side handling for the current page
-  const sortedUsers = sortField === 'cost'
-    ? [...userUsages].sort((a, b) => {
-        const aValue = a.model_usages.reduce((sum, m) => sum + m.cost, 0);
-        const bValue = b.model_usages.reduce((sum, m) => sum + m.cost, 0);
-        
-        if (sortDirection === 'asc') {
-          return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-        } else {
-          return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-        }
-      })
-    : userUsages; // All other sorts already done by database
-
   // Pagination
   const totalPages = Math.ceil(totalUsersCount / usersPerPage);
-  const paginatedUsers = sortedUsers;
+  const paginatedUsers = userUsages;
 
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
@@ -2109,58 +1881,6 @@ export default function Admin() {
           <CardContent className="p-0 w-full overflow-hidden">
             {/* Mobile/Tablet Card Layout */}
             <div className="lg:hidden">
-                  {/* Mobile Sort Controls */}
-                  <div className="border-b border-border/50 p-4 bg-muted/20">
-                    <p className="text-xs font-medium text-muted-foreground mb-3">Sort by:</p>
-                    <div className="flex overflow-x-auto gap-2 pb-2 -mx-4 px-4">
-                      <Button
-                        variant={sortField === 'name' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleSort('name')}
-                        className="h-9 text-xs gap-1.5 flex-shrink-0"
-                      >
-                        Name
-                        {sortField === 'name' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-                      </Button>
-                      <Button
-                        variant={sortField === 'email' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleSort('email')}
-                        className="h-9 text-xs gap-1.5 flex-shrink-0"
-                      >
-                        Email
-                        {sortField === 'email' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-                      </Button>
-                      <Button
-                        variant={sortField === 'plan' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleSort('plan')}
-                        className="h-9 text-xs gap-1.5 flex-shrink-0"
-                      >
-                        Plan
-                        {sortField === 'plan' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-                      </Button>
-                      <Button
-                        variant={sortField === 'cost' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleSort('cost')}
-                        className="h-9 text-xs gap-1.5 flex-shrink-0"
-                      >
-                        Cost
-                        {sortField === 'cost' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-                      </Button>
-                      <Button
-                        variant={sortField === 'registered' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleSort('registered')}
-                        className="h-9 text-xs gap-1.5 flex-shrink-0"
-                      >
-                        Registered
-                        {sortField === 'registered' && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-                      </Button>
-                    </div>
-                  </div>
-
                   {paginatedUsers.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                       <Users className="h-16 w-16 opacity-10 mb-4" />
@@ -2261,41 +1981,17 @@ export default function Admin() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50 hover:bg-muted/50">
-                        <TableHead 
-                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
-                          onClick={() => handleSort('name')}
-                        >
-                          <div className="flex items-center gap-1">
-                            User
-                            {getSortIcon('name')}
-                          </div>
+                        <TableHead className="font-semibold text-foreground text-sm">
+                          User
                         </TableHead>
-                        <TableHead 
-                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
-                          onClick={() => handleSort('email')}
-                        >
-                          <div className="flex items-center gap-1">
-                            Email
-                            {getSortIcon('email')}
-                          </div>
+                        <TableHead className="font-semibold text-foreground text-sm">
+                          Email
                         </TableHead>
-                        <TableHead 
-                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
-                          onClick={() => handleSort('plan')}
-                        >
-                          <div className="flex items-center gap-1">
-                            Plan
-                            {getSortIcon('plan')}
-                          </div>
+                        <TableHead className="font-semibold text-foreground text-sm">
+                          Plan
                         </TableHead>
-                        <TableHead
-                          className="font-semibold text-foreground text-sm cursor-pointer hover:bg-muted/70 transition-colors"
-                          onClick={() => handleSort('registered')}
-                        >
-                          <div className="flex items-center gap-1">
-                            Registered
-                            {getSortIcon('registered')}
-                          </div>
+                        <TableHead className="font-semibold text-foreground text-sm">
+                          Registered
                         </TableHead>
                         <TableHead className="font-semibold text-foreground text-sm">Actions</TableHead>
                         <TableHead className="w-[100px]"></TableHead>
@@ -2456,7 +2152,7 @@ export default function Admin() {
                 {totalPages > 1 && (
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/50 p-4 sm:p-5 w-full">
                     <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1 text-center sm:text-left">
-                      Page {currentPage} of {totalPages} • {sortedUsers.length} total
+                      Page {currentPage} of {totalPages} • {paginatedUsers.length} total
                     </div>
                     <div className="flex gap-2 order-1 sm:order-2 flex-shrink-0">
                       <Button
