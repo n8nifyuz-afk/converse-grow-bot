@@ -1089,18 +1089,27 @@ export default function Admin() {
 
   // Clear all filters
   const clearAllFilters = async () => {
-    // Reset all filter states
+    // Reset all filter states to default
     setPlanFilter('all');
     setSearchQuery('');
     setDateFilter({ from: undefined, to: undefined });
     setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setCountryFilter('all');
     setSubscriptionStatusFilter('all');
+    setTimezone('Europe/Nicosia');
+    
+    // Reset pending filters
     setPendingPlanFilter('all');
     setPendingDateFilter({ from: undefined, to: undefined });
     setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
     setPendingCountryFilter('all');
     setPendingSubscriptionStatusFilter('all');
+    setPendingTimezone('Europe/Nicosia');
+    
+    // Reset temp filters
+    setTempDateFilter({ from: undefined, to: undefined });
+    setTempTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+    
     setShowFilters(false);
     
     // Reset to page 1 and refresh data with default filters
