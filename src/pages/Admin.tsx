@@ -806,10 +806,12 @@ export default function Admin() {
       if (sortField === 'plan') {
         console.log('[ADMIN] Applying plan-based sorting across ALL filtered users...');
         
-        // First, get ALL user_ids that match current filters (lightweight query with count)
+        // First, get ALL user_ids that match current filters
+        // CRITICAL: Remove any LIMIT - we need ALL users for sorting
         let allUsersQuery = supabase
           .from('profiles')
-          .select('user_id', { count: 'exact' });
+          .select('user_id', { count: 'exact' })
+          .limit(10000); // Safety limit to prevent timeouts
         
         // Re-apply all the same filters
         if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
@@ -872,33 +874,44 @@ export default function Admin() {
           console.log('[ADMIN] Plan sorting: Fetching subscriptions for', allUserIds.length, 'users');
           console.log('[ADMIN] Sample user_ids being queried:', allUserIds.slice(0, 5));
           
-          // Get subscriptions for ALL these users (handle large datasets with batching if needed)
-          const { data: allSubscriptions, error: subsError } = await supabase
-            .from('user_subscriptions')
-            .select('user_id, plan')
-            .eq('status', 'active')
-            .in('user_id', allUserIds);
+          // CRITICAL: Batch the subscription queries to avoid "Bad Request" error
+          // Supabase has a limit of ~1000 items per IN clause
+          const BATCH_SIZE = 500;
+          const allSubscriptions: Array<{ user_id: string; plan: string }> = [];
           
-          if (subsError) {
-            console.error('[ADMIN] Error fetching subscriptions:', subsError);
+          for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
+            const batch = allUserIds.slice(i, i + BATCH_SIZE);
+            console.log(`[ADMIN] Fetching subscriptions batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(allUserIds.length / BATCH_SIZE)}: ${batch.length} users`);
+            
+            const { data: batchSubs, error: subsError } = await supabase
+              .from('user_subscriptions')
+              .select('user_id, plan')
+              .eq('status', 'active')
+              .in('user_id', batch);
+            
+            if (subsError) {
+              console.error('[ADMIN] Error fetching subscriptions batch:', subsError);
+            } else if (batchSubs) {
+              allSubscriptions.push(...batchSubs);
+            }
           }
           
-          console.log('[ADMIN] Plan sorting: Found', allSubscriptions?.length || 0, 'active subscriptions');
-          console.log('[ADMIN] Sample subscriptions:', allSubscriptions?.slice(0, 5));
+          console.log('[ADMIN] Plan sorting: Found', allSubscriptions.length, 'active subscriptions total');
+          console.log('[ADMIN] Sample subscriptions:', allSubscriptions.slice(0, 5));
           
           // Debug: Log plan distribution
-          const planCounts = allSubscriptions?.reduce((acc, sub) => {
+          const planCounts = allSubscriptions.reduce((acc, sub) => {
             acc[sub.plan] = (acc[sub.plan] || 0) + 1;
             return acc;
           }, {} as Record<string, number>);
           console.log('[ADMIN] Plan distribution in subscriptions:', planCounts);
           
           // Log specific pro users
-          const proUsers = allSubscriptions?.filter(s => s.plan === 'pro');
-          console.log('[ADMIN] Pro users found:', proUsers?.length || 0, proUsers?.map(u => u.user_id));
+          const proUsers = allSubscriptions.filter(s => s.plan === 'pro');
+          console.log('[ADMIN] Pro users found:', proUsers.length, proUsers.map(u => u.user_id));
           
           // Create plan map
-          const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
+          const userPlanMap = new Map(allSubscriptions.map(s => [s.user_id, s.plan]));
           
           console.log('[ADMIN] User plan map size:', userPlanMap.size);
           console.log('[ADMIN] Plan map entries (first 10):', Array.from(userPlanMap.entries()).slice(0, 10));
