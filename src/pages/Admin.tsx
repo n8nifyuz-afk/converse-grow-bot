@@ -238,7 +238,6 @@ export default function Admin() {
   const [selectedUser, setSelectedUser] = useState<UserTokenUsage | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false); // For filter/search updates
   const [currentPage, setCurrentPage] = useState(1);
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultra'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -305,10 +304,7 @@ export default function Admin() {
   
   useEffect(() => {
     if (isAdmin && userUsages.length > 0 && !isApplyingFilters.current) {
-      setIsRefreshing(true);
-      fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery).finally(() => {
-        setIsRefreshing(false);
-      });
+      fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery);
     }
     isApplyingFilters.current = false;
   }, [currentPage, sortField, sortDirection]);
@@ -319,13 +315,10 @@ export default function Admin() {
 
     const debounceTimer = setTimeout(() => {
       setCurrentPage(1); // Reset to first page on search
-      setIsRefreshing(true);
       Promise.all([
         fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery),
         fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
-      ]).finally(() => {
-        setIsRefreshing(false);
-      });
+      ]);
     }, 500); // 500ms debounce
 
     return () => clearTimeout(debounceTimer);
@@ -980,14 +973,13 @@ export default function Admin() {
       }
       
       // Step 4: Apply pagination and execute query
+      // Database has sorted ALL filtered users, now get page slice
       const { data: profilesData, error: profilesError, count } = await query
         .range(offset, offset + usersPerPage - 1);
       
-      resultCount = count || 0;
-      
       if (profilesError) throw profilesError;
       
-      console.log('[ADMIN] Loaded profiles for page:', profilesData?.length, 'Total filtered:', count);
+      console.log('[ADMIN] Loaded page', currentPage, ':', profilesData?.length, 'users. Total filtered:', count, 'users');
 
       // CRITICAL: If no users match the filters, clear everything
       if (count === 0 || !profilesData || profilesData.length === 0) {
@@ -1065,13 +1057,6 @@ export default function Admin() {
           }
         };
       }) || [];
-      
-      console.log('[ADMIN] Final user list after all filters:', users.length);
-      console.log('[ADMIN] Sample users (first 3):', users.slice(0, 3).map(u => ({
-        email: u.email,
-        plan: u.subscription_status?.plan,
-        subscribed: u.subscription_status?.subscribed
-      })));
       
       setUserUsages(users);
       setModelUsages([]);
@@ -1180,34 +1165,22 @@ export default function Admin() {
     return dateTime;
   };
 
-  // Users are already filtered and sorted server-side
-  const filteredUsers = userUsages;
-
-  // Apply client-side sorting only for complex fields (plan, cost) that couldn't be sorted at DB level
-  // Simple fields (name, email, registered) are already sorted by the database query
-  const sortedUsers = (sortField === 'plan' || sortField === 'cost') 
-    ? [...filteredUsers].sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
-
-        if (sortField === 'plan') {
-          const planOrder = { free: 0, pro: 1, ultra: 2 };
-          aValue = planOrder[getUserPlan(a)];
-          bValue = planOrder[getUserPlan(b)];
-        } else if (sortField === 'cost') {
-          aValue = a.model_usages.reduce((sum, m) => sum + m.cost, 0);
-          bValue = b.model_usages.reduce((sum, m) => sum + m.cost, 0);
-        }
-
+  // Users are already filtered and sorted by database (including plan sort above)
+  // Only cost sorting needs client-side handling for the current page
+  const sortedUsers = sortField === 'cost'
+    ? [...userUsages].sort((a, b) => {
+        const aValue = a.model_usages.reduce((sum, m) => sum + m.cost, 0);
+        const bValue = b.model_usages.reduce((sum, m) => sum + m.cost, 0);
+        
         if (sortDirection === 'asc') {
           return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
         } else {
           return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
         }
       })
-    : filteredUsers; // For name, email, registered - already sorted by database
+    : userUsages; // All other sorts already done by database
 
-  // Pagination - use sorted data
+  // Pagination
   const totalPages = Math.ceil(totalUsersCount / usersPerPage);
   const paginatedUsers = sortedUsers;
 
@@ -1276,8 +1249,7 @@ export default function Admin() {
     
     console.log('[ADMIN FILTER] Applied planFilter:', pendingPlanFilter);
     
-    // Fetch data with new filters - CRITICAL: Pass ALL pending filter values directly to avoid race condition
-    setIsRefreshing(true);
+    // Fetch data with new filters
     await Promise.all([
       fetchTokenUsageData(false, pendingPlanFilter, pendingDateFilter, pendingTimeFilter, pendingCountryFilter, searchQuery),
       fetchAggregateStats(
@@ -1288,7 +1260,6 @@ export default function Admin() {
         searchQuery
       )
     ]);
-    setIsRefreshing(false);
   };
   
   // Manual refresh function
@@ -1342,30 +1313,16 @@ export default function Admin() {
     // Reset to page 1 and refresh data with default filters
     isApplyingFilters.current = true;
     setCurrentPage(1);
-    setIsRefreshing(true);
     
     await Promise.all([
       fetchTokenUsageData(false, 'all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', ''),
       fetchAggregateStats('all', { from: undefined, to: undefined }, { fromTime: '00:00', toTime: '23:59' }, 'all', '')
     ]);
-    
-    setIsRefreshing(false);
   };
 
   // Reset to page 1 and refetch when filter, search, or sort changes
-  useEffect(() => {
-    if (isAdmin) {
-      setCurrentPage(1);
-      // Trigger data fetch when sort changes
-      setIsRefreshing(true);
-      Promise.all([
-        fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery),
-        fetchAggregateStats(planFilter, dateFilter, timeFilter, countryFilter, searchQuery)
-      ]).finally(() => {
-        setIsRefreshing(false);
-      });
-    }
-  }, [sortField, sortDirection]);
+  // Note: This useEffect is now handled by the dependency in the previous useEffect
+  // No separate sort change handler needed
 
   // Fetch cost/token usage data for a specific user when "Cost View" is clicked
   const fetchUserCostData = async (userId: string) => {
@@ -2016,7 +1973,7 @@ export default function Admin() {
         </div>
 
         {/* Stats Cards */}
-        <div className={`grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5 w-full transition-opacity duration-200 ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}>
+        <div className={`grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-5 w-full transition-opacity duration-200 ${refreshing ? 'opacity-50' : 'opacity-100'}`}>
           <Card className="border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg col-span-2 lg:col-span-1 overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 p-4 sm:p-5 md:p-6">
               <CardTitle className="text-sm sm:text-base font-medium text-muted-foreground truncate">Total Users</CardTitle>
@@ -2096,9 +2053,6 @@ export default function Admin() {
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse flex-shrink-0" />
                     <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">Token Usage by User</CardTitle>
-                    {isRefreshing && (
-                      <Loader2 className="h-4 w-4 animate-spin text-primary flex-shrink-0" />
-                    )}
                   </div>
                   <CardDescription className="text-xs sm:text-sm mt-2 truncate">
                     Showing {userUsages.length} users (Page {currentPage} of {totalPages})
