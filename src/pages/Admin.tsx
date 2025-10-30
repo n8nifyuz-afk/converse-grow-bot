@@ -303,7 +303,9 @@ export default function Admin() {
   const isApplyingFilters = useRef(false);
   
   useEffect(() => {
+    console.log('[ADMIN SORT] useEffect triggered - sortField:', sortField, 'sortDirection:', sortDirection, 'currentPage:', currentPage);
     if (isAdmin && userUsages.length > 0 && !isApplyingFilters.current) {
+      console.log('[ADMIN SORT] Calling fetchTokenUsageData with sortField:', sortField);
       fetchTokenUsageData(false, planFilter, dateFilter, timeFilter, countryFilter, searchQuery);
     }
     isApplyingFilters.current = false;
@@ -712,11 +714,15 @@ export default function Admin() {
       const activeCountryFilter = overrideCountryFilter ?? countryFilter;
       const activeSearchQuery = overrideSearchQuery ?? searchQuery;
 
+      console.log('[ADMIN] ========================================');
       console.log('[ADMIN] Starting to fetch page data with filters...');
       console.log('[ADMIN] Active planFilter:', activePlanFilter);
       console.log('[ADMIN] Current page:', currentPage);
       console.log('[ADMIN] Sort field:', sortField, 'direction:', sortDirection);
-      console.log('[ADMIN] Search query:', searchQuery);
+      console.log('[ADMIN] Search query:', activeSearchQuery);
+      console.log('[ADMIN] sortField === "plan"?', sortField === 'plan');
+      console.log('[ADMIN] sortField type:', typeof sortField, 'value:', JSON.stringify(sortField));
+      console.log('[ADMIN] ========================================');
 
       // Calculate offset based on current page
       const offset = (currentPage - 1) * usersPerPage;
@@ -1175,9 +1181,14 @@ export default function Admin() {
 
   // Toggle sort - refetch data with new sort order
   const handleSort = (field: 'name' | 'email' | 'plan' | 'cost' | 'registered') => {
+    console.log('[ADMIN SORT] handleSort called with field:', field);
+    console.log('[ADMIN SORT] Current sortField:', sortField, 'sortDirection:', sortDirection);
+    
     const newDirection = sortField === field 
       ? (sortDirection === 'asc' ? 'desc' : 'asc')
       : 'asc';
+    
+    console.log('[ADMIN SORT] Setting new sortField:', field, 'newDirection:', newDirection);
     
     setSortField(field);
     setSortDirection(newDirection);
