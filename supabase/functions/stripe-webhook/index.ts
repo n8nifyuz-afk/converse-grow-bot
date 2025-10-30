@@ -572,27 +572,45 @@ serve(async (req) => {
           .eq('user_id', user.id)
           .single();
         
+        logStep("Fetched subscription from DB", { found: !!subscription, subscription });
+        
         // If subscription doesn't exist in DB yet (race condition), fetch from Stripe
         if (!subscription && invoice.subscription) {
-          const stripeSubscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
-          const productId = typeof stripeSubscription.items.data[0].price.product === 'string'
-            ? stripeSubscription.items.data[0].price.product
-            : stripeSubscription.items.data[0].price.product.id;
-          
-          const planMapping = productMappings.find(p => p.stripe_product_id === productId);
-          if (planMapping) {
-            subscription = {
-              plan: planMapping.plan_tier,
-              plan_name: planMapping.plan_name
-            };
-            logStep("Fetched subscription from Stripe (DB not updated yet)", { plan: planMapping.plan_tier });
+          try {
+            logStep("Fetching subscription from Stripe due to race condition", { subscriptionId: invoice.subscription });
+            const stripeSubscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+            const productId = typeof stripeSubscription.items.data[0].price.product === 'string'
+              ? stripeSubscription.items.data[0].price.product
+              : stripeSubscription.items.data[0].price.product.id;
+            
+            logStep("Retrieved Stripe subscription", { productId });
+            
+            const planMapping = productMappings.find(p => p.stripe_product_id === productId);
+            if (planMapping) {
+              subscription = {
+                plan: planMapping.plan_tier,
+                plan_name: planMapping.plan_name
+              };
+              logStep("Fetched subscription from Stripe successfully", { plan: planMapping.plan_tier, planName: planMapping.plan_name });
+            } else {
+              logStep("WARNING: No plan mapping found for product", { productId });
+            }
+          } catch (stripeError) {
+            logStep("ERROR: Failed to fetch subscription from Stripe", { 
+              error: stripeError instanceof Error ? stripeError.message : String(stripeError) 
+            });
           }
         }
         
-        if (subscription) {
-          // Map plan to planType
-          const planType = subscription.plan === 'pro' ? 'Pro' : subscription.plan === 'ultra_pro' ? 'Ultra' : 'Free';
-          
+        // ALWAYS send webhook and email, even if we couldn't fetch subscription details
+        // Use defaults if subscription info is unavailable
+        const planType = subscription?.plan_name || subscription?.plan === 'pro' ? 'Pro' : subscription?.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+        const plan = subscription?.plan || 'pro';
+        
+        logStep("Processing payment with plan info", { subscription, planType, plan });
+        
+        // Continue processing regardless of whether subscription was found
+        {
           // Get price details from invoice
           const planPrice = invoice.amount_paid ? (invoice.amount_paid / 100) : 0;
           const currency = invoice.currency;
@@ -611,7 +629,7 @@ serve(async (req) => {
             }
           }
           
-          logStep("Payment success tracking data", {
+          logStep("Payment tracking data", {
             planType,
             planDuration,
             planPrice,
@@ -655,7 +673,7 @@ serve(async (req) => {
             const username = userProfile?.display_name || user.email?.split('@')[0] || 'User';
 
             const webhookPayload = {
-              plan_name: subscription.plan_name || planType,
+              plan_name: subscription?.plan_name || planType,
               user_id: user.id,
               email: emailOrPhone,
               username: username,
