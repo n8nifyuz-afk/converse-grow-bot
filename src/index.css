@@ -263,7 +263,7 @@
   }
   
   .country-list {
-    max-height: calc(70vh - 80px);
+    max-height: 180px;
   }
   
   .country-search {
