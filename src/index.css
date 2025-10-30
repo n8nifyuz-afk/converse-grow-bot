@@ -250,26 +250,14 @@
   
   .country-dropdown {
     position: fixed;
-    left: 0.5rem;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    max-height: 70vh;
-    border-radius: 0.75rem;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 340px;
+    border-radius: 0.75rem 0.75rem 0 0;
     margin: 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    animation: slideUpFade 0.2s ease-out;
-  }
-  
-  @keyframes slideUpFade {
-    from {
-      opacity: 0;
-      transform: translateY(-40%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(-50%);
-    }
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
   }
   
   .country-list {

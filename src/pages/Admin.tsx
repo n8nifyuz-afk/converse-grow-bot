@@ -810,206 +810,180 @@ export default function Admin() {
       let resultProfiles: any[] | null = null;
       
       if (sortField === 'plan') {
-        console.log('[ADMIN] ⚡ OPTIMIZED plan sorting: Paid users first, then free users...');
+        console.log('[ADMIN] ⚡ FAST plan sorting: 2-query approach...');
         
-        // STEP 1: Get paid users from user_subscriptions
-        let paidUsersQuery = supabase
-          .from('user_subscriptions')
-          .select('user_id, plan')
-          .eq('status', 'active');
+        // QUERY 1: Get ALL profiles matching filters
+        let allProfilesQuery = supabase
+          .from('profiles')
+          .select('user_id, email, display_name, created_at, ip_address, country, phone_number', { count: 'exact' });
         
-        // If filtering by specific plan, only get that plan
-        if (activePlanFilter === 'pro') {
-          paidUsersQuery = paidUsersQuery.eq('plan', 'pro');
-        } else if (activePlanFilter === 'ultra') {
-          paidUsersQuery = paidUsersQuery.eq('plan', 'ultra_pro');
-        }
-        
-        const { data: paidSubscriptions, error: subsError } = await paidUsersQuery;
-        
-        if (subsError) {
-          console.error('[ADMIN] Error fetching paid subscriptions:', subsError);
-          throw subsError;
-        }
-        
-        console.log('[ADMIN] ⚡ Step 1: Found', paidSubscriptions?.length || 0, 'paid subscriptions');
-        
-        // Separate by plan type
-        const ultraProUsers = paidSubscriptions?.filter(s => s.plan === 'ultra_pro') || [];
-        const proUsers = paidSubscriptions?.filter(s => s.plan === 'pro') || [];
-        const paidUserIds = paidSubscriptions?.map(s => s.user_id) || [];
-        
-        console.log('[ADMIN] ⚡ Breakdown: ultra_pro=', ultraProUsers.length, 'pro=', proUsers.length);
-        
-        // STEP 2: Fetch profiles for paid users
-        const fetchProfilesForUsers = async (userIds: string[]) => {
-          if (userIds.length === 0) return [];
-          
-          let profileQuery = supabase
-            .from('profiles')
-            .select('user_id, email, display_name, created_at, ip_address, country, phone_number')
-            .in('user_id', userIds);
-          
-          // Apply filters to paid users
-          if (activeSearchQuery.trim()) {
-            const search = activeSearchQuery.trim();
-            profileQuery = profileQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
-          }
-          
-          if (activeDateFilter.from || activeDateFilter.to) {
-            const fromDateTime = activeDateFilter.from ? getDateTimeFromFilter(activeDateFilter.from, activeTimeFilter.fromTime) : null;
-            const toDateTime = activeDateFilter.to ? getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime) : null;
-            
-            if (fromDateTime && toDateTime) {
-              profileQuery = profileQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
-            } else if (fromDateTime) {
-              profileQuery = profileQuery.gte('created_at', fromDateTime.toISOString());
-            } else if (toDateTime) {
-              profileQuery = profileQuery.lte('created_at', toDateTime.toISOString());
-            }
-          }
-          
-          if (activeCountryFilter !== 'all') {
-            profileQuery = profileQuery.eq('country', activeCountryFilter);
-          }
-          
-          const { data } = await profileQuery;
-          return data || [];
-        };
-        
-        const ultraProProfiles = await fetchProfilesForUsers(ultraProUsers.map(u => u.user_id));
-        const proProfiles = await fetchProfilesForUsers(proUsers.map(u => u.user_id));
-        
-        console.log('[ADMIN] ⚡ Step 2: Fetched profiles - ultra_pro:', ultraProProfiles.length, 'pro:', proProfiles.length);
-        
-        // STEP 3: Fetch free users (only if not filtering by paid plans)
-        let freeProfiles: any[] = [];
-        
-        if (activePlanFilter !== 'pro' && activePlanFilter !== 'ultra') {
-          let freeUsersQuery = supabase
-            .from('profiles')
-            .select('user_id, email, display_name, created_at, ip_address, country, phone_number', { count: 'exact' });
-          
-          // Exclude paid users
-          if (paidUserIds.length > 0) {
-            freeUsersQuery = freeUsersQuery.not('user_id', 'in', `(${paidUserIds.join(',')})`);
-          }
-          
-          // Apply same filters
-          if (activeSearchQuery.trim()) {
-            const search = activeSearchQuery.trim();
-            freeUsersQuery = freeUsersQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
-          }
-          
-          if (activeDateFilter.from || activeDateFilter.to) {
-            const fromDateTime = activeDateFilter.from ? getDateTimeFromFilter(activeDateFilter.from, activeTimeFilter.fromTime) : null;
-            const toDateTime = activeDateFilter.to ? getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime) : null;
-            
-            if (fromDateTime && toDateTime) {
-              freeUsersQuery = freeUsersQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
-            } else if (fromDateTime) {
-              freeUsersQuery = freeUsersQuery.gte('created_at', fromDateTime.toISOString());
-            } else if (toDateTime) {
-              freeUsersQuery = freeUsersQuery.lte('created_at', toDateTime.toISOString());
-            }
-          }
-          
-          if (activeCountryFilter !== 'all') {
-            freeUsersQuery = freeUsersQuery.eq('country', activeCountryFilter);
-          }
-          
-          const { data: freeData } = await freeUsersQuery;
-          freeProfiles = freeData || [];
-          
-          console.log('[ADMIN] ⚡ Step 3: Fetched', freeProfiles.length, 'free user profiles');
-        }
-        
-        // STEP 4: Combine in correct order based on sort direction
-        let allProfilesOrdered: any[];
-        
-        if (sortDirection === 'asc') {
-          // Ascending: free → pro → ultra_pro
-          allProfilesOrdered = [...freeProfiles, ...proProfiles, ...ultraProProfiles];
-        } else {
-          // Descending: ultra_pro → pro → free
-          allProfilesOrdered = [...ultraProProfiles, ...proProfiles, ...freeProfiles];
-        }
-        
-        resultCount = allProfilesOrdered.length;
-        
-        console.log('[ADMIN] ⚡ Step 4: Combined', resultCount, 'users in order:', sortDirection);
-        console.log('[ADMIN] ⚡ Order breakdown:', {
-          first5: allProfilesOrdered.slice(0, 5).map(p => {
-            if (ultraProUsers.some(u => u.user_id === p.user_id)) return 'ultra_pro';
-            if (proUsers.some(u => u.user_id === p.user_id)) return 'pro';
-            return 'free';
-          }),
-          last5: allProfilesOrdered.slice(-5).map(p => {
-            if (ultraProUsers.some(u => u.user_id === p.user_id)) return 'ultra_pro';
-            if (proUsers.some(u => u.user_id === p.user_id)) return 'pro';
-            return 'free';
-          })
-        });
-        
-        // STEP 5: Paginate
-        const profilesData = allProfilesOrdered.slice(offset, offset + usersPerPage);
-        
-        console.log('[ADMIN] ⚡ Step 5: Paginated - showing', profilesData.length, 'users from page', currentPage);
-        
-        // STEP 6: Fetch subscription details for paginated users and format for display
-        if (profilesData && profilesData.length > 0) {
-          const userIds = profilesData.map(p => p.user_id);
-          
-          const { data: subscriptionsData } = await supabase
+        // Apply all filters
+        if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
+          allProfilesQuery = allProfilesQuery.in('user_id', filteredUserIdsForPaidPlans || []);
+        } else if (activePlanFilter === 'free') {
+          const { data: subs } = await supabase
             .from('user_subscriptions')
-            .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
-            .in('user_id', userIds)
+            .select('user_id')
             .eq('status', 'active');
+          const subscribedIds = subs?.map(s => s.user_id) || [];
+          if (subscribedIds.length > 0) {
+            allProfilesQuery = allProfilesQuery.not('user_id', 'in', `(${subscribedIds.join(',')})`);
+          }
+        }
+        
+        if (activeSearchQuery.trim()) {
+          const search = activeSearchQuery.trim();
+          allProfilesQuery = allProfilesQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
+        }
+        
+        if (activeDateFilter.from || activeDateFilter.to) {
+          const fromDateTime = activeDateFilter.from ? getDateTimeFromFilter(activeDateFilter.from, activeTimeFilter.fromTime) : null;
+          const toDateTime = activeDateFilter.to ? getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime) : null;
           
-          const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
+          if (fromDateTime && toDateTime) {
+            allProfilesQuery = allProfilesQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+          } else if (fromDateTime) {
+            allProfilesQuery = allProfilesQuery.gte('created_at', fromDateTime.toISOString());
+          } else if (toDateTime) {
+            allProfilesQuery = allProfilesQuery.lte('created_at', toDateTime.toISOString());
+          }
+        }
+        
+        if (activeCountryFilter !== 'all') {
+          allProfilesQuery = allProfilesQuery.eq('country', activeCountryFilter);
+        }
+        
+        const { data: allProfiles, count: totalFiltered, error: profilesError } = await allProfilesQuery;
+        
+        if (profilesError) {
+          console.error('[ADMIN] Error fetching profiles:', profilesError);
+          throw profilesError;
+        }
+        
+        resultCount = totalFiltered || 0;
+        console.log('[ADMIN] ⚡ Query 1: Fetched', allProfiles?.length, 'profiles matching filters');
+        
+        if (allProfiles && allProfiles.length > 0) {
+          const allUserIds = allProfiles.map(p => p.user_id);
           
-          let users: UserTokenUsage[] = profilesData.map((profile: any) => {
-            const subscription = subscriptionsMap.get(profile.user_id);
-            const emailDisplay = profile.email || (profile.phone_number ? profile.phone_number : 'Unknown');
-            const displayName = profile.display_name || 
-                               (profile.email ? profile.email.split('@')[0] : null) || 
-                               (profile.phone_number ? profile.phone_number : 'Unknown User');
+          // QUERY 2: Batch fetch subscriptions (Supabase has 1000 row limit per query)
+          const BATCH_SIZE = 500; // Safe batch size for .in() clause
+          const allSubscriptions: Array<{ user_id: string; plan: string }> = [];
+          
+          for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
+            const batch = allUserIds.slice(i, i + BATCH_SIZE);
             
-            return {
-              user_id: profile.user_id,
-              email: emailDisplay,
-              display_name: displayName,
-              created_at: profile.created_at,
-              ip_address: profile.ip_address,
-              country: profile.country,
-              model_usages: [],
-              subscription_status: subscription && subscription.status === 'active' ? {
-                subscribed: true,
-                product_id: subscription.product_id,
-                plan: subscription.plan,
-                subscription_end: subscription.current_period_end,
-                stripe_subscription_id: subscription.stripe_subscription_id,
-                stripe_customer_id: subscription.stripe_customer_id
-              } : {
-                subscribed: false,
-                product_id: null,
-                plan: null,
-                subscription_end: null,
-                stripe_subscription_id: null,
-                stripe_customer_id: null
+            try {
+              const { data: batchSubs, error: subsError } = await supabase
+                .from('user_subscriptions')
+                .select('user_id, plan, status')
+                .eq('status', 'active')
+                .in('user_id', batch);
+              
+              if (subsError) {
+                console.error('[ADMIN] ⚡ Batch error:', subsError);
+                continue; // Skip failed batch, continue with others
               }
-            };
+              
+              if (batchSubs) {
+                allSubscriptions.push(...batchSubs);
+              }
+            } catch (err) {
+              console.error('[ADMIN] ⚡ Network error:', err);
+              continue;
+            }
+          }
+          
+          console.log('[ADMIN] ⚡ Query 2: Fetched', allSubscriptions?.length, 'active subscriptions from', Math.ceil(allUserIds.length / BATCH_SIZE), 'batches');
+          
+          // Create plan map
+          const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
+          
+          // Map profiles with plans
+          const profilesWithPlans = allProfiles.map(profile => ({
+            ...profile,
+            subscription_plan: userPlanMap.get(profile.user_id) || 'free'
+          }));
+          
+          // Log plan distribution
+          const planCounts = profilesWithPlans.reduce((acc: any, p) => {
+            acc[p.subscription_plan] = (acc[p.subscription_plan] || 0) + 1;
+            return acc;
+          }, {});
+          console.log('[ADMIN] ⚡ Plan distribution:', planCounts);
+          
+          // Sort by plan
+          const planOrder: Record<string, number> = { free: 0, pro: 1, ultra_pro: 2 };
+          profilesWithPlans.sort((a, b) => {
+            const valueA = planOrder[a.subscription_plan] || 0;
+            const valueB = planOrder[b.subscription_plan] || 0;
+            
+            return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
           });
           
-          setUserUsages(users);
-          setModelUsages([]);
-          setTotalUsersCount(resultCount);
-          setLoading(false);
-          setRefreshing(false);
-          return; // Exit early - plan sorting complete
+          console.log('[ADMIN] ⚡ First 10 sorted plans:', profilesWithPlans.slice(0, 10).map(p => p.subscription_plan));
+          
+          // Paginate
+          const profilesData = profilesWithPlans.slice(offset, offset + usersPerPage);
+          
+          console.log('[ADMIN] ⚡ Plan sorting complete: 2 queries, sorted', profilesWithPlans.length, 'users, showing', profilesData.length, 'on page', currentPage);
+          
+          // Continue with these sorted profiles (skip the normal query)
+          if (profilesData && profilesData.length > 0) {
+            // Jump to subscription fetching (reuse existing code path)
+            const userIds = profilesData.map(p => p.user_id);
+            
+            const { data: subscriptionsData } = await supabase
+              .from('user_subscriptions')
+              .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
+              .in('user_id', userIds)
+              .eq('status', 'active');
+            
+            const subscriptionsMap = new Map(subscriptionsData?.map(sub => [sub.user_id, sub]) || []);
+            
+            let users: UserTokenUsage[] = profilesData.map((profile: any) => {
+              const subscription = subscriptionsMap.get(profile.user_id);
+              const emailDisplay = profile.email || (profile.phone_number ? profile.phone_number : 'Unknown');
+              const displayName = profile.display_name || 
+                                 (profile.email ? profile.email.split('@')[0] : null) || 
+                                 (profile.phone_number ? profile.phone_number : 'Unknown User');
+              
+              return {
+                user_id: profile.user_id,
+                email: emailDisplay,
+                display_name: displayName,
+                created_at: profile.created_at,
+                ip_address: profile.ip_address,
+                country: profile.country,
+                model_usages: [],
+                subscription_status: subscription && subscription.status === 'active' ? {
+                  subscribed: true,
+                  product_id: subscription.product_id,
+                  plan: subscription.plan,
+                  subscription_end: subscription.current_period_end,
+                  stripe_subscription_id: subscription.stripe_subscription_id,
+                  stripe_customer_id: subscription.stripe_customer_id
+                } : {
+                  subscribed: false,
+                  product_id: null,
+                  plan: null,
+                  subscription_end: null,
+                  stripe_subscription_id: null,
+                  stripe_customer_id: null
+                }
+              };
+            });
+            
+            setUserUsages(users);
+            setModelUsages([]);
+            setTotalUsersCount(resultCount);
+            setLoading(false);
+            setRefreshing(false);
+            return; // Exit early, we're done
+          }
         }
         
-        // If no users matched filters
+        // If we got here, no users matched - clear and return
         setUserUsages([]);
         setModelUsages([]);
         setTotalUsersCount(0);
