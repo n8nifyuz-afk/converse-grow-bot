@@ -866,19 +866,35 @@ export default function Admin() {
         if (allProfiles && allProfiles.length > 0) {
           const allUserIds = allProfiles.map(p => p.user_id);
           
-          // QUERY 2: Get ALL subscriptions in ONE query (no batching!)
-          const { data: allSubscriptions, error: subsError } = await supabase
-            .from('user_subscriptions')
-            .select('user_id, plan, status')
-            .eq('status', 'active')
-            .in('user_id', allUserIds);
+          // QUERY 2: Batch fetch subscriptions (Supabase has 1000 row limit per query)
+          const BATCH_SIZE = 500; // Safe batch size for .in() clause
+          const allSubscriptions: Array<{ user_id: string; plan: string }> = [];
           
-          if (subsError) {
-            console.error('[ADMIN] Error fetching subscriptions:', subsError);
-            throw subsError;
+          for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
+            const batch = allUserIds.slice(i, i + BATCH_SIZE);
+            
+            try {
+              const { data: batchSubs, error: subsError } = await supabase
+                .from('user_subscriptions')
+                .select('user_id, plan, status')
+                .eq('status', 'active')
+                .in('user_id', batch);
+              
+              if (subsError) {
+                console.error('[ADMIN] ⚡ Batch error:', subsError);
+                continue; // Skip failed batch, continue with others
+              }
+              
+              if (batchSubs) {
+                allSubscriptions.push(...batchSubs);
+              }
+            } catch (err) {
+              console.error('[ADMIN] ⚡ Network error:', err);
+              continue;
+            }
           }
           
-          console.log('[ADMIN] ⚡ Query 2: Fetched', allSubscriptions?.length, 'active subscriptions');
+          console.log('[ADMIN] ⚡ Query 2: Fetched', allSubscriptions?.length, 'active subscriptions from', Math.ceil(allUserIds.length / BATCH_SIZE), 'batches');
           
           // Create plan map
           const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
