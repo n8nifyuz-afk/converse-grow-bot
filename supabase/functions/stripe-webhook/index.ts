@@ -566,11 +566,28 @@ serve(async (req) => {
         if (error) throw error;
         
         // Track payment success for GTM
-        const { data: subscription } = await supabaseClient
+        let { data: subscription } = await supabaseClient
           .from('user_subscriptions')
           .select('plan, plan_name')
           .eq('user_id', user.id)
           .single();
+        
+        // If subscription doesn't exist in DB yet (race condition), fetch from Stripe
+        if (!subscription && invoice.subscription) {
+          const stripeSubscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+          const productId = typeof stripeSubscription.items.data[0].price.product === 'string'
+            ? stripeSubscription.items.data[0].price.product
+            : stripeSubscription.items.data[0].price.product.id;
+          
+          const planMapping = productMappings.find(p => p.stripe_product_id === productId);
+          if (planMapping) {
+            subscription = {
+              plan: planMapping.plan_tier,
+              plan_name: planMapping.plan_name
+            };
+            logStep("Fetched subscription from Stripe (DB not updated yet)", { plan: planMapping.plan_tier });
+          }
+        }
         
         if (subscription) {
           // Map plan to planType
