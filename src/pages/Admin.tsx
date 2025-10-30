@@ -856,7 +856,21 @@ export default function Admin() {
         if (allMatchingUsers && allMatchingUsers.length > 0) {
           const allUserIds = allMatchingUsers.map(u => u.user_id);
           
+          // CRITICAL DEBUG: Check if known pro users are in the filtered list
+          const knownProUserIds = ['62cf4852-8a83-45ee-b763-6b39ec703311', '90d63ac8-4eb6-4a66-899b-437f51698f21'];
+          const proUsersIncluded = knownProUserIds.filter(id => allUserIds.includes(id));
+          console.log('[ADMIN] Known pro users in filtered results:', proUsersIncluded.length, '/', knownProUserIds.length);
+          if (proUsersIncluded.length < knownProUserIds.length) {
+            console.warn('[ADMIN] MISSING pro users from filtered results! Check filters:', {
+              dateFilter: activeDateFilter,
+              countryFilter: activeCountryFilter,
+              searchQuery: activeSearchQuery,
+              planFilter: activePlanFilter
+            });
+          }
+          
           console.log('[ADMIN] Plan sorting: Fetching subscriptions for', allUserIds.length, 'users');
+          console.log('[ADMIN] Sample user_ids being queried:', allUserIds.slice(0, 5));
           
           // Get subscriptions for ALL these users (handle large datasets with batching if needed)
           const { data: allSubscriptions, error: subsError } = await supabase
@@ -870,6 +884,7 @@ export default function Admin() {
           }
           
           console.log('[ADMIN] Plan sorting: Found', allSubscriptions?.length || 0, 'active subscriptions');
+          console.log('[ADMIN] Sample subscriptions:', allSubscriptions?.slice(0, 5));
           
           // Debug: Log plan distribution
           const planCounts = allSubscriptions?.reduce((acc, sub) => {
@@ -878,8 +893,15 @@ export default function Admin() {
           }, {} as Record<string, number>);
           console.log('[ADMIN] Plan distribution in subscriptions:', planCounts);
           
+          // Log specific pro users
+          const proUsers = allSubscriptions?.filter(s => s.plan === 'pro');
+          console.log('[ADMIN] Pro users found:', proUsers?.length || 0, proUsers?.map(u => u.user_id));
+          
           // Create plan map
           const userPlanMap = new Map(allSubscriptions?.map(s => [s.user_id, s.plan]) || []);
+          
+          console.log('[ADMIN] User plan map size:', userPlanMap.size);
+          console.log('[ADMIN] Plan map entries (first 10):', Array.from(userPlanMap.entries()).slice(0, 10));
           
           // Sort all user IDs by plan
           const sortedUserIds = [...allUserIds].sort((a, b) => {
