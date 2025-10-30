@@ -894,38 +894,25 @@ export default function Admin() {
         return;
       }
 
-      // Fetch subscriptions only for these users in batches (handle >1000 users)
-      const userIds = profilesData?.map(p => p.user_id) || [];
+      // Fetch ALL active subscriptions (not filtered by user_id) for better performance
+      // Then filter them client-side to avoid .in() array size limits
+      const { data: allActiveSubscriptions, error: subsError } = await supabase
+        .from('user_subscriptions')
+        .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
+        .eq('status', 'active');
       
-      if (userIds.length === 0) {
-        setUserUsages([]);
-        setModelUsages([]);
-        setTotalUsersCount(count || 0);
-        setLoading(false);
-        setRefreshing(false);
-        return;
+      if (subsError) {
+        console.error('[ADMIN] Error fetching subscriptions:', subsError);
+        toast.error('Failed to load subscription data');
       }
       
-      // Batch subscription fetching to handle large user lists
-      let allSubscriptionsData: any[] = [];
-      const subBatchSize = 1000;
+      console.log('[ADMIN] Fetched ALL active subscriptions:', allActiveSubscriptions?.length || 0);
       
-      for (let i = 0; i < userIds.length; i += subBatchSize) {
-        const batchUserIds = userIds.slice(i, i + subBatchSize);
-        const { data: batchSubs } = await supabase
-          .from('user_subscriptions')
-          .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
-          .in('user_id', batchUserIds)
-          .eq('status', 'active');
-        
-        if (batchSubs) {
-          allSubscriptionsData.push(...batchSubs);
-        }
-      }
+      // Filter subscriptions to only include users in our current profile list
+      const userIdsSet = new Set(profilesData?.map(p => p.user_id) || []);
+      const subscriptionsData = allActiveSubscriptions?.filter(sub => userIdsSet.has(sub.user_id)) || [];
       
-      const subscriptionsData = allSubscriptionsData;
-
-      console.log('[ADMIN] Fetched active subscriptions:', subscriptionsData.length, 'for', userIds.length, 'users');
+      console.log('[ADMIN] Filtered subscriptions for loaded users:', subscriptionsData.length, 'for', profilesData?.length || 0, 'users');
       
       // Log plan distribution in fetched subscriptions
       const planCounts = subscriptionsData?.reduce((acc, sub) => {
