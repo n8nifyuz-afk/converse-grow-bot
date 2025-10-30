@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin, RefreshCw } from 'lucide-react';
+import { Loader2, Users, Eye, ChevronLeft, ChevronRight, Search, Download, MessageSquare, Paperclip, Info, Calendar as CalendarIcon, X, Filter, MapPin, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { UserInformationModal } from '@/components/UserInformationModal';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, isWithinInterval, startOfToday, endOfToday } from 'date-fns';
 interface ModelUsageDetail {
   model: string;
@@ -276,7 +277,10 @@ export default function Admin() {
   // Temp state for date picker (before applying within the date picker popover)
   const [tempDateFilter, setTempDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [tempTimeFilter, setTempTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
-  const usersPerPage = 20; // Load 20 users per page
+  const [usersPerPage, setUsersPerPage] = useState<number>(20); // Users per page: 20, 50, or 100
+  
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState<{ column: 'user' | 'email' | 'plan' | 'registered' | null; direction: 'asc' | 'desc' }>({ column: null, direction: 'asc' });
   
   
   useEffect(() => {
@@ -717,10 +721,7 @@ export default function Admin() {
       console.log('[ADMIN] Search query:', activeSearchQuery);
       console.log('[ADMIN] ========================================');
 
-      // Calculate offset based on current page
-      const offset = (currentPage - 1) * usersPerPage;
-      
-      // Step 1: Build base query
+      // Step 1: Build base query - Fetch ALL users matching filters for client-side sorting/pagination
       let query = supabase
         .from('profiles')
         .select('user_id, email, display_name, created_at, ip_address, country, phone_number', { count: 'exact' });
@@ -797,17 +798,15 @@ export default function Admin() {
         query = query.eq('country', activeCountryFilter);
       }
       
-      // Step 3: Apply default ordering
+      // Step 3: Apply default ordering (fetch all filtered users for client-side sorting)
       query = query.order('created_at', { ascending: false });
       
-      // Step 4: Apply pagination and execute query
-      // Database has sorted ALL filtered users, now get page slice
-      const { data: profilesData, error: profilesError, count } = await query
-        .range(offset, offset + usersPerPage - 1);
+      // Step 4: Execute query - fetch ALL filtered users for client-side sorting/pagination
+      const { data: profilesData, error: profilesError, count } = await query;
       
       if (profilesError) throw profilesError;
       
-      console.log('[ADMIN] Loaded page', currentPage, ':', profilesData?.length, 'users. Total filtered:', count, 'users');
+      console.log('[ADMIN] Loaded all filtered users:', profilesData?.length, 'users. Total count:', count);
 
       // CRITICAL: If no users match the filters, clear everything
       if (count === 0 || !profilesData || profilesData.length === 0) {
@@ -973,9 +972,70 @@ export default function Admin() {
     return dateTime;
   };
 
+  // Sorting and Pagination with useMemo for performance
+  const sortedUsers = useMemo(() => {
+    if (!sortConfig.column) return userUsages;
+    
+    const sorted = [...userUsages].sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortConfig.column) {
+        case 'user':
+          aValue = a.display_name?.toLowerCase() || '';
+          bValue = b.display_name?.toLowerCase() || '';
+          break;
+        case 'email':
+          aValue = a.email?.toLowerCase() || '';
+          bValue = b.email?.toLowerCase() || '';
+          break;
+        case 'plan':
+          // Order: ultra pro > pro > free
+          const getPlanValue = (user: UserTokenUsage) => {
+            const plan = getUserPlan(user);
+            if (plan === 'ultra') return 3;
+            if (plan === 'pro') return 2;
+            return 1; // free
+          };
+          aValue = getPlanValue(a);
+          bValue = getPlanValue(b);
+          break;
+        case 'registered':
+          aValue = a.created_at ? new Date(a.created_at).getTime() : 0;
+          bValue = b.created_at ? new Date(b.created_at).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
+    return sorted;
+  }, [userUsages, sortConfig]);
+  
   // Pagination
-  const totalPages = Math.ceil(totalUsersCount / usersPerPage);
-  const paginatedUsers = userUsages;
+  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * usersPerPage;
+    const end = start + usersPerPage;
+    return sortedUsers.slice(start, end);
+  }, [sortedUsers, currentPage, usersPerPage]);
+  
+  // Handle sort toggle
+  const handleSort = (column: 'user' | 'email' | 'plan' | 'registered') => {
+    setSortConfig(prev => ({
+      column,
+      direction: prev.column === column && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+  
+  // Reset to page 1 when users per page changes
+  const handleUsersPerPageChange = (value: string) => {
+    setUsersPerPage(Number(value));
+    setCurrentPage(1);
+  };
 
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
@@ -1900,13 +1960,13 @@ export default function Admin() {
                     <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">Token Usage by User</CardTitle>
                   </div>
                   <CardDescription className="text-xs sm:text-sm mt-2 truncate">
-                    Showing {userUsages.length} users (Page {currentPage} of {totalPages})
+                    Showing {paginatedUsers.length} of {sortedUsers.length} users (Page {currentPage} of {totalPages})
                   </CardDescription>
                 </div>
               </div>
               
-              {/* Search */}
-              <div className="flex flex-col gap-3 w-full">
+              {/* Search and Users Per Page */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full items-start sm:items-center justify-between">
                 <div className="relative flex-1 max-w-full sm:max-w-md md:max-w-lg">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
                   <Input
@@ -1926,6 +1986,21 @@ export default function Admin() {
                       <X className="h-3 w-3" />
                     </Button>
                   )}
+                </div>
+                
+                {/* Users Per Page Selector */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">Show:</span>
+                  <Select value={String(usersPerPage)} onValueChange={handleUsersPerPageChange}>
+                    <SelectTrigger className="w-[80px] h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -2034,16 +2109,56 @@ export default function Admin() {
                     <TableHeader>
                       <TableRow className="bg-muted/50 hover:bg-muted/50">
                         <TableHead className="font-semibold text-foreground text-sm">
-                          User
+                          <button 
+                            onClick={() => handleSort('user')}
+                            className="flex items-center gap-1 hover:text-primary transition-colors"
+                          >
+                            User
+                            {sortConfig.column === 'user' ? (
+                              sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 opacity-40" />
+                            )}
+                          </button>
                         </TableHead>
                         <TableHead className="font-semibold text-foreground text-sm">
-                          Email
+                          <button 
+                            onClick={() => handleSort('email')}
+                            className="flex items-center gap-1 hover:text-primary transition-colors"
+                          >
+                            Email
+                            {sortConfig.column === 'email' ? (
+                              sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 opacity-40" />
+                            )}
+                          </button>
                         </TableHead>
                         <TableHead className="font-semibold text-foreground text-sm">
-                          Plan
+                          <button 
+                            onClick={() => handleSort('plan')}
+                            className="flex items-center gap-1 hover:text-primary transition-colors"
+                          >
+                            Plan
+                            {sortConfig.column === 'plan' ? (
+                              sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 opacity-40" />
+                            )}
+                          </button>
                         </TableHead>
                         <TableHead className="font-semibold text-foreground text-sm">
-                          Registered
+                          <button 
+                            onClick={() => handleSort('registered')}
+                            className="flex items-center gap-1 hover:text-primary transition-colors"
+                          >
+                            Registered
+                            {sortConfig.column === 'registered' ? (
+                              sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 opacity-40" />
+                            )}
+                          </button>
                         </TableHead>
                         <TableHead className="font-semibold text-foreground text-sm"></TableHead>
                         <TableHead className="w-[100px]"></TableHead>
@@ -2204,28 +2319,85 @@ export default function Admin() {
                 {totalPages > 1 && (
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border/50 p-4 sm:p-5 w-full">
                     <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1 text-center sm:text-left">
-                      Page {currentPage} of {totalPages} • {paginatedUsers.length} total
+                      Page {currentPage} of {totalPages} • Showing {paginatedUsers.length} of {sortedUsers.length} users
                     </div>
-                    <div className="flex gap-2 order-1 sm:order-2 flex-shrink-0">
+                    <div className="flex gap-1 order-1 sm:order-2 flex-shrink-0 items-center">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="h-10 px-3 sm:px-4 min-w-[90px] sm:min-w-[100px]"
+                        className="h-10 px-3 sm:px-4"
                       >
                         <ChevronLeft className="h-4 w-4 sm:mr-1" />
                         <span className="hidden sm:inline">Previous</span>
-                        <span className="sm:hidden">Prev</span>
                       </Button>
+                      
+                      {/* Page Numbers */}
+                      <div className="hidden sm:flex gap-1">
+                        {/* First page */}
+                        {currentPage > 3 && (
+                          <>
+                            <Button
+                              variant={currentPage === 1 ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(1)}
+                              className="h-10 w-10 px-0"
+                            >
+                              1
+                            </Button>
+                            {currentPage > 4 && <span className="flex items-center px-2 text-muted-foreground">...</span>}
+                          </>
+                        )}
+                        
+                        {/* Current page and nearby pages */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter(page => {
+                            return page === currentPage || 
+                                   page === currentPage - 1 || 
+                                   page === currentPage + 1 ||
+                                   (page === 1 && currentPage <= 3) ||
+                                   (page === 2 && currentPage <= 3) ||
+                                   (page === totalPages && currentPage >= totalPages - 2) ||
+                                   (page === totalPages - 1 && currentPage >= totalPages - 2);
+                          })
+                          .map(page => (
+                            <Button
+                              key={page}
+                              variant={currentPage === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(page)}
+                              className="h-10 w-10 px-0"
+                            >
+                              {page}
+                            </Button>
+                          ))
+                        }
+                        
+                        {/* Last page */}
+                        {currentPage < totalPages - 2 && (
+                          <>
+                            {currentPage < totalPages - 3 && <span className="flex items-center px-2 text-muted-foreground">...</span>}
+                            <Button
+                              variant={currentPage === totalPages ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(totalPages)}
+                              className="h-10 w-10 px-0"
+                            >
+                              {totalPages}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                      
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
-                        className="h-10 px-3 sm:px-4 min-w-[90px] sm:min-w-[100px]"
+                        className="h-10 px-3 sm:px-4"
                       >
-                        <span>Next</span>
+                        <span className="hidden sm:inline">Next</span>
                         <ChevronRight className="h-4 w-4 sm:ml-1" />
                       </Button>
                     </div>
