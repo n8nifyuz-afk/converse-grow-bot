@@ -254,14 +254,16 @@
     bottom: 0;
     left: 0;
     right: 0;
-    max-height: 340px;
+    max-height: 70vh;
     border-radius: 0.75rem 0.75rem 0 0;
     margin: 0;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
   
   .country-list {
-    max-height: 240px;
+    max-height: calc(70vh - 80px);
   }
   
   .country-search {
