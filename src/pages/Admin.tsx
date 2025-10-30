@@ -273,6 +273,9 @@ export default function Admin() {
   const [pendingSubscriptionStatusFilter, setPendingSubscriptionStatusFilter] = useState<'all' | 'subscribed' | 'free'>('all');
   const [pendingTimezone, setPendingTimezone] = useState<string>('Europe/Nicosia');
   
+  // Total users count for pagination
+  const [totalUsersCount, setTotalUsersCount] = useState<number>(0);
+  
   // Temp state for date picker (before applying within the date picker popover)
   const [tempDateFilter, setTempDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [tempTimeFilter, setTempTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
@@ -296,7 +299,7 @@ export default function Admin() {
     }
   }, [isAdmin]);
   
-  // Fetch data when page changes (pagination)
+  // Fetch data when page or sort changes
   // Use a ref to track if this is from applying filters to avoid double fetch
   const isApplyingFilters = useRef(false);
   
@@ -308,7 +311,7 @@ export default function Admin() {
       });
     }
     isApplyingFilters.current = false;
-  }, [currentPage]);
+  }, [currentPage, sortField, sortDirection]);
 
   // Real-time search with debounce
   useEffect(() => {
@@ -442,7 +445,7 @@ export default function Admin() {
           });
           setUserUsages([]);
           setModelUsages([]);
-          (window as any).__adminTotalUsers = 0;
+          setTotalUsersCount(0);
           console.log('[ADMIN STATS] No users with plan - cleared all data');
           return;
         }
@@ -525,7 +528,7 @@ export default function Admin() {
         // CRITICAL: Also clear the user list
         setUserUsages([]);
         setModelUsages([]);
-        (window as any).__adminTotalUsers = 0;
+        setTotalUsersCount(0);
         
         console.log('[ADMIN STATS] No users match filters - cleared all data');
         return;
@@ -751,7 +754,7 @@ export default function Admin() {
         if (filteredUserIdsForPaidPlans.length === 0) {
           setUserUsages([]);
           setModelUsages([]);
-          (window as any).__adminTotalUsers = 0;
+          setTotalUsersCount(0);
           setLoading(false);
           setRefreshing(false);
           return;
@@ -948,7 +951,7 @@ export default function Admin() {
             
             setUserUsages(users);
             setModelUsages([]);
-            (window as any).__adminTotalUsers = resultCount;
+            setTotalUsersCount(resultCount);
             setLoading(false);
             setRefreshing(false);
             return; // Exit early, we're done
@@ -958,7 +961,7 @@ export default function Admin() {
         // If we got here, no users matched - clear and return
         setUserUsages([]);
         setModelUsages([]);
-        (window as any).__adminTotalUsers = 0;
+        setTotalUsersCount(0);
         setLoading(false);
         setRefreshing(false);
         return;
@@ -991,7 +994,7 @@ export default function Admin() {
         console.log('[ADMIN] No users found matching filters - clearing user list');
         setUserUsages([]);
         setModelUsages([]);
-        (window as any).__adminTotalUsers = 0;
+        setTotalUsersCount(0);
         setLoading(false);
         setRefreshing(false);
         return;
@@ -1003,7 +1006,7 @@ export default function Admin() {
       if (userIds.length === 0) {
         setUserUsages([]);
         setModelUsages([]);
-        (window as any).__adminTotalUsers = count || 0;
+        setTotalUsersCount(count || 0);
         setLoading(false);
         setRefreshing(false);
         return;
@@ -1074,7 +1077,7 @@ export default function Admin() {
       setModelUsages([]);
       
       // Store total count for pagination
-      (window as any).__adminTotalUsers = count || 0;
+      setTotalUsersCount(count || 0);
       
     } catch (error) {
       console.error('[ADMIN] Error fetching data:', error);
@@ -1128,14 +1131,15 @@ export default function Admin() {
     return 'free'; // Fallback to free if we can't determine the plan
   };
 
-  // Toggle sort
+  // Toggle sort - refetch data with new sort order
   const handleSort = (field: 'name' | 'email' | 'plan' | 'cost' | 'registered') => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
+    const newDirection = sortField === field 
+      ? (sortDirection === 'asc' ? 'desc' : 'asc')
+      : 'asc';
+    
+    setSortField(field);
+    setSortDirection(newDirection);
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   // Get sort icon
@@ -1204,8 +1208,7 @@ export default function Admin() {
     : filteredUsers; // For name, email, registered - already sorted by database
 
   // Pagination - use sorted data
-  const totalUsers = (window as any).__adminTotalUsers || userUsages.length;
-  const totalPages = Math.ceil(totalUsers / usersPerPage);
+  const totalPages = Math.ceil(totalUsersCount / usersPerPage);
   const paginatedUsers = sortedUsers;
 
   // Quick date presets
