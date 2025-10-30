@@ -572,6 +572,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_cost_summary: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          total_cost: number | null
+          total_input_tokens: number | null
+          total_output_tokens: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          total_cost?: number | null
+          total_input_tokens?: number | null
+          total_output_tokens?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          total_cost?: number | null
+          total_input_tokens?: number | null
+          total_output_tokens?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_message_usage: {
         Row: {
           created_at: string

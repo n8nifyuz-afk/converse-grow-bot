@@ -659,12 +659,98 @@ export default function Admin() {
         }
       }
       
-      // For cost calculation, we'll use a simplified approach
-      // Only calculate costs if filters are applied, otherwise show 0
+      // STEP 4: Calculate total cost and tokens efficiently using user_cost_summary
       let totalCost = 0;
       let totalTokens = 0;
       
-      console.log('[ADMIN STATS] Cost calculation skipped for unfiltered view - too many users');
+      // Build query for cost summaries
+      let costQuery = supabase
+        .from('user_cost_summary')
+        .select('total_cost, total_input_tokens, total_output_tokens');
+      
+      // Apply same filters as user query
+      if (filterPlan === 'pro' || filterPlan === 'ultra') {
+        if (planFilteredUserIds && planFilteredUserIds.length > 0) {
+          costQuery = costQuery.in('user_id', planFilteredUserIds);
+        } else {
+          // No users with this plan
+          console.log('[ADMIN STATS] No cost data - no users with plan');
+          totalCost = 0;
+          totalTokens = 0;
+        }
+      } else if (filterPlan === 'free' && planFilteredUserIds && planFilteredUserIds.length > 0) {
+        // Exclude subscribed users
+        costQuery = costQuery.not('user_id', 'in', `(${planFilteredUserIds.join(',')})`);
+      }
+      
+      // Apply date filter to user_cost_summary
+      if (filterDate.from || filterDate.to || filterCountry !== 'all' || filterSearch.trim()) {
+        // Need to join with profiles to apply other filters
+        // Get filtered user_ids first
+        let filteredUserIdsQuery = supabase
+          .from('profiles')
+          .select('user_id');
+        
+        if (filterDate.from || filterDate.to) {
+          const fromDateTime = getDateTimeFromFilter(filterDate.from, filterTime.fromTime);
+          const toDateTime = getDateTimeFromFilter(filterDate.to, filterTime.toTime);
+          
+          if (fromDateTime && toDateTime) {
+            filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+          } else if (fromDateTime) {
+            filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString());
+          } else if (toDateTime) {
+            filteredUserIdsQuery = filteredUserIdsQuery.lte('created_at', toDateTime.toISOString());
+          }
+        }
+        
+        if (filterCountry !== 'all') {
+          filteredUserIdsQuery = filteredUserIdsQuery.eq('country', filterCountry);
+        }
+        
+        if (filterSearch.trim()) {
+          const search = filterSearch.trim();
+          filteredUserIdsQuery = filteredUserIdsQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
+        }
+        
+        // Apply plan filter if needed
+        if (filterPlan === 'pro' || filterPlan === 'ultra') {
+          if (planFilteredUserIds && planFilteredUserIds.length > 0) {
+            filteredUserIdsQuery = filteredUserIdsQuery.in('user_id', planFilteredUserIds);
+          }
+        } else if (filterPlan === 'free' && planFilteredUserIds && planFilteredUserIds.length > 0) {
+          filteredUserIdsQuery = filteredUserIdsQuery.not('user_id', 'in', `(${planFilteredUserIds.join(',')})`);
+        }
+        
+        const { data: filteredUsers } = await filteredUserIdsQuery;
+        const filteredUserIds = filteredUsers?.map(u => u.user_id) || [];
+        
+        if (filteredUserIds.length > 0) {
+          costQuery = costQuery.in('user_id', filteredUserIds);
+        } else {
+          totalCost = 0;
+          totalTokens = 0;
+        }
+      }
+      
+      // Execute cost query
+      if (totalCost === 0 && totalTokens === 0) {
+        const { data: costData } = await costQuery;
+        
+        if (costData && costData.length > 0) {
+          totalCost = costData.reduce((sum, row) => sum + (parseFloat(row.total_cost as any) || 0), 0);
+          totalTokens = costData.reduce((sum, row) => 
+            sum + (parseInt(row.total_input_tokens as any) || 0) + (parseInt(row.total_output_tokens as any) || 0), 
+            0
+          );
+        }
+        
+        console.log('[ADMIN STATS] Cost calculated from user_cost_summary:', {
+          totalCost: totalCost.toFixed(2),
+          totalTokens,
+          numUsers: costData?.length || 0
+        });
+      }
       
       // Update aggregate stats
       const stats = {
@@ -1311,13 +1397,25 @@ export default function Admin() {
     try {
       console.log('Fetching cost data for user:', userId);
       
-      // Fetch token usage for this specific user only
+      // OPTIMIZED: Fetch summary first (instant - single row)
+      const { data: summaryData, error: summaryError } = await supabase
+        .from('user_cost_summary')
+        .select('total_cost, total_input_tokens, total_output_tokens')
+        .eq('user_id', userId)
+        .single();
+      
+      if (summaryError && summaryError.code !== 'PGRST116') {
+        // PGRST116 = no rows found, which is fine for new users
+        console.error('Error fetching cost summary:', summaryError);
+      }
+      
+      // Fetch detailed breakdown for modal view (up to 1000 most recent records)
       const { data: tokenData, error: tokenError } = await supabase
         .from('token_usage')
         .select('model, input_tokens, output_tokens, cost')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
-        .limit(1000); // Last 1000 records for this user
+        .limit(1000);
       
       if (tokenError) throw tokenError;
       
@@ -1336,7 +1434,10 @@ export default function Admin() {
           : u
       ));
       
-      console.log('Loaded cost data:', modelUsages.length, 'records');
+      console.log('Loaded cost data:', {
+        summaryTotalCost: summaryData?.total_cost || 0,
+        detailedRecords: modelUsages.length
+      });
     } catch (error) {
       console.error('Error fetching user cost data:', error);
       toast.error('Failed to load cost data');
