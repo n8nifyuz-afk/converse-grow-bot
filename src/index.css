@@ -255,7 +255,7 @@
     left: 0;
     right: 0;
     max-height: 70vh;
-    min-height: 280px;
+    min-height: 200px;
     border-radius: 0.75rem 0.75rem 0 0;
     margin: 0;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
