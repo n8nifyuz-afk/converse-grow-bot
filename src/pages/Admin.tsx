@@ -1087,6 +1087,52 @@ export default function Admin() {
     subscriptionStatusFilter !== 'all'
   ].filter(Boolean).length;
 
+  // Remove single filter and refetch data
+  const removeFilter = async (filterType: 'plan' | 'date' | 'country' | 'status') => {
+    let newPlanFilter = planFilter;
+    let newDateFilter = dateFilter;
+    let newTimeFilter = timeFilter;
+    let newCountryFilter = countryFilter;
+    let newStatusFilter = subscriptionStatusFilter;
+
+    switch (filterType) {
+      case 'plan':
+        newPlanFilter = 'all';
+        setPlanFilter('all');
+        setPendingPlanFilter('all');
+        break;
+      case 'date':
+        newDateFilter = { from: undefined, to: undefined };
+        newTimeFilter = { fromTime: '00:00', toTime: '23:59' };
+        setDateFilter({ from: undefined, to: undefined });
+        setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setPendingDateFilter({ from: undefined, to: undefined });
+        setPendingTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        setTempDateFilter({ from: undefined, to: undefined });
+        setTempTimeFilter({ fromTime: '00:00', toTime: '23:59' });
+        break;
+      case 'country':
+        newCountryFilter = 'all';
+        setCountryFilter('all');
+        setPendingCountryFilter('all');
+        break;
+      case 'status':
+        newStatusFilter = 'all';
+        setSubscriptionStatusFilter('all');
+        setPendingSubscriptionStatusFilter('all');
+        break;
+    }
+
+    // Reset to page 1 and fetch data with remaining filters
+    isApplyingFilters.current = true;
+    setCurrentPage(1);
+    
+    await Promise.all([
+      fetchTokenUsageData(false, newPlanFilter, newDateFilter, newTimeFilter, newCountryFilter, searchQuery),
+      fetchAggregateStats(newPlanFilter, newDateFilter, newTimeFilter, newCountryFilter, searchQuery)
+    ]);
+  };
+
   // Clear all filters
   const clearAllFilters = async () => {
     // Reset all filter states to default
@@ -1715,7 +1761,7 @@ export default function Admin() {
                   Plan: {planFilter}
                   <X 
                     className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                    onClick={() => setPlanFilter('all')}
+                    onClick={() => removeFilter('plan')}
                   />
                 </Badge>
               )}
@@ -1737,10 +1783,7 @@ export default function Admin() {
                   }
                   <X 
                     className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                    onClick={() => {
-                      setDateFilter({ from: undefined, to: undefined });
-                      setTimeFilter({ fromTime: '00:00', toTime: '23:59' });
-                    }}
+                    onClick={() => removeFilter('date')}
                   />
                 </Badge>
               )}
@@ -1749,7 +1792,7 @@ export default function Admin() {
                   Country: {getCountryName(countryFilter)}
                   <X 
                     className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                    onClick={() => setCountryFilter('all')}
+                    onClick={() => removeFilter('country')}
                   />
                 </Badge>
               )}
@@ -1758,7 +1801,7 @@ export default function Admin() {
                   Status: {subscriptionStatusFilter}
                   <X 
                     className="h-3 w-3 cursor-pointer hover:text-foreground" 
-                    onClick={() => setSubscriptionStatusFilter('all')}
+                    onClick={() => removeFilter('status')}
                   />
                 </Badge>
               )}
