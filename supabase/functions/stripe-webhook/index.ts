@@ -408,60 +408,13 @@ serve(async (req) => {
           imageLimit
         });
 
-        // Send subscription webhook to n8n
-        try {
-          // Get user profile data for webhook metadata
-          const { data: userProfile } = await supabaseClient
-            .from('profiles')
-            .select('ip_address, country, gclid, url_params, initial_referer')
-            .eq('user_id', user.id)
-            .single();
-
-          // Clean IP address (remove proxy IPs)
-          const cleanIP = userProfile?.ip_address 
-            ? userProfile.ip_address.split(',')[0].trim() 
-            : 'Unknown';
-
-          const webhookPayload = {
-            plan_name: planMapping.name,
-            user_id: user.id,
-            email: user.email,
-            price: planPrice,
-            currency: priceData.currency || 'usd',
-            plan_duration: planDuration,
-            ip_address: cleanIP,
-            country: userProfile?.country || 'Unknown',
-            timestamp: new Date().toISOString(),
-            gclid: userProfile?.gclid || null,
-            urlParams: userProfile?.url_params ? JSON.stringify(userProfile.url_params) : '{}',
-            referer: userProfile?.initial_referer || null
-          };
-
-          logStep("Sending subscription webhook", webhookPayload);
-
-          const webhookResponse = await fetch(SUBSCRIPTION_WEBHOOK_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(webhookPayload),
-          });
-
-          if (webhookResponse.ok) {
-            logStep("✅ Subscription webhook sent successfully");
-          } else {
-            const errorText = await webhookResponse.text();
-            logStep("⚠️ Subscription webhook failed", { 
-              status: webhookResponse.status, 
-              error: errorText 
-            });
-          }
-        } catch (webhookError) {
-          logStep("⚠️ Subscription webhook error", { 
-            error: webhookError instanceof Error ? webhookError.message : String(webhookError) 
-          });
-          // Don't fail the entire webhook if n8n call fails
-        }
+        // DON'T send webhook here - it will be sent on invoice.payment_succeeded
+        // This prevents duplicate webhooks when subscription is created
+        logStep("Subscription metadata updated (webhook will be sent on payment)", {
+          userId: user.id,
+          plan: plan,
+          planPrice: planPrice
+        });
 
         break;
       }
@@ -657,6 +610,28 @@ serve(async (req) => {
               .eq('user_id', user.id)
               .single();
 
+            // Clean IP address (remove proxy IPs)
+            const cleanIP = userProfile?.ip_address 
+              ? userProfile.ip_address.split(',')[0].trim() 
+              : null;
+
+            // Fetch country from Cloudflare if not in profile
+            let countryCode = userProfile?.country;
+            if (!countryCode || countryCode === 'Unknown') {
+              try {
+                const ipResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+                if (ipResponse.ok) {
+                  const text = await ipResponse.text();
+                  const data = Object.fromEntries(
+                    text.trim().split('\n').map(line => line.split('='))
+                  );
+                  countryCode = data.loc || 'Unknown';
+                }
+              } catch {
+                countryCode = 'Unknown';
+              }
+            }
+
             // For phone signups: use phone_number when email is null
             const emailOrPhone = user.email || userProfile?.phone_number || '';
             // For username: use display_name from profile
@@ -670,11 +645,11 @@ serve(async (req) => {
               price: planPrice,
               currency: currency,
               plan_duration: planDuration,
-              ip_address: userProfile?.ip_address || null,
-              country: userProfile?.country || null,
+              ip_address: cleanIP,
+              country: countryCode,
               gclid: userProfile?.gclid || null,
               urlParams: JSON.stringify(userProfile?.url_params || {}), // Stringified JSON
-              referer: userProfile?.initial_referer ? String(userProfile.initial_referer) : "null", // String format
+              referer: userProfile?.initial_referer ? String(userProfile.initial_referer) : null,
               timestamp: new Date().toISOString(),
               hasDocument: "false"
             };
