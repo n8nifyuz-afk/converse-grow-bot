@@ -283,9 +283,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Defer async operations to prevent blocking auth flow
           setTimeout(async () => {
-            // ONLY log activity on actual sign-in events, not page refreshes
-            // This prevents duplicate logging and only captures real login actions
-            await logUserActivity(session.user.id, 'login');
+            // Check if this was an OAuth login (not a page refresh)
+            const wasOAuthLogin = sessionStorage.getItem('oauth_login_initiated') === 'true';
+            
+            if (wasOAuthLogin) {
+              // Clear the flag
+              sessionStorage.removeItem('oauth_login_initiated');
+              
+              // Log the OAuth login
+              await logUserActivity(session.user.id, 'login');
+            }
             
             // Check if this is a new signup
             const { data: profile } = await supabase
@@ -720,8 +727,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password
     });
     
-    // REMOVED: updateLoginGeoData call - profile is already updated by log-user-activity edge function
-    // Activity logging happens automatically in onAuthStateChange handler
+    // Log activity only on successful actual sign-in
+    if (!error && data?.user) {
+      await logUserActivity(data.user.id, 'login');
+    }
     
     // If login fails, check if user exists with OAuth provider
     if (error && error.message?.toLowerCase().includes('invalid')) {
@@ -770,6 +779,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
     
+    // Mark that we're initiating OAuth login
+    sessionStorage.setItem('oauth_login_initiated', 'true');
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -790,6 +802,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
     
+    // Mark that we're initiating OAuth login
+    sessionStorage.setItem('oauth_login_initiated', 'true');
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: {
@@ -806,6 +821,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithMicrosoft = async () => {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
+    
+    // Mark that we're initiating OAuth login
+    sessionStorage.setItem('oauth_login_initiated', 'true');
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'azure',
@@ -840,6 +858,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       token,
       type: 'sms'
     });
+    
+    // Log activity on successful phone verification
+    if (!error && data?.user) {
+      await logUserActivity(data.user.id, 'login');
+    }
     
     return { error };
   };
