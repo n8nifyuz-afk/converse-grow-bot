@@ -784,7 +784,7 @@ serve(async (req) => {
                                 </table>
 
                                 <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 24px; color: #333333;">
-                                  If you ever need us, we're here <a href="mailto:support@chatl.ai" style="color: #000000; text-decoration: underline;">support@chatl.ai</a>.
+                                  If you ever need us, we're <a href="https://www.chatl.ai/help" style="color: #000000; text-decoration: underline;">here at our help center</a>.
                                 </p>
 
                                 <p style="margin: 0 0 8px 0; font-size: 16px; line-height: 24px; color: #333333;">
@@ -806,7 +806,7 @@ serve(async (req) => {
                             <tr>
                               <td style="padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
                                 <p style="margin: 0; font-size: 13px; line-height: 20px; color: #666666;">
-                                  If you have any questions, please contact us at <a href="mailto:support@chatl.ai" style="color: #000000; text-decoration: underline;">support@chatl.ai</a>.
+                                  If you have any questions, please contact us through our <a href="https://www.chatl.ai/help" style="color: #000000; text-decoration: underline;">help center</a>.
                                 </p>
                               </td>
                             </tr>
