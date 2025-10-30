@@ -2,13 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { allCountries, type Country, getCountryByCode, detectCountryFromIP } from '@/utils/countryPhoneCodes';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 
 interface CountryPhoneInputProps {
   value: string;
@@ -36,7 +29,6 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Auto-detect country on mount
@@ -222,76 +214,37 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
         </p>
       )}
 
-      {/* Dropdown for Desktop / Drawer for Mobile */}
-      {isMobile ? (
-        <Drawer open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-          <DrawerContent className="max-h-[80vh]">
-            <DrawerHeader>
-              <DrawerTitle>Select Country</DrawerTitle>
-            </DrawerHeader>
-            <div className="px-4 pb-4 flex flex-col h-full">
-              <input
-                type="text"
-                placeholder="Search country..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="country-search mb-3"
-                autoFocus
-              />
-              <div className="country-list flex-1 overflow-y-auto">
-                {filteredCountries.map((country) => (
-                  <button
-                    key={country.code}
-                    type="button"
-                    onClick={() => handleCountrySelect(country)}
-                    className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
-                  >
-                    <div className="country-info">
-                      <span className="country-flag">{country.code}</span>
-                      <span className="country-name">{country.name}</span>
-                    </div>
-                    <span className="country-dial-code">{country.dialCode}</span>
-                  </button>
-                ))}
-                {filteredCountries.length === 0 && (
-                  <div className="no-results">No countries found</div>
-                )}
-              </div>
-            </div>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        isDropdownOpen && (
-          <div className="country-dropdown">
-            <input
-              type="text"
-              placeholder="Search country..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="country-search"
-              autoFocus
-            />
-            <div className="country-list">
-              {filteredCountries.map((country) => (
-                <button
-                  key={country.code}
-                  type="button"
-                  onClick={() => handleCountrySelect(country)}
-                  className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
-                >
-                  <div className="country-info">
-                    <span className="country-flag">{country.code}</span>
-                    <span className="country-name">{country.name}</span>
-                  </div>
-                  <span className="country-dial-code">{country.dialCode}</span>
-                </button>
-              ))}
-              {filteredCountries.length === 0 && (
-                <div className="no-results">No countries found</div>
-              )}
-            </div>
+      {/* Dropdown */}
+      {isDropdownOpen && (
+        <div className="country-dropdown">
+          <input
+            type="text"
+            placeholder="Search country..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="country-search"
+            autoFocus
+          />
+          <div className="country-list">
+            {filteredCountries.map((country) => (
+              <button
+                key={country.code}
+                type="button"
+                onClick={() => handleCountrySelect(country)}
+                className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
+              >
+                <div className="country-info">
+                  <span className="country-flag">{country.code}</span>
+                  <span className="country-name">{country.name}</span>
+                </div>
+                <span className="country-dial-code">{country.dialCode}</span>
+              </button>
+            ))}
+            {filteredCountries.length === 0 && (
+              <div className="no-results">No countries found</div>
+            )}
           </div>
-        )
+        </div>
       )}
     </div>
   );
