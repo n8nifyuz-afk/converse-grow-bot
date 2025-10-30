@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logError, logInfo } from '@/utils/errorLogger';
+import { logUserActivity } from '@/utils/browserTracking';
 
 interface GoogleOneTabProps {
   onSuccess?: () => void;
@@ -107,6 +108,10 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
           const { data: sessionData } = await supabase.auth.getSession();
           if (sessionData?.session) {
             logInfo('Google One Tap: Session verified, authentication complete');
+            
+            // Log user activity for Google One-Tap login
+            await logUserActivity(data.session.user.id, 'login');
+            
             onSuccess?.();
           } else {
             logError('Google One Tap: Session not found after creation');
