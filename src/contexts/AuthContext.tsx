@@ -86,14 +86,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
-  // Update user profile with comprehensive tracking data on login
+  // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
     try {
       const { ip, country } = await fetchIPAndCountry();
       const trackingData = getFullTrackingData('login');
       
-      // Log the login activity with full tracking data
-      await logUserActivity(userId, 'login');
+      // REMOVED: Activity logging is now done only once in onAuthStateChange
       
       // Update profile with IP and country
       if (ip || country) {
@@ -137,8 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const provider = isGoogleSignIn ? 'google' : isAppleSignIn ? 'apple' : isMicrosoftSignIn ? 'microsoft' : 'email';
       
-      // Update geo data for all logins (OAuth and email)
-      await updateLoginGeoData(user.id);
+      // REMOVED: updateLoginGeoData call - profile is already updated by log-user-activity edge function
       
       // Only sync profile data for OAuth providers
       if (!isGoogleSignIn && !isAppleSignIn && !isMicrosoftSignIn) return;
@@ -285,57 +283,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Defer async operations to prevent blocking auth flow
           setTimeout(async () => {
-            // Log user activity for ALL logins (email, OAuth, etc.)
-            try {
-              // Collect browser and device information
-              const browserInfo = {
-                browser: navigator.userAgent.match(/(?:Firefox|Chrome|Safari|Edge|Opera)\/[\d.]+/)?.[0]?.split('/')[0] || 'Unknown',
-                browserVersion: navigator.userAgent.match(/(?:Firefox|Chrome|Safari|Edge|Opera)\/([\d.]+)/)?.[1] || 'Unknown',
-                device: /Mobile|Tablet/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-                os: navigator.platform || 'Unknown',
-                userAgent: navigator.userAgent,
-                isMobile: /Mobile/i.test(navigator.userAgent),
-                isTablet: /Tablet/i.test(navigator.userAgent),
-                isDesktop: !/Mobile|Tablet/i.test(navigator.userAgent),
-              };
-              
-              const deviceInfo = {
-                platform: navigator.platform,
-                language: navigator.language,
-                languages: navigator.languages,
-                screenResolution: `${screen.width}x${screen.height}`,
-                screenWidth: screen.width,
-                screenHeight: screen.height,
-                viewportWidth: window.innerWidth,
-                viewportHeight: window.innerHeight,
-                colorDepth: screen.colorDepth,
-                devicePixelRatio: window.devicePixelRatio,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                timezoneOffset: new Date().getTimezoneOffset(),
-                cookiesEnabled: navigator.cookieEnabled,
-                doNotTrack: navigator.doNotTrack,
-                hardwareConcurrency: navigator.hardwareConcurrency,
-                touchSupport: 'ontouchstart' in window
-              };
-              
-              // Call log-user-activity edge function
-              await supabase.functions.invoke('log-user-activity', {
-                body: {
-                  userId: session.user.id,
-                  activityType: 'login',
-                  browserInfo,
-                  deviceInfo,
-                  referrer: document.referrer,
-                  metadata: {
-                    authProvider: session.user.app_metadata?.provider || 'email',
-                    signInMethod: event === 'SIGNED_IN' ? 'signin' : 'unknown'
-                  }
-                }
-              });
-            } catch (activityError) {
-              console.warn('Failed to log user activity:', activityError);
-              // Don't block auth flow if activity logging fails
-            }
+            // ONLY log activity on actual sign-in events, not page refreshes
+            // This prevents duplicate logging and only captures real login actions
+            await logUserActivity(session.user.id, 'login');
             
             // Check if this is a new signup
             const { data: profile } = await supabase
@@ -770,10 +720,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password
     });
     
-    // Update geo data on successful login
-    if (!error && data.user) {
-      setTimeout(() => updateLoginGeoData(data.user.id), 0);
-    }
+    // REMOVED: updateLoginGeoData call - profile is already updated by log-user-activity edge function
+    // Activity logging happens automatically in onAuthStateChange handler
     
     // If login fails, check if user exists with OAuth provider
     if (error && error.message?.toLowerCase().includes('invalid')) {

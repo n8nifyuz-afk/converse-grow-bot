@@ -51,22 +51,22 @@ function parseBrowserInfo(): BrowserInfo {
   let osVersion = 'Unknown';
   let device = 'Unknown';
   
-  // Detect browser
-  if (ua.includes('Firefox/')) {
-    browser = 'Firefox';
-    browserVersion = ua.match(/Firefox\/(\d+\.\d+)/)?.[1] || 'Unknown';
-  } else if (ua.includes('Edg/')) {
-    browser = 'Microsoft Edge';
+  // Detect browser - Order matters: check more specific first
+  if (ua.includes('Edg/')) {
+    browser = 'Edge';
     browserVersion = ua.match(/Edg\/(\d+\.\d+)/)?.[1] || 'Unknown';
-  } else if (ua.includes('Chrome/') && !ua.includes('Edg/')) {
-    browser = 'Chrome';
-    browserVersion = ua.match(/Chrome\/(\d+\.\d+)/)?.[1] || 'Unknown';
-  } else if (ua.includes('Safari/') && !ua.includes('Chrome')) {
-    browser = 'Safari';
-    browserVersion = ua.match(/Version\/(\d+\.\d+)/)?.[1] || 'Unknown';
-  } else if (ua.includes('Opera/') || ua.includes('OPR/')) {
+  } else if (ua.includes('OPR/') || ua.includes('Opera/')) {
     browser = 'Opera';
     browserVersion = ua.match(/(?:Opera|OPR)\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('Firefox/')) {
+    browser = 'Firefox';
+    browserVersion = ua.match(/Firefox\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('Chrome/')) {
+    browser = 'Chrome';
+    browserVersion = ua.match(/Chrome\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('Safari/')) {
+    browser = 'Safari';
+    browserVersion = ua.match(/Version\/(\d+\.\d+)/)?.[1] || 'Unknown';
   }
   
   // Detect OS
