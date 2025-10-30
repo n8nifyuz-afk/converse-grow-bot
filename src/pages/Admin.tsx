@@ -813,11 +813,9 @@ export default function Admin() {
         console.log('[ADMIN] Applying plan-based sorting across ALL filtered users...');
         
         // First, get ALL user_ids that match current filters
-        // CRITICAL: Remove any LIMIT - we need ALL users for sorting
         let allUsersQuery = supabase
           .from('profiles')
-          .select('user_id', { count: 'exact' })
-          .limit(10000); // Safety limit to prevent timeouts
+          .select('user_id', { count: 'exact' });
         
         // Re-apply all the same filters
         if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
@@ -880,25 +878,39 @@ export default function Admin() {
           console.log('[ADMIN] Plan sorting: Fetching subscriptions for', allUserIds.length, 'users');
           console.log('[ADMIN] Sample user_ids being queried:', allUserIds.slice(0, 5));
           
-          // CRITICAL: Batch the subscription queries to avoid "Bad Request" error
-          // Supabase has a limit of ~1000 items per IN clause
-          const BATCH_SIZE = 500;
+          // CRITICAL: Use smaller batch size to avoid network timeouts
+          // Network "Load failed" errors occur with 500 users per batch
+          const BATCH_SIZE = 100; // Reduced from 500 to prevent timeouts
           const allSubscriptions: Array<{ user_id: string; plan: string }> = [];
           
           for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
             const batch = allUserIds.slice(i, i + BATCH_SIZE);
-            console.log(`[ADMIN] Fetching subscriptions batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(allUserIds.length / BATCH_SIZE)}: ${batch.length} users`);
+            const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+            const totalBatches = Math.ceil(allUserIds.length / BATCH_SIZE);
             
-            const { data: batchSubs, error: subsError } = await supabase
-              .from('user_subscriptions')
-              .select('user_id, plan')
-              .eq('status', 'active')
-              .in('user_id', batch);
+            console.log(`[ADMIN] Fetching subscriptions batch ${batchNum}/${totalBatches}: ${batch.length} users`);
             
-            if (subsError) {
-              console.error('[ADMIN] Error fetching subscriptions batch:', subsError);
-            } else if (batchSubs) {
-              allSubscriptions.push(...batchSubs);
+            try {
+              const { data: batchSubs, error: subsError } = await supabase
+                .from('user_subscriptions')
+                .select('user_id, plan')
+                .eq('status', 'active')
+                .in('user_id', batch);
+              
+              if (subsError) {
+                console.error(`[ADMIN] Error fetching batch ${batchNum}:`, subsError);
+              } else if (batchSubs) {
+                allSubscriptions.push(...batchSubs);
+                console.log(`[ADMIN] ✓ Batch ${batchNum} successful: ${batchSubs.length} subscriptions found`);
+              }
+            } catch (err) {
+              console.error(`[ADMIN] Network error on batch ${batchNum}:`, err);
+              // Continue with next batch even if one fails
+            }
+            
+            // Small delay between batches to prevent overwhelming the connection
+            if (i + BATCH_SIZE < allUserIds.length) {
+              await new Promise(resolve => setTimeout(resolve, 50));
             }
           }
           
