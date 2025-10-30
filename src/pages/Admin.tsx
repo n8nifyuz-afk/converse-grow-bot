@@ -801,12 +801,87 @@ export default function Admin() {
       // Step 3: Apply default ordering (fetch all filtered users for client-side sorting)
       query = query.order('created_at', { ascending: false });
       
-      // Step 4: Execute query - fetch ALL filtered users for client-side sorting/pagination
-      const { data: profilesData, error: profilesError, count } = await query;
+      // Step 4: Get total count first
+      const { count: totalCount, error: countError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
       
-      if (profilesError) throw profilesError;
+      if (countError) throw countError;
       
-      console.log('[ADMIN] Loaded all filtered users:', profilesData?.length, 'users. Total count:', count);
+      // Step 5: Fetch ALL filtered users in batches to overcome 1000 row limit
+      let allProfilesData: any[] = [];
+      const batchSize = 1000;
+      let offset = 0;
+      let hasMore = true;
+      
+      console.log('[ADMIN] Fetching users in batches...');
+      
+      while (hasMore) {
+        // Clone query and add pagination
+        let batchQuery = supabase
+          .from('profiles')
+          .select('user_id, email, display_name, created_at, ip_address, country, phone_number');
+        
+        // Re-apply all filters to batch query
+        if (activePlanFilter === 'pro' || activePlanFilter === 'ultra') {
+          if (filteredUserIdsForPaidPlans && filteredUserIdsForPaidPlans.length > 0) {
+            batchQuery = batchQuery.in('user_id', filteredUserIdsForPaidPlans);
+          }
+        } else if (activePlanFilter === 'free') {
+          const { data: subscriptions } = await supabase
+            .from('user_subscriptions')
+            .select('user_id')
+            .eq('status', 'active');
+          
+          const subscribedUserIds = subscriptions?.map(s => s.user_id) || [];
+          if (subscribedUserIds.length > 0) {
+            batchQuery = batchQuery.not('user_id', 'in', `(${subscribedUserIds.join(',')})`);
+          }
+        }
+        
+        if (activeSearchQuery.trim()) {
+          const search = activeSearchQuery.trim();
+          batchQuery = batchQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
+        }
+        
+        if (activeDateFilter.from || activeDateFilter.to) {
+          const fromDateTime = getDateTimeFromFilter(activeDateFilter.from, activeTimeFilter.fromTime);
+          const toDateTime = getDateTimeFromFilter(activeDateFilter.to, activeTimeFilter.toTime);
+          
+          if (fromDateTime && toDateTime) {
+            batchQuery = batchQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
+          } else if (fromDateTime) {
+            batchQuery = batchQuery.gte('created_at', fromDateTime.toISOString());
+          } else if (toDateTime) {
+            batchQuery = batchQuery.lte('created_at', toDateTime.toISOString());
+          }
+        }
+        
+        if (activeCountryFilter !== 'all') {
+          batchQuery = batchQuery.eq('country', activeCountryFilter);
+        }
+        
+        batchQuery = batchQuery.order('created_at', { ascending: false });
+        batchQuery = batchQuery.range(offset, offset + batchSize - 1);
+        
+        const { data: batchData, error: batchError } = await batchQuery;
+        
+        if (batchError) throw batchError;
+        
+        if (batchData && batchData.length > 0) {
+          allProfilesData.push(...batchData);
+          offset += batchSize;
+          hasMore = batchData.length === batchSize;
+          console.log(`[ADMIN] Fetched batch: ${batchData.length} users (total so far: ${allProfilesData.length})`);
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      const profilesData = allProfilesData;
+      const count = allProfilesData.length;
+      
+      console.log('[ADMIN] Loaded ALL filtered users:', profilesData.length, 'users');
 
       // CRITICAL: If no users match the filters, clear everything
       if (count === 0 || !profilesData || profilesData.length === 0) {
@@ -819,7 +894,7 @@ export default function Admin() {
         return;
       }
 
-      // Fetch subscriptions only for these users
+      // Fetch subscriptions only for these users in batches (handle >1000 users)
       const userIds = profilesData?.map(p => p.user_id) || [];
       
       if (userIds.length === 0) {
@@ -831,14 +906,26 @@ export default function Admin() {
         return;
       }
       
-      // Fetch subscriptions only for these users - CRITICAL: Only fetch ACTIVE subscriptions
-      const { data: subscriptionsData } = await supabase
-        .from('user_subscriptions')
-        .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
-        .in('user_id', userIds)
-        .eq('status', 'active'); // CRITICAL: Only active subscriptions
+      // Batch subscription fetching to handle large user lists
+      let allSubscriptionsData: any[] = [];
+      const subBatchSize = 1000;
+      
+      for (let i = 0; i < userIds.length; i += subBatchSize) {
+        const batchUserIds = userIds.slice(i, i + subBatchSize);
+        const { data: batchSubs } = await supabase
+          .from('user_subscriptions')
+          .select('user_id, status, product_id, plan, current_period_end, stripe_subscription_id, stripe_customer_id')
+          .in('user_id', batchUserIds)
+          .eq('status', 'active');
+        
+        if (batchSubs) {
+          allSubscriptionsData.push(...batchSubs);
+        }
+      }
+      
+      const subscriptionsData = allSubscriptionsData;
 
-      console.log('[ADMIN] Fetched active subscriptions:', subscriptionsData?.length, 'for', userIds.length, 'users');
+      console.log('[ADMIN] Fetched active subscriptions:', subscriptionsData.length, 'for', userIds.length, 'users');
       
       // Log plan distribution in fetched subscriptions
       const planCounts = subscriptionsData?.reduce((acc, sub) => {
