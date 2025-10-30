@@ -645,27 +645,11 @@ serve(async (req) => {
               .eq('user_id', user.id)
               .single();
 
-            // Clean IP address (remove proxy IPs)
+            // Get all data from database profile only
             const cleanIP = userProfile?.ip_address 
               ? userProfile.ip_address.split(',')[0].trim() 
               : null;
-
-            // Fetch country from Cloudflare if not in profile
-            let countryCode = userProfile?.country;
-            if (!countryCode || countryCode === 'Unknown') {
-              try {
-                const ipResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
-                if (ipResponse.ok) {
-                  const text = await ipResponse.text();
-                  const data = Object.fromEntries(
-                    text.trim().split('\n').map(line => line.split('='))
-                  );
-                  countryCode = data.loc || 'Unknown';
-                }
-              } catch {
-                countryCode = 'Unknown';
-              }
-            }
+            const countryCode = userProfile?.country || null;
 
             // For phone signups: use phone_number when email is null
             const emailOrPhone = user.email || userProfile?.phone_number || '';
