@@ -51,20 +51,41 @@ function parseBrowserInfo(): BrowserInfo {
   let osVersion = 'Unknown';
   let device = 'Unknown';
   
-  // Detect browser - Order matters: check more specific first
-  if (ua.includes('Edg/')) {
+  // Detect browser - Order matters: check mobile-specific identifiers first
+  if (ua.includes('CriOS/')) {
+    // Chrome on iOS
+    browser = 'Chrome';
+    browserVersion = ua.match(/CriOS\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('FxiOS/')) {
+    // Firefox on iOS
+    browser = 'Firefox';
+    browserVersion = ua.match(/FxiOS\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('EdgiOS/')) {
+    // Edge on iOS
     browser = 'Edge';
-    browserVersion = ua.match(/Edg\/(\d+\.\d+)/)?.[1] || 'Unknown';
+    browserVersion = ua.match(/EdgiOS\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('OPiOS/')) {
+    // Opera on iOS
+    browser = 'Opera';
+    browserVersion = ua.match(/OPiOS\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('Edg/') || ua.includes('EdgA/')) {
+    // Edge on desktop or Android
+    browser = 'Edge';
+    browserVersion = ua.match(/(?:Edg|EdgA)\/(\d+\.\d+)/)?.[1] || 'Unknown';
   } else if (ua.includes('OPR/') || ua.includes('Opera/')) {
+    // Opera on desktop or Android
     browser = 'Opera';
     browserVersion = ua.match(/(?:Opera|OPR)\/(\d+\.\d+)/)?.[1] || 'Unknown';
   } else if (ua.includes('Firefox/')) {
+    // Firefox on desktop or Android
     browser = 'Firefox';
     browserVersion = ua.match(/Firefox\/(\d+\.\d+)/)?.[1] || 'Unknown';
   } else if (ua.includes('Chrome/')) {
+    // Chrome on desktop or Android (must check after other Chromium-based browsers)
     browser = 'Chrome';
     browserVersion = ua.match(/Chrome\/(\d+\.\d+)/)?.[1] || 'Unknown';
   } else if (ua.includes('Safari/')) {
+    // Safari (must be last since other browsers also include Safari in UA)
     browser = 'Safari';
     browserVersion = ua.match(/Version\/(\d+\.\d+)/)?.[1] || 'Unknown';
   }
