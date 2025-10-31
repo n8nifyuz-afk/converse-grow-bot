@@ -214,7 +214,7 @@ export default function AuthModal({
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('verify-email-code', {
-        body: { email: pendingEmail, code: verificationCode, password }
+        body: { email: pendingEmail, code: verificationCode }
       });
 
       if (error) {

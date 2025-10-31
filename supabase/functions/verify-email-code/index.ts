@@ -26,13 +26,13 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { code, email, password } = await req.json();
+    const { verificationId, code, email, password } = await req.json();
     
-    if (!code || !email) {
-      throw new Error("Email and code are required");
+    if (!verificationId || !code || !email || !password) {
+      throw new Error("All fields are required");
     }
 
-    logStep("Verification attempt", { email });
+    logStep("Verification attempt", { email, verificationId });
 
     // Initialize Supabase admin client
     const supabaseAdmin = createClient(
@@ -40,50 +40,28 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Check if this is an authenticated request (email linking) or signup
+    // Get authenticated user
     const authHeader = req.headers.get('Authorization');
-    let user = null;
-    let isSignup = false;
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
 
-    if (authHeader && authHeader !== 'Bearer undefined' && authHeader !== 'Bearer null') {
-      // Try to authenticate - email linking flow
-      const { data: { user: authUser }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
-      
-      if (!userError && authUser) {
-        // Valid authentication - this is email linking
-        user = authUser;
-        isSignup = false;
-        logStep("Email linking verification", { userId: user.id });
-      } else {
-        // Invalid/expired token - treat as signup
-        isSignup = true;
-        if (!password) {
-          throw new Error("Password is required for signup");
-        }
-        logStep("Signup verification (invalid token)", { email });
-      }
-    } else {
-      // No valid auth header - signup flow
-      isSignup = true;
-      if (!password) {
-        throw new Error("Password is required for signup");
-      }
-      logStep("Signup verification", { email });
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (userError || !user) {
+      throw new Error('Unauthorized');
     }
 
     // Get verification record
     const { data: verification, error: fetchError } = await supabaseAdmin
       .from('email_verifications')
       .select('*')
+      .eq('id', verificationId)
       .eq('email', email)
-      .eq('verified', false)
-      .order('created_at', { ascending: false })
-      .limit(1)
       .single();
 
     if (fetchError || !verification) {
-      logStep("No verification found", { email });
-      throw new Error("Invalid verification request. Please request a new code.");
+      logStep("Invalid verification ID", { email, verificationId });
+      throw new Error("Invalid verification request");
     }
 
     // Check if code matches
@@ -105,71 +83,34 @@ serve(async (req) => {
       throw new Error("This code has already been used");
     }
 
-    // Verify password if provided (for signup or linking with password)
-    if (password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // Hash the password to compare
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-      if (verification.password_hash !== passwordHash) {
-        throw new Error('Password mismatch');
-      }
+    // Verify password matches
+    if (verification.password_hash !== passwordHash) {
+      throw new Error('Password mismatch');
     }
 
-    if (isSignup) {
-      // Create new user account
-      logStep("Creating new user account", { email });
-      
-      const { data: newUser, error: signupError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true, // Auto-confirm email since they verified the code
-      });
-
-      if (signupError) {
-        logStep("Error creating user", { error: signupError.message });
-        throw new Error('Failed to create account: ' + signupError.message);
-      }
-
-      logStep("User account created successfully", { userId: newUser.user.id });
-
-      // Mark verification as used
-      await supabaseAdmin
-        .from('email_verifications')
-        .update({ verified: true })
-        .eq('id', verification.id);
-
-      return new Response(
-        JSON.stringify({ 
-          success: true,
-          message: "Account created successfully! You can now sign in."
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Email linking flow
-    logStep("Code verified, updating user", { userId: user!.id });
+    logStep("Code verified, updating user", { userId: user.id });
 
     // Check if user already has this email (re-linking case)
-    const isRelinking = user!.email === email;
+    const isRelinking = user.email === email;
     
     if (isRelinking) {
-      logStep("User is re-linking same email, skipping auth update", { userId: user!.id });
+      logStep("User is re-linking same email, skipping auth update", { userId: user.id });
       // Email already set, just confirm it's linked
       // No need to update password as it's already set
     } else {
       // Update the user's email and password using admin API
       const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-        user!.id,
+        user.id,
         {
           email: email,
-          password: password || undefined,
+          password: password,
           email_confirm: true, // Auto-confirm the email
         }
       );
@@ -177,7 +118,7 @@ serve(async (req) => {
       if (updateError) {
         // Handle "same password" error gracefully for re-linking
         if (updateError.message?.includes('same password')) {
-          logStep("Same password detected, proceeding with linking", { userId: user!.id });
+          logStep("Same password detected, proceeding with linking", { userId: user.id });
         } else {
           logStep("Error updating user", { error: updateError.message });
           throw new Error('Failed to link email to account');
@@ -193,21 +134,21 @@ serve(async (req) => {
         signup_method: 'phone+email',
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', user!.id);
+      .eq('user_id', user.id);
 
     // Mark verification as used
     await supabaseAdmin
       .from('email_verifications')
       .update({ verified: true })
-      .eq('id', verification.id);
+      .eq('id', verificationId);
 
-    logStep("User email linked successfully", { userId: user!.id });
+    logStep("User email linked successfully", { userId: user.id });
 
     // Get user's display name for personalized email
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('display_name')
-      .eq('user_id', user!.id)
+      .eq('user_id', user.id)
       .single();
 
     // Send confirmation email using our branded template
