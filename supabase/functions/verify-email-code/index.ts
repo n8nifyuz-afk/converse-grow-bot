@@ -40,17 +40,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get authenticated user
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
-
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
-    if (userError || !user) {
-      throw new Error('Unauthorized');
-    }
-
     // Get verification record by code
     const { data: verification, error: fetchError } = await supabaseAdmin
       .from('email_verifications')
@@ -80,53 +69,24 @@ serve(async (req) => {
     // Get the password from the verification record
     const password = verification.password_hash;
 
-    logStep("Code verified, updating user", { userId: user.id });
+    logStep("Code verified, creating new user");
 
-    // Check if user already has this email (re-linking case)
-    const isRelinking = user.email === email;
-    
-    if (isRelinking) {
-      logStep("User is re-linking same email, skipping auth update", { userId: user.id });
-      // Email already set, just confirm it's linked
-      // No need to update password as it's already set
-    } else {
-      // Update the user's email and password using admin API
-      // Hash the stored password to use it
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const passwordHashToUse = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-        user.id,
-        {
-          email: email,
-          password: passwordHashToUse,
-          email_confirm: true, // Auto-confirm the email
-        }
-      );
-
-      if (updateError) {
-        // Handle "same password" error gracefully for re-linking
-        if (updateError.message?.includes('same password')) {
-          logStep("Same password detected, proceeding with linking", { userId: user.id });
-        } else {
-          logStep("Error updating user", { error: updateError.message });
-          throw new Error('Failed to link email to account');
-        }
+    // Create new user with verified email
+    const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+      email: email,
+      password: password,
+      email_confirm: true, // Auto-confirm the email
+      user_metadata: {
+        signup_method: 'email',
       }
+    });
+
+    if (signUpError) {
+      logStep("Error creating user", { error: signUpError.message });
+      throw new Error(signUpError.message);
     }
 
-    // Update profile to reflect email
-    await supabaseAdmin
-      .from('profiles')
-      .update({
-        email: email,
-        signup_method: 'phone+email',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('user_id', user.id);
+    logStep("User created successfully", { userId: newUser.user?.id });
 
     // Mark verification as used
     await supabaseAdmin
@@ -135,50 +95,48 @@ serve(async (req) => {
       .eq('code', code)
       .eq('email', email);
 
-    logStep("User email linked successfully", { userId: user.id });
-
     // Get user's display name for personalized email
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('display_name')
-      .eq('user_id', user.id)
+      .eq('user_id', newUser.user?.id)
       .single();
 
-    // Send confirmation email using our branded template
+    // Send welcome email
     try {
       const html = await renderAsync(
         React.createElement(EmailLinkedEmail, {
           email,
-          userName: profile?.display_name,
+          userName: profile?.display_name || 'there',
         })
       );
 
       await resend.emails.send({
         from: "ChatLearn <no-reply@chatl.ai>",
         to: [email],
-        subject: "Email Successfully Linked to ChatLearn",
+        subject: "Welcome to ChatLearn!",
         html,
         headers: {
-          'X-Entity-Ref-ID': `email-linked-${Date.now()}`,
+          'X-Entity-Ref-ID': `email-signup-${Date.now()}`,
         },
         tags: [
           {
             name: 'category',
-            value: 'email_linked',
+            value: 'email_signup',
           },
         ],
       });
 
-      logStep("Confirmation email sent", { email });
+      logStep("Welcome email sent", { email });
     } catch (emailError) {
       // Don't fail the request if email fails
-      logStep("Failed to send confirmation email", { error: emailError });
+      logStep("Failed to send welcome email", { error: emailError });
     }
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: "Email successfully linked to your account"
+        message: "Account created successfully! Please sign in with your email and password."
       }),
       {
         status: 200,
