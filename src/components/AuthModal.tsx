@@ -180,11 +180,16 @@ export default function AuthModal({
         body: { email, password }
       });
 
-      // Check for error in response data (for 400/409 responses)
-      if (data?.error) {
-        const errorMessage = data.error;
-        console.log('📝 Error from edge function:', errorMessage);
+      // For non-2xx responses, error will be set and data will contain the error body
+      if (error) {
+        // Extract the actual error message from the response body
+        let errorMessage = "An error occurred. Please try again.";
         
+        if (data?.error) {
+          errorMessage = data.error;
+        }
+        
+        console.log('📝 Error from edge function:', errorMessage);
         setError(errorMessage);
         
         if (errorMessage.toLowerCase().includes('already registered with')) {
@@ -201,19 +206,6 @@ export default function AuthModal({
             variant: "destructive"
           });
         }
-        return;
-      }
-
-
-      if (error) {
-        console.error('📛 Unexpected error:', error);
-        const errorMessage = error.message || "An error occurred. Please try again.";
-        setError(errorMessage);
-        toast({
-          title: "Sign up failed",
-          description: errorMessage,
-          variant: "destructive"
-        });
         return;
       }
 
