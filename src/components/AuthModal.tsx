@@ -176,13 +176,19 @@ export default function AuthModal({
     
     try {
       // Send verification code via our custom edge function
-      const { data, error } = await supabase.functions.invoke('send-verification-code', {
-        body: { email, password }
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-verification-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ email, password })
       });
 
-      // For non-2xx responses, error will be set and data will contain the error body
-      if (error) {
-        // Extract the actual error message from the response body
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Extract error message from response
         const errorMessage = data?.error || "An error occurred. Please try again.";
         setError(errorMessage);
         return;
