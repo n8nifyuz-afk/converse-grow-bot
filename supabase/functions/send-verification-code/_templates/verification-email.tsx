@@ -62,7 +62,9 @@ export const VerificationEmail = ({
           </Text>
 
           <Text style={text}>
-            Best,<br />
+            Best,
+          </Text>
+          <Text style={text}>
             The ChatLearn Team
           </Text>
 
