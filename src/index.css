@@ -252,10 +252,10 @@
   .country-dropdown {
     position: fixed;
     top: auto;
-    bottom: 35vh;
+    bottom: 0;
     left: 0;
     right: 0;
-    max-height: 60vh;
+    max-height: 70vh;
     min-height: 200px;
     border-radius: 0.75rem 0.75rem 0 0;
     margin: 0;
@@ -267,7 +267,7 @@
   }
   
   .country-list {
-    max-height: calc(60vh - 60px);
+    max-height: 180px;
   }
   
   .country-search {
