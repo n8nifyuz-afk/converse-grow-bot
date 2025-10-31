@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { renderAsync } from 'https://esm.sh/@react-email/components@0.0.22';
+import React from 'https://esm.sh/react@18.3.1';
+import { VerificationEmail } from './_templates/verification-email.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -117,80 +120,29 @@ serve(async (req) => {
       }
     }
 
-    // Send verification email
+    // Render email template
+    const html = await renderAsync(
+      React.createElement(VerificationEmail, {
+        code,
+        email,
+      })
+    );
+
+    // Send verification email with proper headers for deliverability
     const { error: emailError } = await resend.emails.send({
-      from: "ChatL <no-reply@chatl.ai>",
+      from: "ChatLearn <no-reply@chatl.ai>",
       to: [email],
-      subject: "Link Your Email - ChatLearn",
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <title>Link Your Email to ChatLearn</title>
-          </head>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 40px;">
-            <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto;">
-              
-              <!-- Header with logo -->
-              <tr>
-                <td style="padding-bottom: 30px;">
-                  <a href="https://www.chatl.ai" target="_blank" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center;">
-                    <img src="https://chatl.ai/favicon.png"
-                         alt="ChatLearn Logo"
-                         width="40" height="40"
-                         style="display: inline-block; vertical-align: middle; margin-right: 10px;">
-                    <span style="font-size: 28px; font-weight: 700; vertical-align: middle;">ChatLearn</span>
-                  </a>
-                </td>
-              </tr>
-
-              <!-- Body -->
-              <tr>
-                <td>
-                  <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 20px;">Link your email address</h2>
-                  
-                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                    Hi there,
-                  </p>
-
-                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                    Please use the verification code below to link your email to your ChatLearn account:
-                  </p>
-
-                  <div style="background-color: #f4f4f4; border-radius: 8px; padding: 32px 20px; margin: 32px 0; text-align: center; border: 2px solid #e0e0e0;">
-                    <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #333; margin: 0; font-family: monospace;">
-                      ${code}
-                    </div>
-                  </div>
-
-                  <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                    This code will expire in 10 minutes.
-                  </p>
-
-                  <p style="font-size: 15px; line-height: 1.6; color: #333;">
-                    If you didn't request to link an email, you can safely ignore this message.
-                  </p>
-
-                  <p style="font-size: 15px; margin-top: 30px;">
-                    Best,<br>
-                    The ChatLearn Team
-                  </p>
-                </td>
-              </tr>
-
-              <!-- Footer -->
-              <tr>
-                <td style="border-top: 1px solid #eee; padding-top: 20px; font-size: 13px; color: #777;">
-                  If you have any questions, please contact us at 
-                  <a href="mailto:support@chatl.ai" style="color: #10a37f; text-decoration: none;">support@chatl.ai</a>.
-                </td>
-              </tr>
-
-            </table>
-          </body>
-        </html>
-      `,
+      subject: "Link Your Email - ChatLearn Verification Code",
+      html,
+      headers: {
+        'X-Entity-Ref-ID': `email-link-${Date.now()}`,
+      },
+      tags: [
+        {
+          name: 'category',
+          value: 'email_verification',
+        },
+      ],
     });
 
     if (emailError) {
