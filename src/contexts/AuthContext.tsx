@@ -314,9 +314,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               
               // Send webhook only for new signups
               if (isNewSignup) {
+                // CRITICAL: Check if webhook already sent to prevent duplicates during OAuth flow
+                const webhookSentKey = `webhook_sent_${session.user.id}`;
+                const webhookAlreadySent = sessionStorage.getItem(webhookSentKey);
                 
-                // Send subscriber webhook for new user with IP/country from client
-                try {
+                if (webhookAlreadySent) {
+                  console.log('[SIGNUP-WEBHOOK] Webhook already sent for this signup, skipping duplicate');
+                } else {
+                  // Send subscriber webhook for new user with IP/country from client
+                  try {
                   // Get IPv4 address and country using ipapi.co (returns IPv4 only)
                   let ipAddress = 'Unknown';
                   let country = 'Unknown';
@@ -404,9 +410,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       referer: document.referrer || null,
                     }
                   });
-                } catch (webhookError) {
-                  console.error('Failed to send subscriber webhook:', webhookError);
-                }
+                  
+                  // Mark webhook as sent to prevent duplicates
+                  sessionStorage.setItem(webhookSentKey, 'true');
+                  console.log('[SIGNUP-WEBHOOK] Successfully sent and marked as complete');
+                  } catch (webhookError) {
+                    console.error('Failed to send subscriber webhook:', webhookError);
+                  }
+                } // End webhookAlreadySent check
               } // End if (isNewSignup)
               
               // IMPORTANT: Always try to capture GCLID for ALL logins (not just new signups)
