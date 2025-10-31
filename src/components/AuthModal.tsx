@@ -172,6 +172,8 @@ export default function AuthModal({
     }
     
     setLoading(true);
+    setError('');
+    
     try {
       // Send verification code via our custom edge function
       const { data, error } = await supabase.functions.invoke('send-verification-code', {
@@ -179,20 +181,56 @@ export default function AuthModal({
       });
 
       if (error) {
-        const errorMsg = error.message || "An error occurred";
+        console.error('Signup error:', error);
         
-        // Check if it's an OAuth account
-        if (errorMsg.includes('registered with')) {
+        // Extract the actual error message from the edge function response
+        let errorMessage = "An error occurred. Please try again.";
+        
+        if (typeof error === 'object' && error !== null) {
+          // Try to get error message from various possible locations
+          errorMessage = error.message || 
+                        error.error || 
+                        error.msg || 
+                        (error.context?.body && typeof error.context.body === 'string' 
+                          ? (() => {
+                              try {
+                                const parsed = JSON.parse(error.context.body);
+                                return parsed.error || parsed.message;
+                              } catch {
+                                return error.context.body;
+                              }
+                            })()
+                          : errorMessage);
+        }
+        
+        console.log('Extracted error message:', errorMessage);
+        
+        // Show different UI based on error type
+        if (errorMessage.toLowerCase().includes('already registered with')) {
+          // OAuth account exists - show helpful message
+          const provider = errorMessage.match(/with (\w+)/)?.[1] || 'social login';
+          setError(errorMessage);
           toast({
-            title: "Account exists",
-            description: errorMsg,
+            title: "Account already exists",
+            description: errorMessage,
             variant: "destructive",
             duration: 10000
           });
+        } else if (errorMessage.toLowerCase().includes('already registered')) {
+          // Email/password account exists
+          setError(errorMessage);
+          toast({
+            title: "Account already exists",
+            description: errorMessage + " Please try signing in instead.",
+            variant: "destructive",
+            duration: 8000
+          });
         } else {
+          // Other errors
+          setError(errorMessage);
           toast({
             title: "Sign up failed",
-            description: errorMsg,
+            description: errorMessage,
             variant: "destructive"
           });
         }
@@ -211,6 +249,8 @@ export default function AuthModal({
         setMode('verify-email');
       }
     } catch (error) {
+      console.error('Unexpected error during signup:', error);
+      setError("An unexpected error occurred. Please try again.");
       toast({
         title: "An error occurred",
         description: "Please try again later.",
