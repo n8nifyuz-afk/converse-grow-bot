@@ -31,34 +31,40 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    // Get authenticated user
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
-
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
-    if (userError || !user) {
-      throw new Error('Unauthorized');
-    }
-
     const { email, password, userId } = await req.json();
     
-    if (!email || !password || !userId) {
-      throw new Error("Email, password, and userId are required");
+    if (!email || !password) {
+      throw new Error("Email and password are required");
     }
 
-    // Verify user making request matches userId
-    if (user.id !== userId) {
-      throw new Error('Unauthorized: user mismatch');
-    }
+    // Check if this is an authenticated request (email linking) or signup
+    const authHeader = req.headers.get('Authorization');
+    let user = null;
+    let isSignup = false;
 
-    logStep("Request received", { email, userId });
+    if (authHeader) {
+      // Authenticated - email linking flow
+      const { data: { user: authUser }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
+      if (userError || !authUser) {
+        throw new Error('Unauthorized');
+      }
+      
+      if (userId && authUser.id !== userId) {
+        throw new Error('Unauthorized: user mismatch');
+      }
+      
+      user = authUser;
+      logStep("Email linking request", { email, userId: user.id });
+    } else {
+      // Unauthenticated - signup flow
+      isSignup = true;
+      logStep("Signup request", { email });
+    }
 
     // Check if email already exists in auth.users
     const { data: existingUsers, error: searchError } = await supabaseAdmin.auth.admin.listUsers();
@@ -66,9 +72,18 @@ serve(async (req) => {
       throw new Error('Failed to check email availability');
     }
 
-    const emailExists = existingUsers.users.some(u => u.email === email && u.id !== userId);
-    if (emailExists) {
-      throw new Error('This email is already registered. Please use a different email.');
+    if (isSignup) {
+      // For signup, check if email exists at all
+      const emailExists = existingUsers.users.some(u => u.email === email);
+      if (emailExists) {
+        throw new Error('This email is already registered. Please sign in instead.');
+      }
+    } else {
+      // For linking, check if email exists for a different user
+      const emailExists = existingUsers.users.some(u => u.email === email && u.id !== user!.id);
+      if (emailExists) {
+        throw new Error('This email is already registered. Please use a different email.');
+      }
     }
 
     // Generate 6-digit verification code
@@ -93,6 +108,7 @@ serve(async (req) => {
         code,
         password_hash: passwordHash,
         expires_at: expiresAt.toISOString(),
+        user_id: user?.id || null, // null for signup, user_id for linking
       })
       .select()
       .single();
