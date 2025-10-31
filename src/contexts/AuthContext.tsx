@@ -1447,14 +1447,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
 
-      // Update profile to remove OAuth metadata (keep contact info like email/phone)
+      // Update profile and auth.users to remove credentials completely
       if (provider === 'phone') {
+        // Clear phone from both auth and profile
+        await supabase.auth.updateUser({ phone: '' });
         await supabase.from('profiles').update({
           phone_number: null,
           updated_at: new Date().toISOString()
         }).eq('user_id', user.id);
+      } else if (provider === 'email') {
+        // Clear email and password from auth.users completely
+        // This makes the email available for new signups
+        await supabase.auth.updateUser({ 
+          email: `deleted-${user.id}@temp.local` // Temporary email to free up the real one
+        });
+        await supabase.from('profiles').update({
+          email: null,
+          updated_at: new Date().toISOString()
+        }).eq('user_id', user.id);
       } else if (['google', 'apple', 'microsoft'].includes(provider)) {
-        // Clear OAuth-specific data but keep email/phone as contact info
+        // Clear OAuth-specific data
         await supabase.from('profiles').update({
           oauth_provider: null,
           oauth_metadata: null,
