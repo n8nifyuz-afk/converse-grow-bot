@@ -84,8 +84,7 @@ export const VerificationEmail = ({
               © {new Date().getFullYear()} ChatLearn. All rights reserved.
             </Text>
             <Text style={footerText}>
-              If you have any questions, please contact us at{' '}
-              <Link href="mailto:support@chatl.ai" style={footerLink}>
+              If you have any questions, please contact us at <Link href="mailto:support@chatl.ai" style={footerLink}>
                 support@chatl.ai
               </Link>
             </Text>
@@ -93,7 +92,7 @@ export const VerificationEmail = ({
               <Link href="https://www.chatl.ai/privacy" style={footerLink}>
                 Privacy Policy
               </Link>
-              {' • '}
+              <span> • </span>
               <Link href="https://www.chatl.ai/terms" style={footerLink}>
                 Terms of Service
               </Link>
