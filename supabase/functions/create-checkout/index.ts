@@ -144,7 +144,7 @@ serve(async (req) => {
     } else {
       logStep("No existing customer, will create during checkout");
       
-      // For phone-only users, create customer manually with metadata
+      // CRITICAL: For phone-only users, ALWAYS create customer first to avoid email collection
       if (!user.email && user.phone) {
         logStep("Creating customer for phone-only user", { phone: user.phone });
         const newCustomer = await stripe.customers.create({
@@ -156,6 +156,9 @@ serve(async (req) => {
         });
         customerId = newCustomer.id;
         logStep("Created new customer for phone user", { customerId });
+      } else if (!user.email && !user.phone) {
+        // Edge case: User has neither email nor phone (should not happen)
+        throw new Error("Unable to create checkout: User must have either email or phone number");
       }
     }
 
