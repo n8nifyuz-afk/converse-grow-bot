@@ -97,19 +97,33 @@ serve(async (req) => {
 
     logStep("Code verified, updating user", { userId: user.id });
 
-    // Update the user's email and password using admin API
-    const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      user.id,
-      {
-        email: email,
-        password: password,
-        email_confirm: true, // Auto-confirm the email
-      }
-    );
+    // Check if user already has this email (re-linking case)
+    const isRelinking = user.email === email;
+    
+    if (isRelinking) {
+      logStep("User is re-linking same email, skipping auth update", { userId: user.id });
+      // Email already set, just confirm it's linked
+      // No need to update password as it's already set
+    } else {
+      // Update the user's email and password using admin API
+      const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        user.id,
+        {
+          email: email,
+          password: password,
+          email_confirm: true, // Auto-confirm the email
+        }
+      );
 
-    if (updateError) {
-      logStep("Error updating user", { error: updateError.message });
-      throw new Error('Failed to link email to account');
+      if (updateError) {
+        // Handle "same password" error gracefully for re-linking
+        if (updateError.message?.includes('same password')) {
+          logStep("Same password detected, proceeding with linking", { userId: user.id });
+        } else {
+          logStep("Error updating user", { error: updateError.message });
+          throw new Error('Failed to link email to account');
+        }
+      }
     }
 
     // Update profile to reflect email

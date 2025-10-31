@@ -1312,8 +1312,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        console.error('Link email error:', error);
-        return { error };
+        // Handle "same password" error when re-linking
+        if (error.message?.includes('same password') || error.code === 'same_password') {
+          console.log('Re-linking with same credentials, proceeding...');
+          // Continue to update profile even if password is the same
+        } else {
+          console.error('Link email error:', error);
+          return { error };
+        }
       }
 
       // Update profile
