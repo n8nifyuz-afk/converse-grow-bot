@@ -81,7 +81,7 @@ export const VerificationEmail = ({
           {/* Footer */}
           <Section style={footer}>
             <Text style={footerText}>
-              © {new Date().getFullYear()} ChatLearn. All rights reserved.
+              © 2025 ChatLearn. All rights reserved.
             </Text>
             <Text style={footerText}>
               If you have any questions, contact us at support@chatl.ai
