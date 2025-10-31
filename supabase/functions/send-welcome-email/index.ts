@@ -24,6 +24,43 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { userId, userEmail, userName }: WelcomeEmailRequest = await req.json();
 
+    console.log(`Checking if welcome email was already sent for user ${userId}`);
+
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Check if welcome email was already sent
+    const { data: profile, error: fetchError } = await supabase
+      .from("profiles")
+      .select("welcome_email_sent")
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching profile:", fetchError);
+      throw fetchError;
+    }
+
+    if (profile?.welcome_email_sent) {
+      console.log(`Welcome email already sent for user ${userId}, skipping`);
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Welcome email already sent",
+          skipped: true
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
     console.log(`Sending welcome email to user ${userId} at ${userEmail}`);
 
     const displayName = userName || userEmail.split('@')[0];
@@ -125,6 +162,19 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("Welcome email sent successfully:", emailResponse);
+
+    // Mark welcome email as sent in the database
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ welcome_email_sent: true })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      console.error("Error updating welcome_email_sent flag:", updateError);
+      // Don't throw - email was sent successfully, just log the error
+    } else {
+      console.log(`Marked welcome email as sent for user ${userId}`);
+    }
 
     return new Response(
       JSON.stringify({ 
