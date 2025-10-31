@@ -183,29 +183,8 @@ export default function AuthModal({
       // For non-2xx responses, error will be set and data will contain the error body
       if (error) {
         // Extract the actual error message from the response body
-        let errorMessage = "An error occurred. Please try again.";
-        
-        if (data?.error) {
-          errorMessage = data.error;
-        }
-        
-        console.log('📝 Error from edge function:', errorMessage);
+        const errorMessage = data?.error || "An error occurred. Please try again.";
         setError(errorMessage);
-        
-        if (errorMessage.toLowerCase().includes('already registered with')) {
-          toast({
-            title: "Account already exists",
-            description: errorMessage,
-            variant: "destructive",
-            duration: 10000
-          });
-        } else {
-          toast({
-            title: "Sign up failed",
-            description: errorMessage,
-            variant: "destructive"
-          });
-        }
         return;
       }
 
