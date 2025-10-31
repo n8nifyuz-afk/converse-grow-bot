@@ -250,8 +250,9 @@ serve(async (req) => {
       }
     };
     
-    // CRITICAL: Only add customer_update if customer exists
-    if (customerId) {
+    // CRITICAL: Only add customer_update if customer exists AND user has email
+    // For phone-only users, don't collect additional info to avoid email prompt
+    if (customerId && user.email) {
       sessionConfig.customer_update = {
         address: 'auto'  // Collect address for tax calculation
       };
