@@ -598,15 +598,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         )
         .subscribe();
       
-      // Check for returning from Stripe (both success and failure cases)
+      // Check for returning from Stripe (ONLY success case with session_id)
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
-      const isReturningFromStripe = sessionId || urlParams.has('success');
       
-      // Also detect if user was just on Stripe by checking document.referrer
+      // CRITICAL FIX: Only run retry logic if there's a session_id (actual payment completed)
+      // Don't use document.referrer alone - user might have just clicked back button without paying
+      const isReturningFromStripe = !!sessionId;
+      
+      // Also detect if user came from Stripe via referrer
       const comingFromStripe = document.referrer.includes('stripe.com') || document.referrer.includes('checkout.stripe.com');
       
-      if (isReturningFromStripe || comingFromStripe) {
+      // If user came from Stripe but has NO session_id, they cancelled/went back
+      if (comingFromStripe && !sessionId) {
+        console.log('[SUBSCRIPTION] User returned from Stripe without payment - clearing cached subscription');
+        // Clear any stale cached subscription data
+        const resetStatus = {
+          subscribed: false,
+          product_id: null,
+          subscription_end: null,
+          plan: null,
+          plan_name: null
+        };
+        setSubscriptionStatus(resetStatus);
+        clearCachedSubscription();
+        setLoadingSubscription(false);
+        return; // Don't run retry logic
+      }
+      
+      if (isReturningFromStripe) {
         // Clean URL immediately to avoid confusion
         const cleanUrl = () => {
           if (sessionId || urlParams.has('success')) {
