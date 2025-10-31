@@ -42,7 +42,15 @@ serve(async (req) => {
     
     if (!email || !password) {
       logStep("Missing email or password");
-      throw new Error("Email and password are required");
+      return new Response(
+        JSON.stringify({ 
+          error: "Email and password are required"
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     logStep("Request received", { email });
@@ -63,9 +71,26 @@ serve(async (req) => {
       // Check if user signed up with OAuth (Google, Apple, etc.)
       const providers = existingUser.app_metadata?.providers || [];
       if (providers.length > 0 && !providers.includes('email')) {
-        throw new Error(`This email is already registered with ${providers[0]}. Please sign in using ${providers[0]} instead, or use a different email address.`);
+        const provider = providers[0].charAt(0).toUpperCase() + providers[0].slice(1);
+        return new Response(
+          JSON.stringify({ 
+            error: `This email is already registered with ${provider}. Please sign in using ${provider} instead, or use a different email address.`
+          }),
+          {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       } else {
-        throw new Error('This email is already registered. Please sign in or use the "Forgot Password" option.');
+        return new Response(
+          JSON.stringify({ 
+            error: 'This email is already registered. Please sign in or use the "Forgot Password" option.'
+          }),
+          {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
     }
 

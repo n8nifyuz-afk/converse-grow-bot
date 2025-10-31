@@ -180,81 +180,56 @@ export default function AuthModal({
         body: { email, password }
       });
 
-      if (error) {
-        console.error('=== SIGNUP ERROR DEBUG ===');
-        console.error('Full error object:', JSON.stringify(error, null, 2));
-        console.error('Error.context?.body:', error.context?.body);
-        console.error('=========================');
+      // Check for error in response data (for 400/409 responses)
+      if (data?.error) {
+        const errorMessage = data.error;
+        console.log('📝 Error from edge function:', errorMessage);
         
-        // Extract the error message
-        let errorMessage = "An error occurred. Please try again.";
-        
-        // Method 1: Try context.body (edge functions)
-        if (error.context?.body) {
-          try {
-            const bodyStr = typeof error.context.body === 'string' 
-              ? error.context.body 
-              : JSON.stringify(error.context.body);
-            const parsed = JSON.parse(bodyStr);
-            errorMessage = parsed.error || parsed.message || errorMessage;
-          } catch (e) {
-            console.log('Could not parse error body');
-          }
-        }
-        
-        // Method 2: Direct properties
-        if (errorMessage === "An error occurred. Please try again.") {
-          errorMessage = error.message || error.error || error.msg || errorMessage;
-        }
-        
-        console.log('📝 Extracted error:', errorMessage);
-        
-        // Display in form and toast
         setError(errorMessage);
         
-        // Show different UI based on error type
         if (errorMessage.toLowerCase().includes('already registered with')) {
-          // OAuth account exists - show helpful message
-          const provider = errorMessage.match(/with (\w+)/)?.[1] || 'social login';
-          setError(errorMessage);
           toast({
             title: "Account already exists",
             description: errorMessage,
             variant: "destructive",
             duration: 10000
           });
-        } else if (errorMessage.toLowerCase().includes('already registered')) {
-          // Email/password account exists
-          setError(errorMessage);
-          toast({
-            title: "Account already exists",
-            description: errorMessage + " Please try signing in instead.",
-            variant: "destructive",
-            duration: 8000
-          });
         } else {
-          // Other errors
-          setError(errorMessage);
           toast({
             title: "Sign up failed",
             description: errorMessage,
             variant: "destructive"
           });
         }
-      } else {
-        setLastSignupAttempt(now);
-        setSignupCooldown(60);
-        setPendingEmail(email);
-        
-        toast({
-          title: "Check your email",
-          description: "We've sent a 6-digit verification code to your email. Please enter it below.",
-          duration: 8000
-        });
-        
-        // Switch to verification code mode
-        setMode('verify-email');
+        return;
       }
+
+
+      if (error) {
+        console.error('📛 Unexpected error:', error);
+        const errorMessage = error.message || "An error occurred. Please try again.";
+        setError(errorMessage);
+        toast({
+          title: "Sign up failed",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Success - verification code sent
+      setLastSignupAttempt(now);
+      setSignupCooldown(60);
+      setPendingEmail(email);
+      
+      toast({
+        title: "Check your email",
+        description: "We've sent a 6-digit verification code to your email. Please enter it below.",
+        duration: 8000
+      });
+      
+      // Switch to verification code mode
+      setMode('verify-email');
     } catch (error) {
       console.error('Unexpected error during signup:', error);
       setError("An unexpected error occurred. Please try again.");
