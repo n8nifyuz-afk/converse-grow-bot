@@ -86,15 +86,15 @@ export const VerificationEmail = ({
             <Text style={footerText}>
               If you have any questions, contact us at support@chatl.ai
             </Text>
-            <Link href="https://www.chatl.ai/privacy" style={footerLink}>
-              Privacy Policy
-            </Link>
-            <Text style={{ ...footerText, display: 'inline', margin: '0 8px' }}>
-              •
+            <Text style={footerText}>
+              <Link href="https://www.chatl.ai/privacy" style={footerLink}>
+                Privacy Policy
+              </Link>
+              {' | '}
+              <Link href="https://www.chatl.ai/terms" style={footerLink}>
+                Terms of Service
+              </Link>
             </Text>
-            <Link href="https://www.chatl.ai/terms" style={footerLink}>
-              Terms of Service
-            </Link>
           </Section>
         </Container>
       </Body>
