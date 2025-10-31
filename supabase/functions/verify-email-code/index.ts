@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
+import { renderAsync } from 'https://esm.sh/@react-email/components@0.0.22';
+import React from 'https://esm.sh/react@18.3.1';
+import { EmailLinkedEmail } from './_templates/email-linked.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -126,6 +129,44 @@ serve(async (req) => {
       .eq('id', verificationId);
 
     logStep("User email linked successfully", { userId: user.id });
+
+    // Get user's display name for personalized email
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('display_name')
+      .eq('user_id', user.id)
+      .single();
+
+    // Send confirmation email using our branded template
+    try {
+      const html = await renderAsync(
+        React.createElement(EmailLinkedEmail, {
+          email,
+          userName: profile?.display_name,
+        })
+      );
+
+      await resend.emails.send({
+        from: "ChatLearn <no-reply@chatl.ai>",
+        to: [email],
+        subject: "Email Successfully Linked to ChatLearn",
+        html,
+        headers: {
+          'X-Entity-Ref-ID': `email-linked-${Date.now()}`,
+        },
+        tags: [
+          {
+            name: 'category',
+            value: 'email_linked',
+          },
+        ],
+      });
+
+      logStep("Confirmation email sent", { email });
+    } catch (emailError) {
+      // Don't fail the request if email fails
+      logStep("Failed to send confirmation email", { error: emailError });
+    }
 
     return new Response(
       JSON.stringify({ 
