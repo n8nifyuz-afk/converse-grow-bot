@@ -1478,53 +1478,66 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col bg-background">
-          <SheetHeader className="px-4 md:px-6 py-3 md:py-4 border-b border-border/40 flex-shrink-0 bg-gradient-to-r from-background to-background/95">
-            <SheetTitle className="text-lg md:text-xl font-semibold text-left text-foreground">{t('settingsModal.title')}</SheetTitle>
-          </SheetHeader>
-          
-          {/* Mobile Tab Navigation */}
-          <div className="flex-shrink-0 border-b border-border/40 bg-gradient-to-r from-muted/30 to-muted/10 backdrop-blur-sm">
-            <nav className="flex p-2 md:p-3 gap-1.5 md:gap-2 overflow-x-auto">
-              {sidebarItems.map((item) => {
-                const Icon = item.icon;
-                const isDisabled = !user && (item.id === 'profile' || item.id === 'data');
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    disabled={isDisabled}
-                    className={`flex-1 min-w-[70px] flex flex-col items-center justify-center gap-1 md:gap-1.5 px-2 md:px-3 py-2.5 md:py-3 rounded-xl text-sm transition-all duration-200 ${
-                      activeTab === item.id
-                        ? 'bg-primary/10 text-primary font-semibold shadow-sm border border-primary/20'
-                        : isDisabled
-                        ? 'text-muted-foreground/40 cursor-not-allowed'
-                        : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground hover:scale-105'
-                    }`}
-                  >
-                    <div className={`p-1.5 md:p-2 rounded-lg transition-colors ${
-                      activeTab === item.id 
-                        ? 'bg-primary/15' 
-                        : 'bg-muted/40'
-                    }`}>
-                      <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                    </div>
-                    <span className="text-[10px] md:text-xs font-medium leading-tight">{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Mobile Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-background to-background/98 max-h-full" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-            <div className="p-4 pb-8 min-h-0">
-              {renderContent()}
+      <>
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col bg-background">
+            <SheetHeader className="px-4 md:px-6 py-3 md:py-4 border-b border-border/40 flex-shrink-0 bg-gradient-to-r from-background to-background/95">
+              <SheetTitle className="text-lg md:text-xl font-semibold text-left text-foreground">{t('settingsModal.title')}</SheetTitle>
+            </SheetHeader>
+            
+            {/* Mobile Tab Navigation */}
+            <div className="flex-shrink-0 border-b border-border/40 bg-gradient-to-r from-muted/30 to-muted/10 backdrop-blur-sm">
+              <nav className="flex p-2 md:p-3 gap-1.5 md:gap-2 overflow-x-auto">
+                {sidebarItems.map((item) => {
+                  const Icon = item.icon;
+                  const isDisabled = !user && (item.id === 'profile' || item.id === 'data');
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      disabled={isDisabled}
+                      className={`flex-1 min-w-[70px] flex flex-col items-center justify-center gap-1 md:gap-1.5 px-2 md:px-3 py-2.5 md:py-3 rounded-xl text-sm transition-all duration-200 ${
+                        activeTab === item.id
+                          ? 'bg-primary/10 text-primary font-semibold shadow-sm border border-primary/20'
+                          : isDisabled
+                          ? 'text-muted-foreground/40 cursor-not-allowed'
+                          : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground hover:scale-105'
+                      }`}
+                    >
+                      <div className={`p-1.5 md:p-2 rounded-lg transition-colors ${
+                        activeTab === item.id 
+                          ? 'bg-primary/15' 
+                          : 'bg-muted/40'
+                      }`}>
+                        <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                      </div>
+                      <span className="text-[10px] md:text-xs font-medium leading-tight">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+
+            {/* Mobile Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-background to-background/98 max-h-full" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+              <div className="p-4 pb-8 min-h-0">
+                {renderContent()}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+        
+        {/* Account Linking Modals - Mobile */}
+        <PhoneLinkModal 
+          open={showPhoneLinkModal} 
+          onOpenChange={setShowPhoneLinkModal} 
+        />
+        <EmailLinkModal 
+          open={showEmailLinkModal} 
+          onOpenChange={setShowEmailLinkModal}
+          linkedIdentities={linkedIdentities}
+        />
+      </>
     );
   }
 
