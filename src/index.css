@@ -104,7 +104,7 @@
   border-radius: 0.75rem;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
   z-index: 99999;
-  max-height: 500px;
+  max-height: min(600px, 80vh);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -115,10 +115,12 @@
 
 .country-dropdown.dropdown-below {
   top: calc(100% + 0.5rem);
+  max-height: min(600px, calc(100vh - var(--dropdown-top, 200px) - 2rem));
 }
 
 .country-dropdown.dropdown-above {
   bottom: calc(100% + 0.5rem);
+  max-height: min(600px, calc(var(--dropdown-top, 300px) - 2rem));
 }
 
 .country-search {
@@ -145,10 +147,12 @@
 
 .country-list {
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0.25rem;
   flex: 1;
-  max-height: 420px;
+  max-height: none;
   min-height: 200px;
+  overscroll-behavior: contain;
 }
 
 .country-option {

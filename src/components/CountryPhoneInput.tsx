@@ -174,12 +174,18 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
       // Calculate position when opening
       if (newIsOpen && containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        const dropdownHeight = 500; // Max height of dropdown
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const spaceAbove = rect.top;
+        const maxDropdownHeight = 600;
+        const spaceBelow = window.innerHeight - rect.bottom - 16; // 16px padding
+        const spaceAbove = rect.top - 16; // 16px padding
         
-        // Show above if not enough space below but enough space above
-        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+        // Set CSS variable for dynamic height calculation
+        const dropdown = containerRef.current.querySelector('.country-dropdown') as HTMLElement;
+        if (dropdown) {
+          dropdown.style.setProperty('--dropdown-top', `${rect.top}px`);
+        }
+        
+        // Show above if not enough space below but more space above
+        if (spaceBelow < Math.min(maxDropdownHeight, 400) && spaceAbove > spaceBelow) {
           setDropdownPosition('above');
         } else {
           setDropdownPosition('below');
