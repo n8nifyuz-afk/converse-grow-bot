@@ -11,6 +11,7 @@ import MainLayout from '@/layouts/MainLayout';
 import PublicLayout from '@/layouts/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ResetPassword from '@/pages/ResetPassword';
+import LinkEmail from '@/pages/LinkEmail';
 import Index from '@/pages/Index';
 import Chat from '@/pages/Chat';
 import ProjectPage from '@/pages/ProjectPage';
@@ -135,6 +136,7 @@ function AppContent() {
           
           {/* Auth pages */}
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/link-email" element={<LinkEmail />} />
           
           {/* 404 */}
           <Route path="*" element={<NotFound />} />

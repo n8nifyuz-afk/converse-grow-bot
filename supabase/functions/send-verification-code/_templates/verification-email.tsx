@@ -13,18 +13,18 @@ import {
 import * as React from 'https://esm.sh/react@18.3.1';
 
 interface VerificationEmailProps {
-  code: string;
+  verificationLink: string;
   email: string;
 }
 
 export const VerificationEmail = ({
-  code,
+  verificationLink,
   email,
 }: VerificationEmailProps) => {
   return (
     <Html>
       <Head />
-      <Preview>Link your email to ChatLearn - Verification code: {code}</Preview>
+      <Preview>Link your email to ChatLearn</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Logo Section */}
@@ -46,15 +46,25 @@ export const VerificationEmail = ({
           </Text>
           
           <Text style={text}>
-            Please use the verification code below to link <strong>{email}</strong> to your ChatLearn account:
+            Click the button below to link <strong>{email}</strong> to your ChatLearn account:
           </Text>
 
-          <Section style={codeSection}>
-            <Text style={codeText}>{code}</Text>
+          <Section style={buttonSection}>
+            <Link href={verificationLink} style={button}>
+              Verify Email Address
+            </Link>
           </Section>
 
           <Text style={text}>
-            This code will expire in <strong>10 minutes</strong>.
+            This link will expire in <strong>30 minutes</strong>.
+          </Text>
+
+          <Text style={orText}>
+            Or copy and paste this URL into your browser:
+          </Text>
+          
+          <Text style={linkText}>
+            {verificationLink}
           </Text>
 
           <Text style={warningText}>
@@ -139,22 +149,43 @@ const text = {
   padding: '0 20px',
 };
 
-const codeSection = {
-  backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
+const buttonSection = {
   padding: '32px 20px',
-  margin: '32px 20px',
+  margin: '24px 0',
   textAlign: 'center' as const,
-  border: '2px solid #e6ebf1',
 };
 
-const codeText = {
-  fontSize: '36px',
-  fontWeight: '700',
-  letterSpacing: '8px',
-  color: '#1a1a1a',
-  margin: '0',
-  fontFamily: 'Courier, monospace',
+const button = {
+  backgroundColor: '#8B5CF6',
+  borderRadius: '8px',
+  color: '#ffffff',
+  display: 'inline-block',
+  fontSize: '16px',
+  fontWeight: '600',
+  lineHeight: '50px',
+  textAlign: 'center' as const,
+  textDecoration: 'none',
+  width: '280px',
+  padding: '0 20px',
+};
+
+const orText = {
+  color: '#666',
+  fontSize: '14px',
+  lineHeight: '20px',
+  margin: '24px 0 8px',
+  padding: '0 20px',
+  textAlign: 'center' as const,
+};
+
+const linkText = {
+  color: '#8B5CF6',
+  fontSize: '13px',
+  lineHeight: '20px',
+  margin: '0 0 24px',
+  padding: '0 20px',
+  textAlign: 'center' as const,
+  wordBreak: 'break-all' as const,
 };
 
 const warningText = {

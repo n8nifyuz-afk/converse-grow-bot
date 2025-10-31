@@ -17,9 +17,11 @@ const logStep = (step: string, details?: any) => {
   console.log(`[SEND-VERIFICATION-CODE] ${step}${detailsStr}`);
 };
 
-// Generate a 6-digit code
-const generateCode = (): string => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+// Generate a secure token for email verification link
+const generateToken = (): string => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 };
 
 serve(async (req) => {
@@ -71,11 +73,11 @@ serve(async (req) => {
       throw new Error('This email is already registered. Please use a different email.');
     }
 
-    // Generate 6-digit verification code
-    const code = generateCode();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    // Generate secure verification token
+    const token = generateToken();
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-    logStep("Generated verification code", { email, expiresAt });
+    logStep("Generated verification token", { email, expiresAt });
 
     // Hash password properly
     const encoder = new TextEncoder();
@@ -84,13 +86,13 @@ serve(async (req) => {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Store the verification code in Supabase
+    // Store the verification token in Supabase
     let verificationRecord;
     const { data: verification, error: storeError } = await supabaseAdmin
       .from('email_verifications')
       .insert({
         email,
-        code,
+        code: token,
         password_hash: passwordHash,
         expires_at: expiresAt.toISOString(),
       })
@@ -102,7 +104,7 @@ serve(async (req) => {
       const { data: updatedVerification, error: updateError } = await supabaseAdmin
         .from('email_verifications')
         .update({
-          code,
+          code: token,
           password_hash: passwordHash,
           expires_at: expiresAt.toISOString(),
           verified: false,
@@ -129,10 +131,14 @@ serve(async (req) => {
       throw new Error('Failed to create verification record');
     }
 
+    // Create verification link
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const verificationLink = `${supabaseUrl.replace('lciaiunzacgvvbvcshdh.supabase.co', 'chatl.ai')}/link-email?token=${token}&email=${encodeURIComponent(email)}`;
+    
     // Render email template
     const html = await renderAsync(
       React.createElement(VerificationEmail, {
-        code,
+        verificationLink,
         email,
       })
     );
@@ -141,7 +147,7 @@ serve(async (req) => {
     const { error: emailError } = await resend.emails.send({
       from: "ChatLearn <no-reply@chatl.ai>",
       to: [email],
-      subject: "Link Your Email - ChatLearn Verification Code",
+      subject: "Link Your Email to ChatLearn",
       html,
       headers: {
         'X-Entity-Ref-ID': `email-link-${Date.now()}`,
@@ -170,7 +176,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         verificationId: verificationRecord.id,
-        message: "Verification code sent to your email"
+        message: "Verification link sent to your email"
       }),
       {
         status: 200,

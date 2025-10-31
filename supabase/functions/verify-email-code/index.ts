@@ -26,13 +26,13 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { verificationId, code, email, password } = await req.json();
+    const { token, email } = await req.json();
     
-    if (!verificationId || !code || !email || !password) {
-      throw new Error("All fields are required");
+    if (!token || !email) {
+      throw new Error("Token and email are required");
     }
 
-    logStep("Verification attempt", { email, verificationId });
+    logStep("Verification attempt", { email });
 
     // Initialize Supabase admin client
     const supabaseAdmin = createClient(
@@ -51,49 +51,34 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Get verification record
+    // Get verification record by token
     const { data: verification, error: fetchError } = await supabaseAdmin
       .from('email_verifications')
       .select('*')
-      .eq('id', verificationId)
+      .eq('code', token)
       .eq('email', email)
       .single();
 
     if (fetchError || !verification) {
-      logStep("Invalid verification ID", { email, verificationId });
-      throw new Error("Invalid verification request");
+      logStep("Invalid verification token", { email });
+      throw new Error("Invalid or expired verification link");
     }
 
-    // Check if code matches
-    if (verification.code !== code) {
-      logStep("Invalid code", { email });
-      throw new Error("Invalid verification code");
-    }
-
-    // Check if code is expired
+    // Check if link is expired
     const expiresAt = new Date(verification.expires_at);
     if (expiresAt < new Date()) {
-      logStep("Code expired", { email, expiresAt });
-      throw new Error("Verification code has expired. Please request a new one.");
+      logStep("Link expired", { email, expiresAt });
+      throw new Error("Verification link has expired. Please request a new one.");
     }
 
     // Check if already verified
     if (verification.verified) {
       logStep("Already verified", { email });
-      throw new Error("This code has already been used");
+      throw new Error("This link has already been used");
     }
 
-    // Hash the password to compare
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    // Verify password matches
-    if (verification.password_hash !== passwordHash) {
-      throw new Error('Password mismatch');
-    }
+    // Get the password from the verification record
+    const password = verification.password_hash;
 
     logStep("Code verified, updating user", { userId: user.id });
 
@@ -106,11 +91,18 @@ serve(async (req) => {
       // No need to update password as it's already set
     } else {
       // Update the user's email and password using admin API
+      // Hash the stored password to use it
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const passwordHashToUse = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
       const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
         user.id,
         {
           email: email,
-          password: password,
+          password: passwordHashToUse,
           email_confirm: true, // Auto-confirm the email
         }
       );
@@ -140,7 +132,8 @@ serve(async (req) => {
     await supabaseAdmin
       .from('email_verifications')
       .update({ verified: true })
-      .eq('id', verificationId);
+      .eq('code', token)
+      .eq('email', email);
 
     logStep("User email linked successfully", { userId: user.id });
 
