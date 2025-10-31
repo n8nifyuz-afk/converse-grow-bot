@@ -266,10 +266,16 @@
     flex-direction: column;
     transition: none !important;
     will-change: auto !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    -webkit-overflow-scrolling: touch;
   }
   
   .country-list {
     max-height: 180px;
+    pointer-events: auto !important;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch;
   }
   
   .country-search {
@@ -279,6 +285,9 @@
   
   .country-option {
     padding: 1rem;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent;
   }
   
   .country-name {
