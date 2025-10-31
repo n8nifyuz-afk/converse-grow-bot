@@ -37,16 +37,25 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user) throw new Error("User not authenticated");
+    logStep("User authenticated", { userId: user.id, email: user.email || "none", phone: user.phone || "none" });
+
+    // Look up Stripe customer ID from user_subscriptions table
+    // This works for both email and phone-only users
+    const { data: subscription, error: subError } = await supabaseClient
+      .from('user_subscriptions')
+      .select('stripe_customer_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (subError || !subscription?.stripe_customer_id) {
+      throw new Error("No subscription found for this user. Please subscribe first.");
+    }
+
+    const customerId = subscription.stripe_customer_id;
+    logStep("Found Stripe customer from subscription", { customerId });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
-    }
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
     const portalSession = await stripe.billingPortal.sessions.create({
