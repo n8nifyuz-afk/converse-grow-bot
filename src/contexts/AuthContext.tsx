@@ -274,6 +274,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let initialCheckComplete = false;
     
+    // Check for OAuth errors in URL parameters (e.g., after failed account linking)
+    const checkOAuthErrors = () => {
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      
+      const error = params.get('error') || hashParams.get('error');
+      const errorDescription = params.get('error_description') || hashParams.get('error_description');
+      const errorCode = params.get('error_code') || hashParams.get('error_code');
+      
+      if (error || errorDescription) {
+        // Import toast dynamically to avoid issues
+        import('@/hooks/use-toast').then(({ toast }) => {
+          let title = 'Account Linking Failed';
+          let description = errorDescription || 'Failed to link account';
+          
+          // Handle specific error cases
+          if (errorDescription?.toLowerCase().includes('already linked') || 
+              errorDescription?.toLowerCase().includes('identity is already linked')) {
+            title = 'Account Already Used';
+            description = 'This Google/Apple account is already linked to a different user. Please use another account or sign in with the existing one.';
+          } else if (error === 'identity_already_exists' || errorCode === '23505') {
+            title = 'Already Linked';
+            description = 'You have already linked this type of account to your profile.';
+          } else if (errorCode === '422' || error === '422') {
+            title = 'Cannot Link Account';
+            description = 'This account cannot be linked. It may already be in use by another user.';
+          }
+          
+          toast({
+            title,
+            description,
+            variant: 'destructive',
+            duration: 7000,
+          });
+        });
+        
+        // Clean up URL without reloading
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+      }
+    };
+    
+    // Check for errors immediately on mount
+    checkOAuthErrors();
+    
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
