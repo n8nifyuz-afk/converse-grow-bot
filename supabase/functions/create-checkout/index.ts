@@ -66,6 +66,18 @@ serve(async (req) => {
       customerId = customers.data[0].id;
       logStep("Existing customer found", { customerId });
       
+      // CRITICAL: Ensure user_id metadata is set (for backward compatibility)
+      if (!customers.data[0].metadata?.user_id) {
+        logStep("Adding user_id metadata to existing customer", { customerId });
+        await stripe.customers.update(customerId, {
+          metadata: {
+            ...customers.data[0].metadata,
+            user_id: user.id,
+            phone: user.phone || '',
+          }
+        });
+      }
+      
       // Check if customer has any active subscriptions
       const activeSubscriptions = await stripe.subscriptions.list({
         customer: customerId,

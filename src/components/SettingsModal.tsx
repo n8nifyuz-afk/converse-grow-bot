@@ -1121,6 +1121,108 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             </div>
             
             <div className="space-y-4 md:space-y-6">
+              {/* Linked Accounts Section */}
+              <div>
+                <p className="font-medium mb-2 md:mb-3 text-sm md:text-base">Linked Accounts</p>
+                <Card className="shadow-sm border-border/40">
+                  <CardContent className="p-4 md:p-6 space-y-3">
+                    <p className="text-xs md:text-sm text-muted-foreground mb-3">
+                      Link multiple sign-in methods to access your account flexibly. Your subscription works across all linked methods.
+                    </p>
+                    
+                    {/* Current Auth Method */}
+                    <div className="p-3 bg-muted/30 rounded-lg border">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <Shield className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {userProfile?.signup_method === 'phone' && 'Phone Number'}
+                              {userProfile?.signup_method === 'google' && 'Google Account'}
+                              {userProfile?.signup_method === 'apple' && 'Apple ID'}
+                              {userProfile?.signup_method === 'microsoft' && 'Microsoft Account'}
+                              {userProfile?.signup_method === 'email' && 'Email & Password'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {user?.email && `${user.email}`}
+                              {user?.phone && !user?.email && `${user.phone}`}
+                              {!user?.email && !user?.phone && 'Primary method'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="p-1 bg-green-100 rounded-full">
+                          <Check className="h-3.5 w-3.5 text-green-600" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Add Phone Number (for email/OAuth users) */}
+                    {user?.email && !user?.phone && (
+                      <div className="p-3 bg-muted/30 rounded-lg border border-dashed">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-2 bg-background rounded-lg">
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm">Phone Number</p>
+                              <p className="text-xs text-muted-foreground">
+                                Link your phone for alternative sign-in
+                              </p>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled
+                            className="text-xs"
+                          >
+                            Coming Soon
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Add Email (for phone users) */}
+                    {user?.phone && !user?.email && (
+                      <div className="p-3 bg-muted/30 rounded-lg border border-dashed">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="p-2 bg-background rounded-lg">
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm">Email Address</p>
+                              <p className="text-xs text-muted-foreground">
+                                Link your email for alternative sign-in
+                              </p>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled
+                            className="text-xs"
+                          >
+                            Coming Soon
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900">
+                      <p className="text-xs text-blue-800 dark:text-blue-300">
+                        💡 Your subscription is tied to your account, not your sign-in method. You can access your Pro/Ultra plan with any linked authentication method.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Separator />
+
               {/* Multi-Factor Authentication */}
               <div>
                 <p className="font-medium mb-2 md:mb-3 text-sm md:text-base">{t('security.multiFactorAuth')}</p>

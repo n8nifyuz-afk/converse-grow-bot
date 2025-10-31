@@ -110,34 +110,82 @@ serve(async (req) => {
           cancelAtPeriodEnd: subscription.cancel_at_period_end
         });
 
-        // Get customer email
+        // CRITICAL: Get customer and prioritize user_id metadata for matching
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-        if (!customer.email) {
-          logStep("No customer email found");
-          break;
-        }
-
-        // Lookup user by email via profiles table (handles unlimited users)
-        const { data: profile, error: profileError } = await supabaseClient
-          .from('profiles')
-          .select('user_id')
-          .ilike('email', customer.email)
-          .single();
+        const customerUserId = customer.metadata?.user_id;
         
-        if (!profile) {
-          logStep("User not found in profiles", { email: customer.email, error: profileError?.message });
-          break;
-        }
+        let user;
+        let profile;
         
-        // Get full user object from auth
-        const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) {
-          logStep("User not found in auth", { userId: profile.user_id, error: userError?.message });
-          break;
+        // STRATEGY 1: Match by user_id metadata (most reliable, works for all auth methods)
+        if (customerUserId) {
+          logStep("Attempting to match by user_id metadata", { userId: customerUserId });
+          
+          const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(customerUserId);
+          if (userData?.user) {
+            user = userData.user;
+            logStep("✅ User matched by user_id metadata", { userId: user.id });
+          } else {
+            logStep("⚠️ user_id metadata present but user not found", { 
+              userId: customerUserId, 
+              error: userError?.message 
+            });
+          }
         }
         
-        const user = userData.user;
-        logStep("Found user successfully", { userId: user.id, email: user.email });
+        // STRATEGY 2: Fallback to email matching (for backward compatibility)
+        if (!user && customer.email) {
+          logStep("Falling back to email matching", { email: customer.email });
+          
+          const { data: profileData, error: profileError } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .ilike('email', customer.email)
+            .single();
+          
+          if (profileData) {
+            const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(profileData.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              profile = profileData;
+              logStep("✅ User matched by email", { userId: user.id, email: customer.email });
+            }
+          } else {
+            logStep("⚠️ No profile found with email", { email: customer.email, error: profileError?.message });
+          }
+        }
+        
+        // STRATEGY 3: Match by phone metadata (for phone-only users)
+        if (!user && customer.metadata?.phone) {
+          logStep("Attempting to match by phone metadata", { phone: customer.metadata.phone });
+          
+          const { data: profileData, error: profileError } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .eq('phone_number', customer.metadata.phone)
+            .single();
+          
+          if (profileData) {
+            const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(profileData.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              profile = profileData;
+              logStep("✅ User matched by phone", { userId: user.id, phone: customer.metadata.phone });
+            }
+          }
+        }
+        
+        if (!user) {
+          logStep("❌ No user found with any matching strategy", { 
+            customerId: customer.id,
+            email: customer.email || 'none',
+            phone: customer.metadata?.phone || 'none',
+            userId: customerUserId || 'none'
+          });
+          break;
+        }
+        
+        logStep("Found user successfully", { userId: user.id, email: user.email || 'none', phone: user.phone || 'none' });
 
         // CRITICAL: Check cancel_at_period_end flag
         // If true, keep user active until period end, don't downgrade yet
@@ -423,30 +471,59 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Subscription deleted", { subscriptionId: subscription.id });
 
+        // CRITICAL: Use same matching strategy as subscription.created/updated
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-        if (!customer.email) {
-          logStep("No customer email for deletion");
-          break;
-        }
-
-        // Lookup user via profiles
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('user_id')
-          .ilike('email', customer.email)
-          .single();
+        const customerUserId = customer.metadata?.user_id;
         
-        if (!profile) {
-          logStep("User not found for subscription deletion", { email: customer.email });
-          break;
+        let user;
+        
+        // STRATEGY 1: Match by user_id metadata
+        if (customerUserId) {
+          const { data: userData } = await supabaseClient.auth.admin.getUserById(customerUserId);
+          if (userData?.user) {
+            user = userData.user;
+            logStep("✅ User matched by user_id for deletion", { userId: user.id });
+          }
         }
         
-        const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) {
-          logStep("User not found in auth for deletion", { userId: profile.user_id });
+        // STRATEGY 2: Fallback to email
+        if (!user && customer.email) {
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .ilike('email', customer.email)
+            .single();
+          
+          if (profile) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              logStep("✅ User matched by email for deletion", { userId: user.id });
+            }
+          }
+        }
+        
+        // STRATEGY 3: Match by phone
+        if (!user && customer.metadata?.phone) {
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .eq('phone_number', customer.metadata.phone)
+            .single();
+          
+          if (profile) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              logStep("✅ User matched by phone for deletion", { userId: user.id });
+            }
+          }
+        }
+        
+        if (!user) {
+          logStep("❌ No user found for subscription deletion");
           break;
         }
-        const user = userData.user;
 
         // Delete subscription and clean up usage limits (user downgrade)
         await supabaseClient
@@ -468,29 +545,59 @@ serve(async (req) => {
         const invoice = event.data.object as Stripe.Invoice;
         logStep("Payment succeeded", { invoiceId: invoice.id });
 
-        if (!invoice.customer_email) {
-          logStep("No customer email for payment");
-          break;
-        }
-
-        // Lookup user via profiles
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('user_id')
-          .ilike('email', invoice.customer_email)
-          .single();
+        // CRITICAL: Use same matching strategy as subscription events
+        const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
+        const customerUserId = customer.metadata?.user_id;
         
-        if (!profile) {
-          logStep("User not found for payment success", { email: invoice.customer_email });
-          break;
+        let user;
+        
+        // STRATEGY 1: Match by user_id metadata
+        if (customerUserId) {
+          const { data: userData } = await supabaseClient.auth.admin.getUserById(customerUserId);
+          if (userData?.user) {
+            user = userData.user;
+            logStep("✅ User matched by user_id for payment", { userId: user.id });
+          }
         }
         
-        const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) {
-          logStep("User not found in auth for payment", { userId: profile.user_id });
+        // STRATEGY 2: Fallback to email
+        if (!user && invoice.customer_email) {
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .ilike('email', invoice.customer_email)
+            .single();
+          
+          if (profile) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              logStep("✅ User matched by email for payment", { userId: user.id });
+            }
+          }
+        }
+        
+        // STRATEGY 3: Match by phone
+        if (!user && customer.metadata?.phone) {
+          const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .eq('phone_number', customer.metadata.phone)
+            .single();
+          
+          if (profile) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              logStep("✅ User matched by phone for payment", { userId: user.id });
+            }
+          }
+        }
+        
+        if (!user) {
+          logStep("❌ No user found for payment success");
           break;
         }
-        const user = userData.user;
 
         // Check if this is the first invoice after trial (trial conversion)
         if (invoice.subscription) {
