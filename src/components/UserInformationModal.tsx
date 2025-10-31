@@ -275,8 +275,10 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                     </div>
                     <div>
                       <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Total Logins</p>
-                      <p className="text-xl sm:text-2xl font-bold text-primary">{userInfo.login_count || 0}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Login sessions</p>
+                      <p className="text-xl sm:text-2xl font-bold text-primary">
+                        {activityLogs.filter(log => log.activity_type === 'login').length || 0}
+                      </p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Unique login sessions</p>
                     </div>
                     <div>
                       <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Signup Method</p>

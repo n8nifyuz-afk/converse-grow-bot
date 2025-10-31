@@ -24,7 +24,7 @@ export default function PhoneLinkModal({ open, onOpenChange }: PhoneLinkModalPro
     if (!phone || phone.length < 10) {
       toast({
         title: 'Invalid Phone',
-        description: 'Please enter a valid phone number',
+        description: 'Please enter a valid phone number with country code',
         variant: 'destructive'
       });
       return;
@@ -35,6 +35,13 @@ export default function PhoneLinkModal({ open, onOpenChange }: PhoneLinkModalPro
       const { error } = await linkPhoneNumber(phone);
       
       if (error) {
+        // Handle specific error cases
+        if (error.message?.includes('already linked') || error.message?.includes('Phone number already exists')) {
+          throw new Error('This phone number is already linked to another account');
+        }
+        if (error.message?.includes('identity_already_exists')) {
+          throw new Error('You have already linked a phone number to this account');
+        }
         throw error;
       }
 
@@ -47,7 +54,7 @@ export default function PhoneLinkModal({ open, onOpenChange }: PhoneLinkModalPro
       console.error('Send OTP error:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to send OTP',
+        description: error.message || 'Failed to send OTP. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -59,7 +66,7 @@ export default function PhoneLinkModal({ open, onOpenChange }: PhoneLinkModalPro
     if (!otp || otp.length !== 6) {
       toast({
         title: 'Invalid Code',
-        description: 'Please enter the 6-digit code',
+        description: 'Please enter the complete 6-digit verification code',
         variant: 'destructive'
       });
       return;
@@ -70,12 +77,16 @@ export default function PhoneLinkModal({ open, onOpenChange }: PhoneLinkModalPro
       const { error } = await verifyPhoneLink(phone, otp);
       
       if (error) {
+        // Handle specific verification errors
+        if (error.message?.includes('expired') || error.message?.includes('invalid')) {
+          throw new Error('The verification code is invalid or has expired. Please request a new code.');
+        }
         throw error;
       }
 
       toast({
-        title: 'Phone Linked!',
-        description: 'Your phone number has been successfully linked',
+        title: 'Phone Linked Successfully!',
+        description: 'You can now sign in with your phone number',
       });
       
       // Reset and close
@@ -86,8 +97,8 @@ export default function PhoneLinkModal({ open, onOpenChange }: PhoneLinkModalPro
     } catch (error: any) {
       console.error('Verify OTP error:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'Invalid verification code',
+        title: 'Verification Failed',
+        description: error.message || 'Invalid verification code. Please try again.',
         variant: 'destructive'
       });
     } finally {

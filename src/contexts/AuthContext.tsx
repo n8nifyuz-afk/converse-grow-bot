@@ -37,6 +37,9 @@ interface AuthContextType {
   verifyPhoneLink: (phone: string, token: string) => Promise<{ error: any }>;
   linkEmailPassword: (email: string, password: string) => Promise<{ error: any }>;
   linkGoogleAccount: () => Promise<{ error: any }>;
+  linkAppleAccount: () => Promise<{ error: any }>;
+  linkMicrosoftAccount: () => Promise<{ error: any }>;
+  unlinkAuthMethod: (provider: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -1290,7 +1293,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // CRITICAL: Use linkIdentity for OAuth linking
-      // This will redirect to Google and link the account
       const { error } = await supabase.auth.linkIdentity({
         provider: 'google',
         options: {
@@ -1308,6 +1310,105 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: null };
     } catch (error) {
       console.error('Link Google exception:', error);
+      return { error };
+    }
+  };
+
+  const linkAppleAccount = async (): Promise<{ error: any }> => {
+    try {
+      if (!user) {
+        return { error: { message: 'No user logged in' } };
+      }
+
+      const { error } = await supabase.auth.linkIdentity({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          skipBrowserRedirect: false
+        }
+      });
+
+      if (error) {
+        console.error('Link Apple error:', error);
+        return { error };
+      }
+
+      console.log('✅ Apple account linking initiated');
+      return { error: null };
+    } catch (error) {
+      console.error('Link Apple exception:', error);
+      return { error };
+    }
+  };
+
+  const linkMicrosoftAccount = async (): Promise<{ error: any }> => {
+    try {
+      if (!user) {
+        return { error: { message: 'No user logged in' } };
+      }
+
+      const { error } = await supabase.auth.linkIdentity({
+        provider: 'azure',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          skipBrowserRedirect: false,
+          scopes: 'email openid profile'
+        }
+      });
+
+      if (error) {
+        console.error('Link Microsoft error:', error);
+        return { error };
+      }
+
+      console.log('✅ Microsoft account linking initiated');
+      return { error: null };
+    } catch (error) {
+      console.error('Link Microsoft exception:', error);
+      return { error };
+    }
+  };
+
+  const unlinkAuthMethod = async (provider: string): Promise<{ error: any }> => {
+    try {
+      if (!user) {
+        return { error: { message: 'No user logged in' } };
+      }
+
+      // Get user identities to check count
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const identities = currentUser?.identities || [];
+
+      if (identities.length <= 1) {
+        return { error: { message: 'Cannot unlink last authentication method. Add another method first.' } };
+      }
+
+      // Find the identity to unlink
+      const identityToUnlink = identities.find(id => id.provider === provider);
+      if (!identityToUnlink) {
+        return { error: { message: 'Authentication method not found' } };
+      }
+
+      const { error } = await supabase.auth.unlinkIdentity(identityToUnlink);
+
+      if (error) {
+        console.error('Unlink error:', error);
+        return { error };
+      }
+
+      // Update profile to remove provider-specific data
+      if (provider === 'phone') {
+        await supabase.from('profiles').update({
+          phone_number: null,
+          updated_at: new Date().toISOString()
+        }).eq('user_id', user.id);
+      }
+
+      console.log('✅ Authentication method unlinked:', provider);
+      await refreshUserProfile();
+      return { error: null };
+    } catch (error) {
+      console.error('Unlink exception:', error);
       return { error };
     }
   };
@@ -1336,7 +1437,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     linkPhoneNumber,
     verifyPhoneLink,
     linkEmailPassword,
-    linkGoogleAccount
+    linkGoogleAccount,
+    linkAppleAccount,
+    linkMicrosoftAccount,
+    unlinkAuthMethod
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
