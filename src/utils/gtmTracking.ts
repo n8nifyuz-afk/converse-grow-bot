@@ -81,12 +81,20 @@ export const trackRegistrationComplete = () => {
       return;
     }
     
-    console.log('🎯 Tracking registration to Google Analytics...');
-    window.dataLayer.push({ 
+    const gclid = getCurrentGCLID();
+    const eventData: Record<string, any> = {
       event: 'registration_complete'
-    });
+    };
+    
+    if (gclid) {
+      eventData.gclid = gclid;
+      console.log('🎯 Including GCLID in registration event:', gclid);
+    }
+    
+    console.log('🎯 Tracking registration to Google Analytics...');
+    window.dataLayer.push(eventData);
     localStorage.setItem(trackedKey, 'true');
-    console.log('✅ Registration tracked successfully');
+    console.log('✅ Registration tracked successfully with data:', eventData);
   } else {
     console.warn('⚠️ GTM dataLayer not available for registration tracking');
   }
@@ -101,7 +109,16 @@ export const trackChatStart = (chatId?: string) => {
       return;
     }
     
-    window.dataLayer.push({ event: 'chat_start' });
+    const gclid = getCurrentGCLID();
+    const eventData: Record<string, any> = {
+      event: 'chat_start'
+    };
+    
+    if (gclid) {
+      eventData.gclid = gclid;
+    }
+    
+    window.dataLayer.push(eventData);
     
     const newTrackedChats = trackedChats ? `${trackedChats},${trackedKey}` : trackedKey;
     sessionStorage.setItem('gtm_tracked_chats', newTrackedChats);
@@ -114,14 +131,24 @@ export const trackPaymentComplete = (
   planPrice: number
 ) => {
   if (typeof window !== 'undefined' && window.dataLayer) {
-    console.log('🎯 Pushing payment_complete event to GTM dataLayer...');
-    window.dataLayer.push({
+    const gclid = getCurrentGCLID();
+    const eventData: Record<string, any> = {
       event: 'payment_complete',
       plan_type: planType,
       plan_duration: planDuration,
-      plan_price: planPrice
-    });
-    console.log('✅ Payment event pushed to dataLayer:', { plan_type: planType, plan_duration: planDuration, plan_price: planPrice });
+      plan_price: planPrice,
+      currency: 'USD',
+      value: planPrice  // Standard ecommerce field for conversion value
+    };
+    
+    if (gclid) {
+      eventData.gclid = gclid;
+      console.log('🎯 Including GCLID in payment event:', gclid);
+    }
+    
+    console.log('🎯 Pushing payment_complete event to GTM dataLayer...');
+    window.dataLayer.push(eventData);
+    console.log('✅ Payment event pushed to dataLayer:', eventData);
   } else {
     console.error('❌ GTM dataLayer not available for payment tracking');
   }
