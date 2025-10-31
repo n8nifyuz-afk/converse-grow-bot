@@ -62,6 +62,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const [showPhoneLinkModal, setShowPhoneLinkModal] = React.useState(false);
   const [showEmailLinkModal, setShowEmailLinkModal] = React.useState(false);
   const [linkedIdentities, setLinkedIdentities] = React.useState<any[]>([]);
+  const [unlinkingIdentity, setUnlinkingIdentity] = React.useState<any>(null);
   const { theme, accentColor, setTheme, setAccentColor } = useTheme();
   const { toast } = useToast();
   const { user, signOut, userProfile, subscriptionStatus, checkSubscription, refreshUserProfile, unlinkAuthMethod } = useAuth();
@@ -1213,27 +1214,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={async () => {
-                                    try {
-                                      const { error } = await unlinkAuthMethod(identity.provider);
-                                      if (error) throw error;
-                                      
-                                      toast({
-                                        title: 'Method Unlinked',
-                                        description: `${identity.provider} has been removed from your account`,
-                                      });
-                                      
-                                      // Refresh identities
-                                      const { data: { user: currentUser } } = await supabase.auth.getUser();
-                                      setLinkedIdentities(currentUser?.identities || []);
-                                    } catch (error: any) {
-                                      toast({
-                                        title: 'Error',
-                                        description: error.message || 'Failed to unlink method',
-                                        variant: 'destructive'
-                                      });
-                                    }
-                                  }}
+                                  onClick={() => setUnlinkingIdentity(identity)}
                                   className="text-xs text-destructive hover:text-destructive"
                                 >
                                   Unlink
@@ -1630,6 +1611,50 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         onOpenChange={setShowEmailLinkModal}
         linkedIdentities={linkedIdentities}
       />
+
+      {/* Unlink Confirmation Dialog */}
+      <AlertDialog open={!!unlinkingIdentity} onOpenChange={(open) => !open && setUnlinkingIdentity(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unlink Sign-In Method?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to unlink <strong>{unlinkingIdentity?.provider}</strong> from your account?
+              You will no longer be able to sign in using this method.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                try {
+                  const { error } = await unlinkAuthMethod(unlinkingIdentity.provider);
+                  if (error) throw error;
+                  
+                  toast({
+                    title: 'Method Unlinked',
+                    description: `${unlinkingIdentity.provider} has been removed from your account`,
+                  });
+                  
+                  // Refresh identities
+                  const { data: { user: currentUser } } = await supabase.auth.getUser();
+                  setLinkedIdentities(currentUser?.identities || []);
+                  setUnlinkingIdentity(null);
+                } catch (error: any) {
+                  toast({
+                    title: 'Error',
+                    description: error.message || 'Failed to unlink method',
+                    variant: 'destructive'
+                  });
+                  setUnlinkingIdentity(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Unlink
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
