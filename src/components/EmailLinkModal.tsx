@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Mail } from 'lucide-react';
-import { EmailVerificationLinking } from './EmailVerificationLinking';
 
 interface EmailLinkModalProps {
   open: boolean;
@@ -14,8 +14,10 @@ interface EmailLinkModalProps {
 
 export default function EmailLinkModal({ open, onOpenChange, linkedIdentities = [] }: EmailLinkModalProps) {
   const [method, setMethod] = useState<'email' | 'google' | 'apple' | 'microsoft' | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { linkGoogleAccount, linkAppleAccount, linkMicrosoftAccount } = useAuth();
+  const { linkEmailPassword, linkGoogleAccount, linkAppleAccount, linkMicrosoftAccount } = useAuth();
   const { toast } = useToast();
 
   // Check which methods are already linked
@@ -24,6 +26,68 @@ export default function EmailLinkModal({ open, onOpenChange, linkedIdentities = 
   const hasApple = linkedIdentities.some(id => id.provider === 'apple');
   const hasMicrosoft = linkedIdentities.some(id => id.provider === 'azure');
 
+  const handleLinkEmail = async () => {
+    if (!email || !password) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please enter both email and password',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: 'Invalid Email',
+        description: 'Please enter a valid email address',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: 'Weak Password',
+        description: 'Password must be at least 6 characters',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await linkEmailPassword(email, password);
+      
+      if (error) {
+        // Handle specific error cases
+        if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+          throw new Error('This email is already registered. Try signing in instead.');
+        }
+        if (error.message?.includes('identity_already_exists')) {
+          throw new Error('You have already linked an email to this account');
+        }
+        throw error;
+      }
+
+      toast({
+        title: 'Email Linked Successfully!',
+        description: 'Check your email to verify the link',
+      });
+      
+      handleClose();
+    } catch (error: any) {
+      console.error('Link email error:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to link email. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLinkApple = async () => {
     setLoading(true);
@@ -120,6 +184,8 @@ export default function EmailLinkModal({ open, onOpenChange, linkedIdentities = 
 
   const handleClose = () => {
     setMethod(null);
+    setEmail('');
+    setPassword('');
     onOpenChange(false);
   };
 
@@ -208,25 +274,47 @@ export default function EmailLinkModal({ open, onOpenChange, linkedIdentities = 
               </p>
             </div>
           </div>
-        ) : method === 'email' ? (
+        ) : (
           <div className="space-y-4 pt-4">
-            <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900 p-3 mb-4">
-              <p className="text-xs text-blue-800 dark:text-blue-300">
-                📧 We'll send a verification code to your email to confirm it's yours
-              </p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+              />
             </div>
 
-            <EmailVerificationLinking />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Password</label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+              />
+            </div>
 
-            <Button
-              variant="outline"
-              onClick={() => setMethod(null)}
-              className="w-full"
-            >
-              Back
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setMethod(null)}
+                disabled={loading}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleLinkEmail}
+                disabled={loading || !email || !password}
+                className="flex-1"
+              >
+                {loading ? 'Linking...' : 'Link Email'}
+              </Button>
+            </div>
           </div>
-        ) : null}
+        )}
       </DialogContent>
     </Dialog>
   );

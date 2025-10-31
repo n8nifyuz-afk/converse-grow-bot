@@ -173,13 +173,9 @@ export default function AuthModal({
     
     setLoading(true);
     try {
-      // Use Supabase's built-in signup for new users
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        }
+      // Call edge function to send verification code
+      const { error } = await supabase.functions.invoke('send-verification-code', {
+        body: { email, password }
       });
 
       if (error) {
@@ -191,15 +187,14 @@ export default function AuthModal({
       } else {
         setLastSignupAttempt(now);
         setSignupCooldown(60);
+        setPendingEmail(email);
+        setMode('verify-email');
         
         toast({
           title: "Check your email",
-          description: "We've sent a confirmation link to your email. Please click it to verify your account.",
+          description: "We've sent a 6-digit verification code to your email.",
           duration: 8000
         });
-        
-        // Switch to sign in mode after successful signup
-        setMode('signin');
       }
     } catch (error) {
       toast({
