@@ -250,18 +250,13 @@ serve(async (req) => {
       }
     };
     
-    // Handle address collection for tax purposes
+    // CRITICAL: Always add customer_update for existing customers
+    // This collects address for automatic tax WITHOUT asking for email
+    // Email is only asked when creating NEW customers without customer_email
     if (customerId) {
-      if (user.email) {
-        // Email users: update customer with address
-        sessionConfig.customer_update = {
-          address: 'auto'
-        };
-      } else {
-        // Phone-only users: collect billing address without updating customer
-        // This avoids email prompt while still getting address for tax
-        sessionConfig.billing_address_collection = 'required';
-      }
+      sessionConfig.customer_update = {
+        address: 'auto'  // Collects & saves address for tax calculation
+      };
     }
     
     // For trials: add 3-day trial period + €0.99 upfront charge
