@@ -6,6 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Clean and format IP addresses (removes proxies, formats IPv6)
+const cleanIpAddress = (ipAddress: string | null): string => {
+  if (!ipAddress || ipAddress === 'unknown') return 'Unknown';
+  
+  // Handle comma-separated IPs (X-Forwarded-For)
+  // Format: "client_ip, proxy1_ip, proxy2_ip"
+  // We want the first one (real client IP)
+  const ips = ipAddress.split(',').map(ip => ip.trim());
+  const clientIp = ips[0];
+  
+  return clientIp;
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -23,8 +36,8 @@ serve(async (req) => {
                          req.headers.get('x-real-ip') || 
                          'unknown'
     
-    // Clean IP: take first IP from comma-separated list (real client IP)
-    const ipAddress = rawIpAddress.split(',')[0].trim()
+    // Clean and format IP address using the utility function
+    const ipAddress = cleanIpAddress(rawIpAddress)
 
     // Fetch country from IP
     let country = null

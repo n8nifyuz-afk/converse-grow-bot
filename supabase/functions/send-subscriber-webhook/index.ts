@@ -7,6 +7,20 @@ const corsHeaders = {
 
 const WEBHOOK_URL = "https://adsgbt.app.n8n.cloud/webhook/subscriber";
 
+// Clean and format IP addresses (removes proxies, formats IPv6)
+const cleanIpAddress = (ipAddress: string | null): string => {
+  if (!ipAddress || ipAddress === 'unknown' || ipAddress === 'Unknown') return 'Unknown';
+  
+  // Handle comma-separated IPs (X-Forwarded-For)
+  // Format: "client_ip, proxy1_ip, proxy2_ip"
+  // We want the first one (real client IP)
+  const ips = ipAddress.split(',').map(ip => ip.trim());
+  const clientIp = ips[0];
+  
+  // Return the cleaned IP
+  return clientIp;
+};
+
 // Extract IP from request headers with comprehensive header checking
 const getClientIP = (req: Request): string | null => {
   console.log("[IP-DETECTION] Checking headers for IP...");
@@ -98,12 +112,15 @@ serve(async (req) => {
     console.log(`[SUBSCRIBER-WEBHOOK] GCLID: ${gclid}, Referer: ${referer}`);
     console.log(`[SUBSCRIBER-WEBHOOK] URL Params:`, urlParams);
 
+    // Clean and format IP address before sending to webhook
+    const cleanedIpAddress = cleanIpAddress(ipAddress);
+    
     // Prepare webhook payload with proper formatting
     const webhookPayload = {
       email,
       username,
       country: country || 'Unknown',
-      ip_address: ipAddress || 'Unknown',
+      ip_address: cleanedIpAddress,
       user_id: userId,
       signup_method: signupMethod || 'email',
       gclid: gclid || null,

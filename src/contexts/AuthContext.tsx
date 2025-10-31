@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { trackPaymentComplete, trackRegistrationComplete } from '@/utils/gtmTracking';
 import { fetchIPAndCountry } from '@/utils/webhookMetadata';
 import { logUserActivity, getFullTrackingData } from '@/utils/browserTracking';
+import { cleanIpAddress } from '@/utils/ipFormatter';
 
 interface AuthContextType {
   user: User | null;
@@ -321,19 +322,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   let country = 'Unknown';
                   
                   try {
-                    // Use ipapi.co which returns only IPv4 addresses
+                    // Use ipapi.co to get IP and country
                     const ipResponse = await fetch('https://ipapi.co/json/');
                     if (ipResponse.ok) {
                       const ipData = await ipResponse.json();
-                      ipAddress = ipData.ip || 'Unknown'; // This will be IPv4
+                      const rawIp = ipData.ip || 'Unknown';
+                      // Clean and format the IP address properly
+                      ipAddress = cleanIpAddress(rawIp);
                       country = ipData.country_code || ipData.country || 'Unknown';
-                      console.log('[SIGNUP-WEBHOOK] Got IPv4 address:', ipAddress, 'Country:', country);
+                      console.log('[SIGNUP-WEBHOOK] Got IP address:', ipAddress, 'Country:', country);
                     } else {
-                      // Fallback to ip-api.com which also returns IPv4
+                      // Fallback to ip-api.com
                       const fallbackResponse = await fetch('https://api.ipify.org?format=json');
                       if (fallbackResponse.ok) {
                         const fallbackData = await fallbackResponse.json();
-                        ipAddress = fallbackData.ip || 'Unknown';
+                        const rawIp = fallbackData.ip || 'Unknown';
+                        // Clean and format the IP address properly
+                        ipAddress = cleanIpAddress(rawIp);
                         // Get country separately
                         const geoResponse = await fetch(`https://ipapi.co/${ipAddress}/country/`);
                         if (geoResponse.ok) {
@@ -342,7 +347,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       }
                     }
                   } catch (traceError) {
-                    console.warn('Failed to get IPv4 address:', traceError);
+                    console.warn('Failed to get IP address:', traceError);
                   }
                   
                   // Capture URL parameters (GCLID, UTM params, etc.)
