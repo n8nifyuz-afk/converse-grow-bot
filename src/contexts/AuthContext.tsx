@@ -294,7 +294,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               await logUserActivity(session.user.id, 'login');
             }
             
-            // Check if this is a new signup
+            // Check if this is a new signup and track registration
+            // The trackRegistrationComplete function has its own deduplication via localStorage
             const { data: profile } = await supabase
               .from('profiles')
               .select('id, created_at')
@@ -304,11 +305,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (profile) {
               const profileCreated = new Date(session.user.created_at).getTime();
               const now = Date.now();
-              // Profile created within last 60 seconds = new signup (increased from 10s to be more reliable)
+              // Profile created within last 60 seconds = new signup
               const isNewSignup = (now - profileCreated) < 60000;
               
+              // Always attempt to track registration (deduplication handled in function)
+              trackRegistrationComplete();
+              
+              // Send webhook only for new signups
               if (isNewSignup) {
-                trackRegistrationComplete();
                 
                 // Send subscriber webhook for new user with IP/country from client
                 try {
@@ -398,7 +402,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 } catch (webhookError) {
                   console.error('Failed to send subscriber webhook:', webhookError);
                 }
-              }
+              } // End if (isNewSignup)
               
               // IMPORTANT: Always try to capture GCLID for ALL logins (not just new signups)
               // This handles cases where user signs up without params, then returns with ?gclid=ABC
@@ -437,7 +441,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     })
                     .eq('user_id', session.user.id);
                   
-                  console.log('[LOGIN] Updated GCLID for user:', currentGclid, 'New signup:', isNewSignup);
+                  console.log('[LOGIN] Updated GCLID for user:', currentGclid);
                 }
               } catch (err) {
                 console.warn('Failed to update user GCLID on login:', err);
@@ -1002,14 +1006,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Check if returning from Stripe checkout (session_id in URL)
         const urlParams = new URLSearchParams(window.location.search);
-        const hasSessionId = urlParams.has('session_id');
+        const sessionId = urlParams.get('session_id');
+        const hasSessionId = !!sessionId;
         
-        // Track payment complete if user just upgraded OR returning from Stripe
-        const shouldTrack = (!previousSubscribed && newStatus.subscribed) || (hasSessionId && newStatus.subscribed);
+        // Track ALL successful payments when returning from Stripe checkout
+        // This includes: first subscription, upgrades, renewals, and trials
+        const shouldTrack = hasSessionId && newStatus.subscribed;
         
         if (shouldTrack) {
-          // Check if we've already tracked this subscription to prevent duplicates
-          const trackedKey = `payment_tracked_${user.id}_${newStatus.product_id}`;
+          // Use session_id for deduplication (unique per payment)
+          // This prevents double-tracking if page refreshes, but allows tracking renewals
+          const trackedKey = `payment_tracked_${sessionId}`;
           const alreadyTracked = localStorage.getItem(trackedKey);
           
           if (!alreadyTracked && dbSub) {
@@ -1028,8 +1035,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const productIdLower = productId.toLowerCase();
               const planNameLower = (dbSub.plan_name || '').toLowerCase();
               
-              // Check for duration indicators
-              if (productIdLower.includes('year') || productIdLower.includes('annual') || planNameLower.includes('year') || planNameLower.includes('annual')) {
+              // Check for duration indicators (including 3-day trial)
+              if (productIdLower.includes('trial') || productIdLower.includes('3day') || planNameLower.includes('trial') || planNameLower.includes('3 day')) {
+                planDuration = '3_months'; // Use 3_months for trial tracking
+                planPrice = 0.99; // 3-day trial price
+              } else if (productIdLower.includes('year') || productIdLower.includes('annual') || planNameLower.includes('year') || planNameLower.includes('annual')) {
                 planDuration = 'yearly';
                 planPrice = planType === 'Ultra' ? 119.99 : 59.99;
               } else if (productIdLower.includes('quarter') || productIdLower.includes('3month') || planNameLower.includes('3 month') || planNameLower.includes('quarter')) {
@@ -1039,8 +1049,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // Otherwise keep monthly defaults
             }
             
-            console.log('📊 Tracking data:', { planType, planDuration, planPrice, product_id: dbSub.product_id, plan_name: dbSub.plan_name });
+            console.log('📊 Tracking data:', { planType, planDuration, planPrice, product_id: dbSub.product_id, plan_name: dbSub.plan_name, session_id: sessionId });
             trackPaymentComplete(planType, planDuration, planPrice);
+            
+            // Mark this session as tracked
+            localStorage.setItem(trackedKey, 'true');
             
             // Send payment webhook to n8n with IPv4 address
             (async () => {
