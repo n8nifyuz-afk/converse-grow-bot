@@ -1266,12 +1266,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         </Button>
                       )}
                     </div>
-
-                    <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900">
-                      <p className="text-xs text-blue-800 dark:text-blue-300">
-                        💡 Your subscription is tied to your account, not your sign-in method. Access your Pro/Ultra plan with any linked method.
-                      </p>
-                    </div>
                   </CardContent>
                 </Card>
               </div>

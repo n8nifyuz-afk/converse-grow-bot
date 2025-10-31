@@ -191,12 +191,6 @@ export default function EmailLinkModal({ open, onOpenChange, linkedIdentities = 
                 </p>
               </div>
             )}
-
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900">
-              <p className="text-xs text-blue-800 dark:text-blue-300">
-                💡 Your subscription will work with all linked sign-in methods
-              </p>
-            </div>
           </div>
         ) : null}
       </DialogContent>
