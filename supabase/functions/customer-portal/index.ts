@@ -49,13 +49,26 @@ serve(async (req) => {
 
     // Look up Stripe customer ID from user_subscriptions table (using service role)
     // This works for both email and phone-only users
+    logStep("Querying user_subscriptions", { userId: user.id });
+    
     const { data: subscription, error: subError } = await supabaseClient
       .from('user_subscriptions')
       .select('stripe_customer_id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();  // Use maybeSingle instead of single to avoid error on no rows
 
-    if (subError || !subscription?.stripe_customer_id) {
+    logStep("Query result", { 
+      hasData: !!subscription, 
+      hasError: !!subError,
+      errorDetails: subError?.message,
+      customerId: subscription?.stripe_customer_id 
+    });
+
+    if (subError) {
+      throw new Error(`Database error: ${subError.message}`);
+    }
+    
+    if (!subscription?.stripe_customer_id) {
       throw new Error("No subscription found for this user. Please subscribe first.");
     }
 
