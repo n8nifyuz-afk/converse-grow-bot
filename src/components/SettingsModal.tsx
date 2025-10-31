@@ -1245,23 +1245,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         </Button>
                       )}
 
-                      {/* Add Email/Password (only if no OAuth with email OR no standalone email) */}
-                      {!linkedIdentities.some(id => 
-                        (id.provider === 'email') || 
-                        (id.provider === 'google' && id.identity_data?.email) ||
-                        (id.provider === 'apple' && id.identity_data?.email) ||
-                        (id.provider === 'azure' && id.identity_data?.email)
-                      ) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowEmailLinkModal(true)}
-                          className="w-full justify-start gap-2 h-10"
-                        >
-                          <Mail className="h-4 w-4" />
-                          <span>Link Email & Password</span>
-                        </Button>
-                      )}
                       
                       {/* Add Social Accounts */}
                       {(!linkedIdentities.some(id => id.provider === 'google') ||
