@@ -1067,7 +1067,7 @@ export default function AuthModal({
       </Drawer>;
   }
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] sm:max-w-lg md:max-w-2xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
+      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
         <DialogHeader className="sr-only">
           <DialogTitle>ChatLearn Authentication</DialogTitle>
           <DialogDescription>

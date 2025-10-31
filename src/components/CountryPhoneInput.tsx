@@ -26,7 +26,6 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isDetectingCountry, setIsDetectingCountry] = useState(true);
-  const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -167,30 +166,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
       if (inputRef.current) {
         inputRef.current.blur();
       }
-      
-      const newIsOpen = !isDropdownOpen;
-      setIsDropdownOpen(newIsOpen);
-      
-      // Calculate position when opening
-      if (newIsOpen && containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const maxDropdownHeight = 600;
-        const spaceBelow = window.innerHeight - rect.bottom - 16; // 16px padding
-        const spaceAbove = rect.top - 16; // 16px padding
-        
-        // Set CSS variable for dynamic height calculation
-        const dropdown = containerRef.current.querySelector('.country-dropdown') as HTMLElement;
-        if (dropdown) {
-          dropdown.style.setProperty('--dropdown-top', `${rect.top}px`);
-        }
-        
-        // Show above if not enough space below but more space above
-        if (spaceBelow < Math.min(maxDropdownHeight, 400) && spaceAbove > spaceBelow) {
-          setDropdownPosition('above');
-        } else {
-          setDropdownPosition('below');
-        }
-      }
+      setIsDropdownOpen(!isDropdownOpen);
     }
   };
 
@@ -240,7 +216,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
       {/* Dropdown */}
       {isDropdownOpen && (
-        <div className={`country-dropdown ${dropdownPosition === 'above' ? 'dropdown-above' : 'dropdown-below'}`}>
+        <div className="country-dropdown">
           <input
             type="text"
             placeholder="Search country..."
