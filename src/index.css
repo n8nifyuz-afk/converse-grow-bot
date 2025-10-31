@@ -252,7 +252,7 @@
   .country-dropdown {
     position: fixed;
     top: auto;
-    bottom: 2rem;
+    bottom: 10rem;
     left: 0;
     right: 0;
     max-height: 70vh;
