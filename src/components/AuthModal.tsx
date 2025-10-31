@@ -175,20 +175,24 @@ export default function AuthModal({
     setError('');
     
     try {
-      // Send verification code via our custom edge function
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-verification-code`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({ email, password })
-      });
+      // Use direct fetch for better error handling
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-verification-code`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({ email, password })
+        }
+      );
 
       const data = await response.json();
 
+      // Handle non-2xx responses
       if (!response.ok) {
-        // Extract error message from response
         const errorMessage = data?.error || "An error occurred. Please try again.";
         setError(errorMessage);
         return;
@@ -210,11 +214,6 @@ export default function AuthModal({
     } catch (error) {
       console.error('Unexpected error during signup:', error);
       setError("An unexpected error occurred. Please try again.");
-      toast({
-        title: "An error occurred",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
