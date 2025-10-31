@@ -180,15 +180,37 @@ export default function AuthModal({
         body: { email, password }
       });
 
+      console.log('🔍 Edge function response:', { 
+        hasError: !!error, 
+        data, 
+        error,
+        errorMessage: error?.message,
+        errorContext: error?.context
+      });
+
       // For non-2xx responses, extract the error message
       if (error) {
-        // Try multiple ways to extract the error message
-        let errorMessage = data?.error || 
-                          error.context?.body?.error || 
-                          error.message || 
-                          "An error occurred. Please try again.";
+        // Extract error message from various possible locations
+        let errorMessage = "An error occurred. Please try again.";
         
-        console.log('📝 Error from edge function:', { error, data, errorMessage });
+        // Try to parse the error message from different locations
+        if (typeof data === 'object' && data !== null && 'error' in data) {
+          errorMessage = data.error;
+        } else if (error.context?.body) {
+          try {
+            const bodyStr = typeof error.context.body === 'string' 
+              ? error.context.body 
+              : JSON.stringify(error.context.body);
+            const parsed = JSON.parse(bodyStr);
+            if (parsed.error) {
+              errorMessage = parsed.error;
+            }
+          } catch (e) {
+            console.error('Failed to parse error body:', e);
+          }
+        }
+        
+        console.log('📝 Extracted error message:', errorMessage);
         setError(errorMessage);
         
         // Only show toast for non-already-registered errors
