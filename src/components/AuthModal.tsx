@@ -181,29 +181,36 @@ export default function AuthModal({
       });
 
       if (error) {
-        console.error('Signup error:', error);
+        console.error('=== SIGNUP ERROR DEBUG ===');
+        console.error('Full error object:', JSON.stringify(error, null, 2));
+        console.error('Error.context?.body:', error.context?.body);
+        console.error('=========================');
         
-        // Extract the actual error message from the edge function response
+        // Extract the error message
         let errorMessage = "An error occurred. Please try again.";
         
-        if (typeof error === 'object' && error !== null) {
-          // Try to get error message from various possible locations
-          errorMessage = error.message || 
-                        error.error || 
-                        error.msg || 
-                        (error.context?.body && typeof error.context.body === 'string' 
-                          ? (() => {
-                              try {
-                                const parsed = JSON.parse(error.context.body);
-                                return parsed.error || parsed.message;
-                              } catch {
-                                return error.context.body;
-                              }
-                            })()
-                          : errorMessage);
+        // Method 1: Try context.body (edge functions)
+        if (error.context?.body) {
+          try {
+            const bodyStr = typeof error.context.body === 'string' 
+              ? error.context.body 
+              : JSON.stringify(error.context.body);
+            const parsed = JSON.parse(bodyStr);
+            errorMessage = parsed.error || parsed.message || errorMessage;
+          } catch (e) {
+            console.log('Could not parse error body');
+          }
         }
         
-        console.log('Extracted error message:', errorMessage);
+        // Method 2: Direct properties
+        if (errorMessage === "An error occurred. Please try again.") {
+          errorMessage = error.message || error.error || error.msg || errorMessage;
+        }
+        
+        console.log('📝 Extracted error:', errorMessage);
+        
+        // Display in form and toast
+        setError(errorMessage);
         
         // Show different UI based on error type
         if (errorMessage.toLowerCase().includes('already registered with')) {
