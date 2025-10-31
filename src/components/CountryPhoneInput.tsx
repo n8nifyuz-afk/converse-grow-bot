@@ -26,6 +26,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isDetectingCountry, setIsDetectingCountry] = useState(true);
+  const [dropdownBottom, setDropdownBottom] = useState<number>(96); // Default 6rem = 96px
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -117,6 +118,44 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Handle keyboard positioning for Chrome and Safari on mobile
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+
+    const updateDropdownPosition = () => {
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        const viewportHeight = window.visualViewport.height;
+        const windowHeight = window.innerHeight;
+        
+        // If keyboard is open (viewport height is less than window height)
+        if (viewportHeight < windowHeight) {
+          // Position dropdown at 16px from bottom of visible viewport
+          const bottomOffset = Math.max(16, windowHeight - viewportHeight + 16);
+          setDropdownBottom(bottomOffset);
+        } else {
+          // Keyboard is closed, use default position
+          setDropdownBottom(96); // 6rem
+        }
+      }
+    };
+
+    // Initial position
+    updateDropdownPosition();
+
+    // Listen for viewport changes (keyboard open/close)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateDropdownPosition);
+      window.visualViewport.addEventListener('scroll', updateDropdownPosition);
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateDropdownPosition);
+        window.visualViewport.removeEventListener('scroll', updateDropdownPosition);
+      }
+    };
+  }, [isDropdownOpen]);
 
   const validatePhoneNumber = (number: string, country: Country): boolean => {
     if (!number) return false;
@@ -216,7 +255,10 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
       {/* Dropdown */}
       {isDropdownOpen && (
-        <div className="country-dropdown">
+        <div 
+          className="country-dropdown"
+          style={{ bottom: `${dropdownBottom}px` }}
+        >
           <input
             type="text"
             placeholder="Search country..."
