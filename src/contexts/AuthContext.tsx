@@ -1467,13 +1467,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: null,
           updated_at: new Date().toISOString()
         }).eq('user_id', user.id);
-      } else if (['google', 'apple', 'microsoft'].includes(provider)) {
-        // Clear OAuth-specific data
-        await supabase.from('profiles').update({
+      } else if (['google', 'apple', 'azure'].includes(provider)) {
+        // When unlinking OAuth, also clear email and avatar if signup was not via email/oauth
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('signup_method')
+          .eq('user_id', user.id)
+          .single();
+
+        const updateData: any = {
           oauth_provider: null,
           oauth_metadata: null,
           updated_at: new Date().toISOString()
-        }).eq('user_id', user.id);
+        };
+
+        // If user signed up with phone, also clear email and avatar from OAuth
+        if (profile?.signup_method === 'phone') {
+          updateData.email = null;
+          updateData.avatar_url = null;
+        }
+
+        await supabase.from('profiles').update(updateData).eq('user_id', user.id);
       }
 
       console.log('✅ Authentication method unlinked:', provider);
