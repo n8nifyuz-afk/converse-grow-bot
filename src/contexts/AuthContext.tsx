@@ -32,6 +32,11 @@ interface AuthContextType {
   verifyOtp: (phone: string, token: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  // Account linking methods
+  linkPhoneNumber: (phone: string) => Promise<{ error: any }>;
+  verifyPhoneLink: (phone: string, token: string) => Promise<{ error: any }>;
+  linkEmailPassword: (email: string, password: string) => Promise<{ error: any }>;
+  linkGoogleAccount: () => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -1187,6 +1192,126 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.href = '/';
   };
 
+  // Account Linking Functions
+  const linkPhoneNumber = async (phone: string): Promise<{ error: any }> => {
+    try {
+      if (!user) {
+        return { error: { message: 'No user logged in' } };
+      }
+
+      // CRITICAL: For linking phone to existing account, we update the user's phone
+      // Supabase will send an OTP for verification
+      const { error } = await supabase.auth.updateUser({
+        phone: phone
+      });
+
+      if (error) {
+        console.error('Link phone error:', error);
+        return { error };
+      }
+
+      console.log('✅ Phone OTP sent for linking:', phone);
+      return { error: null };
+    } catch (error) {
+      console.error('Link phone exception:', error);
+      return { error };
+    }
+  };
+
+  const verifyPhoneLink = async (phone: string, token: string): Promise<{ error: any }> => {
+    try {
+      if (!user) {
+        return { error: { message: 'No user logged in' } };
+      }
+
+      // Verify the phone OTP - this completes the linking
+      const { error } = await supabase.auth.verifyOtp({
+        phone: phone,
+        token: token,
+        type: 'phone_change'
+      });
+
+      if (error) {
+        console.error('Verify phone link error:', error);
+        return { error };
+      }
+
+      // Update profile with phone number
+      await supabase.from('profiles').update({
+        phone_number: phone,
+        updated_at: new Date().toISOString()
+      }).eq('user_id', user.id);
+
+      console.log('✅ Phone linked successfully:', phone);
+      await refreshUserProfile();
+      return { error: null };
+    } catch (error) {
+      console.error('Verify phone link exception:', error);
+      return { error };
+    }
+  };
+
+  const linkEmailPassword = async (email: string, password: string): Promise<{ error: any }> => {
+    try {
+      if (!user) {
+        return { error: { message: 'No user logged in' } };
+      }
+
+      // For phone users wanting to add email/password
+      const { error } = await supabase.auth.updateUser({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        console.error('Link email error:', error);
+        return { error };
+      }
+
+      // Update profile
+      await supabase.from('profiles').update({
+        email: email,
+        updated_at: new Date().toISOString()
+      }).eq('user_id', user.id);
+
+      console.log('✅ Email linked successfully:', email);
+      await refreshUserProfile();
+      return { error: null };
+    } catch (error) {
+      console.error('Link email exception:', error);
+      return { error };
+    }
+  };
+
+  const linkGoogleAccount = async (): Promise<{ error: any }> => {
+    try {
+      if (!user) {
+        return { error: { message: 'No user logged in' } };
+      }
+
+      // CRITICAL: Use linkIdentity for OAuth linking
+      // This will redirect to Google and link the account
+      const { error } = await supabase.auth.linkIdentity({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          skipBrowserRedirect: false
+        }
+      });
+
+      if (error) {
+        console.error('Link Google error:', error);
+        return { error };
+      }
+
+      console.log('✅ Google account linking initiated');
+      return { error: null };
+    } catch (error) {
+      console.error('Link Google exception:', error);
+      return { error };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -1206,7 +1331,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithPhone,
     verifyOtp,
     signOut,
-    resetPassword
+    resetPassword,
+    // Account linking
+    linkPhoneNumber,
+    verifyPhoneLink,
+    linkEmailPassword,
+    linkGoogleAccount
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

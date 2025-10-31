@@ -13,6 +13,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUsageLimits } from '@/hooks/useUsageLimits';
+import PhoneLinkModal from './PhoneLinkModal';
+import EmailLinkModal from './EmailLinkModal';
 import { 
   Settings, 
   User, 
@@ -57,6 +59,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const [isUpdatingName, setIsUpdatingName] = React.useState(false);
   const [birthDate, setBirthDate] = React.useState('');
   const [isUpdatingBirthDate, setIsUpdatingBirthDate] = React.useState(false);
+  const [showPhoneLinkModal, setShowPhoneLinkModal] = React.useState(false);
+  const [showEmailLinkModal, setShowEmailLinkModal] = React.useState(false);
   const { theme, accentColor, setTheme, setAccentColor } = useTheme();
   const { toast } = useToast();
   const { user, signOut, userProfile, subscriptionStatus, checkSubscription, refreshUserProfile } = useAuth();
@@ -1176,10 +1180,10 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            disabled
+                            onClick={() => setShowPhoneLinkModal(true)}
                             className="text-xs"
                           >
-                            Coming Soon
+                            Link Phone
                           </Button>
                         </div>
                       </div>
@@ -1203,10 +1207,10 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            disabled
+                            onClick={() => setShowEmailLinkModal(true)}
                             className="text-xs"
                           >
-                            Coming Soon
+                            Link Email
                           </Button>
                         </div>
                       </div>
@@ -1515,6 +1519,16 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           </div>
         </div>
       </DialogContent>
+      
+      {/* Account Linking Modals */}
+      <PhoneLinkModal 
+        open={showPhoneLinkModal} 
+        onOpenChange={setShowPhoneLinkModal} 
+      />
+      <EmailLinkModal 
+        open={showEmailLinkModal} 
+        onOpenChange={setShowEmailLinkModal} 
+      />
     </Dialog>
   );
 }
