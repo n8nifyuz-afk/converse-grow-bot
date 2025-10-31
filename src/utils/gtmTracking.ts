@@ -24,6 +24,12 @@ export const initializeGTMWithGCLID = () => {
     const gclidFromStorage = localStorage.getItem('gclid');
     const gclid = gclidFromUrl || gclidFromStorage;
 
+    // CRITICAL: Store GCLID in localStorage if found in URL (for later use during signup)
+    if (gclidFromUrl && gclidFromUrl !== gclidFromStorage) {
+      localStorage.setItem('gclid', gclidFromUrl);
+      console.log('🎯 GCLID saved to localStorage:', gclidFromUrl);
+    }
+
     // Collect all URL parameters for attribution
     const allUrlParams: Record<string, string> = {};
     urlParams.forEach((value, key) => {
