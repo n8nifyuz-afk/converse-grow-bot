@@ -238,37 +238,53 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
         </p>
       )}
 
-      {/* Dropdown */}
+      {/* Dropdown - Mobile style */}
       {isDropdownOpen && (
-        <div className={`country-dropdown ${dropdownPosition === 'above' ? 'dropdown-above' : 'dropdown-below'}`}>
-          <input
-            type="text"
-            placeholder="Search country..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="country-search"
-            autoFocus
-          />
-          <div className="country-list">
-            {filteredCountries.map((country) => (
-              <button
-                key={country.code}
-                type="button"
-                onClick={() => handleCountrySelect(country)}
-                className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
+        <>
+          {/* Backdrop for desktop */}
+          <div className="country-dropdown-backdrop" onClick={() => setIsDropdownOpen(false)} />
+          
+          {/* Modal-style dropdown */}
+          <div className="country-dropdown-modal">
+            <div className="country-modal-header">
+              <h3 className="country-modal-title">Select Country</h3>
+              <button 
+                type="button" 
+                className="country-modal-close"
+                onClick={() => setIsDropdownOpen(false)}
               >
-                <div className="country-info">
-                  <span className="country-flag">{country.code}</span>
-                  <span className="country-name">{country.name}</span>
-                </div>
-                <span className="country-dial-code">{country.dialCode}</span>
+                ✕
               </button>
-            ))}
-            {filteredCountries.length === 0 && (
-              <div className="no-results">No countries found</div>
-            )}
+            </div>
+            <input
+              type="text"
+              placeholder="Search country..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="country-search"
+              autoFocus
+            />
+            <div className="country-list">
+              {filteredCountries.map((country) => (
+                <button
+                  key={country.code}
+                  type="button"
+                  onClick={() => handleCountrySelect(country)}
+                  className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
+                >
+                  <div className="country-info">
+                    <span className="country-flag">{country.code}</span>
+                    <span className="country-name">{country.name}</span>
+                  </div>
+                  <span className="country-dial-code">{country.dialCode}</span>
+                </button>
+              ))}
+              {filteredCountries.length === 0 && (
+                <div className="no-results">No countries found</div>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
