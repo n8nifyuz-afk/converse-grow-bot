@@ -246,12 +246,6 @@ serve(async (req) => {
           plan: targetPlan,
           user_id: user.id,
           phone: user.phone || '',
-        },
-        // CRITICAL: Save payment method for off-session future charges
-        // This establishes mandate during initial €0.99 + 3DS so €19.99 renewal
-        // after trial can run automatically without requiring 3DS again
-        payment_settings: {
-          save_default_payment_method: 'on_subscription'
         }
       }
     };
