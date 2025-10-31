@@ -1091,6 +1091,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           plan_name: dbSub?.plan_name || null
         };
         
+        console.log('[SUBSCRIPTION-CHECK-RESULT]', {
+          userId: user.id,
+          email: user.email,
+          newStatus,
+          previousSubscribed,
+          changed: previousSubscribed !== newStatus.subscribed
+        });
+        
         setSubscriptionStatus(newStatus);
         
         // Check if returning from Stripe checkout (session_id in URL)

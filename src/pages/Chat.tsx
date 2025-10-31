@@ -3669,6 +3669,19 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   // Check if user has Ultra subscription
                   const hasUltra = subscriptionStatus.plan === 'ultra_pro';
                   
+                  // DEBUG: Log badge visibility for first pro model only (to avoid spam)
+                  if (isPro && model.id === 'gpt-4o') {
+                    console.log('[MODEL-BADGE-DEBUG]', {
+                      modelId: model.id,
+                      modelType: model.type,
+                      isPro,
+                      subscribed: subscriptionStatus.subscribed,
+                      subscribedType: typeof subscriptionStatus.subscribed,
+                      showBadge: isPro && !subscriptionStatus.subscribed,
+                      fullStatus: subscriptionStatus
+                    });
+                  }
+                  
                   return (
                     <SelectItem
                       key={model.id} 
