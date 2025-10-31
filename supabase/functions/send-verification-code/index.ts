@@ -56,9 +56,17 @@ serve(async (req) => {
       throw new Error(`Failed to check email availability: ${searchError.message}`);
     }
 
-    const emailExists = existingUsers.users.some(u => u.email === email);
-    if (emailExists) {
-      throw new Error('This email is already registered. Please use a different email.');
+    const existingUser = existingUsers.users.find(u => u.email === email);
+    if (existingUser) {
+      logStep("Email already exists", { email, providers: existingUser.app_metadata?.providers });
+      
+      // Check if user signed up with OAuth (Google, Apple, etc.)
+      const providers = existingUser.app_metadata?.providers || [];
+      if (providers.length > 0 && !providers.includes('email')) {
+        throw new Error(`This email is already registered with ${providers[0]}. Please sign in using ${providers[0]} instead, or use a different email address.`);
+      } else {
+        throw new Error('This email is already registered. Please sign in or use the "Forgot Password" option.');
+      }
     }
 
     // Generate a 6-digit verification code

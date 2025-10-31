@@ -179,11 +179,23 @@ export default function AuthModal({
       });
 
       if (error) {
-        toast({
-          title: "Sign up failed",
-          description: error.message,
-          variant: "destructive"
-        });
+        const errorMsg = error.message || "An error occurred";
+        
+        // Check if it's an OAuth account
+        if (errorMsg.includes('registered with')) {
+          toast({
+            title: "Account exists",
+            description: errorMsg,
+            variant: "destructive",
+            duration: 10000
+          });
+        } else {
+          toast({
+            title: "Sign up failed",
+            description: errorMsg,
+            variant: "destructive"
+          });
+        }
       } else {
         setLastSignupAttempt(now);
         setSignupCooldown(60);
