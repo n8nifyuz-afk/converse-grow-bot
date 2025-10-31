@@ -23,23 +23,37 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    // Log environment check
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      logStep("Missing environment variables", { 
+        hasUrl: !!supabaseUrl, 
+        hasKey: !!serviceRoleKey 
+      });
+      throw new Error("Server configuration error - missing credentials");
+    }
 
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+    logStep("Parsing request body");
     const { email, password } = await req.json();
     
     if (!email || !password) {
+      logStep("Missing email or password");
       throw new Error("Email and password are required");
     }
 
     logStep("Request received", { email });
 
     // Check if email already exists in auth.users
+    logStep("Checking if email exists");
     const { data: existingUsers, error: searchError } = await supabaseAdmin.auth.admin.listUsers();
+    
     if (searchError) {
-      throw new Error('Failed to check email availability');
+      logStep("Error checking email availability", { error: searchError });
+      throw new Error(`Failed to check email availability: ${searchError.message}`);
     }
 
     const emailExists = existingUsers.users.some(u => u.email === email);
@@ -154,10 +168,19 @@ serve(async (req) => {
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR", { message: errorMessage });
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    logStep("ERROR", { 
+      message: errorMessage,
+      stack: errorStack,
+      errorType: error?.constructor?.name
+    });
     
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ 
+        error: errorMessage,
+        details: "Check edge function logs for more information"
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
