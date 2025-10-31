@@ -85,6 +85,7 @@ serve(async (req) => {
     const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
     // Store the verification code in Supabase
+    let verificationRecord;
     const { data: verification, error: storeError } = await supabaseAdmin
       .from('email_verifications')
       .insert({
@@ -118,6 +119,14 @@ serve(async (req) => {
       if (!updatedVerification) {
         throw new Error('Failed to create verification record');
       }
+      
+      verificationRecord = updatedVerification;
+    } else {
+      verificationRecord = verification;
+    }
+    
+    if (!verificationRecord) {
+      throw new Error('Failed to create verification record');
     }
 
     // Render email template
@@ -160,7 +169,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        verificationId: verification?.id || null,
+        verificationId: verificationRecord.id,
         message: "Verification code sent to your email"
       }),
       {

@@ -1441,10 +1441,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
 
-      // Update profile to remove provider-specific data
+      // Update profile to remove OAuth metadata (keep contact info like email/phone)
       if (provider === 'phone') {
         await supabase.from('profiles').update({
           phone_number: null,
+          updated_at: new Date().toISOString()
+        }).eq('user_id', user.id);
+      } else if (['google', 'apple', 'microsoft'].includes(provider)) {
+        // Clear OAuth-specific data but keep email/phone as contact info
+        await supabase.from('profiles').update({
+          oauth_provider: null,
+          oauth_metadata: null,
           updated_at: new Date().toISOString()
         }).eq('user_id', user.id);
       }
