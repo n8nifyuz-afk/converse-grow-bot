@@ -68,13 +68,13 @@ verify_jwt = false
 [functions.send-welcome-email]
 verify_jwt = false
 
-# Verification code sender (requires authentication)
+# Verification code sender (handles both signup and linking internally)
 [functions.send-verification-code]
-verify_jwt = true
+verify_jwt = false
 
-# Email code verification (requires authentication)
+# Email code verification (handles both signup and linking internally)
 [functions.verify-email-code]
-verify_jwt = true
+verify_jwt = false
 
 # Subscriber webhook notification (requires authentication)
 [functions.send-subscriber-webhook]
