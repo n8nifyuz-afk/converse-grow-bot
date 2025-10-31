@@ -250,12 +250,18 @@ serve(async (req) => {
       }
     };
     
-    // CRITICAL: Only add customer_update if customer exists AND user has email
-    // For phone-only users, don't collect additional info to avoid email prompt
-    if (customerId && user.email) {
-      sessionConfig.customer_update = {
-        address: 'auto'  // Collect address for tax calculation
-      };
+    // Handle address collection for tax purposes
+    if (customerId) {
+      if (user.email) {
+        // Email users: update customer with address
+        sessionConfig.customer_update = {
+          address: 'auto'
+        };
+      } else {
+        // Phone-only users: collect billing address without updating customer
+        // This avoids email prompt while still getting address for tax
+        sessionConfig.billing_address_collection = 'required';
+      }
     }
     
     // For trials: add 3-day trial period + €0.99 upfront charge
