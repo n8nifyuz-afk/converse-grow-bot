@@ -45,16 +45,25 @@ serve(async (req) => {
     let user = null;
     let isSignup = false;
 
-    if (authHeader) {
-      // Authenticated - email linking flow
+    if (authHeader && authHeader !== 'Bearer undefined' && authHeader !== 'Bearer null') {
+      // Try to authenticate - email linking flow
       const { data: { user: authUser }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
-      if (userError || !authUser) {
-        throw new Error('Unauthorized');
+      
+      if (!userError && authUser) {
+        // Valid authentication - this is email linking
+        user = authUser;
+        isSignup = false;
+        logStep("Email linking verification", { userId: user.id });
+      } else {
+        // Invalid/expired token - treat as signup
+        isSignup = true;
+        if (!password) {
+          throw new Error("Password is required for signup");
+        }
+        logStep("Signup verification (invalid token)", { email });
       }
-      user = authUser;
-      logStep("Email linking verification", { userId: user.id });
     } else {
-      // Unauthenticated - signup flow
+      // No valid auth header - signup flow
       isSignup = true;
       if (!password) {
         throw new Error("Password is required for signup");
