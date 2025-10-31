@@ -12,7 +12,7 @@ export function EmailVerificationLinking() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const [step, setStep] = useState<'input' | 'sent'>('input');
+  const [step, setStep] = useState<'input' | 'verify'>('input');
   const [loading, setLoading] = useState(false);
   const [verificationId, setVerificationId] = useState('');
 
@@ -57,10 +57,11 @@ export function EmailVerificationLinking() {
       if (error) throw error;
 
       if (data?.success) {
-        setStep('sent');
-        toast.success('Verification link sent! Check your email.');
+        setStep('verify');
+        setVerificationId(data.verificationId);
+        toast.success('Verification code sent! Check your email.');
       } else {
-        throw new Error(data?.error || 'Failed to send verification link');
+        throw new Error(data?.error || 'Failed to send verification code');
       }
     } catch (error: any) {
       console.error('Send code error:', error);
@@ -70,26 +71,97 @@ export function EmailVerificationLinking() {
     }
   };
 
-  if (step === 'sent') {
+  const handleVerifyCode = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast.error('Please enter the 6-digit code');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Session expired. Please log in again.');
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('verify-email-code', {
+        body: {
+          code: verificationCode,
+          email,
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success('Email linked successfully!');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        throw new Error(data?.error || 'Failed to verify code');
+      }
+    } catch (error: any) {
+      console.error('Verification error:', error);
+      toast.error(error.message || 'Invalid or expired code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (step === 'verify') {
     return (
       <div className="space-y-3">
         <div className="space-y-2 text-center py-4">
           <Mail className="h-12 w-12 mx-auto text-primary" />
-          <h3 className="font-semibold text-sm">Check Your Email</h3>
+          <h3 className="font-semibold text-sm">Enter Verification Code</h3>
           <p className="text-xs text-muted-foreground">
-            We've sent a verification link to <strong>{email}</strong>
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Click the link in the email to complete linking your email address.
+            We sent a 6-digit code to <strong>{email}</strong>
           </p>
         </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="code" className="flex items-center gap-1.5 text-xs">
+            <Key className="h-3 w-3" />
+            Verification Code
+          </Label>
+          <Input
+            id="code"
+            type="text"
+            placeholder="000000"
+            maxLength={6}
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+            disabled={loading}
+            className="h-9 text-sm text-center text-2xl tracking-widest"
+          />
+        </div>
+
+        <Button
+          onClick={handleVerifyCode}
+          disabled={loading || verificationCode.length !== 6}
+          className="w-full h-8 text-xs"
+          size="sm"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+              Verifying...
+            </>
+          ) : (
+            'Verify Code'
+          )}
+        </Button>
 
         <Button
           variant="outline"
           onClick={() => {
             setStep('input');
-            setEmail('');
-            setPassword('');
+            setVerificationCode('');
           }}
           className="w-full h-8 text-xs"
           size="sm"
@@ -149,7 +221,7 @@ export function EmailVerificationLinking() {
             Sending...
           </>
         ) : (
-          'Send Verification Link'
+          'Send Verification Code'
         )}
       </Button>
     </div>

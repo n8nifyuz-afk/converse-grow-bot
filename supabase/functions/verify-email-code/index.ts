@@ -26,10 +26,10 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { token, email } = await req.json();
+    const { code, email } = await req.json();
     
-    if (!token || !email) {
-      throw new Error("Token and email are required");
+    if (!code || !email) {
+      throw new Error("Code and email are required");
     }
 
     logStep("Verification attempt", { email });
@@ -51,30 +51,30 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Get verification record by token
+    // Get verification record by code
     const { data: verification, error: fetchError } = await supabaseAdmin
       .from('email_verifications')
       .select('*')
-      .eq('code', token)
+      .eq('code', code)
       .eq('email', email)
       .single();
 
     if (fetchError || !verification) {
-      logStep("Invalid verification token", { email });
-      throw new Error("Invalid or expired verification link");
+      logStep("Invalid verification code", { email });
+      throw new Error("Invalid or expired verification code");
     }
 
-    // Check if link is expired
+    // Check if code is expired
     const expiresAt = new Date(verification.expires_at);
     if (expiresAt < new Date()) {
-      logStep("Link expired", { email, expiresAt });
-      throw new Error("Verification link has expired. Please request a new one.");
+      logStep("Code expired", { email, expiresAt });
+      throw new Error("Verification code has expired. Please request a new one.");
     }
 
     // Check if already verified
     if (verification.verified) {
       logStep("Already verified", { email });
-      throw new Error("This link has already been used");
+      throw new Error("This code has already been used");
     }
 
     // Get the password from the verification record
@@ -132,7 +132,7 @@ serve(async (req) => {
     await supabaseAdmin
       .from('email_verifications')
       .update({ verified: true })
-      .eq('code', token)
+      .eq('code', code)
       .eq('email', email);
 
     logStep("User email linked successfully", { userId: user.id });

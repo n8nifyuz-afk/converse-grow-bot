@@ -1,9 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { renderAsync } from 'https://esm.sh/@react-email/components@0.0.22';
-import React from 'https://esm.sh/react@18.3.1';
-import { VerificationEmail } from './_templates/verification-email.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -15,13 +12,6 @@ const corsHeaders = {
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[SEND-VERIFICATION-CODE] ${step}${detailsStr}`);
-};
-
-// Generate a secure token for email verification link
-const generateToken = (): string => {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 };
 
 serve(async (req) => {
@@ -73,11 +63,11 @@ serve(async (req) => {
       throw new Error('This email is already registered. Please use a different email.');
     }
 
-    // Generate secure verification token
-    const token = generateToken();
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+    // Generate a 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    logStep("Generated verification token", { email, expiresAt });
+    logStep("Generated verification code", { email, expiresAt });
 
     // Hash password properly
     const encoder = new TextEncoder();
@@ -86,13 +76,13 @@ serve(async (req) => {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Store the verification token in Supabase
+    // Store the verification code in Supabase
     let verificationRecord;
     const { data: verification, error: storeError } = await supabaseAdmin
       .from('email_verifications')
       .insert({
         email,
-        code: token,
+        code: code,
         password_hash: passwordHash,
         expires_at: expiresAt.toISOString(),
       })
@@ -104,7 +94,7 @@ serve(async (req) => {
       const { data: updatedVerification, error: updateError } = await supabaseAdmin
         .from('email_verifications')
         .update({
-          code: token,
+          code: code,
           password_hash: passwordHash,
           expires_at: expiresAt.toISOString(),
           verified: false,
@@ -131,26 +121,26 @@ serve(async (req) => {
       throw new Error('Failed to create verification record');
     }
 
-    // Create verification link
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const verificationLink = `${supabaseUrl.replace('lciaiunzacgvvbvcshdh.supabase.co', 'chatl.ai')}/link-email?token=${token}&email=${encodeURIComponent(email)}`;
-    
-    // Render email template
-    const html = await renderAsync(
-      React.createElement(VerificationEmail, {
-        verificationLink,
-        email,
-      })
-    );
-
-    // Send verification email with proper headers for deliverability
+    // Send simple verification code email
     const { error: emailError } = await resend.emails.send({
       from: "ChatLearn <no-reply@chatl.ai>",
       to: [email],
-      subject: "Link Your Email to ChatLearn",
-      html,
+      subject: "Your ChatLearn Verification Code",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333;">Verify Your Email</h2>
+          <p style="color: #666; font-size: 16px;">Your verification code is:</p>
+          <div style="background: #f4f4f4; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
+            ${code}
+          </div>
+          <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
+          <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #999; font-size: 12px; text-align: center;">© 2025 ChatLearn. All rights reserved.</p>
+        </div>
+      `,
       headers: {
-        'X-Entity-Ref-ID': `email-link-${Date.now()}`,
+        'X-Entity-Ref-ID': `email-verification-${Date.now()}`,
       },
       tags: [
         {
@@ -170,13 +160,13 @@ serve(async (req) => {
       throw emailError;
     }
 
-    logStep("Verification email sent successfully", { email });
+    logStep("Verification code sent successfully", { email });
 
     return new Response(
       JSON.stringify({ 
         success: true,
         verificationId: verificationRecord.id,
-        message: "Verification link sent to your email"
+        message: "Verification code sent to your email"
       }),
       {
         status: 200,
