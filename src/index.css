@@ -111,6 +111,14 @@
   flex-direction: column;
 }
 
+/* Mobile-specific positioning */
+@media (max-width: 767px) {
+  .country-dropdown {
+    bottom: 10rem;
+    top: auto;
+  }
+}
+
 .country-search {
   padding: 0.875rem 1rem;
   border: none;
