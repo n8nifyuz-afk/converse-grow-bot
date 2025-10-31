@@ -83,7 +83,7 @@ export const VerificationEmail = ({
               <Link href="https://www.chatl.ai/privacy" style={footerLink}>
                 Privacy Policy
               </Link>
-              {' • '}
+              {" • "}
               <Link href="https://www.chatl.ai/terms" style={footerLink}>
                 Terms of Service
               </Link>
