@@ -24,7 +24,14 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     logStep("Stripe key verified");
 
+    // Use service role for database access (bypass RLS)
     const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Use anon client for user authentication
+    const supabaseAuth = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
@@ -34,13 +41,13 @@ serve(async (req) => {
     logStep("Authorization header found");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    const { data: userData, error: userError } = await supabaseAuth.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id, email: user.email || "none", phone: user.phone || "none" });
 
-    // Look up Stripe customer ID from user_subscriptions table
+    // Look up Stripe customer ID from user_subscriptions table (using service role)
     // This works for both email and phone-only users
     const { data: subscription, error: subError } = await supabaseClient
       .from('user_subscriptions')
