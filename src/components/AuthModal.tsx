@@ -568,7 +568,7 @@ export default function AuthModal({
 
   const authContent = <div className="flex flex-col">
            {/* Auth Form */}
-           <div className="w-full p-4 md:p-6 flex flex-col pb-safe">
+           <div className="w-full px-4 md:px-6 py-6 md:py-8 flex flex-col pb-safe">
              {/* Main Heading - Hide during profile completion */}
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
