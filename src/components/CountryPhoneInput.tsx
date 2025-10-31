@@ -26,6 +26,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isDetectingCountry, setIsDetectingCountry] = useState(true);
+  const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -166,7 +167,24 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
       if (inputRef.current) {
         inputRef.current.blur();
       }
-      setIsDropdownOpen(!isDropdownOpen);
+      
+      const newIsOpen = !isDropdownOpen;
+      setIsDropdownOpen(newIsOpen);
+      
+      // Calculate position when opening
+      if (newIsOpen && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const dropdownHeight = 500; // Max height of dropdown
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Show above if not enough space below but enough space above
+        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+          setDropdownPosition('above');
+        } else {
+          setDropdownPosition('below');
+        }
+      }
     }
   };
 
@@ -216,7 +234,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
       {/* Dropdown */}
       {isDropdownOpen && (
-        <div className="country-dropdown">
+        <div className={`country-dropdown ${dropdownPosition === 'above' ? 'dropdown-above' : 'dropdown-below'}`}>
           <input
             type="text"
             placeholder="Search country..."

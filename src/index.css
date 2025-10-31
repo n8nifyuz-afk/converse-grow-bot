@@ -97,7 +97,6 @@
 /* Country Dropdown */
 .country-dropdown {
   position: absolute;
-  top: calc(100% + 0.5rem);
   left: 0;
   right: 0;
   background: hsl(var(--popover));
@@ -105,10 +104,21 @@
   border-radius: 0.75rem;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
   z-index: 99999;
-  max-height: 450px;
+  max-height: 500px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.country-dropdown.dropdown-below {
+  top: calc(100% + 0.5rem);
+}
+
+.country-dropdown.dropdown-above {
+  bottom: calc(100% + 0.5rem);
 }
 
 .country-search {
@@ -137,7 +147,7 @@
   overflow-y: auto;
   padding: 0.25rem;
   flex: 1;
-  max-height: 370px;
+  max-height: 420px;
   min-height: 200px;
 }
 
