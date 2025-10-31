@@ -135,16 +135,6 @@ export default function EmailLinkModal({ open, onOpenChange, linkedIdentities = 
 
         {!method ? (
           <div className="space-y-3 pt-4">
-            {!hasEmail && (
-              <Button
-                variant="outline"
-                onClick={() => setMethod('email')}
-                className="w-full h-12 justify-start gap-3"
-              >
-                <Mail className="h-5 w-5" />
-                Link Email & Password
-              </Button>
-            )}
 
             {!hasGoogle && (
               <Button
@@ -207,24 +197,6 @@ export default function EmailLinkModal({ open, onOpenChange, linkedIdentities = 
                 💡 Your subscription will work with all linked sign-in methods
               </p>
             </div>
-          </div>
-        ) : method === 'email' ? (
-          <div className="space-y-4 pt-4">
-            <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900 p-3 mb-4">
-              <p className="text-xs text-blue-800 dark:text-blue-300">
-                📧 We'll send a verification code to your email to confirm it's yours
-              </p>
-            </div>
-
-            <EmailVerificationLinking />
-
-            <Button
-              variant="outline"
-              onClick={() => setMethod(null)}
-              className="w-full"
-            >
-              Back
-            </Button>
           </div>
         ) : null}
       </DialogContent>
