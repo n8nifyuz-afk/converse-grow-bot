@@ -180,41 +180,26 @@ export default function AuthModal({
         body: { email, password }
       });
 
-      console.log('🔍 Edge function response:', { 
-        hasError: !!error, 
-        data, 
-        error,
-        errorMessage: error?.message,
-        errorContext: error?.context
-      });
-
-      // For non-2xx responses, extract the error message
+      // For non-2xx responses, error will be set and data will contain the error body
       if (error) {
-        // Extract error message from various possible locations
+        // Extract the actual error message from the response body
         let errorMessage = "An error occurred. Please try again.";
         
-        // Try to parse the error message from different locations
-        if (typeof data === 'object' && data !== null && 'error' in data) {
+        if (data?.error) {
           errorMessage = data.error;
-        } else if (error.context?.body) {
-          try {
-            const bodyStr = typeof error.context.body === 'string' 
-              ? error.context.body 
-              : JSON.stringify(error.context.body);
-            const parsed = JSON.parse(bodyStr);
-            if (parsed.error) {
-              errorMessage = parsed.error;
-            }
-          } catch (e) {
-            console.error('Failed to parse error body:', e);
-          }
         }
         
-        console.log('📝 Extracted error message:', errorMessage);
+        console.log('📝 Error from edge function:', errorMessage);
         setError(errorMessage);
         
-        // Only show toast for non-already-registered errors
-        if (!errorMessage.toLowerCase().includes('already registered with')) {
+        if (errorMessage.toLowerCase().includes('already registered with')) {
+          toast({
+            title: "Account already exists",
+            description: errorMessage,
+            variant: "destructive",
+            duration: 10000
+          });
+        } else {
           toast({
             title: "Sign up failed",
             description: errorMessage,
