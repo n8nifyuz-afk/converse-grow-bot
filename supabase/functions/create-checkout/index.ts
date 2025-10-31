@@ -238,12 +238,6 @@ serve(async (req) => {
           request_three_d_secure: 'any',
         },
       },
-      // CRITICAL: Establish off-session mandate for future automatic charges
-      // This ensures that after the initial €0.99 + 3DS, future charges (€19.99)
-      // can run automatically without requiring another 3DS prompt
-      payment_intent_data: {
-        setup_future_usage: 'off_session'
-      },
       automatic_tax: {
         enabled: true,
       },
@@ -252,6 +246,12 @@ serve(async (req) => {
           plan: targetPlan,
           user_id: user.id,
           phone: user.phone || '',
+        },
+        // CRITICAL: Save payment method for off-session future charges
+        // This establishes mandate during initial €0.99 + 3DS so €19.99 renewal
+        // after trial can run automatically without requiring 3DS again
+        payment_settings: {
+          save_default_payment_method: 'on_subscription'
         }
       }
     };
