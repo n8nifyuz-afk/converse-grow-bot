@@ -971,6 +971,157 @@ serve(async (req) => {
         break;
       }
 
+      case "invoice.payment_action_required": {
+        const invoice = event.data.object as Stripe.Invoice;
+        logStep("Payment requires action (3DS/SCA needed)", { 
+          invoiceId: invoice.id, 
+          amountDue: invoice.amount_due / 100,
+          hostedInvoiceUrl: invoice.hosted_invoice_url 
+        });
+
+        // Get customer to match user
+        const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
+        const customerUserId = customer.metadata?.user_id;
+        
+        let user;
+        
+        // STRATEGY 1: Match by user_id metadata
+        if (customerUserId) {
+          const { data: userData } = await supabaseClient.auth.admin.getUserById(customerUserId);
+          if (userData?.user) {
+            user = userData.user;
+            logStep("✅ User matched by user_id metadata", { userId: user.id });
+          }
+        }
+        
+        // STRATEGY 2: Fallback to email matching
+        if (!user && customer.email) {
+          const { data: profileData } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .ilike('email', customer.email)
+            .single();
+          
+          if (profileData) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profileData.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              logStep("✅ User matched by email", { email: customer.email });
+            }
+          }
+        }
+        
+        // STRATEGY 3: Fallback to phone matching
+        if (!user && customer.phone) {
+          const { data: profileData } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .eq('phone_number', customer.phone)
+            .single();
+          
+          if (profileData) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profileData.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              logStep("✅ User matched by phone", { phone: customer.phone });
+            }
+          }
+        }
+        
+        if (!user) {
+          logStep("❌ Could not match user for payment action required");
+          break;
+        }
+
+        // Get hosted invoice URL for authentication
+        if (!invoice.hosted_invoice_url) {
+          logStep("❌ No hosted_invoice_url available");
+          break;
+        }
+
+        // Send email notification with hosted invoice link
+        try {
+          const { data: userProfile } = await supabaseClient
+            .from('profiles')
+            .select('display_name')
+            .eq('user_id', user.id)
+            .single();
+
+          const userName = userProfile?.display_name || user.email?.split('@')[0] || 'Valued Customer';
+          const userEmail = user.email || customer.email;
+
+          if (!userEmail) {
+            logStep("❌ No email available to send authentication link");
+            break;
+          }
+
+          await resend.emails.send({
+            from: 'ChatL Billing <billing@chatl.ai>',
+            to: [userEmail],
+            subject: '⚠️ Action Required: Complete Payment Authentication',
+            html: `
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="color: white; margin: 0; font-size: 28px;">Payment Authentication Needed</h1>
+                  </div>
+                  
+                  <div style="background: #ffffff; padding: 40px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+                    <p style="font-size: 16px; margin-bottom: 20px;">Hi ${userName},</p>
+                    
+                    <p style="font-size: 16px; margin-bottom: 20px;">
+                      Your bank requires additional authentication to complete your subscription payment of <strong>€${(invoice.amount_due / 100).toFixed(2)}</strong>.
+                    </p>
+                    
+                    <p style="font-size: 16px; margin-bottom: 30px;">
+                      To keep your ChatL subscription active, please complete the authentication process by clicking the button below:
+                    </p>
+                    
+                    <div style="text-align: center; margin: 40px 0;">
+                      <a href="${invoice.hosted_invoice_url}" 
+                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                        Complete Authentication
+                      </a>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: #666; margin-top: 30px;">
+                      If you don't complete this within the next few hours, your subscription may be paused. You can always complete authentication later from your account settings.
+                    </p>
+                    
+                    <p style="font-size: 14px; color: #666; margin-top: 20px;">
+                      If you didn't authorize this payment, please contact our support team immediately.
+                    </p>
+                    
+                    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                    
+                    <p style="font-size: 12px; color: #999; text-align: center;">
+                      ChatL - Your AI Companion<br>
+                      <a href="https://chatl.ai" style="color: #667eea; text-decoration: none;">chatl.ai</a>
+                    </p>
+                  </div>
+                </body>
+              </html>
+            `,
+          });
+
+          logStep("✅ Authentication email sent successfully", { 
+            userId: user.id,
+            email: userEmail 
+          });
+        } catch (emailError) {
+          logStep("❌ Failed to send authentication email", { 
+            error: emailError instanceof Error ? emailError.message : String(emailError) 
+          });
+        }
+
+        break;
+      }
+
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         logStep("Payment failed", { invoiceId: invoice.id, amountDue: invoice.amount_due / 100 });
