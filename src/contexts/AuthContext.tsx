@@ -1458,8 +1458,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (provider === 'email') {
         // Clear email and password from auth.users completely
         // This makes the email available for new signups
+        const randomPassword = crypto.randomUUID() + crypto.randomUUID();
         await supabase.auth.updateUser({ 
-          email: `deleted-${user.id}@temp.local` // Temporary email to free up the real one
+          email: `deleted-${user.id}@temp.local`, // Temporary email to free up the real one
+          password: randomPassword // Set random password to invalidate old credentials
         });
         await supabase.from('profiles').update({
           email: null,
