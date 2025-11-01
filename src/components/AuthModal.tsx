@@ -1095,19 +1095,23 @@ export default function AuthModal({
                        required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
-                     {showPassword && <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
-              setPassword(e.target.value);
-              if (!isMobile) setError('');
-            }} required minLength={6} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />}
+                     <div className={showPassword ? 'block' : 'invisible h-0 overflow-hidden'}>
+                       <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
+                         setPassword(e.target.value);
+                         if (!isMobile) setError('');
+                       }} required minLength={6} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />
+                     </div>
                       {error && !isMobile && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                          {error}
                        </div>}
-                     {showPassword && <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
+                     <div className={showPassword ? 'block' : 'invisible h-0 overflow-hidden'}>
+                       <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
                         {loading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                             {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
                           </> : mode === 'signup' && signupCooldown > 0 ? `${t('authModal.wait')} ${signupCooldown}s` : t('authModal.continueWithEmail')}
-                      </Button>}
+                      </Button>
+                     </div>
                    </form>
 
                   <div className="mt-4 text-center space-x-2 text-sm">
