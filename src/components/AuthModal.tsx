@@ -702,10 +702,15 @@ export default function AuthModal({
                       </> : t('authModal.sendVerificationCode')}
                   </Button>
                   <button type="button" onClick={() => {
+            // CRITICAL: Reset all states to show default auth modal view
             setMode('signin');
             setPhone('');
             setError('');
             setShowPhoneValidation(false);
+            setEmail('');
+            setPassword('');
+            setShowPassword(false);
+            setIsEmailFocused(false);
           }} className="text-sm text-primary hover:underline">
                     ← Back to sign in
                   </button>
@@ -1041,8 +1046,9 @@ export default function AuthModal({
                           <span className="px-3 bg-background text-sm text-muted-foreground">{t('authModal.or')}</span>
                         </div>
                       </div>
-                    </>}
+                   </>}
 
+                   {/* Always show email/password form */}
                    <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
                      <Input 
                        ref={emailInputRef}
@@ -1050,22 +1056,34 @@ export default function AuthModal({
                        placeholder={t('authModal.enterEmail')} 
                        value={email} 
                      onChange={e => {
-                         setEmail(e.target.value);
+                         const newValue = e.target.value;
+                         setEmail(newValue);
                          if (!isMobile) setError('');
-                         if (e.target.value.trim()) {
+                         
+                         // CRITICAL: Update showPassword based on whether email has content
+                         // This controls visibility of social buttons on mobile
+                         if (newValue.trim()) {
                            setShowPassword(true);
                          } else {
                            setShowPassword(false);
+                           // On mobile, when email is cleared, reset focus state to show default view
+                           if (isMobile) {
+                             setIsEmailFocused(false);
+                           }
                          }
                        }}
                        onFocus={() => {
-                         if (isMobile) {
+                         if (isMobile && email.trim()) {
+                           // Only set focused if there's content
                            setIsEmailFocused(true);
                          }
                        }}
                        onBlur={() => {
                          if (isMobile) {
-                           setIsEmailFocused(false);
+                           // Small delay to allow state updates to complete
+                           setTimeout(() => {
+                             setIsEmailFocused(false);
+                           }, 100);
                          }
                        }}
                        required
