@@ -1109,9 +1109,6 @@ export default function AuthModal({
                       </Button>}
                    </form>
 
-                   {/* Add bottom spacing when social buttons are hidden */}
-                   {isMobile && isEmailFocused && <div className="h-32" />}
-
                   <div className="mt-4 text-center space-x-2 text-sm">
                     {mode === 'signin' ? <>
                         <span className="text-muted-foreground">{t('authModal.dontHaveAccount')}</span>
