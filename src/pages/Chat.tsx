@@ -1040,17 +1040,30 @@ export default function Chat() {
         console.error('[REGENERATE] Error checking first message:', error);
       }
       
-      // Fetch user's external_id and email from profiles
+      // Fetch user's external_id, email AND stored Google Ads params from profiles
       let externalId = null;
       let userEmail = user.email || null;
+      let storedGclid = null;
+      let storedUrlParams = {};
+      let storedReferer = null;
+      
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('external_id, email')
+          .select('external_id, email, gclid, url_params, initial_referer')
           .eq('user_id', user.id)
           .single();
         externalId = profile?.external_id;
         userEmail = profile?.email || user.email || null;
+        storedGclid = profile?.gclid || null;
+        storedUrlParams = profile?.url_params || {};
+        storedReferer = profile?.initial_referer || null;
+        
+        console.log('[REGENERATE] 🎯 Stored Google Ads params from DB:', {
+          gclid: storedGclid,
+          url_params: storedUrlParams,
+          initial_referer: storedReferer
+        });
       } catch (error) {
         console.error('[REGENERATE] Error fetching profile data:', error);
       }
@@ -1069,9 +1082,9 @@ export default function Chat() {
           userIP: metadata.userIP,
           countryCode: metadata.countryCode,
           isMobile: metadata.isMobile,
-          gclid: metadata.gclid,
-          urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-          referer: metadata.referer ? String(metadata.referer) : "null", // String format
+          gclid: storedGclid, // Use stored value from DB
+          urlParams: JSON.stringify(storedUrlParams), // Use stored value from DB
+          referer: storedReferer ? String(storedReferer) : "null", // Use stored value from DB
           hasDocument: "false"
         })
       });
@@ -1282,17 +1295,30 @@ export default function Chat() {
         console.error('[AI-RESPONSE] Error checking first message:', error);
       }
       
-      // Fetch user's external_id and email from profiles
+      // Fetch user's external_id, email AND stored Google Ads params from profiles
       let externalId = null;
       let userEmail = user.email || null;
+      let storedGclid = null;
+      let storedUrlParams = {};
+      let storedReferer = null;
+      
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('external_id, email')
+          .select('external_id, email, gclid, url_params, initial_referer')
           .eq('user_id', user.id)
           .single();
         externalId = profile?.external_id;
         userEmail = profile?.email || user.email || null;
+        storedGclid = profile?.gclid || null;
+        storedUrlParams = profile?.url_params || {};
+        storedReferer = profile?.initial_referer || null;
+        
+        console.log('[AI-RESPONSE] 🎯 Stored Google Ads params from DB:', {
+          gclid: storedGclid,
+          url_params: storedUrlParams,
+          initial_referer: storedReferer
+        });
       } catch (error) {
         console.error('[AI-RESPONSE] Error fetching profile data:', error);
       }
@@ -1315,9 +1341,9 @@ export default function Chat() {
           userIP: metadata.userIP,
           countryCode: metadata.countryCode,
           isMobile: metadata.isMobile,
-          gclid: metadata.gclid,
-          urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-          referer: metadata.referer ? String(metadata.referer) : "null", // String format
+          gclid: storedGclid, // Use stored value from DB
+          urlParams: JSON.stringify(storedUrlParams), // Use stored value from DB
+          referer: storedReferer ? String(storedReferer) : "null", // Use stored value from DB
           hasDocument: "false"
         })
       });
@@ -2040,17 +2066,30 @@ export default function Chat() {
           console.error('[IMAGE-GEN] Error checking first message:', error);
         }
         
-        // Fetch user's external_id and email from profiles
+        // Fetch user's external_id, email AND stored Google Ads params from profiles
         let externalId = null;
         let userEmail = user.email || null;
+        let storedGclid = null;
+        let storedUrlParams = {};
+        let storedReferer = null;
+        
         try {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('external_id, email')
+            .select('external_id, email, gclid, url_params, initial_referer')
             .eq('user_id', user.id)
             .single();
           externalId = profile?.external_id;
           userEmail = profile?.email || user.email || null;
+          storedGclid = profile?.gclid || null;
+          storedUrlParams = profile?.url_params || {};
+          storedReferer = profile?.initial_referer || null;
+          
+          console.log('[IMAGE-GEN] 🎯 Stored Google Ads params from DB:', {
+            gclid: storedGclid,
+            url_params: storedUrlParams,
+            initial_referer: storedReferer
+          });
         } catch (error) {
           console.error('[IMAGE-GEN] Error fetching profile data:', error);
         }
@@ -2073,9 +2112,9 @@ export default function Chat() {
             userIP: metadata.userIP,
             countryCode: metadata.countryCode,
             isMobile: metadata.isMobile,
-            gclid: metadata.gclid,
-            urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-            referer: metadata.referer ? String(metadata.referer) : "null", // String format
+            gclid: storedGclid, // Use stored value from DB
+            urlParams: JSON.stringify(storedUrlParams), // Use stored value from DB
+            referer: storedReferer ? String(storedReferer) : "null", // Use stored value from DB
             hasDocument: "false"
           })
         });

@@ -627,7 +627,25 @@ export default function ProjectPage() {
 
             // For image generation without files, send the prompt
             if (selectedModel === 'generate-image' && files.length === 0) {
-              // Get webhook metadata
+              // Fetch stored Google Ads params from database
+              let storedGclid = null;
+              let storedUrlParams = {};
+              let storedReferer = null;
+              
+              try {
+                const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('gclid, url_params, initial_referer')
+                  .eq('user_id', user.id)
+                  .single();
+                storedGclid = profile?.gclid || null;
+                storedUrlParams = profile?.url_params || {};
+                storedReferer = profile?.initial_referer || null;
+              } catch (error) {
+                console.error('[PROJECT-WEBHOOK] Error fetching stored params:', error);
+              }
+              
+              // Get webhook metadata (for IP, country, etc.)
               const metadata = await getWebhookMetadata();
               
               await fetch(webhookUrl, {
@@ -645,9 +663,9 @@ export default function ProjectPage() {
                   userIP: metadata.userIP,
                   countryCode: metadata.countryCode,
                   isMobile: metadata.isMobile,
-                  gclid: metadata.gclid,
-                  urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-                  referer: metadata.referer ? String(metadata.referer) : "null", // String format
+                  gclid: storedGclid, // Use stored value from DB
+                  urlParams: JSON.stringify(storedUrlParams), // Use stored value from DB
+                  referer: storedReferer ? String(storedReferer) : "null", // Use stored value from DB
                   hasDocument: "false"
                 })
               });
@@ -690,7 +708,25 @@ export default function ProjectPage() {
             // Determine correct type based on file type
             const webhookType = file.type.startsWith('image/') ? 'analyse-image' : 'analyse-files';
             
-            // Get webhook metadata
+            // Fetch stored Google Ads params from database
+            let storedGclid = null;
+            let storedUrlParams = {};
+            let storedReferer = null;
+            
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('gclid, url_params, initial_referer')
+                .eq('user_id', user.id)
+                .single();
+              storedGclid = profile?.gclid || null;
+              storedUrlParams = profile?.url_params || {};
+              storedReferer = profile?.initial_referer || null;
+            } catch (error) {
+              console.error('[PROJECT-WEBHOOK] Error fetching stored params:', error);
+            }
+            
+            // Get webhook metadata (for IP, country, etc.)
             const metadata = await getWebhookMetadata();
             
             await fetch(webhookUrl, {
@@ -712,9 +748,9 @@ export default function ProjectPage() {
                 userIP: metadata.userIP,
                 countryCode: metadata.countryCode,
                 isMobile: metadata.isMobile,
-                gclid: metadata.gclid,
-                urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-                referer: metadata.referer ? String(metadata.referer) : "null", // String format
+                gclid: storedGclid, // Use stored value from DB
+                urlParams: JSON.stringify(storedUrlParams), // Use stored value from DB
+                referer: storedReferer ? String(storedReferer) : "null", // Use stored value from DB
                 hasDocument: "true"
               })
             });
