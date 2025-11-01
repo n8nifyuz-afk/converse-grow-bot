@@ -50,6 +50,7 @@ export default function AuthModal({
   const [showEmailPasswordModal, setShowEmailPasswordModal] = useState(false);
   const [showEmailPasswordInline, setShowEmailPasswordInline] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [showVerificationInModal, setShowVerificationInModal] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -292,7 +293,12 @@ export default function AuthModal({
         });
         
         // Switch to verification code mode
-        setMode('verify-email');
+        // For mobile with email/password modal open, show verification in the same modal
+        if (isMobile && showEmailPasswordModal) {
+          setShowVerificationInModal(true);
+        } else {
+          setMode('verify-email');
+        }
       } else {
         setError("Unexpected response from server. Please try again.");
       }
@@ -338,6 +344,12 @@ export default function AuthModal({
       if (data?.success) {
         // Case 1: User already exists (tried to verify twice or account exists)
         if (data.alreadyExists) {
+          // Close email/password modal if open (mobile view)
+          if (showEmailPasswordModal) {
+            setShowEmailPasswordModal(false);
+            setShowVerificationInModal(false);
+          }
+          
           if (data.provider) {
             // OAuth account exists
             toast({
@@ -357,7 +369,7 @@ export default function AuthModal({
             // Pre-fill email for convenience
             setEmail(pendingEmail);
           }
-        } 
+        }
         // Case 2: New user created successfully - automatically sign in
         else if (data.newUser) {
           toast({
@@ -365,6 +377,12 @@ export default function AuthModal({
             description: "Your account has been created. Signing you in...",
             duration: 3000
           });
+          
+          // Close email/password modal if open (mobile view)
+          if (showEmailPasswordModal) {
+            setShowEmailPasswordModal(false);
+            setShowVerificationInModal(false);
+          }
           
           // Automatically sign in the user
           const { error: signInError } = await signIn(pendingEmail, password);
@@ -1268,13 +1286,15 @@ export default function AuthModal({
   // Email/Password Modal Content
   const emailPasswordContent = (
     <div className="w-full px-4 md:px-6 py-8 md:py-12">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold">
-          {mode === 'signin' ? 'Sign In' : 'Sign Up'}
-        </h2>
-      </div>
-      
-      <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-4">
+      {!showVerificationInModal ? (
+        <>
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl md:text-3xl font-bold">
+              {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+            </h2>
+          </div>
+          
+          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-4">
         <Input 
           type="email" 
           placeholder={t('authModal.enterEmail')} 
@@ -1364,6 +1384,97 @@ export default function AuthModal({
           </>
         )}
       </div>
+        </>
+      ) : (
+        // Verification code UI in the same modal
+        <form onSubmit={handleVerifyEmailCode} className="space-y-6">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-1">Verify Your Email</h3>
+              <p className="text-sm text-muted-foreground">
+                We sent a code to <span className="font-semibold">{pendingEmail}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Enter 6-digit code</label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={verificationCode}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setVerificationCode(value);
+                  setError('');
+                }}
+                placeholder="000000"
+                className="text-center text-2xl tracking-widest font-mono h-14"
+                autoFocus
+              />
+            </div>
+
+            {error && (
+              <div className="text-sm text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading || verificationCode.length !== 6}
+              className="w-full h-12"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                  Verifying...
+                </>
+              ) : (
+                'Verify Email'
+              )}
+            </Button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  if (signupCooldown === 0) {
+                    handleSignUp(new Event('submit') as any);
+                  }
+                }}
+                disabled={signupCooldown > 0}
+                className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {signupCooldown > 0 
+                  ? `Resend code in ${signupCooldown}s` 
+                  : "Didn't receive the code? Resend"}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setShowVerificationInModal(false);
+              setVerificationCode('');
+              setPendingEmail('');
+              setError('');
+            }}
+            className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to sign up
+          </button>
+        </form>
+      )}
     </div>
   );
 
@@ -1408,10 +1519,14 @@ export default function AuthModal({
           onOpenChange={(open) => {
             setShowEmailPasswordModal(open);
             if (!open) {
+              // Reset all states when closing modal
               setEmail('');
               setPassword('');
               setError('');
               setMode('signin');
+              setShowVerificationInModal(false);
+              setVerificationCode('');
+              setPendingEmail('');
             }
           }}
           dismissible={true}
