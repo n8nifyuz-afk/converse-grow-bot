@@ -613,15 +613,19 @@ export default function Admin() {
           console.log('[ADMIN STATS] Filtered user IDs for plan breakdown:', allFilteredUserIds.length);
           
           if (allFilteredUserIds.length > 0) {
-            // Now count subscriptions only for filtered users
+            // Count DISTINCT users with profiles for each plan
             const { data: filteredSubs } = await supabase
               .from('user_subscriptions')
-              .select('plan')
+              .select('user_id, plan')
               .eq('status', 'active')
               .in('user_id', allFilteredUserIds);
             
-            proCount = filteredSubs?.filter(s => s.plan === 'pro').length || 0;
-            ultraProCount = filteredSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
+            // Use Set to count unique user_ids per plan
+            const proUserIds = new Set(filteredSubs?.filter(s => s.plan === 'pro').map(s => s.user_id) || []);
+            const ultraProUserIds = new Set(filteredSubs?.filter(s => s.plan === 'ultra_pro').map(s => s.user_id) || []);
+            
+            proCount = proUserIds.size;
+            ultraProCount = ultraProUserIds.size;
             const subscribedCount = proCount + ultraProCount;
             freeCount = totalCount - subscribedCount;
             
@@ -638,14 +642,29 @@ export default function Admin() {
             freeCount = totalCount;
           }
         } else {
-          // No filters - use simple global count (fast!)
+          // No filters - count DISTINCT users with profiles and active subscriptions
           const { data: allSubs } = await supabase
             .from('user_subscriptions')
-            .select('plan')
+            .select('user_id, plan')
             .eq('status', 'active');
           
-          proCount = allSubs?.filter(s => s.plan === 'pro').length || 0;
-          ultraProCount = allSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
+          // Filter to only include users that have profiles
+          const { data: allProfiles } = await supabase
+            .from('profiles')
+            .select('user_id');
+          
+          const profileUserIds = new Set(allProfiles?.map(p => p.user_id) || []);
+          
+          // Count unique users per plan who also have profiles
+          const proUserIds = new Set(
+            allSubs?.filter(s => s.plan === 'pro' && profileUserIds.has(s.user_id)).map(s => s.user_id) || []
+          );
+          const ultraProUserIds = new Set(
+            allSubs?.filter(s => s.plan === 'ultra_pro' && profileUserIds.has(s.user_id)).map(s => s.user_id) || []
+          );
+          
+          proCount = proUserIds.size;
+          ultraProCount = ultraProUserIds.size;
           const subscribedCount = proCount + ultraProCount;
           freeCount = totalCount - subscribedCount;
           
