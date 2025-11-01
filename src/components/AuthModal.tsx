@@ -1067,7 +1067,6 @@ export default function AuthModal({
                        readOnly
                        onClick={() => {
                          setShowEmailPasswordModal(true);
-                         onClose();
                        }}
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
                      />
