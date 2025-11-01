@@ -1138,7 +1138,7 @@ export default function AuthModal({
             WebkitTransform: 'translate3d(0, 0, 0)',
             transition: 'none',
             paddingBottom: 'env(safe-area-inset-bottom)',
-            overflow: 'auto',
+            overflow: 'hidden',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain'
           }}
