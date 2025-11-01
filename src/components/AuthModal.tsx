@@ -633,9 +633,9 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className="flex flex-col">
+  const authContent = <div className="flex flex-col h-full overflow-y-auto">
            {/* Auth Form */}
-           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe overflow-hidden">
+           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe">
              {/* Main Heading - Hide during profile completion */}
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
@@ -1041,6 +1041,13 @@ export default function AuthModal({
                            setShowPassword(false);
                          }
                        }}
+                       onFocus={(e) => {
+                         if (isMobile) {
+                           setTimeout(() => {
+                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                           }, 300);
+                         }
+                       }}
                        required 
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
@@ -1122,14 +1129,15 @@ export default function AuthModal({
           ref={drawerContentRef}
           className="h-auto p-0" 
           style={{ 
-            maxHeight: mode === 'complete-profile' ? '75dvh' : '90vh',
+            maxHeight: mode === 'complete-profile' ? '75dvh' : '85dvh',
             position: 'fixed',
             bottom: 0,
             left: 0,
             right: 0,
             paddingBottom: 'env(safe-area-inset-bottom)',
-            overflow: 'hidden',
-            touchAction: 'none'
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
           }}
         >
           <DrawerHeader className="sr-only">
