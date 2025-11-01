@@ -1067,6 +1067,7 @@ export default function AuthModal({
                        readOnly
                        onClick={() => {
                          setShowEmailPasswordModal(true);
+                         onClose();
                        }}
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
                      />
@@ -1289,7 +1290,7 @@ export default function AuthModal({
             }
           }}
           dismissible={true}
-          modal={false}
+          modal={true}
         >
           <DrawerContent 
             className="h-auto p-0"
@@ -1299,7 +1300,6 @@ export default function AuthModal({
               bottom: 0,
               left: 0,
               right: 0,
-              zIndex: 60,
               paddingBottom: 'env(safe-area-inset-bottom)',
               overflow: 'visible',
             }}
