@@ -1181,6 +1181,22 @@ export default function AuthModal({
             t('authModal.continueWithEmail')
           )}
         </Button>
+        
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => {
+              setShowEmailPasswordModal(false);
+              setEmail('');
+              setPassword('');
+              setError('');
+              setMode('signin');
+            }}
+            className="text-sm text-primary hover:underline"
+          >
+            ← Back to sign in
+          </button>
+        </div>
       </form>
       
       <div className="mt-4 text-center space-x-2 text-sm">
@@ -1221,22 +1237,6 @@ export default function AuthModal({
             </button>
           </>
         )}
-      </div>
-      
-      <div className="mt-4 pt-4 border-t border-border text-center">
-        <button
-          type="button"
-          onClick={() => {
-            setShowEmailPasswordModal(false);
-            setEmail('');
-            setPassword('');
-            setError('');
-            setMode('signin');
-          }}
-          className="text-sm text-primary hover:underline"
-        >
-          ← Back to sign in options
-        </button>
       </div>
     </div>
   );
