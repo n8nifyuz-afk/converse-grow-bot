@@ -635,7 +635,7 @@ export default function AuthModal({
 
   const authContent = <div className="flex flex-col h-full">
            {/* Auth Form */}
-           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe relative overflow-y-auto md:overflow-visible">
+           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe relative">
              {/* Main Heading - Hide during profile completion */}
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
@@ -1041,25 +1041,7 @@ export default function AuthModal({
                            setShowPassword(false);
                          }
                        }}
-                       onFocus={(e) => {
-                         if (isMobile && drawerContentRef.current) {
-                           setTimeout(() => {
-                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                             drawerContentRef.current?.scrollTo({ 
-                               top: e.target.offsetTop - 100, 
-                               behavior: 'smooth' 
-                             });
-                           }, 350);
-                         }
-                       }}
-                       onBlur={() => {
-                         if (isMobile && drawerContentRef.current) {
-                           setTimeout(() => {
-                             drawerContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                           }, 150);
-                         }
-                       }}
-                       required 
+                       required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
                      {showPassword && <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
@@ -1140,7 +1122,7 @@ export default function AuthModal({
           ref={drawerContentRef}
           className="h-auto p-0" 
           style={{ 
-            maxHeight: mode === 'complete-profile' ? '75dvh' : '95dvh',
+            maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
             position: 'fixed',
             bottom: 0,
             left: 0,
@@ -1148,8 +1130,7 @@ export default function AuthModal({
             paddingBottom: 'env(safe-area-inset-bottom)',
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'auto',
-            WebkitOverflowScrolling: 'touch'
+            overflow: 'visible'
           }}
         >
           <DrawerHeader className="sr-only">
