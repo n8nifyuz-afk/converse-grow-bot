@@ -26,9 +26,11 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isDetectingCountry, setIsDetectingCountry] = useState(true);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const initialViewportHeight = useRef(window.visualViewport?.height || window.innerHeight);
 
   useEffect(() => {
     // Auto-detect country on mount
@@ -116,6 +118,26 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Detect keyboard open/close on mobile
+  useEffect(() => {
+    const handleViewportChange = () => {
+      const currentHeight = window.visualViewport?.height || window.innerHeight;
+      const heightDifference = initialViewportHeight.current - currentHeight;
+      
+      // If viewport height decreased by more than 150px, keyboard is likely open
+      setIsKeyboardOpen(heightDifference > 150);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      window.visualViewport.addEventListener('scroll', handleViewportChange);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportChange);
+        window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+      };
+    }
   }, []);
 
   const validatePhoneNumber = (number: string, country: Country): boolean => {
@@ -216,7 +238,7 @@ export const CountryPhoneInput: React.FC<CountryPhoneInputProps> = ({
 
       {/* Dropdown */}
       {isDropdownOpen && (
-        <div className="country-dropdown">
+        <div className={`country-dropdown ${isKeyboardOpen ? 'keyboard-open' : ''}`}>
           <input
             type="text"
             placeholder="Search country..."

@@ -252,13 +252,18 @@
   .country-dropdown {
     position: fixed;
     top: auto;
-    bottom: 10rem;
+    bottom: 5rem;
     left: 1rem;
     right: 1rem;
     width: calc(100% - 2rem);
     max-height: 60vh;
     min-height: 200px;
     border-radius: 1rem;
+    transition: bottom 0.2s ease;
+  }
+  
+  .country-dropdown.keyboard-open {
+    bottom: 12rem;
     margin: 0;
     z-index: 999999;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
