@@ -72,22 +72,24 @@ serve(async (req) => {
       const providers = existingUser.app_metadata?.providers || [];
       if (providers.length > 0 && !providers.includes('email')) {
         const provider = providers[0].charAt(0).toUpperCase() + providers[0].slice(1);
+        // Return 200 status with error in body for user-facing errors
         return new Response(
           JSON.stringify({ 
             error: `This email is already registered with ${provider}. Please sign in using ${provider} instead, or use a different email address.`
           }),
           {
-            status: 409,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
       } else {
+        // Return 200 status with error in body for user-facing errors
         return new Response(
           JSON.stringify({ 
             error: 'This email is already registered. Please sign in or use the "Forgot Password" option.'
           }),
           {
-            status: 409,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );

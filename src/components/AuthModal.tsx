@@ -214,16 +214,45 @@ export default function AuthModal({
         body: { email, password }
       });
 
-      // Handle errors from edge function
+      // Handle errors from edge function (including 409 status codes)
       if (invokeError) {
         console.error('Edge function invocation error:', invokeError);
-        setError(invokeError.message || "Failed to send verification code. Please try again.");
+        
+        // Try to parse the error message from the response
+        let errorMessage = invokeError.message || "Failed to send verification code. Please try again.";
+        
+        // Check if this is an "already registered" error
+        const isAlreadyRegistered = 
+          errorMessage.toLowerCase().includes('already registered') ||
+          errorMessage.toLowerCase().includes('already exists') ||
+          errorMessage.toLowerCase().includes('user already');
+        
+        if (isAlreadyRegistered) {
+          const friendlyMessage = "This email is already registered. Please sign in or use the Forgot Password option.";
+          
+          if (isMobile) {
+            // Show toast popup for mobile
+            sonnerToast.error("Account Exists", { 
+              description: friendlyMessage, 
+              duration: 5000 
+            });
+          } else {
+            // Show inline error for desktop
+            setError(friendlyMessage);
+          }
+        } else {
+          // Handle other errors
+          if (isMobile) {
+            sonnerToast.error("Sign Up Failed", { description: errorMessage, duration: 3000 });
+          } else {
+            setError(errorMessage);
+          }
+        }
         return;
       }
 
-      // Handle error responses from the function
+      // Handle error responses from the function (when status is 2xx but contains error)
       if (data?.error) {
-        // Check if error is about user already being registered
         const isAlreadyRegistered = 
           data.error.toLowerCase().includes('already registered') ||
           data.error.toLowerCase().includes('already exists') ||
@@ -233,17 +262,14 @@ export default function AuthModal({
           const errorMessage = "This email is already registered. Please sign in or use the Forgot Password option.";
           
           if (isMobile) {
-            // Show toast popup for mobile
             sonnerToast.error("Account Exists", { 
               description: errorMessage, 
               duration: 5000 
             });
           } else {
-            // Show inline error for desktop
             setError(errorMessage);
           }
         } else {
-          // Handle other errors
           if (isMobile) {
             sonnerToast.error("Sign Up Failed", { description: data.error, duration: 3000 });
           } else {
