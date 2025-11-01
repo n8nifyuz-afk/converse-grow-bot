@@ -331,7 +331,7 @@ export default function AuthModal({
         toast({
           title: "Check your email",
           description: "If an account exists with this email, you'll receive a password reset link. Please check your inbox and spam folder.",
-          duration: 10000
+          duration: 3000
         });
         setMode('signin');
         setEmail('');
