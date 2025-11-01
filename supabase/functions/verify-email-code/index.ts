@@ -69,7 +69,26 @@ serve(async (req) => {
     // Get the password from the verification record
     const password = verification.password_hash;
 
-    logStep("Code verified, creating new user");
+    logStep("Code verified, checking if user exists");
+
+    // Check if user already exists
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+
+    if (existingUser) {
+      logStep("User already exists", { email });
+      
+      // Mark verification as used
+      await supabaseAdmin
+        .from('email_verifications')
+        .update({ verified: true })
+        .eq('code', code)
+        .eq('email', email);
+
+      throw new Error("This email is already registered. Please sign in instead of creating a new account.");
+    }
+
+    logStep("Creating new user");
 
     // Create new user with verified email
     const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
