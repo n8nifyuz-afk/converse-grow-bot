@@ -45,7 +45,6 @@ export default function AuthModal({
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
-  const [isEmailFocused, setIsEmailFocused] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -711,7 +710,6 @@ export default function AuthModal({
               setEmail('');
               setPassword('');
               setShowPassword(false);
-              setIsEmailFocused(false);
               // Scroll to top
               setTimeout(() => {
                 if (drawerContentRef.current) {
@@ -986,7 +984,7 @@ export default function AuthModal({
                     ← Back to sign up
                    </button>
                  </form> : <>
-                   {!showPassword && !(isMobile && isEmailFocused) && <>
+                   {!showPassword && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
                         {googleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
@@ -1062,35 +1060,15 @@ export default function AuthModal({
                        type="email" 
                        placeholder={t('authModal.enterEmail')} 
                        value={email} 
-                     onChange={e => {
+                      onChange={e => {
                           setEmail(e.target.value);
                           if (!isMobile) setError('');
                           if (e.target.value.trim()) {
                             setShowPassword(true);
                           } else {
                             setShowPassword(false);
-                            // Reset to default modal state on mobile when email is cleared
-                            if (isMobile) {
-                              setIsEmailFocused(false);
-                              // Scroll to top when keyboard closes
-                              setTimeout(() => {
-                                if (drawerContentRef.current) {
-                                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-                                }
-                              }, 100);
-                            }
                           }
                         }}
-                       onFocus={() => {
-                         if (isMobile) {
-                           setIsEmailFocused(true);
-                         }
-                       }}
-                       onBlur={() => {
-                         if (isMobile) {
-                           setIsEmailFocused(false);
-                         }
-                       }}
                        required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
