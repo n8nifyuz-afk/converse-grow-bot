@@ -262,17 +262,45 @@ export default function AuthModal({
         return;
       }
 
-      // Success
+      // Success - handle different scenarios
       if (data?.success) {
-        toast({
-          title: "Success!",
-          description: data.message || "Your account has been created. Please sign in.",
-          duration: 5000
-        });
-        setMode('signin');
+        // Case 1: User already exists (tried to verify twice or account exists)
+        if (data.alreadyExists) {
+          if (data.provider) {
+            // OAuth account exists
+            toast({
+              title: "Account Found",
+              description: data.message,
+              duration: 8000,
+            });
+            setMode('signin');
+          } else {
+            // Email/password account exists
+            toast({
+              title: "Account Already Exists",
+              description: data.message,
+              duration: 6000,
+            });
+            setMode('signin');
+            // Pre-fill email for convenience
+            setEmail(pendingEmail);
+          }
+        } 
+        // Case 2: New user created successfully
+        else if (data.newUser) {
+          toast({
+            title: "Success!",
+            description: data.message,
+            duration: 5000
+          });
+          setMode('signin');
+          // Pre-fill email for convenience
+          setEmail(pendingEmail);
+        }
+        
+        // Clean up verification state
         setVerificationCode('');
         setPendingEmail('');
-        setEmail('');
         setPassword('');
       }
     } catch (error) {

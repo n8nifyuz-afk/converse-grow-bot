@@ -75,17 +75,52 @@ serve(async (req) => {
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
     const existingUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
 
-    if (existingUser) {
-      logStep("User already exists", { email });
-      
-      // Mark verification as used
-      await supabaseAdmin
-        .from('email_verifications')
-        .update({ verified: true })
-        .eq('code', code)
-        .eq('email', email);
+    // Mark verification as used regardless of outcome
+    await supabaseAdmin
+      .from('email_verifications')
+      .update({ verified: true })
+      .eq('code', code)
+      .eq('email', email);
 
-      throw new Error("This email is already registered. Please sign in instead of creating a new account.");
+    if (existingUser) {
+      logStep("User already exists - verification successful, directing to sign in", { 
+        email,
+        userId: existingUser.id,
+        providers: existingUser.app_metadata?.providers 
+      });
+      
+      // Check how the user originally signed up
+      const providers = existingUser.app_metadata?.providers || [];
+      
+      if (providers.length > 0 && !providers.includes('email')) {
+        // User signed up with OAuth
+        const provider = providers[0].charAt(0).toUpperCase() + providers[0].slice(1);
+        return new Response(
+          JSON.stringify({ 
+            success: true,
+            alreadyExists: true,
+            provider: provider,
+            message: `This email is already linked to your ${provider} account. Please sign in using ${provider}.`
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      } else {
+        // User already has email/password account
+        return new Response(
+          JSON.stringify({ 
+            success: true,
+            alreadyExists: true,
+            message: "This email is already registered. Please sign in with your email and password."
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
     }
 
     logStep("Creating new user");
@@ -106,13 +141,6 @@ serve(async (req) => {
     }
 
     logStep("User created successfully", { userId: newUser.user?.id });
-
-    // Mark verification as used
-    await supabaseAdmin
-      .from('email_verifications')
-      .update({ verified: true })
-      .eq('code', code)
-      .eq('email', email);
 
     // Get user's display name for personalized email
     const { data: profile } = await supabaseAdmin
@@ -155,6 +183,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
+        newUser: true,
         message: "Account created successfully! Please sign in with your email and password."
       }),
       {
