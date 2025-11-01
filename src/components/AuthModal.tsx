@@ -1118,6 +1118,11 @@ export default function AuthModal({
                         <button 
                           type="button" 
                           onClick={() => {
+                            // Blur the email input to prevent immediate re-focus
+                            if (emailInputRef.current) {
+                              emailInputRef.current.blur();
+                            }
+                            
                             // Reset all email flow states
                             setEmail('');
                             setPassword('');
@@ -1127,7 +1132,7 @@ export default function AuthModal({
                             setError('');
                             setMode('signin');
                             
-                            // Scroll to top after a brief delay to ensure DOM updates
+                            // Scroll to top after states are reset
                             setTimeout(() => {
                               if (drawerContentRef.current) {
                                 drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
