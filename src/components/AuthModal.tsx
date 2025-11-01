@@ -712,6 +712,12 @@ export default function AuthModal({
               setPassword('');
               setShowPassword(false);
               setIsEmailFocused(false);
+              // Scroll to top
+              setTimeout(() => {
+                if (drawerContentRef.current) {
+                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }, 100);
             }
           }} className="text-sm text-primary hover:underline">
                     ← Back to sign in
@@ -1057,18 +1063,24 @@ export default function AuthModal({
                        placeholder={t('authModal.enterEmail')} 
                        value={email} 
                      onChange={e => {
-                         setEmail(e.target.value);
-                         if (!isMobile) setError('');
-                         if (e.target.value.trim()) {
-                           setShowPassword(true);
-                         } else {
-                           setShowPassword(false);
-                           // Reset to default modal state on mobile when email is cleared
-                           if (isMobile) {
-                             setIsEmailFocused(false);
-                           }
-                         }
-                       }}
+                          setEmail(e.target.value);
+                          if (!isMobile) setError('');
+                          if (e.target.value.trim()) {
+                            setShowPassword(true);
+                          } else {
+                            setShowPassword(false);
+                            // Reset to default modal state on mobile when email is cleared
+                            if (isMobile) {
+                              setIsEmailFocused(false);
+                              // Scroll to top when keyboard closes
+                              setTimeout(() => {
+                                if (drawerContentRef.current) {
+                                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                              }, 100);
+                            }
+                          }
+                        }}
                        onFocus={() => {
                          if (isMobile) {
                            setIsEmailFocused(true);
