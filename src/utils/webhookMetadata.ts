@@ -108,7 +108,7 @@ export async function getWebhookMetadata(): Promise<WebhookMetadata> {
       }
     }
   } catch (error) {
-    console.warn('[WEBHOOK-METADATA] Failed to fetch stored params:', error);
+    // Silently fail - use fallback values
   }
   
   // Fallback to localStorage for gclid if not in database or URL
