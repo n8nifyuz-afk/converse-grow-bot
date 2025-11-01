@@ -706,6 +706,13 @@ export default function AuthModal({
             setPhone('');
             setError('');
             setShowPhoneValidation(false);
+            // Reset to default modal state on mobile
+            if (isMobile) {
+              setEmail('');
+              setPassword('');
+              setShowPassword(false);
+              setIsEmailFocused(false);
+            }
           }} className="text-sm text-primary hover:underline">
                     ← Back to sign in
                   </button>
@@ -1056,6 +1063,10 @@ export default function AuthModal({
                            setShowPassword(true);
                          } else {
                            setShowPassword(false);
+                           // Reset to default modal state on mobile when email is cleared
+                           if (isMobile) {
+                             setIsEmailFocused(false);
+                           }
                          }
                        }}
                        onFocus={() => {
