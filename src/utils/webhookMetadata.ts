@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 // Utility to gather metadata for webhook calls
 export interface WebhookMetadata {
   sessionId: string;
@@ -70,22 +72,57 @@ export async function fetchIPAndCountry(): Promise<{ ip: string | null; country:
 
 // Main function to gather all metadata
 export async function getWebhookMetadata(): Promise<WebhookMetadata> {
-  const urlParams = getUrlParams();
+  const currentUrlParams = getUrlParams();
   const { ip, country } = await getIPMetadata();
   
-  // CRITICAL: Check localStorage for persisted GCLID (like AuthContext does)
-  // Users may have signed up with ?gclid=ABC but current URL doesn't have it
-  const gclidFromUrl = urlParams['gclid'] || null;
-  const gclidFromStorage = typeof window !== 'undefined' ? localStorage.getItem('gclid') : null;
-  const finalGclid = gclidFromUrl || gclidFromStorage || null;
+  // CRITICAL: For logged-in users, fetch stored params from database
+  // This ensures we send the ORIGINAL signup params, not just current URL
+  let finalUrlParams = currentUrlParams;
+  let finalGclid = currentUrlParams['gclid'] || null;
+  let finalReferer = document.referrer || null;
+  
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      // User is logged in - fetch stored params from database
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('gclid, url_params, initial_referer')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!error && profile) {
+        // Use stored params from database (fallback to current URL if not stored)
+        finalGclid = profile.gclid || finalGclid;
+        
+        // Safely cast url_params from Json to Record<string, string>
+        if (profile.url_params && typeof profile.url_params === 'object' && !Array.isArray(profile.url_params)) {
+          const storedParams = profile.url_params as Record<string, string>;
+          if (Object.keys(storedParams).length > 0) {
+            finalUrlParams = storedParams;
+          }
+        }
+        
+        finalReferer = profile.initial_referer || finalReferer;
+      }
+    }
+  } catch (error) {
+    console.warn('[WEBHOOK-METADATA] Failed to fetch stored params:', error);
+  }
+  
+  // Fallback to localStorage for gclid if not in database or URL
+  if (!finalGclid && typeof window !== 'undefined') {
+    finalGclid = localStorage.getItem('gclid') || null;
+  }
 
   return {
     sessionId: getSessionId(),
     userIP: ip,
     countryCode: country,
     isMobile: isMobileDevice(),
-    referer: document.referrer || null,
-    urlParams,
+    referer: finalReferer,
+    urlParams: finalUrlParams,
     gclid: finalGclid,
   };
 }
