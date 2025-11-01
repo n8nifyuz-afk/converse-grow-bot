@@ -1295,13 +1295,13 @@ export default function AuthModal({
           <DrawerContent 
             className="h-auto p-0"
             style={{
-              maxHeight: '65vh',
+              maxHeight: '50vh',
               position: 'fixed',
               bottom: 0,
               left: 0,
               right: 0,
               paddingBottom: 'env(safe-area-inset-bottom)',
-              overflowY: 'auto',
+              overflow: 'visible',
             }}
           >
             <DrawerHeader className="sr-only">
