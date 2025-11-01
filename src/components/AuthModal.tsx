@@ -114,7 +114,7 @@ export default function AuthModal({
       setError('');
       setShowPassword(false);
       setShowPhoneValidation(false);
-      setShowEmailPasswordModal(false);
+      // Don't reset showEmailPasswordModal - it's independent
     }
   }, [isOpen]);
 
