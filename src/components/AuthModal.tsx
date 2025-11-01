@@ -47,6 +47,7 @@ export default function AuthModal({
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [showEmailPasswordModal, setShowEmailPasswordModal] = useState(false);
+  const [showEmailPasswordInline, setShowEmailPasswordInline] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -115,6 +116,7 @@ export default function AuthModal({
       setShowPassword(false);
       setShowPhoneValidation(false);
       setShowEmailPasswordModal(false);
+      setShowEmailPasswordInline(false);
     }
   }, [isOpen]);
 
@@ -987,8 +989,8 @@ export default function AuthModal({
           }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
                     ← Back to sign up
                    </button>
-                 </form> : <>
-                   {!showPassword && !(isMobile && isEmailFocused) && <>
+                  </form> : <>
+                   {!showPassword && !(isMobile && isEmailFocused) && !showEmailPasswordInline && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
                         {googleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
@@ -1058,17 +1060,90 @@ export default function AuthModal({
                       </div>
                     </>}
 
-                   <div className="space-y-3">
-                     <Input 
-                       ref={emailInputRef}
-                       type="email" 
-                       placeholder={t('authModal.enterEmail')} 
-                       value=""
-                       readOnly
-                       onClick={() => setShowEmailPasswordModal(true)}
-                       className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
-                     />
-                   </div>
+                   {/* Email/Password inline for desktop, modal trigger for mobile */}
+                   {!showEmailPasswordInline ? (
+                     <div className="space-y-3">
+                       <Input 
+                         ref={emailInputRef}
+                         type="email" 
+                         placeholder={t('authModal.enterEmail')} 
+                         value=""
+                         readOnly
+                         onClick={() => {
+                           if (isMobile) {
+                             setShowEmailPasswordModal(true);
+                           } else {
+                             setShowEmailPasswordInline(true);
+                           }
+                         }}
+                         className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
+                       />
+                     </div>
+                   ) : (
+                     <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-4">
+                       <Input 
+                         type="email" 
+                         placeholder={t('authModal.enterEmail')} 
+                         value={email} 
+                         onChange={e => {
+                           setEmail(e.target.value);
+                           setError('');
+                         }}
+                         required
+                         autoFocus
+                         className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+                       />
+                       
+                       <Input 
+                         type="password" 
+                         placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} 
+                         value={password} 
+                         onChange={e => {
+                           setPassword(e.target.value);
+                           setError('');
+                         }} 
+                         required 
+                         minLength={6} 
+                         className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+                       />
+                       
+                       {error && (
+                         <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                           {error}
+                         </div>
+                       )}
+                       
+                       <Button 
+                         type="submit" 
+                         disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)} 
+                         className="w-full h-11 md:h-12 text-base"
+                       >
+                         {loading ? (
+                           <>
+                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                             {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
+                           </>
+                         ) : mode === 'signup' && signupCooldown > 0 ? (
+                           `${t('authModal.wait')} ${signupCooldown}s`
+                         ) : (
+                           t('authModal.continueWithEmail')
+                         )}
+                       </Button>
+
+                       <button 
+                         type="button" 
+                         onClick={() => {
+                           setShowEmailPasswordInline(false);
+                           setEmail('');
+                           setPassword('');
+                           setError('');
+                         }} 
+                         className="text-sm text-muted-foreground hover:text-foreground"
+                       >
+                         ← Back to other options
+                       </button>
+                     </form>
+                   )}
 
                   <div className="mt-4 text-center space-x-2 text-sm">
                     {mode === 'signin' ? <>
@@ -1286,40 +1361,16 @@ export default function AuthModal({
   }
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
-          <DialogHeader className="sr-only">
-            <DialogTitle>ChatLearn Authentication</DialogTitle>
-            <DialogDescription>
-              {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
-            </DialogDescription>
-          </DialogHeader>
-          {authContent}
-        </DialogContent>
-      </Dialog>
-
-      {/* Separate Email/Password Modal */}
-      <Dialog 
-        open={showEmailPasswordModal} 
-        onOpenChange={(open) => {
-          setShowEmailPasswordModal(open);
-          if (!open) {
-            setEmail('');
-            setPassword('');
-            setError('');
-            setMode('signin');
-          }
-        }}
-      >
-        <DialogContent className="max-w-[90vw] sm:max-w-md w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Email Sign In</DialogTitle>
-            <DialogDescription>Sign in with email and password</DialogDescription>
-          </DialogHeader>
-          {emailPasswordContent}
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
+        <DialogHeader className="sr-only">
+          <DialogTitle>ChatLearn Authentication</DialogTitle>
+          <DialogDescription>
+            {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
+          </DialogDescription>
+        </DialogHeader>
+        {authContent}
+      </DialogContent>
+    </Dialog>
   );
 }
