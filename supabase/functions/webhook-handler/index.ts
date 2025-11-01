@@ -286,6 +286,73 @@ serve(async (req) => {
     console.log('[WEBHOOK-HANDLER] Message ID:', data.id);
     console.log('[WEBHOOK-HANDLER] First time user:', isFirstMessage);
 
+    // Fetch user's stored Google Ads params from database
+    let storedGclid = null;
+    let storedUrlParams = null;
+    let storedReferer = null;
+    
+    if (user_id) {
+      console.log('[WEBHOOK-HANDLER] Fetching stored Google Ads params for user:', user_id);
+      const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('gclid, url_params, initial_referer')
+        .eq('user_id', user_id)
+        .single();
+      
+      if (profileError) {
+        console.error('[WEBHOOK-HANDLER] Error fetching profile:', profileError);
+      } else if (profile) {
+        storedGclid = profile.gclid;
+        storedUrlParams = profile.url_params;
+        storedReferer = profile.initial_referer;
+        console.log('[WEBHOOK-HANDLER] 🎯 Stored Google Ads params:', {
+          gclid: storedGclid,
+          url_params: storedUrlParams,
+          initial_referer: storedReferer
+        });
+      }
+    }
+
+    // Send to n8n webhook with stored params
+    const N8N_WEBHOOK_URL = "https://adsgbt.app.n8n.cloud/webhook/chat-message";
+    
+    try {
+      const webhookPayload = {
+        message_id: data.id,
+        chat_id: chat_id,
+        user_id: user_id,
+        content: messageContent,
+        model: model,
+        is_first_message: isFirstMessage,
+        has_image: !!imageUrl,
+        image_url: imageUrl,
+        // Include stored Google Ads params from database
+        gclid: storedGclid,
+        url_params: storedUrlParams,
+        initial_referer: storedReferer,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log('[WEBHOOK-HANDLER] 📤 Sending to n8n webhook:', JSON.stringify(webhookPayload, null, 2));
+      
+      const webhookResponse = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(webhookPayload),
+      });
+      
+      if (webhookResponse.ok) {
+        console.log('[WEBHOOK-HANDLER] ✅ n8n webhook call successful');
+      } else {
+        console.error('[WEBHOOK-HANDLER] ❌ n8n webhook call failed:', webhookResponse.status);
+      }
+    } catch (webhookError) {
+      console.error('[WEBHOOK-HANDLER] ❌ Error calling n8n webhook:', webhookError);
+      // Don't fail the request if webhook fails
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
