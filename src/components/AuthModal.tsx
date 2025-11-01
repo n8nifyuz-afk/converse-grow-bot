@@ -1118,6 +1118,7 @@ export default function AuthModal({
                         <button 
                           type="button" 
                           onClick={() => {
+                            // Reset all email flow states
                             setEmail('');
                             setPassword('');
                             setShowPassword(false);
@@ -1125,13 +1126,14 @@ export default function AuthModal({
                             setHasStartedEmailFlow(false);
                             setError('');
                             setMode('signin');
-                            // Scroll to top
+                            
+                            // Scroll to top after a brief delay to ensure DOM updates
                             setTimeout(() => {
                               if (drawerContentRef.current) {
                                 drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
                               }
-                            }, 100);
-                          }}
+                            }, 50);
+                          }} 
                           className="text-sm text-primary hover:underline"
                         >
                           ← Back to sign in
