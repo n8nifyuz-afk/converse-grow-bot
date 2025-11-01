@@ -46,6 +46,7 @@ export default function AuthModal({
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [hasStartedEmailFlow, setHasStartedEmailFlow] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -116,6 +117,7 @@ export default function AuthModal({
       // Reset email focus state on mobile
       if (isMobile) {
         setIsEmailFocused(false);
+        setHasStartedEmailFlow(false);
       }
     }
   }, [isOpen, isMobile]);
@@ -716,6 +718,7 @@ export default function AuthModal({
               setPassword('');
               setShowPassword(false);
               setIsEmailFocused(false);
+              setHasStartedEmailFlow(false);
               // Scroll to top
               setTimeout(() => {
                 if (drawerContentRef.current) {
@@ -990,7 +993,7 @@ export default function AuthModal({
                     ← Back to sign up
                    </button>
                  </form> : <>
-                   {!showPassword && !(isMobile && isEmailFocused) && <>
+                   {!showPassword && !(isMobile && hasStartedEmailFlow) && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
                         {googleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
@@ -1073,21 +1076,12 @@ export default function AuthModal({
                             setShowPassword(true);
                           } else {
                             setShowPassword(false);
-                            // Reset to default modal state on mobile when email is cleared
-                            if (isMobile) {
-                              setIsEmailFocused(false);
-                              // Scroll to top when keyboard closes
-                              setTimeout(() => {
-                                if (drawerContentRef.current) {
-                                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-                                }
-                              }, 100);
-                            }
                           }
                         }}
                        onFocus={() => {
                          if (isMobile) {
                            setIsEmailFocused(true);
+                           setHasStartedEmailFlow(true);
                            setShowPassword(true);
                          }
                        }}
@@ -1124,6 +1118,7 @@ export default function AuthModal({
                             setPassword('');
                             setShowPassword(false);
                             setIsEmailFocused(false);
+                            setHasStartedEmailFlow(false);
                             setError('');
                             // Scroll to top
                             setTimeout(() => {
@@ -1131,7 +1126,7 @@ export default function AuthModal({
                                 drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
                               }
                             }, 100);
-                          }} 
+                          }}
                           className="text-sm text-primary hover:underline"
                         >
                           ← Back to sign in
