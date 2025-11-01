@@ -1246,16 +1246,8 @@ export default function AuthModal({
       <>
         <Drawer 
           open={isOpen} 
-          onOpenChange={(open) => {
-            // Prevent closing if email/password modal is open
-            if (!open && showEmailPasswordModal) {
-              return;
-            }
-            if (!open) {
-              onClose();
-            }
-          }} 
-          dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile' && !showEmailPasswordModal}
+          onOpenChange={onClose} 
+          dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'}
           modal={true}
           noBodyStyles={true}
         >
@@ -1297,7 +1289,7 @@ export default function AuthModal({
             }
           }}
           dismissible={true}
-          modal={true}
+          modal={false}
         >
           <DrawerContent 
             className="h-auto p-0"
@@ -1307,6 +1299,7 @@ export default function AuthModal({
               bottom: 0,
               left: 0,
               right: 0,
+              zIndex: 60,
               paddingBottom: 'env(safe-area-inset-bottom)',
               overflow: 'visible',
             }}
