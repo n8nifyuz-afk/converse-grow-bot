@@ -114,7 +114,7 @@ export default function AuthModal({
       setError('');
       setShowPassword(false);
       setShowPhoneValidation(false);
-      // Don't reset showEmailPasswordModal - it's independent
+      setShowEmailPasswordModal(false);
     }
   }, [isOpen]);
 
@@ -1067,7 +1067,6 @@ export default function AuthModal({
                        readOnly
                        onClick={() => {
                          setShowEmailPasswordModal(true);
-                         onClose();
                        }}
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
                      />
@@ -1295,13 +1294,13 @@ export default function AuthModal({
           <DrawerContent 
             className="h-auto p-0"
             style={{
-              maxHeight: '50vh',
+              maxHeight: '65vh',
               position: 'fixed',
               bottom: 0,
               left: 0,
               right: 0,
               paddingBottom: 'env(safe-area-inset-bottom)',
-              overflow: 'visible',
+              overflowY: 'auto',
             }}
           >
             <DrawerHeader className="sr-only">
