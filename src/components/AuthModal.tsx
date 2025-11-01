@@ -1042,10 +1042,17 @@ export default function AuthModal({
                          }
                        }}
                        onFocus={(e) => {
-                         if (isMobile) {
+                         if (isMobile && drawerContentRef.current) {
                            setTimeout(() => {
-                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                             e.target.scrollIntoView({ behavior: 'smooth', block: 'end' });
                            }, 300);
+                         }
+                       }}
+                       onBlur={() => {
+                         if (isMobile && drawerContentRef.current) {
+                           setTimeout(() => {
+                             drawerContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                           }, 100);
                          }
                        }}
                        required 
