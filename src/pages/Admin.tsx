@@ -529,116 +529,134 @@ export default function Admin() {
         return;
       }
       
-      // STEP 3: Calculate plan breakdown - SIMPLIFIED APPROACH
+      // STEP 3: Calculate plan breakdown
+      // Since we already filtered by plan in the query, this is simpler
       let proCount = 0;
       let ultraProCount = 0;
       let freeCount = 0;
       
       if (filterPlan === 'pro') {
+        // All counted users are Pro
         proCount = totalCount;
         ultraProCount = 0;
         freeCount = 0;
       } else if (filterPlan === 'ultra') {
+        // All counted users are Ultra Pro
         proCount = 0;
         ultraProCount = totalCount;
         freeCount = 0;
       } else if (filterPlan === 'free') {
+        // All counted users are free
         proCount = 0;
         ultraProCount = 0;
         freeCount = totalCount;
       } else {
-        // filterPlan === 'all' - Use the SAME logic as filters use
+        // filterPlan === 'all' - optimize plan breakdown
+        // CRITICAL OPTIMIZATION: Use efficient counting approach instead of fetching all user_ids
         
-        // Get Pro users (same as filter button logic)
-        const { data: proSubs } = await supabase
+        // Strategy: Count subscriptions directly with filters applied at database level
+        let subsQuery = supabase
           .from('user_subscriptions')
-          .select('user_id')
-          .eq('status', 'active')
-          .eq('plan', 'pro');
+          .select('user_id, plan', { count: 'exact' })
+          .eq('status', 'active');
         
-        // Get Ultra Pro users (same as filter button logic)
-        const { data: ultraProSubs } = await supabase
-          .from('user_subscriptions')
-          .select('user_id')
-          .eq('status', 'active')
-          .eq('plan', 'ultra_pro');
-        
-        // Get all profile user_ids to verify these users have profiles
-        let profileUserIds: Set<string>;
-        
+        // If we have filters, we need to join with profiles to filter subscriptions
+        // But to avoid fetching all data, we'll use a more efficient approach
         if (filterDate.from || filterDate.to || filterCountry !== 'all' || filterSearch.trim()) {
-          // Apply filters to profiles
-          let profilesQuery = supabase
+          // Build user_ids query with pagination to handle large datasets
+          let filteredUserIdsQuery = supabase
             .from('profiles')
             .select('user_id');
           
+          // Apply filters
           if (filterDate.from || filterDate.to) {
             const fromDateTime = getDateTimeFromFilter(filterDate.from, filterTime.fromTime);
             const toDateTime = getDateTimeFromFilter(filterDate.to, filterTime.toTime);
             
             if (fromDateTime && toDateTime) {
-              profilesQuery = profilesQuery
-                .gte('created_at', fromDateTime.toISOString())
-                .lte('created_at', toDateTime.toISOString());
+              filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString()).lte('created_at', toDateTime.toISOString());
             } else if (fromDateTime) {
-              profilesQuery = profilesQuery.gte('created_at', fromDateTime.toISOString());
+              filteredUserIdsQuery = filteredUserIdsQuery.gte('created_at', fromDateTime.toISOString());
             } else if (toDateTime) {
-              profilesQuery = profilesQuery.lte('created_at', toDateTime.toISOString());
+              filteredUserIdsQuery = filteredUserIdsQuery.lte('created_at', toDateTime.toISOString());
             }
           }
           
           if (filterCountry !== 'all') {
-            profilesQuery = profilesQuery.eq('country', filterCountry);
+            filteredUserIdsQuery = filteredUserIdsQuery.eq('country', filterCountry);
           }
           
           if (filterSearch.trim()) {
             const search = filterSearch.trim();
-            profilesQuery = profilesQuery.or(
-              `display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`
-            );
+            filteredUserIdsQuery = filteredUserIdsQuery.or(`display_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
           }
           
-          const { data: filteredProfiles } = await profilesQuery;
-          profileUserIds = new Set(filteredProfiles?.map(p => p.user_id) || []);
+          // Fetch in batches to avoid hitting limits
+          const batchSize = 1000;
+          let allFilteredUserIds: string[] = [];
+          let offset = 0;
+          let hasMore = true;
+          
+          while (hasMore && offset < 10000) { // Safety limit of 10k users for performance
+            const { data: batch } = await filteredUserIdsQuery
+              .range(offset, offset + batchSize - 1);
+            
+            if (batch && batch.length > 0) {
+              allFilteredUserIds.push(...batch.map(u => u.user_id));
+              offset += batchSize;
+              hasMore = batch.length === batchSize;
+            } else {
+              hasMore = false;
+            }
+          }
+          
+          console.log('[ADMIN STATS] Filtered user IDs for plan breakdown:', allFilteredUserIds.length);
+          
+          if (allFilteredUserIds.length > 0) {
+            // Now count subscriptions only for filtered users
+            const { data: filteredSubs } = await supabase
+              .from('user_subscriptions')
+              .select('plan')
+              .eq('status', 'active')
+              .in('user_id', allFilteredUserIds);
+            
+            proCount = filteredSubs?.filter(s => s.plan === 'pro').length || 0;
+            ultraProCount = filteredSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
+            const subscribedCount = proCount + ultraProCount;
+            freeCount = totalCount - subscribedCount;
+            
+            console.log('[ADMIN STATS] Plan breakdown with filters:', {
+              proCount,
+              ultraProCount,
+              subscribedCount,
+              freeCount,
+              totalCount
+            });
+          } else {
+            proCount = 0;
+            ultraProCount = 0;
+            freeCount = totalCount;
+          }
         } else {
-          // No filters - get all profiles
-          const { data: allProfiles } = await supabase
-            .from('profiles')
-            .select('user_id');
-          profileUserIds = new Set(allProfiles?.map(p => p.user_id) || []);
+          // No filters - use simple global count (fast!)
+          const { data: allSubs } = await supabase
+            .from('user_subscriptions')
+            .select('plan')
+            .eq('status', 'active');
+          
+          proCount = allSubs?.filter(s => s.plan === 'pro').length || 0;
+          ultraProCount = allSubs?.filter(s => s.plan === 'ultra_pro').length || 0;
+          const subscribedCount = proCount + ultraProCount;
+          freeCount = totalCount - subscribedCount;
+          
+          console.log('[ADMIN STATS] Plan breakdown (no filters):', {
+            proCount,
+            ultraProCount,
+            subscribedCount,
+            freeCount,
+            totalCount
+          });
         }
-        
-        // Count distinct users with profiles
-        const proUserIds = new Set<string>();
-        const ultraProUserIds = new Set<string>();
-        
-        proSubs?.forEach(sub => {
-          if (profileUserIds.has(sub.user_id)) {
-            proUserIds.add(sub.user_id);
-          }
-        });
-        
-        ultraProSubs?.forEach(sub => {
-          if (profileUserIds.has(sub.user_id)) {
-            ultraProUserIds.add(sub.user_id);
-          }
-        });
-        
-        proCount = proUserIds.size;
-        ultraProCount = ultraProUserIds.size;
-        const subscribedCount = proCount + ultraProCount;
-        freeCount = totalCount - subscribedCount;
-        
-        console.log('[ADMIN STATS] Plan breakdown (using filter logic):', {
-          proCount,
-          ultraProCount,
-          subscribedCount,
-          freeCount,
-          totalCount,
-          proSubsTotal: proSubs?.length || 0,
-          ultraProSubsTotal: ultraProSubs?.length || 0,
-          profilesChecked: profileUserIds.size
-        });
       }
       
       // STEP 4: Calculate total cost and tokens efficiently using user_cost_summary
