@@ -1069,34 +1069,47 @@ export default function AuthModal({
                             setShowPassword(false);
                           }
                         }}
-                       onFocus={(e) => {
-                         if (isMobile) {
-                           console.log('📧 Email input focused on mobile');
-                           const scrollToInput = () => {
-                             const element = e.target;
-                             console.log('🔄 Attempting to scroll email input into view');
-                             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                             
-                             // Double-check after a moment and retry if needed
-                             setTimeout(() => {
-                               const rect = element.getBoundingClientRect();
-                               const viewportHeight = window.innerHeight;
-                               console.log('📏 Input position:', { top: rect.top, bottom: rect.bottom, viewportHeight });
-                               
-                               // If input is in bottom 40% of viewport (likely behind keyboard), scroll again
-                               if (rect.bottom > viewportHeight * 0.6) {
-                                 console.log('⚠️ Input still too low, scrolling again');
-                                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                               } else {
-                                 console.log('✅ Input properly positioned above keyboard');
-                               }
-                             }, 500);
-                           };
-                           
-                           // Initial scroll after keyboard animation starts
-                           setTimeout(scrollToInput, 300);
-                         }
-                       }}
+                        onFocus={() => {
+                          if (!emailInputRef.current) return;
+
+                          const input = emailInputRef.current;
+                          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+                          if (isIOS) {
+                            // iOS: More aggressive positioning
+                            setTimeout(() => {
+                              input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              
+                              setTimeout(() => {
+                                // Scroll parent drawer to ensure input visibility
+                                if (drawerContentRef.current) {
+                                  const inputRect = input.getBoundingClientRect();
+                                  const drawerRect = drawerContentRef.current.getBoundingClientRect();
+                                  
+                                  // If input is below the middle of drawer, scroll it up
+                                  if (inputRect.top > window.innerHeight * 0.4) {
+                                    drawerContentRef.current.scrollTop = input.offsetTop - 100;
+                                  }
+                                }
+                              }, 100);
+                            }, 400);
+                          } else {
+                            // Android: Standard approach
+                            setTimeout(() => {
+                              input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              
+                              const rect = input.getBoundingClientRect();
+                              const keyboardHeight = window.innerHeight * 0.5;
+                              
+                              if (rect.bottom + keyboardHeight > window.innerHeight) {
+                                if (drawerContentRef.current) {
+                                  drawerContentRef.current.scrollTop += 
+                                    (rect.bottom + keyboardHeight) - window.innerHeight + 30;
+                                }
+                              }
+                            }, 200);
+                          }
+                        }}
                        required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
