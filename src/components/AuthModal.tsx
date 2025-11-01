@@ -46,6 +46,7 @@ export default function AuthModal({
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [showEmailPasswordModal, setShowEmailPasswordModal] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -113,6 +114,7 @@ export default function AuthModal({
       setError('');
       setShowPassword(false);
       setShowPhoneValidation(false);
+      setShowEmailPasswordModal(false);
     }
   }, [isOpen]);
 
@@ -1056,58 +1058,17 @@ export default function AuthModal({
                       </div>
                     </>}
 
-                   <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
+                   <div className="space-y-3">
                      <Input 
                        ref={emailInputRef}
                        type="email" 
                        placeholder={t('authModal.enterEmail')} 
-                       value={email} 
-                     onChange={e => {
-                          setEmail(e.target.value);
-                          if (!isMobile) setError('');
-                          if (e.target.value.trim()) {
-                            setShowPassword(true);
-                          } else {
-                            setShowPassword(false);
-                            // Reset to default modal state on mobile when email is cleared
-                            if (isMobile) {
-                              setIsEmailFocused(false);
-                              // Scroll to top when keyboard closes
-                              setTimeout(() => {
-                                if (drawerContentRef.current) {
-                                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-                                }
-                              }, 100);
-                            }
-                          }
-                        }}
-                       onFocus={() => {
-                         if (isMobile) {
-                           setIsEmailFocused(true);
-                         }
-                       }}
-                       onBlur={() => {
-                         if (isMobile) {
-                           setIsEmailFocused(false);
-                         }
-                       }}
-                       required
-                       className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+                       value=""
+                       readOnly
+                       onClick={() => setShowEmailPasswordModal(true)}
+                       className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
                      />
-                     {showPassword && <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
-              setPassword(e.target.value);
-              if (!isMobile) setError('');
-            }} required minLength={6} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />}
-                      {error && !isMobile && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
-                         {error}
-                       </div>}
-                     {showPassword && <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
-                        {loading ? <>
-                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                            {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
-                          </> : mode === 'signup' && signupCooldown > 0 ? `${t('authModal.wait')} ${signupCooldown}s` : t('authModal.continueWithEmail')}
-                      </Button>}
-                   </form>
+                   </div>
 
                   <div className="mt-4 text-center space-x-2 text-sm">
                     {mode === 'signin' ? <>
@@ -1160,48 +1121,205 @@ export default function AuthModal({
              </div>
            </div>
          </div>;
-  if (isMobile) {
-    return <Drawer 
-      open={isOpen} 
-      onOpenChange={onClose} 
-      dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'}
-      modal={true}
-      noBodyStyles={true}
-    >
-        <DrawerContent 
-          ref={drawerContentRef}
-          className="h-auto p-0" 
-          style={{ 
-            maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            paddingBottom: 'env(safe-area-inset-bottom)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'visible'
+  // Email/Password Modal Content
+  const emailPasswordContent = (
+    <div className="w-full px-4 md:px-6 py-8 md:py-12">
+      <div className="mb-6 text-center">
+        <h2 className="text-2xl md:text-3xl font-bold">
+          {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+        </h2>
+      </div>
+      
+      <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-4">
+        <Input 
+          type="email" 
+          placeholder={t('authModal.enterEmail')} 
+          value={email} 
+          onChange={e => {
+            setEmail(e.target.value);
+            setError('');
           }}
+          required
+          autoFocus
+          className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+        />
+        
+        <Input 
+          type="password" 
+          placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} 
+          value={password} 
+          onChange={e => {
+            setPassword(e.target.value);
+            setError('');
+          }} 
+          required 
+          minLength={6} 
+          className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+        />
+        
+        {error && (
+          <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+            {error}
+          </div>
+        )}
+        
+        <Button 
+          type="submit" 
+          disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)} 
+          className="w-full h-11 md:h-12 text-base"
         >
-          <DrawerHeader className="sr-only">
-            <DrawerTitle>ChatLearn Authentication</DrawerTitle>
-            <DrawerDescription>
-              {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
-            </DrawerDescription>
-          </DrawerHeader>
-          {authContent}
-        </DrawerContent>
-      </Drawer>;
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+              {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
+            </>
+          ) : mode === 'signup' && signupCooldown > 0 ? (
+            `${t('authModal.wait')} ${signupCooldown}s`
+          ) : (
+            t('authModal.continueWithEmail')
+          )}
+        </Button>
+      </form>
+      
+      <div className="mt-4 text-center space-x-2 text-sm">
+        {mode === 'signin' ? (
+          <>
+            <span className="text-muted-foreground">{t('authModal.dontHaveAccount')}</span>
+            <button 
+              onClick={() => {
+                setMode('signup');
+                setError('');
+              }} 
+              className="text-primary hover:underline font-medium"
+            >
+              {t('authModal.signUp')}
+            </button>
+            <span className="text-muted-foreground">|</span>
+            <button 
+              onClick={() => {
+                setMode('reset');
+                setShowEmailPasswordModal(false);
+              }} 
+              className="text-primary hover:underline"
+            >
+              {t('authModal.forgotPassword')}
+            </button>
+          </>
+        ) : (
+          <>
+            <span className="text-muted-foreground">{t('authModal.alreadyHaveAccount')}</span>
+            <button 
+              onClick={() => {
+                setMode('signin');
+                setError('');
+              }} 
+              className="text-primary hover:underline font-medium"
+            >
+              {t('authModal.signIn')}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <Drawer 
+          open={isOpen} 
+          onOpenChange={onClose} 
+          dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'}
+          modal={true}
+          noBodyStyles={true}
+        >
+          <DrawerContent 
+            ref={drawerContentRef}
+            className="h-auto p-0" 
+            style={{ 
+              maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'visible'
+            }}
+          >
+            <DrawerHeader className="sr-only">
+              <DrawerTitle>ChatLearn Authentication</DrawerTitle>
+              <DrawerDescription>
+                {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
+              </DrawerDescription>
+            </DrawerHeader>
+            {authContent}
+          </DrawerContent>
+        </Drawer>
+
+        {/* Separate Email/Password Modal */}
+        <Drawer 
+          open={showEmailPasswordModal} 
+          onOpenChange={(open) => {
+            setShowEmailPasswordModal(open);
+            if (!open) {
+              setEmail('');
+              setPassword('');
+              setError('');
+              setMode('signin');
+            }
+          }}
+          dismissible={true}
+          modal={true}
+        >
+          <DrawerContent className="h-auto p-0">
+            <DrawerHeader className="sr-only">
+              <DrawerTitle>Email Sign In</DrawerTitle>
+              <DrawerDescription>Sign in with email and password</DrawerDescription>
+            </DrawerHeader>
+            {emailPasswordContent}
+          </DrawerContent>
+        </Drawer>
+      </>
+    );
   }
-  return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
-        <DialogHeader className="sr-only">
-          <DialogTitle>ChatLearn Authentication</DialogTitle>
-          <DialogDescription>
-            {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
-          </DialogDescription>
-        </DialogHeader>
-        {authContent}
-      </DialogContent>
-    </Dialog>;
+
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
+          <DialogHeader className="sr-only">
+            <DialogTitle>ChatLearn Authentication</DialogTitle>
+            <DialogDescription>
+              {mode === 'reset' ? 'Reset your password' : 'Sign in or sign up to ChatLearn'}
+            </DialogDescription>
+          </DialogHeader>
+          {authContent}
+        </DialogContent>
+      </Dialog>
+
+      {/* Separate Email/Password Modal */}
+      <Dialog 
+        open={showEmailPasswordModal} 
+        onOpenChange={(open) => {
+          setShowEmailPasswordModal(open);
+          if (!open) {
+            setEmail('');
+            setPassword('');
+            setError('');
+            setMode('signin');
+          }
+        }}
+      >
+        <DialogContent className="max-w-[90vw] sm:max-w-md w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Email Sign In</DialogTitle>
+            <DialogDescription>Sign in with email and password</DialogDescription>
+          </DialogHeader>
+          {emailPasswordContent}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
