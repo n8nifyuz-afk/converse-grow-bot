@@ -1099,28 +1099,26 @@ export default function AuthModal({
                  </>}
              </div>
 
-             {/* Footer - Hide on mobile when email is focused */}
-             {!(isMobile && isEmailFocused) && (
-            <div className="mt-5 md:mt-6 pt-5 border-t border-border">
-              <div className="text-sm text-muted-foreground text-center">
-                {t('authModal.termsAgreement')}{' '}
-                <button onClick={() => {
-            onClose();
-            navigate('/terms');
-          }} className="text-primary hover:underline">
-                  {t('authModal.termsOfService')}
-                </button>
-                {' '}{t('authModal.and')}{' '}
-                <button onClick={() => {
-            onClose();
-            navigate('/privacy');
-          }} className="text-primary hover:underline">
-                  {t('authModal.privacyPolicy')}
+             {/* Footer */}
+             <div className="mt-5 md:mt-6 pt-5 border-t border-border">
+               <div className="text-sm text-muted-foreground text-center">
+                 {t('authModal.termsAgreement')}{' '}
+                 <button onClick={() => {
+             onClose();
+             navigate('/terms');
+           }} className="text-primary hover:underline">
+                   {t('authModal.termsOfService')}
+                 </button>
+                 {' '}{t('authModal.and')}{' '}
+                 <button onClick={() => {
+             onClose();
+             navigate('/privacy');
+           }} className="text-primary hover:underline">
+                   {t('authModal.privacyPolicy')}
                  </button>
                  .
                </div>
              </div>
-             )}
            </div>
          </div>;
   if (isMobile) {
