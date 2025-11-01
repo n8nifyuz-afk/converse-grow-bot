@@ -1065,9 +1065,7 @@ export default function AuthModal({
                        placeholder={t('authModal.enterEmail')} 
                        value=""
                        readOnly
-                       onClick={() => {
-                         setShowEmailPasswordModal(true);
-                       }}
+                       onClick={() => setShowEmailPasswordModal(true)}
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
                      />
                    </div>
@@ -1125,7 +1123,7 @@ export default function AuthModal({
          </div>;
   // Email/Password Modal Content
   const emailPasswordContent = (
-    <div className="w-full px-4 md:px-6 py-6 md:py-8">
+    <div className="w-full px-4 md:px-6 py-8 md:py-12">
       <div className="mb-6 text-center">
         <h2 className="text-2xl md:text-3xl font-bold">
           {mode === 'signin' ? 'Sign In' : 'Sign Up'}
@@ -1181,22 +1179,6 @@ export default function AuthModal({
             t('authModal.continueWithEmail')
           )}
         </Button>
-        
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setShowEmailPasswordModal(false);
-              setEmail('');
-              setPassword('');
-              setError('');
-              setMode('signin');
-            }}
-            className="text-sm text-primary hover:underline"
-          >
-            ← Back to sign in
-          </button>
-        </div>
       </form>
       
       <div className="mt-4 text-center space-x-2 text-sm">
@@ -1291,18 +1273,7 @@ export default function AuthModal({
           dismissible={true}
           modal={true}
         >
-          <DrawerContent 
-            className="h-auto p-0"
-            style={{
-              maxHeight: '65vh',
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              paddingBottom: 'env(safe-area-inset-bottom)',
-              overflowY: 'auto',
-            }}
-          >
+          <DrawerContent className="h-auto p-0">
             <DrawerHeader className="sr-only">
               <DrawerTitle>Email Sign In</DrawerTitle>
               <DrawerDescription>Sign in with email and password</DrawerDescription>
