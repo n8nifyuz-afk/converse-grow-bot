@@ -111,6 +111,15 @@ serve(async (req) => {
     console.log(`[SUBSCRIBER-WEBHOOK] IP: ${ipAddress}, Country: ${country}, Signup Method: ${signupMethod}`);
     console.log(`[SUBSCRIBER-WEBHOOK] GCLID: ${gclid}, Referer: ${referer}`);
     console.log(`[SUBSCRIBER-WEBHOOK] URL Params:`, urlParams);
+    
+    // Extract and log Google Ads parameters specifically
+    const googleAdsParams = {
+      gclid: gclid,
+      gad_source: urlParams?.gad_source,
+      gad_campaignid: urlParams?.gad_campaignid,
+      gbraid: urlParams?.gbraid
+    };
+    console.log(`🎯 [SUBSCRIBER-WEBHOOK-GOOGLE-ADS] Google Ads Parameters:`, googleAdsParams);
 
     // Clean and format IP address before sending to webhook
     const cleanedIpAddress = cleanIpAddress(ipAddress);

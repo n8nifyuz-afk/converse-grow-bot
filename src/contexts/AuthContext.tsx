@@ -432,13 +432,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     }
                   }
                   
+                  // Extract and log Google Ads parameters specifically
+                  const googleAdsParams = {
+                    gclid: urlParamsObj.gclid || gclid,
+                    gad_source: urlParamsObj.gad_source,
+                    gad_campaignid: urlParamsObj.gad_campaignid,
+                    gbraid: urlParamsObj.gbraid,
+                    utm_source: urlParamsObj.utm_source,
+                    utm_medium: urlParamsObj.utm_medium,
+                    utm_campaign: urlParamsObj.utm_campaign
+                  };
+                  
+                  console.log('🎯 [SIGNUP-GOOGLE-ADS] Google Ads Parameters Captured:', googleAdsParams);
+                  console.log('📊 [SIGNUP-ALL-PARAMS] All URL Parameters:', urlParamsObj);
+                  
                   // Store GCLID in localStorage for future use (Google Click ID should persist)
                   if (gclid && !localStorage.getItem('gclid')) {
                     localStorage.setItem('gclid', gclid);
                   }
                   
                   // Save GCLID and URL params to database
-                  await supabase
+                  const { error: updateError } = await supabase
                     .from('profiles')
                     .update({
                       gclid: gclid,
@@ -447,7 +461,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     })
                     .eq('user_id', session.user.id);
                   
-                  console.log('[SIGNUP] Saved GCLID and URL params to database:', { gclid, urlParamsObj });
+                  if (updateError) {
+                    console.error('❌ [SIGNUP-DB] Failed to save params to database:', updateError);
+                  } else {
+                    console.log('✅ [SIGNUP-DB] Successfully saved to database:', {
+                      gclid,
+                      gad_source: urlParamsObj.gad_source,
+                      gad_campaignid: urlParamsObj.gad_campaignid,
+                      gbraid: urlParamsObj.gbraid,
+                      all_params: urlParamsObj
+                    });
+                  }
                   
                   // Fetch profile data including phone_number and display_name
                   const { data: profileData } = await supabase
@@ -465,6 +489,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                                    session.user.email?.split('@')[0] || 
                                    'User';
 
+                  console.log('📤 [SIGNUP-WEBHOOK] Sending webhook with Google Ads data:', {
+                    gclid: gclid,
+                    gad_source: urlParamsObj.gad_source,
+                    gad_campaignid: urlParamsObj.gad_campaignid,
+                    gbraid: urlParamsObj.gbraid
+                  });
+                  
                   await supabase.functions.invoke('send-subscriber-webhook', {
                     body: {
                       userId: session.user.id,
