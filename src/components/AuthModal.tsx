@@ -45,6 +45,7 @@ export default function AuthModal({
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -710,6 +711,7 @@ export default function AuthModal({
               setEmail('');
               setPassword('');
               setShowPassword(false);
+              setIsEmailFocused(false);
               // Scroll to top
               setTimeout(() => {
                 if (drawerContentRef.current) {
@@ -984,7 +986,7 @@ export default function AuthModal({
                     ← Back to sign up
                    </button>
                  </form> : <>
-                   {!showPassword && <>
+                   {!showPassword && !(isMobile && isEmailFocused) && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
                         {googleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
@@ -1055,85 +1057,40 @@ export default function AuthModal({
                     </>}
 
                    <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
-                   <Input 
-                     ref={emailInputRef}
-                     type="email" 
-                     placeholder={t('authModal.enterEmail')} 
-                     value={email} 
-                      onChange={e => {
+                     <Input 
+                       ref={emailInputRef}
+                       type="email" 
+                       placeholder={t('authModal.enterEmail')} 
+                       value={email} 
+                     onChange={e => {
                           setEmail(e.target.value);
                           if (!isMobile) setError('');
                           if (e.target.value.trim()) {
                             setShowPassword(true);
                           } else {
                             setShowPassword(false);
-                          }
-                        }}
-                        onFocus={() => {
-                          if (!emailInputRef.current || !isMobile) return;
-
-                          const input = emailInputRef.current;
-                          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-                          console.log('📧 Email input focused on mobile');
-
-                          if (isIOS) {
-                            // iOS: More aggressive positioning with reliable calculation
-                            setTimeout(() => {
-                              console.log('🔄 iOS: Scrolling email input into view');
-                              input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              
+                            // Reset to default modal state on mobile when email is cleared
+                            if (isMobile) {
+                              setIsEmailFocused(false);
+                              // Scroll to top when keyboard closes
                               setTimeout(() => {
                                 if (drawerContentRef.current) {
-                                  const inputRect = input.getBoundingClientRect();
-                                  const estimatedKeyboardHeight = window.innerHeight * 0.45;
-                                  
-                                  console.log('📏 iOS Input position:', { 
-                                    top: inputRect.top, 
-                                    bottom: inputRect.bottom, 
-                                    viewportHeight: window.innerHeight 
-                                  });
-                                  
-                                  // Check if input will be covered by keyboard
-                                  if (inputRect.bottom + estimatedKeyboardHeight > window.innerHeight) {
-                                    const scrollNeeded = (inputRect.bottom + estimatedKeyboardHeight) - window.innerHeight;
-                                    console.log('⚠️ iOS Input will be covered, scrolling drawer by:', scrollNeeded + 30);
-                                    drawerContentRef.current.scrollTop += scrollNeeded + 30;
-                                  } else {
-                                    console.log('✅ iOS Input properly positioned');
-                                  }
-                                }
-                              }, 150);
-                            }, 400);
-                          } else {
-                            // Android: Standard approach with improved calculation
-                            setTimeout(() => {
-                              console.log('🔄 Android: Scrolling email input into view');
-                              input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              
-                              setTimeout(() => {
-                                const rect = input.getBoundingClientRect();
-                                const keyboardHeight = window.innerHeight * 0.5;
-                                
-                                console.log('📏 Android Input position:', { 
-                                  top: rect.top, 
-                                  bottom: rect.bottom, 
-                                  viewportHeight: window.innerHeight 
-                                });
-                                
-                                if (rect.bottom + keyboardHeight > window.innerHeight) {
-                                  if (drawerContentRef.current) {
-                                    const scrollNeeded = (rect.bottom + keyboardHeight) - window.innerHeight;
-                                    console.log('⚠️ Android Input will be covered, scrolling drawer by:', scrollNeeded + 30);
-                                    drawerContentRef.current.scrollTop += scrollNeeded + 30;
-                                  }
-                                } else {
-                                  console.log('✅ Android Input properly positioned');
+                                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
                                 }
                               }, 100);
-                            }, 200);
+                            }
                           }
                         }}
+                       onFocus={() => {
+                         if (isMobile) {
+                           setIsEmailFocused(true);
+                         }
+                       }}
+                       onBlur={() => {
+                         if (isMobile) {
+                           setIsEmailFocused(false);
+                         }
+                       }}
                        required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
