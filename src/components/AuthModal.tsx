@@ -1124,6 +1124,7 @@ export default function AuthModal({
                             setIsEmailFocused(false);
                             setHasStartedEmailFlow(false);
                             setError('');
+                            setMode('signin');
                             // Scroll to top
                             setTimeout(() => {
                               if (drawerContentRef.current) {
