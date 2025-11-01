@@ -53,6 +53,13 @@ export const initializeGTMWithGCLID = () => {
 
     console.log('📊 [GTM-INIT] URL Parameters:', allUrlParams);
 
+    // CRITICAL: Store ALL URL parameters in localStorage (for later use during OAuth signup)
+    // This ensures utm_source, utm_medium, gad_source, etc. persist through OAuth redirects
+    if (Object.keys(allUrlParams).length > 0) {
+      localStorage.setItem('url_params', JSON.stringify(allUrlParams));
+      console.log('💾 [GTM-INIT] URL parameters saved to localStorage:', allUrlParams);
+    }
+
     // If we have GCLID or URL params, push to dataLayer
     if (gclid || Object.keys(allUrlParams).length > 0) {
       const eventData: Record<string, any> = {

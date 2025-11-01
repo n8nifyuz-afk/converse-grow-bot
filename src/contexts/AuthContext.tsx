@@ -412,10 +412,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   // Capture URL parameters (GCLID, UTM params, etc.)
                   const urlParams = new URLSearchParams(window.location.search);
                   const gclid = urlParams.get('gclid') || localStorage.getItem('gclid') || null;
-                  const urlParamsObj: Record<string, string> = {};
+                  
+                  // Get URL params from current URL or localStorage (for OAuth redirects)
+                  let urlParamsObj: Record<string, string> = {};
                   urlParams.forEach((value, key) => {
                     urlParamsObj[key] = value;
                   });
+                  
+                  // If no URL params in current URL, try to get from localStorage (OAuth case)
+                  if (Object.keys(urlParamsObj).length === 0) {
+                    const storedParams = localStorage.getItem('url_params');
+                    if (storedParams) {
+                      try {
+                        urlParamsObj = JSON.parse(storedParams);
+                        console.log('[SIGNUP] Restored URL params from localStorage:', urlParamsObj);
+                      } catch (e) {
+                        console.warn('[SIGNUP] Failed to parse stored URL params');
+                      }
+                    }
+                  }
                   
                   // Store GCLID in localStorage for future use (Google Click ID should persist)
                   if (gclid && !localStorage.getItem('gclid')) {
@@ -491,10 +506,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                                     (currentGclid && currentGclid !== existingProfile?.gclid);
                 
                 if (shouldUpdate && currentGclid) {
-                  const urlParamsObj: Record<string, string> = {};
+                  let urlParamsObj: Record<string, string> = {};
                   currentUrlParams.forEach((value, key) => {
                     urlParamsObj[key] = value;
                   });
+                  
+                  // If no URL params in current URL, try to get from localStorage (OAuth case)
+                  if (Object.keys(urlParamsObj).length === 0) {
+                    const storedParams = localStorage.getItem('url_params');
+                    if (storedParams) {
+                      try {
+                        urlParamsObj = JSON.parse(storedParams);
+                      } catch (e) {
+                        // Silent error
+                      }
+                    }
+                  }
                   
                   // Store in localStorage for persistence
                   if (!localStorage.getItem('gclid')) {
