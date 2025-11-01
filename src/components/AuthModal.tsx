@@ -1088,11 +1088,16 @@ export default function AuthModal({
                        onFocus={() => {
                          if (isMobile) {
                            setIsEmailFocused(true);
+                           setShowPassword(true);
                          }
                        }}
                        onBlur={() => {
                          if (isMobile) {
                            setIsEmailFocused(false);
+                           // Hide password field if email is empty when blurring
+                           if (!email.trim()) {
+                             setShowPassword(false);
+                           }
                          }
                        }}
                        required
