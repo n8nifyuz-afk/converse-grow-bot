@@ -1055,11 +1055,11 @@ export default function AuthModal({
                     </>}
 
                    <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
-                     <Input 
-                       ref={emailInputRef}
-                       type="email" 
-                       placeholder={t('authModal.enterEmail')} 
-                       value={email} 
+                   <Input 
+                     ref={emailInputRef}
+                     type="email" 
+                     placeholder={t('authModal.enterEmail')} 
+                     value={email} 
                       onChange={e => {
                           setEmail(e.target.value);
                           if (!isMobile) setError('');
@@ -1069,6 +1069,13 @@ export default function AuthModal({
                             setShowPassword(false);
                           }
                         }}
+                       onFocus={(e) => {
+                         if (isMobile) {
+                           setTimeout(() => {
+                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                           }, 300);
+                         }
+                       }}
                        required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
