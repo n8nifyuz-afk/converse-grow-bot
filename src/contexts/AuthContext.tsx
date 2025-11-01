@@ -496,6 +496,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     gbraid: urlParamsObj.gbraid
                   });
                   
+                  // Mark webhook as sent BEFORE invoking to prevent race condition duplicates
+                  sessionStorage.setItem(webhookSentKey, 'true');
+                  
                   await supabase.functions.invoke('send-subscriber-webhook', {
                     body: {
                       userId: session.user.id,
@@ -510,8 +513,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     }
                   });
                   
-                  // Mark webhook as sent to prevent duplicates
-                  sessionStorage.setItem(webhookSentKey, 'true');
                   console.log('[SIGNUP-WEBHOOK] Successfully sent and marked as complete');
                   } catch (webhookError) {
                     console.error('Failed to send subscriber webhook:', webhookError);
