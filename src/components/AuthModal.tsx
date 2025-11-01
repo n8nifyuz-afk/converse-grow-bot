@@ -1573,7 +1573,17 @@ export default function AuthModal({
           dismissible={mode !== 'verify' && mode !== 'complete-profile'}
           modal={true}
         >
-          <DrawerContent className="h-auto p-0">
+          <DrawerContent 
+            className="h-auto p-0"
+            style={{ 
+              maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
+          >
             <DrawerHeader className="sr-only">
               <DrawerTitle>Phone Sign In</DrawerTitle>
               <DrawerDescription>Sign in with phone number</DrawerDescription>
