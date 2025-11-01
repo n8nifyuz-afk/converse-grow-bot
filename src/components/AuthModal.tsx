@@ -1133,7 +1133,7 @@ export default function AuthModal({
           ref={drawerContentRef}
           className="h-auto p-0" 
           style={{ 
-            maxHeight: isEmailFocused ? '50dvh' : mode === 'complete-profile' ? '70dvh' : '80dvh',
+            maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
             position: 'fixed',
             bottom: 0,
             left: 0,
