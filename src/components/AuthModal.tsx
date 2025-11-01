@@ -1070,43 +1070,67 @@ export default function AuthModal({
                           }
                         }}
                         onFocus={() => {
-                          if (!emailInputRef.current) return;
+                          if (!emailInputRef.current || !isMobile) return;
 
                           const input = emailInputRef.current;
                           const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
+                          console.log('📧 Email input focused on mobile');
+
                           if (isIOS) {
-                            // iOS: More aggressive positioning
+                            // iOS: More aggressive positioning with reliable calculation
                             setTimeout(() => {
+                              console.log('🔄 iOS: Scrolling email input into view');
                               input.scrollIntoView({ behavior: 'smooth', block: 'center' });
                               
                               setTimeout(() => {
-                                // Scroll parent drawer to ensure input visibility
                                 if (drawerContentRef.current) {
                                   const inputRect = input.getBoundingClientRect();
-                                  const drawerRect = drawerContentRef.current.getBoundingClientRect();
+                                  const estimatedKeyboardHeight = window.innerHeight * 0.45;
                                   
-                                  // If input is below the middle of drawer, scroll it up
-                                  if (inputRect.top > window.innerHeight * 0.4) {
-                                    drawerContentRef.current.scrollTop = input.offsetTop - 100;
+                                  console.log('📏 iOS Input position:', { 
+                                    top: inputRect.top, 
+                                    bottom: inputRect.bottom, 
+                                    viewportHeight: window.innerHeight 
+                                  });
+                                  
+                                  // Check if input will be covered by keyboard
+                                  if (inputRect.bottom + estimatedKeyboardHeight > window.innerHeight) {
+                                    const scrollNeeded = (inputRect.bottom + estimatedKeyboardHeight) - window.innerHeight;
+                                    console.log('⚠️ iOS Input will be covered, scrolling drawer by:', scrollNeeded + 30);
+                                    drawerContentRef.current.scrollTop += scrollNeeded + 30;
+                                  } else {
+                                    console.log('✅ iOS Input properly positioned');
                                   }
                                 }
-                              }, 100);
+                              }, 150);
                             }, 400);
                           } else {
-                            // Android: Standard approach
+                            // Android: Standard approach with improved calculation
                             setTimeout(() => {
+                              console.log('🔄 Android: Scrolling email input into view');
                               input.scrollIntoView({ behavior: 'smooth', block: 'center' });
                               
-                              const rect = input.getBoundingClientRect();
-                              const keyboardHeight = window.innerHeight * 0.5;
-                              
-                              if (rect.bottom + keyboardHeight > window.innerHeight) {
-                                if (drawerContentRef.current) {
-                                  drawerContentRef.current.scrollTop += 
-                                    (rect.bottom + keyboardHeight) - window.innerHeight + 30;
+                              setTimeout(() => {
+                                const rect = input.getBoundingClientRect();
+                                const keyboardHeight = window.innerHeight * 0.5;
+                                
+                                console.log('📏 Android Input position:', { 
+                                  top: rect.top, 
+                                  bottom: rect.bottom, 
+                                  viewportHeight: window.innerHeight 
+                                });
+                                
+                                if (rect.bottom + keyboardHeight > window.innerHeight) {
+                                  if (drawerContentRef.current) {
+                                    const scrollNeeded = (rect.bottom + keyboardHeight) - window.innerHeight;
+                                    console.log('⚠️ Android Input will be covered, scrolling drawer by:', scrollNeeded + 30);
+                                    drawerContentRef.current.scrollTop += scrollNeeded + 30;
+                                  }
+                                } else {
+                                  console.log('✅ Android Input properly positioned');
                                 }
-                              }
+                              }, 100);
                             }, 200);
                           }
                         }}
