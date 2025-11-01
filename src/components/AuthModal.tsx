@@ -1116,6 +1116,27 @@ export default function AuthModal({
                             {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
                           </> : mode === 'signup' && signupCooldown > 0 ? `${t('authModal.wait')} ${signupCooldown}s` : t('authModal.continueWithEmail')}
                       </Button>}
+                      {showPassword && isMobile && (
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setEmail('');
+                            setPassword('');
+                            setShowPassword(false);
+                            setIsEmailFocused(false);
+                            setError('');
+                            // Scroll to top
+                            setTimeout(() => {
+                              if (drawerContentRef.current) {
+                                drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                              }
+                            }, 100);
+                          }} 
+                          className="text-sm text-primary hover:underline"
+                        >
+                          ← Back to sign in
+                        </button>
+                      )}
                    </form>
 
                   <div className="mt-4 text-center space-x-2 text-sm">
