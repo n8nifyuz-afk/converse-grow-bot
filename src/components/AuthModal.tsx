@@ -159,6 +159,18 @@ export default function AuthModal({
     e.preventDefault();
     if (!email || !password) return;
 
+    // Client-side validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     // Check cooldown
     const now = Date.now();
     const timeSinceLastAttempt = now - lastSignupAttempt;
@@ -177,42 +189,41 @@ export default function AuthModal({
     setError('');
     
     try {
-      // Use direct fetch for better error handling
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-verification-code`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-          },
-          body: JSON.stringify({ email, password })
-        }
-      );
+      // Use Supabase client to invoke edge function
+      const { data, error: invokeError } = await supabase.functions.invoke('send-verification-code', {
+        body: { email, password }
+      });
 
-      const data = await response.json();
+      // Handle errors from edge function
+      if (invokeError) {
+        console.error('Edge function invocation error:', invokeError);
+        setError(invokeError.message || "Failed to send verification code. Please try again.");
+        return;
+      }
 
-      // Handle non-2xx responses
-      if (!response.ok) {
-        const errorMessage = data?.error || "An error occurred. Please try again.";
-        setError(errorMessage);
+      // Handle error responses from the function
+      if (data?.error) {
+        setError(data.error);
         return;
       }
 
       // Success - verification code sent
-      setLastSignupAttempt(now);
-      setSignupCooldown(60);
-      setPendingEmail(email);
-      
-      toast({
-        title: "Check your email",
-        description: "We've sent a 6-digit verification code to your email. Please enter it below.",
-        duration: 8000
-      });
-      
-      // Switch to verification code mode
-      setMode('verify-email');
+      if (data?.success) {
+        setLastSignupAttempt(now);
+        setSignupCooldown(60);
+        setPendingEmail(email);
+        
+        toast({
+          title: "Check your email",
+          description: "We've sent a 6-digit verification code to your email. Please enter it below.",
+          duration: 8000
+        });
+        
+        // Switch to verification code mode
+        setMode('verify-email');
+      } else {
+        setError("Unexpected response from server. Please try again.");
+      }
     } catch (error) {
       console.error('Unexpected error during signup:', error);
       setError("An unexpected error occurred. Please try again.");
@@ -225,19 +236,34 @@ export default function AuthModal({
     e.preventDefault();
     if (!pendingEmail || !verificationCode) return;
 
+    if (verificationCode.length !== 6) {
+      setError('Please enter the complete 6-digit code');
+      return;
+    }
+
     setLoading(true);
+    setError('');
+    
     try {
-      const { data, error } = await supabase.functions.invoke('verify-email-code', {
+      const { data, error: invokeError } = await supabase.functions.invoke('verify-email-code', {
         body: { email: pendingEmail, code: verificationCode }
       });
 
-      if (error) {
-        toast({
-          title: "Verification failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
+      // Handle invocation errors
+      if (invokeError) {
+        console.error('Verification invocation error:', invokeError);
+        setError(invokeError.message || "Verification failed. Please try again.");
+        return;
+      }
+
+      // Handle error responses from the function
+      if (data?.error) {
+        setError(data.error);
+        return;
+      }
+
+      // Success
+      if (data?.success) {
         toast({
           title: "Success!",
           description: data.message || "Your account has been created. Please sign in.",
@@ -250,11 +276,8 @@ export default function AuthModal({
         setPassword('');
       }
     } catch (error) {
-      toast({
-        title: "An error occurred",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
+      console.error('Unexpected verification error:', error);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
