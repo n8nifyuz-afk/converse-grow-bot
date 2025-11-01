@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
@@ -45,6 +45,8 @@ export default function AuthModal({
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
     user,
     signIn,
@@ -974,16 +976,30 @@ export default function AuthModal({
                     </>}
 
                    <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
-                     <Input type="email" placeholder={t('authModal.enterEmail')} value={email} onChange={e => {
-              setEmail(e.target.value);
-              setError('');
-              // Show password field when email is entered, hide when cleared
-              if (e.target.value.trim()) {
-                setShowPassword(true);
-              } else {
-                setShowPassword(false);
-              }
-            }} required className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />
+                     <Input 
+                       ref={emailInputRef}
+                       type="email" 
+                       placeholder={t('authModal.enterEmail')} 
+                       value={email} 
+                       onChange={e => {
+                         setEmail(e.target.value);
+                         setError('');
+                         if (e.target.value.trim()) {
+                           setShowPassword(true);
+                         } else {
+                           setShowPassword(false);
+                         }
+                       }}
+                       onFocus={(e) => {
+                         if (isMobile) {
+                           setTimeout(() => {
+                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                           }, 300);
+                         }
+                       }}
+                       required 
+                       className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+                     />
                      {showPassword && <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
               setPassword(e.target.value);
               setError('');
@@ -1059,15 +1075,21 @@ export default function AuthModal({
       noBodyStyles={true}
     >
         <DrawerContent 
+          ref={drawerContentRef}
           className="h-auto p-0" 
           style={{ 
-            maxHeight: mode === 'complete-profile' ? '75dvh' : '90vh',
+            maxHeight: mode === 'complete-profile' ? '75dvh' : 'calc(100vh - 20px)',
             position: 'fixed',
             bottom: 0,
+            left: 0,
+            right: 0,
             transform: 'translate3d(0, 0, 0)',
+            WebkitTransform: 'translate3d(0, 0, 0)',
             transition: 'none',
             paddingBottom: 'env(safe-area-inset-bottom)',
-            overflow: 'visible'
+            overflow: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain'
           }}
         >
           <DrawerHeader className="sr-only">
