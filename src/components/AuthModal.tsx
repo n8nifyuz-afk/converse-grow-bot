@@ -113,8 +113,12 @@ export default function AuthModal({
       setError('');
       setShowPassword(false);
       setShowPhoneValidation(false);
+      // Reset email focus state on mobile
+      if (isMobile) {
+        setIsEmailFocused(false);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   // Reset phone validation when changing modes
   useEffect(() => {
