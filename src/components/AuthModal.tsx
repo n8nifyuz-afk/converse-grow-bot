@@ -223,10 +223,32 @@ export default function AuthModal({
 
       // Handle error responses from the function
       if (data?.error) {
-        if (isMobile) {
-          sonnerToast.error("Sign Up Failed", { description: data.error, duration: 3000 });
+        // Check if error is about user already being registered
+        const isAlreadyRegistered = 
+          data.error.toLowerCase().includes('already registered') ||
+          data.error.toLowerCase().includes('already exists') ||
+          data.error.toLowerCase().includes('user already');
+        
+        if (isAlreadyRegistered) {
+          const errorMessage = "This email is already registered. Please sign in or use the Forgot Password option.";
+          
+          if (isMobile) {
+            // Show toast popup for mobile
+            sonnerToast.error("Account Exists", { 
+              description: errorMessage, 
+              duration: 5000 
+            });
+          } else {
+            // Show inline error for desktop
+            setError(errorMessage);
+          }
         } else {
-          setError(data.error);
+          // Handle other errors
+          if (isMobile) {
+            sonnerToast.error("Sign Up Failed", { description: data.error, duration: 3000 });
+          } else {
+            setError(data.error);
+          }
         }
         return;
       }
