@@ -1246,8 +1246,16 @@ export default function AuthModal({
       <>
         <Drawer 
           open={isOpen} 
-          onOpenChange={onClose} 
-          dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'}
+          onOpenChange={(open) => {
+            // Prevent closing if email/password modal is open
+            if (!open && showEmailPasswordModal) {
+              return;
+            }
+            if (!open) {
+              onClose();
+            }
+          }} 
+          dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile' && !showEmailPasswordModal}
           modal={true}
           noBodyStyles={true}
         >
