@@ -1059,6 +1059,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsCheckingSubscription(true);
     setLoadingSubscription(true);
     try {
+      // CRITICAL: First try to restore subscription from Stripe if missing locally
+      // This handles cases where users delete their account and re-register
+      if (user.email) {
+        try {
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          if (currentSession?.access_token) {
+            await supabase.functions.invoke('restore-user-subscription', {
+              body: {
+                userId: user.id,
+                userEmail: user.email
+              },
+              headers: {
+                Authorization: `Bearer ${currentSession.access_token}`,
+              },
+            });
+          }
+        } catch (restoreError) {
+          // Silent error - continue with normal subscription check
+          console.log('[SUBSCRIPTION] Restore check completed');
+        }
+      }
+      
       // First, refresh the session to ensure we have a valid token
       const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
       
