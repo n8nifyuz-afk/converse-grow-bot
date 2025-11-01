@@ -45,6 +45,7 @@ export default function AuthModal({
   const [showPassword, setShowPassword] = useState(false);
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -954,9 +955,9 @@ export default function AuthModal({
             setError('');
           }} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
                     ← Back to sign up
-                  </button>
-                </form> : <>
-                  {!showPassword && <>
+                   </button>
+                 </form> : <>
+                   {!showPassword && !(isMobile && isEmailFocused) && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
                         {googleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
@@ -1041,6 +1042,16 @@ export default function AuthModal({
                            setShowPassword(false);
                          }
                        }}
+                       onFocus={() => {
+                         if (isMobile) {
+                           setIsEmailFocused(true);
+                         }
+                       }}
+                       onBlur={() => {
+                         if (isMobile) {
+                           setIsEmailFocused(false);
+                         }
+                       }}
                        required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
@@ -1085,10 +1096,11 @@ export default function AuthModal({
                         </button>
                       </>}
                   </div>
-                </>}
-            </div>
+                 </>}
+             </div>
 
-            {/* Footer */}
+             {/* Footer - Hide on mobile when email is focused */}
+             {!(isMobile && isEmailFocused) && (
             <div className="mt-5 md:mt-6 pt-5 border-t border-border">
               <div className="text-sm text-muted-foreground text-center">
                 {t('authModal.termsAgreement')}{' '}
@@ -1104,12 +1116,13 @@ export default function AuthModal({
             navigate('/privacy');
           }} className="text-primary hover:underline">
                   {t('authModal.privacyPolicy')}
-                </button>
-                .
-              </div>
-            </div>
-          </div>
-        </div>;
+                 </button>
+                 .
+               </div>
+             </div>
+             )}
+           </div>
+         </div>;
   if (isMobile) {
     return <Drawer 
       open={isOpen} 
