@@ -940,12 +940,25 @@ export default function Index() {
             </Select>
           </div>
           
-          {/* Go Pro button for small mobile authenticated users only */}
-          {user && (
-            <div className="ml-auto sm:hidden">
+          {/* Right side buttons */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Login button for unauthenticated users on mobile */}
+            {!user && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowAuthModal(true)}
+                className="text-sm h-8 px-3"
+              >
+                {t('chat.logIn')}
+              </Button>
+            )}
+            
+            {/* Go Pro button for authenticated users on mobile */}
+            {user && (
               <GoProButton />
-            </div>
-          )}
+            )}
+          </div>
         </div>}
       
       <div className={`flex-1 flex flex-col items-center justify-center p-3 sm:p-6 max-w-4xl mx-auto w-full transition-all duration-200 ${isMobile ? 'pt-[72px]' : ''} relative`} onDragOver={e => {
