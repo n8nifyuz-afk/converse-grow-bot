@@ -1230,12 +1230,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
                 
                 // Capture URL parameters (GCLID, UTM params)
-                const urlParams = new URLSearchParams(window.location.search);
-                const gclid = urlParams.get('gclid') || localStorage.getItem('gclid') || null;
-                const urlParamsObj: Record<string, string> = {};
-                urlParams.forEach((value, key) => {
-                  urlParamsObj[key] = value;
-                });
+                // CRITICAL: Fetch stored params from database first (user may buy subscription days after signup)
+                let gclid = null;
+                let urlParamsObj: Record<string, string> = {};
+                let referer = document.referrer || "null";
+                
+                try {
+                  const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('gclid, url_params, initial_referer')
+                    .eq('user_id', user.id)
+                    .single();
+                  
+                  if (profile) {
+                    gclid = profile.gclid;
+                    
+                    // Safely extract url_params from database
+                    if (profile.url_params && typeof profile.url_params === 'object' && !Array.isArray(profile.url_params)) {
+                      urlParamsObj = profile.url_params as Record<string, string>;
+                    }
+                    
+                    referer = profile.initial_referer || referer;
+                  }
+                } catch (error) {
+                  console.warn('[PAYMENT-WEBHOOK] Failed to fetch stored params from database:', error);
+                }
+                
+                // Fallback to current URL if database fetch failed
+                if (!gclid || Object.keys(urlParamsObj).length === 0) {
+                  const currentUrlParams = new URLSearchParams(window.location.search);
+                  gclid = gclid || currentUrlParams.get('gclid') || localStorage.getItem('gclid') || null;
+                  
+                  if (Object.keys(urlParamsObj).length === 0) {
+                    currentUrlParams.forEach((value, key) => {
+                      urlParamsObj[key] = value;
+                    });
+                  }
+                }
                 
                 // Send payment webhook with proper format
                 const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/payment', {
@@ -1255,8 +1286,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     product_id: dbSub.product_id,
                     plan_name: dbSub.plan_name,
                     gclid: gclid,
-                    urlParams: JSON.stringify(urlParamsObj), // Stringified JSON
-                    referer: document.referrer ? String(document.referrer) : "null", // String format
+                    urlParams: JSON.stringify(urlParamsObj), // Stringified JSON from database
+                    referer: referer ? String(referer) : "null", // Use fetched referer from database
                     timestamp: new Date().toISOString(),
                     hasDocument: "false"
                   }),
