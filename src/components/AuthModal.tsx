@@ -66,9 +66,7 @@ export default function AuthModal({
   } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
 
   // Close modal and call onSuccess when user is authenticated
   // BUT NOT if we're in complete-profile mode (collecting profile info after phone verification)
@@ -140,10 +138,7 @@ export default function AuthModal({
         // Check if this is an OAuth-only account
         if (signInError.code === 'oauth_only_account') {
           if (isMobile) {
-            sonnerToast.error("OAuth Account", {
-              description: signInError.message,
-              duration: 3000
-            });
+            sonnerToast.error("OAuth Account", { description: signInError.message, duration: 3000 });
           } else {
             setError(signInError.message);
           }
@@ -158,10 +153,7 @@ export default function AuthModal({
           setPassword('');
         } else {
           if (isMobile) {
-            sonnerToast.error("Sign In Failed", {
-              description: "Email or password is incorrect",
-              duration: 3000
-            });
+            sonnerToast.error("Sign In Failed", { description: "Email or password is incorrect", duration: 3000 });
           } else {
             setError("Email or password is incorrect");
           }
@@ -170,10 +162,7 @@ export default function AuthModal({
       // If sign in succeeds, the useEffect will handle closing the modal and redirecting
     } catch (error) {
       if (isMobile) {
-        sonnerToast.error("Error", {
-          description: "An error occurred. Please try again later.",
-          duration: 3000
-        });
+        sonnerToast.error("Error", { description: "An error occurred. Please try again later.", duration: 3000 });
       } else {
         setError("An error occurred. Please try again later.");
       }
@@ -191,6 +180,7 @@ export default function AuthModal({
       setError('Please enter a valid email address');
       return;
     }
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -209,18 +199,14 @@ export default function AuthModal({
       });
       return;
     }
+    
     setLoading(true);
     setError('');
+    
     try {
       // Use Supabase client to invoke edge function
-      const {
-        data,
-        error: invokeError
-      } = await supabase.functions.invoke('send-verification-code', {
-        body: {
-          email,
-          password
-        }
+      const { data, error: invokeError } = await supabase.functions.invoke('send-verification-code', {
+        body: { email, password }
       });
 
       // Handle errors from edge function
@@ -233,10 +219,7 @@ export default function AuthModal({
       // Handle error responses from the function
       if (data?.error) {
         if (isMobile) {
-          sonnerToast.error("Sign Up Failed", {
-            description: data.error,
-            duration: 3000
-          });
+          sonnerToast.error("Sign Up Failed", { description: data.error, duration: 3000 });
         } else {
           setError(data.error);
         }
@@ -248,12 +231,13 @@ export default function AuthModal({
         setLastSignupAttempt(now);
         setSignupCooldown(60);
         setPendingEmail(email);
+        
         toast({
           title: "Check your email",
           description: "We've sent a 6-digit verification code to your email. Please enter it below.",
           duration: 8000
         });
-
+        
         // Switch to verification code mode
         setMode('verify-email');
       } else {
@@ -266,24 +250,22 @@ export default function AuthModal({
       setLoading(false);
     }
   };
+
   const handleVerifyEmailCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pendingEmail || !verificationCode) return;
+
     if (verificationCode.length !== 6) {
       setError('Please enter the complete 6-digit code');
       return;
     }
+
     setLoading(true);
     setError('');
+    
     try {
-      const {
-        data,
-        error: invokeError
-      } = await supabase.functions.invoke('verify-email-code', {
-        body: {
-          email: pendingEmail,
-          code: verificationCode
-        }
+      const { data, error: invokeError } = await supabase.functions.invoke('verify-email-code', {
+        body: { email: pendingEmail, code: verificationCode }
       });
 
       // Handle invocation errors
@@ -308,7 +290,7 @@ export default function AuthModal({
             toast({
               title: "Account Found",
               description: data.message,
-              duration: 8000
+              duration: 8000,
             });
             setMode('signin');
           } else {
@@ -316,13 +298,13 @@ export default function AuthModal({
             toast({
               title: "Account Already Exists",
               description: data.message,
-              duration: 6000
+              duration: 6000,
             });
             setMode('signin');
             // Pre-fill email for convenience
             setEmail(pendingEmail);
           }
-        }
+        } 
         // Case 2: New user created successfully
         else if (data.newUser) {
           toast({
@@ -334,7 +316,7 @@ export default function AuthModal({
           // Pre-fill email for convenience
           setEmail(pendingEmail);
         }
-
+        
         // Clean up verification state
         setVerificationCode('');
         setPendingEmail('');
@@ -431,6 +413,7 @@ export default function AuthModal({
       setAppleLoading(false);
     }
   };
+
   const handleMicrosoftSignIn = async () => {
     setMicrosoftLoading(true);
     try {
@@ -454,17 +437,19 @@ export default function AuthModal({
       setMicrosoftLoading(false);
     }
   };
+
   const handlePhoneSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowPhoneValidation(true); // Show validation when form is submitted
-
+    
     if (!phone) return;
+    
     setPhoneLoading(true);
     setError('');
+    
     try {
-      const {
-        error
-      } = await signInWithPhone(phone);
+      const { error } = await signInWithPhone(phone);
+      
       if (error) {
         toast({
           title: "Failed to send code",
@@ -490,36 +475,37 @@ export default function AuthModal({
       setPhoneLoading(false);
     }
   };
+
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone || !otp) return;
+    
     setLoading(true);
     setError('');
+    
     try {
       // CRITICAL: Set mode to 'complete-profile' BEFORE verifyOtp to prevent race condition
       // The useEffect that auto-closes on authentication checks for mode !== 'complete-profile'
       // We need to set this mode first, then we'll revert if profile is already complete
       const tempMode = mode;
       setMode('complete-profile');
-      const {
-        error
-      } = await verifyOtp(phone, otp);
+      
+      const { error } = await verifyOtp(phone, otp);
+      
       if (error) {
         setError("Invalid verification code. Please try again.");
         setMode(tempMode); // Revert mode on error
         setLoading(false);
       } else {
         // Check if user already has complete profile
-        const {
-          data: {
-            user
-          }
-        } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const {
-            data: profile
-          } = await supabase.from('profiles').select('display_name, date_of_birth').eq('user_id', user.id).single();
-
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, date_of_birth')
+            .eq('user_id', user.id)
+            .single();
+          
           // If profile is complete, allow modal to close
           if (profile?.display_name && profile?.date_of_birth) {
             setLoading(false);
@@ -543,10 +529,11 @@ export default function AuthModal({
       setLoading(false);
     }
   };
+
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
+    
     // Step 1: First name
     if (profileStep === 1) {
       if (!firstName.trim()) {
@@ -556,7 +543,7 @@ export default function AuthModal({
       setProfileStep(2);
       return;
     }
-
+    
     // Step 2: Last name
     if (profileStep === 2) {
       if (!lastName.trim()) {
@@ -566,60 +553,63 @@ export default function AuthModal({
       setProfileStep(3);
       return;
     }
-
+    
     // Step 3: Date of birth - save to profile
     if (profileStep === 3) {
       if (!dateOfBirth) {
         setError("Please enter your date of birth.");
         return;
       }
-
+      
       // Validate date format DD/MM/YYYY
       const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
       const match = dateOfBirth.match(dateRegex);
+      
       if (!match) {
         setError("Please enter date in DD/MM/YYYY format.");
         return;
       }
+      
       const [, day, month, year] = match;
       const dayNum = parseInt(day);
       const monthNum = parseInt(month);
       const yearNum = parseInt(year);
-
+      
       // Basic validation
       if (dayNum < 1 || dayNum > 31 || monthNum < 1 || monthNum > 12 || yearNum < 1900 || yearNum > new Date().getFullYear()) {
         setError("Please enter a valid date.");
         return;
       }
-
+      
       // Convert to YYYY-MM-DD format for database
       const dbDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      
       setLoading(true);
+      
       try {
-        const {
-          data: {
-            user
-          }
-        } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           setError("Unable to get user information. Please try again.");
           setLoading(false);
           return;
         }
-        const {
-          error: updateError
-        } = await supabase.from('profiles').update({
-          display_name: `${firstName} ${lastName}`,
-          date_of_birth: dbDate,
-          updated_at: new Date().toISOString()
-        }).eq('user_id', user.id);
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            display_name: `${firstName} ${lastName}`,
+            date_of_birth: dbDate,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+
         if (updateError) {
           setError("Failed to save profile. Please try again.");
           setLoading(false);
         } else {
           // Refresh user profile in context to update UI everywhere
           await refreshUserProfile();
-
+          
           // Close modal and trigger success
           onClose();
           onSuccess?.();
@@ -630,13 +620,14 @@ export default function AuthModal({
       }
     }
   };
+
   const handleResendOtp = async () => {
     if (otpTimer > 0) return;
+    
     setPhoneLoading(true);
     try {
-      const {
-        error
-      } = await signInWithPhone(phone);
+      const { error } = await signInWithPhone(phone);
+      
       if (error) {
         toast({
           title: "Failed to resend code",
@@ -660,15 +651,18 @@ export default function AuthModal({
       setPhoneLoading(false);
     }
   };
+
   const authContent = <div className="flex flex-col h-full">
            {/* Auth Form */}
            <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe relative">
              {/* Main Heading - Hide during profile completion */}
-             {mode !== 'complete-profile' && <div className="mb-6 md:mb-7 text-center">
+             {mode !== 'complete-profile' && (
+               <div className="mb-6 md:mb-7 text-center">
                  <h2 className="text-2xl md:text-3xl font-bold leading-tight">
                    {t('authModal.title')}
                  </h2>
-               </div>}
+               </div>
+             )}
 
             {/* Auth Buttons */}
             <div className="flex-1 flex flex-col">
@@ -693,7 +687,13 @@ export default function AuthModal({
                   <div className="text-sm md:text-base text-muted-foreground">
                     {t('authModal.enterPhoneNumber')}
                   </div>
-                  <CountryPhoneInput value={phone} onChange={setPhone} className="w-full" disabled={phoneLoading} showValidation={showPhoneValidation} />
+                  <CountryPhoneInput
+                    value={phone}
+                    onChange={setPhone}
+                    className="w-full"
+                    disabled={phoneLoading}
+                    showValidation={showPhoneValidation}
+                  />
                   {error && <div className="text-sm md:text-base text-destructive bg-destructive/10 px-3 md:px-4 py-2 md:py-3 rounded-md">
                      {error}
                    </div>}
@@ -717,10 +717,7 @@ export default function AuthModal({
               // Scroll to top
               setTimeout(() => {
                 if (drawerContentRef.current) {
-                  drawerContentRef.current.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                  });
+                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }, 100);
             }
@@ -731,7 +728,17 @@ export default function AuthModal({
                   <div className="text-sm text-muted-foreground mb-4">
                     Enter the 6-digit code sent to {phone}
                   </div>
-                  <Input type="text" placeholder="000000" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} required className="h-11 md:h-12 text-base text-center text-xl tracking-widest" maxLength={6} autoComplete="one-time-code" inputMode="numeric" />
+                  <Input 
+                    type="text" 
+                    placeholder="000000" 
+                    value={otp} 
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                    required 
+                    className="h-11 md:h-12 text-base text-center text-xl tracking-widest"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                  />
                   {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                      {error}
                    </div>}
@@ -742,7 +749,12 @@ export default function AuthModal({
                       </> : 'Verify Code'}
                   </Button>
                   <div className="flex justify-between items-center text-sm">
-                    <button type="button" onClick={handleResendOtp} disabled={otpTimer > 0 || phoneLoading} className="text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button 
+                      type="button" 
+                      onClick={handleResendOtp} 
+                      disabled={otpTimer > 0 || phoneLoading}
+                      className="text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       {phoneLoading ? 'Sending...' : otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend code'}
                     </button>
                     <button type="button" onClick={() => {
@@ -765,69 +777,113 @@ export default function AuthModal({
                     </p>
                   </div>
                   
-                  {profileStep === 1 && <Input type="text" placeholder="Enter your first name" value={firstName} onChange={e => setFirstName(e.target.value)} onFocus={e => {
-            setTimeout(() => {
-              e.target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-              });
-            }, 300);
-          }} required autoFocus className="h-12 md:h-13 text-base" />}
+                  {profileStep === 1 && (
+                    <Input 
+                      type="text" 
+                      placeholder="Enter your first name" 
+                      value={firstName} 
+                      onChange={e => setFirstName(e.target.value)} 
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                      }}
+                      required 
+                      autoFocus
+                      className="h-12 md:h-13 text-base"
+                    />
+                  )}
                   
-                  {profileStep === 2 && <Input type="text" placeholder="Enter your last name" value={lastName} onChange={e => setLastName(e.target.value)} onFocus={e => {
-            setTimeout(() => {
-              e.target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-              });
-            }, 300);
-          }} required autoFocus className="h-12 md:h-13 text-base" />}
+                  {profileStep === 2 && (
+                    <Input 
+                      type="text" 
+                      placeholder="Enter your last name" 
+                      value={lastName} 
+                      onChange={e => setLastName(e.target.value)} 
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                      }}
+                      required 
+                      autoFocus
+                      className="h-12 md:h-13 text-base"
+                    />
+                  )}
                   
-                  {profileStep === 3 && <div className="space-y-2">
-                      <Input type="text" placeholder="DD/MM/YYYY" value={dateOfBirth} onChange={e => {
-              // Allow only numbers and slashes
-              let input = e.target.value.replace(/[^\d/]/g, '');
-
-              // Auto-format as user types
-              if (input.length === 2 && !input.includes('/')) {
-                input = input + '/';
-              } else if (input.length === 5 && input.split('/').length === 2) {
-                input = input + '/';
-              }
-
-              // Limit to DD/MM/YYYY format (10 characters)
-              if (input.length <= 10) {
-                setDateOfBirth(input);
-              }
-            }} onFocus={e => {
-              setTimeout(() => {
-                e.target.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'center'
-                });
-              }, 300);
-            }} required autoFocus maxLength={10} className="h-12 md:h-13 text-base tracking-wider" />
+                  {profileStep === 3 && (
+                    <div className="space-y-2">
+                      <Input 
+                        type="text" 
+                        placeholder="DD/MM/YYYY" 
+                        value={dateOfBirth} 
+                        onChange={e => {
+                          // Allow only numbers and slashes
+                          let input = e.target.value.replace(/[^\d/]/g, '');
+                          
+                          // Auto-format as user types
+                          if (input.length === 2 && !input.includes('/')) {
+                            input = input + '/';
+                          } else if (input.length === 5 && input.split('/').length === 2) {
+                            input = input + '/';
+                          }
+                          
+                          // Limit to DD/MM/YYYY format (10 characters)
+                          if (input.length <= 10) {
+                            setDateOfBirth(input);
+                          }
+                        }} 
+                        onFocus={(e) => {
+                          setTimeout(() => {
+                            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }, 300);
+                        }}
+                        required 
+                        autoFocus
+                        maxLength={10}
+                        className="h-12 md:h-13 text-base tracking-wider"
+                      />
                       <p className="text-xs text-muted-foreground">
                         Format: DD/MM/YYYY (e.g., 09/02/2005)
                       </p>
-                    </div>}
+                    </div>
+                  )}
                   
                   {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                      {error}
                    </div>}
                   
                   <div className="flex gap-3">
-                    {profileStep > 1 && <Button type="button" onClick={() => {
-              setProfileStep(profileStep - 1 as 1 | 2 | 3);
-              setError('');
-            }} onPointerDown={e => e.preventDefault()} variant="outline" className="flex-1 h-12 md:h-13 text-base">
+                    {profileStep > 1 && (
+                      <Button 
+                        type="button" 
+                        onClick={() => {
+                          setProfileStep((profileStep - 1) as 1 | 2 | 3);
+                          setError('');
+                        }}
+                        onPointerDown={(e) => e.preventDefault()}
+                        variant="outline"
+                        className="flex-1 h-12 md:h-13 text-base"
+                      >
                         Back
-                      </Button>}
-                    <Button type="submit" disabled={loading} onPointerDown={e => e.preventDefault()} className={`h-12 md:h-13 text-base ${profileStep === 1 ? 'w-full' : 'flex-1'}`}>
-                      {loading ? <>
+                      </Button>
+                    )}
+                    <Button 
+                      type="submit" 
+                      disabled={loading}
+                      onPointerDown={(e) => e.preventDefault()}
+                      className={`h-12 md:h-13 text-base ${profileStep === 1 ? 'w-full' : 'flex-1'}`}
+                    >
+                      {loading ? (
+                        <>
                           <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                           Creating account...
-                        </> : profileStep === 3 ? 'Complete' : 'Next'}
+                        </>
+                      ) : profileStep === 3 ? (
+                        'Complete'
+                      ) : (
+                        'Next'
+                      )}
                     </Button>
                   </div>
                  </form> : mode === 'verify-email' ? <form onSubmit={handleVerifyEmailCode} className="space-y-6">
@@ -841,7 +897,7 @@ export default function AuthModal({
                     <div className="text-center">
                       <h3 className="text-xl font-bold mb-1">Verify Your Email</h3>
                       <p className="text-sm text-muted-foreground">
-                        Enter the 6-digit code sent to<br />
+                        Enter the 6-digit code sent to<br/>
                         <span className="font-medium text-foreground">{pendingEmail}</span>
                       </p>
                     </div>
@@ -850,39 +906,60 @@ export default function AuthModal({
                   {/* 6-digit code input with individual boxes */}
                   <div className="flex flex-col gap-4">
                     <div className="flex justify-center gap-2">
-                      {[0, 1, 2, 3, 4, 5].map(index => <input key={index} id={`code-${index}`} type="text" inputMode="numeric" maxLength={1} value={verificationCode[index] || ''} onChange={e => {
-                const value = e.target.value.replace(/\D/g, '');
-                if (value) {
-                  const newCode = verificationCode.split('');
-                  newCode[index] = value;
-                  setVerificationCode(newCode.join(''));
-                  // Auto-focus next input
-                  if (index < 5) {
-                    document.getElementById(`code-${index + 1}`)?.focus();
-                  }
-                }
-              }} onKeyDown={e => {
-                if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
-                  document.getElementById(`code-${index - 1}`)?.focus();
-                }
-              }} onPaste={e => {
-                e.preventDefault();
-                const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-                setVerificationCode(pastedData);
-                if (pastedData.length === 6) {
-                  document.getElementById('code-5')?.focus();
-                }
-              }} className="w-12 h-14 text-center text-2xl font-bold rounded-lg border-2 border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />)}
+                      {[0, 1, 2, 3, 4, 5].map((index) => (
+                        <input
+                          key={index}
+                          id={`code-${index}`}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={verificationCode[index] || ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            if (value) {
+                              const newCode = verificationCode.split('');
+                              newCode[index] = value;
+                              setVerificationCode(newCode.join(''));
+                              // Auto-focus next input
+                              if (index < 5) {
+                                document.getElementById(`code-${index + 1}`)?.focus();
+                              }
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
+                              document.getElementById(`code-${index - 1}`)?.focus();
+                            }
+                          }}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                            setVerificationCode(pastedData);
+                            if (pastedData.length === 6) {
+                              document.getElementById('code-5')?.focus();
+                            }
+                          }}
+                          className="w-12 h-14 text-center text-2xl font-bold rounded-lg border-2 border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                          required
+                        />
+                      ))}
                     </div>
                     
                     {/* Resend code option */}
                     <div className="text-center">
-                      <button type="button" onClick={() => {
-                if (signupCooldown === 0) {
-                  handleSignUp(new Event('submit') as any);
-                }
-              }} disabled={signupCooldown > 0} className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline">
-                        {signupCooldown > 0 ? `Resend code in ${signupCooldown}s` : "Didn't receive the code? Resend"}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (signupCooldown === 0) {
+                            handleSignUp(new Event('submit') as any);
+                          }
+                        }}
+                        disabled={signupCooldown > 0}
+                        className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+                      >
+                        {signupCooldown > 0 
+                          ? `Resend code in ${signupCooldown}s` 
+                          : "Didn't receive the code? Resend"}
                       </button>
                     </div>
                   </div>
@@ -891,7 +968,11 @@ export default function AuthModal({
                      {error}
                    </div>}
                   
-                  <Button type="submit" disabled={loading || verificationCode.length !== 6} className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all">
+                  <Button 
+                    type="submit" 
+                    disabled={loading || verificationCode.length !== 6} 
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all"
+                  >
                     {loading ? <>
                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                         Verifying...
@@ -935,43 +1016,88 @@ export default function AuthModal({
                           </>}
                       </Button>
 
-                      <Button onClick={handleMicrosoftSignIn} disabled={googleLoading || appleLoading || microsoftLoading || loading} variant="outline" className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base">
+                      <Button 
+                        onClick={handleMicrosoftSignIn} 
+                        disabled={googleLoading || appleLoading || microsoftLoading || loading} 
+                        variant="outline" 
+                        className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base"
+                      >
                         {microsoftLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
                             {t('authModal.continueWithMicrosoft')}
                           </> : <>
                             <svg className="w-6 h-6 mr-3" viewBox="0 0 23 23" fill="none">
-                              <path d="M0 0h11v11H0V0z" fill="#f25022" />
-                              <path d="M12 0h11v11H12V0z" fill="#00a4ef" />
-                              <path d="M0 12h11v11H0V12z" fill="#7fba00" />
-                              <path d="M12 12h11v11H12V12z" fill="#ffb900" />
+                              <path d="M0 0h11v11H0V0z" fill="#f25022"/>
+                              <path d="M12 0h11v11H12V0z" fill="#00a4ef"/>
+                              <path d="M0 12h11v11H0V12z" fill="#7fba00"/>
+                              <path d="M12 12h11v11H12V12z" fill="#ffb900"/>
                             </svg>
                             {t('authModal.continueWithMicrosoft')}
                           </>}
                       </Button>
 
-                      <Button onClick={() => setMode('phone')} disabled={googleLoading || appleLoading || microsoftLoading || loading} variant="outline" className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base">
+                      <Button 
+                        onClick={() => setMode('phone')} 
+                        disabled={googleLoading || appleLoading || microsoftLoading || loading} 
+                        variant="outline" 
+                        className="w-full h-11 md:h-12 mb-3 border-2 border-gray-400 dark:border-gray-600 text-base"
+                      >
                         <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                         </svg>
                         {t('authModal.continueWithPhone')}
                       </Button>
 
                       <div className="relative my-4">
                         <div className="absolute inset-0 flex items-center">
-                          
+                          <div className="w-full border-t border-border" />
                         </div>
-                        
+                        <div className="relative flex justify-center">
+                          <span className="px-3 bg-background text-sm text-muted-foreground">{t('authModal.or')}</span>
+                        </div>
                       </div>
                     </>}
 
                    <div className="space-y-3">
-                     <Input ref={emailInputRef} type="email" placeholder={t('authModal.enterEmail')} value="" readOnly onClick={() => {
-              setShowEmailPasswordModal(true);
-            }} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" />
+                     <Input 
+                       ref={emailInputRef}
+                       type="email" 
+                       placeholder={t('authModal.enterEmail')} 
+                       value=""
+                       readOnly
+                       onClick={() => {
+                         setShowEmailPasswordModal(true);
+                       }}
+                       className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
+                     />
                    </div>
 
-                  
+                  <div className="mt-4 text-center space-x-2 text-sm">
+                    {mode === 'signin' ? <>
+                        <span className="text-muted-foreground">{t('authModal.dontHaveAccount')}</span>
+                        <button onClick={() => {
+                          setMode('signup');
+                          setError('');
+                        }} className="text-primary hover:underline font-medium">
+                          {t('authModal.signUp')}
+                        </button>
+                        <span className="text-muted-foreground">|</span>
+                        <button onClick={() => {
+                          setMode('reset');
+                          setError('');
+                        }} className="text-primary hover:underline">
+                          {t('authModal.forgotPassword')}
+                        </button>
+                      </> : <>
+                        <span className="text-muted-foreground">{t('authModal.alreadyHaveAccount')}</span>
+                        <button onClick={() => {
+                          setMode('signin');
+                          setError('');
+                        }} className="text-primary hover:underline font-medium">
+                          {t('authModal.signIn')}
+                        </button>
+                      </>}
+                  </div>
                  </>}
              </div>
 
@@ -980,16 +1106,16 @@ export default function AuthModal({
                <div className="text-sm text-muted-foreground text-center">
                  {t('authModal.termsAgreement')}{' '}
                  <button onClick={() => {
-            onClose();
-            navigate('/terms');
-          }} className="text-primary hover:underline">
+             onClose();
+             navigate('/terms');
+           }} className="text-primary hover:underline">
                    {t('authModal.termsOfService')}
                  </button>
                  {' '}{t('authModal.and')}{' '}
                  <button onClick={() => {
-            onClose();
-            navigate('/privacy');
-          }} className="text-primary hover:underline">
+             onClose();
+             navigate('/privacy');
+           }} className="text-primary hover:underline">
                    {t('authModal.privacyPolicy')}
                  </button>
                  .
@@ -998,7 +1124,8 @@ export default function AuthModal({
            </div>
          </div>;
   // Email/Password Modal Content
-  const emailPasswordContent = <div className="w-full px-4 md:px-6 py-6 md:py-8">
+  const emailPasswordContent = (
+    <div className="w-full px-4 md:px-6 py-6 md:py-8">
       <div className="mb-6 text-center">
         <h2 className="text-2xl md:text-3xl font-bold">
           {mode === 'signin' ? 'Sign In' : 'Sign Up'}
@@ -1006,81 +1133,139 @@ export default function AuthModal({
       </div>
       
       <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-4">
-        <Input type="email" placeholder={t('authModal.enterEmail')} value={email} onChange={e => {
-        setEmail(e.target.value);
-        setError('');
-      }} required autoFocus className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />
+        <Input 
+          type="email" 
+          placeholder={t('authModal.enterEmail')} 
+          value={email} 
+          onChange={e => {
+            setEmail(e.target.value);
+            setError('');
+          }}
+          required
+          autoFocus
+          className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+        />
         
-        <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
-        setPassword(e.target.value);
-        setError('');
-      }} required minLength={6} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />
+        <Input 
+          type="password" 
+          placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} 
+          value={password} 
+          onChange={e => {
+            setPassword(e.target.value);
+            setError('');
+          }} 
+          required 
+          minLength={6} 
+          className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
+        />
         
-        {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+        {error && (
+          <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
             {error}
-          </div>}
+          </div>
+        )}
         
-        <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
-          {loading ? <>
+        <Button 
+          type="submit" 
+          disabled={loading || !email || !password || (mode === 'signup' && signupCooldown > 0)} 
+          className="w-full h-11 md:h-12 text-base"
+        >
+          {loading ? (
+            <>
               <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
               {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
-            </> : mode === 'signup' && signupCooldown > 0 ? `${t('authModal.wait')} ${signupCooldown}s` : t('authModal.continueWithEmail')}
+            </>
+          ) : mode === 'signup' && signupCooldown > 0 ? (
+            `${t('authModal.wait')} ${signupCooldown}s`
+          ) : (
+            t('authModal.continueWithEmail')
+          )}
         </Button>
         
         <div className="text-center">
-          <button type="button" onClick={() => {
-          setShowEmailPasswordModal(false);
-          setEmail('');
-          setPassword('');
-          setError('');
-          setMode('signin');
-        }} className="text-sm text-primary hover:underline">
+          <button
+            type="button"
+            onClick={() => {
+              setShowEmailPasswordModal(false);
+              setEmail('');
+              setPassword('');
+              setError('');
+              setMode('signin');
+            }}
+            className="text-sm text-primary hover:underline"
+          >
             ← Back to sign in
           </button>
         </div>
       </form>
       
       <div className="mt-4 text-center space-x-2 text-sm">
-        {mode === 'signin' ? <>
+        {mode === 'signin' ? (
+          <>
             <span className="text-muted-foreground">{t('authModal.dontHaveAccount')}</span>
-            <button onClick={() => {
-          setMode('signup');
-          setError('');
-        }} className="text-primary hover:underline font-medium">
+            <button 
+              onClick={() => {
+                setMode('signup');
+                setError('');
+              }} 
+              className="text-primary hover:underline font-medium"
+            >
               {t('authModal.signUp')}
             </button>
             <span className="text-muted-foreground">|</span>
-            <button onClick={() => {
-          setMode('reset');
-          setShowEmailPasswordModal(false);
-        }} className="text-primary hover:underline">
+            <button 
+              onClick={() => {
+                setMode('reset');
+                setShowEmailPasswordModal(false);
+              }} 
+              className="text-primary hover:underline"
+            >
               {t('authModal.forgotPassword')}
             </button>
-          </> : <>
+          </>
+        ) : (
+          <>
             <span className="text-muted-foreground">{t('authModal.alreadyHaveAccount')}</span>
-            <button onClick={() => {
-          setMode('signin');
-          setError('');
-        }} className="text-primary hover:underline font-medium">
+            <button 
+              onClick={() => {
+                setMode('signin');
+                setError('');
+              }} 
+              className="text-primary hover:underline font-medium"
+            >
               {t('authModal.signIn')}
             </button>
-          </>}
+          </>
+        )}
       </div>
-    </div>;
+    </div>
+  );
+
   if (isMobile) {
-    return <>
-        <Drawer open={isOpen} onOpenChange={onClose} dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'} modal={true} noBodyStyles={true}>
-          <DrawerContent ref={drawerContentRef} className="h-auto p-0" style={{
-          maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'visible'
-        }}>
+    return (
+      <>
+        <Drawer 
+          open={isOpen} 
+          onOpenChange={onClose} 
+          dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'}
+          modal={true}
+          noBodyStyles={true}
+        >
+          <DrawerContent 
+            ref={drawerContentRef}
+            className="h-auto p-0" 
+            style={{ 
+              maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'visible'
+            }}
+          >
             <DrawerHeader className="sr-only">
               <DrawerTitle>ChatLearn Authentication</DrawerTitle>
               <DrawerDescription>
@@ -1092,24 +1277,32 @@ export default function AuthModal({
         </Drawer>
 
         {/* Separate Email/Password Modal */}
-        <Drawer open={showEmailPasswordModal} onOpenChange={open => {
-        setShowEmailPasswordModal(open);
-        if (!open) {
-          setEmail('');
-          setPassword('');
-          setError('');
-          setMode('signin');
-        }
-      }} dismissible={true} modal={true}>
-          <DrawerContent className="h-auto p-0" style={{
-          maxHeight: '65vh',
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          overflowY: 'auto'
-        }}>
+        <Drawer 
+          open={showEmailPasswordModal} 
+          onOpenChange={(open) => {
+            setShowEmailPasswordModal(open);
+            if (!open) {
+              setEmail('');
+              setPassword('');
+              setError('');
+              setMode('signin');
+            }
+          }}
+          dismissible={true}
+          modal={true}
+        >
+          <DrawerContent 
+            className="h-auto p-0"
+            style={{
+              maxHeight: '65vh',
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              overflowY: 'auto',
+            }}
+          >
             <DrawerHeader className="sr-only">
               <DrawerTitle>Email Sign In</DrawerTitle>
               <DrawerDescription>Sign in with email and password</DrawerDescription>
@@ -1117,9 +1310,12 @@ export default function AuthModal({
             {emailPasswordContent}
           </DrawerContent>
         </Drawer>
-      </>;
+      </>
+    );
   }
-  return <>
+
+  return (
+    <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
           <DialogHeader className="sr-only">
@@ -1133,15 +1329,18 @@ export default function AuthModal({
       </Dialog>
 
       {/* Separate Email/Password Modal */}
-      <Dialog open={showEmailPasswordModal} onOpenChange={open => {
-      setShowEmailPasswordModal(open);
-      if (!open) {
-        setEmail('');
-        setPassword('');
-        setError('');
-        setMode('signin');
-      }
-    }}>
+      <Dialog 
+        open={showEmailPasswordModal} 
+        onOpenChange={(open) => {
+          setShowEmailPasswordModal(open);
+          if (!open) {
+            setEmail('');
+            setPassword('');
+            setError('');
+            setMode('signin');
+          }
+        }}
+      >
         <DialogContent className="max-w-[90vw] sm:max-w-md w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden">
           <DialogHeader className="sr-only">
             <DialogTitle>Email Sign In</DialogTitle>
@@ -1150,5 +1349,6 @@ export default function AuthModal({
           {emailPasswordContent}
         </DialogContent>
       </Dialog>
-    </>;
+    </>
+  );
 }
