@@ -650,9 +650,9 @@ export default function AuthModal({
     }
   };
 
-  const authContent = <div className="flex flex-col h-full overflow-y-auto">
+  const authContent = <div className="flex flex-col h-full">
            {/* Auth Form */}
-           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe relative min-h-[500px]">
+           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe relative">
              {/* Main Heading - Hide during profile completion */}
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
@@ -1085,7 +1085,6 @@ export default function AuthModal({
                          if (isMobile) {
                            setIsEmailFocused(true);
                          }
-                         setShowPassword(true);
                        }}
                        onBlur={() => {
                          if (isMobile) {
@@ -1095,23 +1094,19 @@ export default function AuthModal({
                        required
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
-                     <div className={showPassword ? 'block' : 'invisible h-0 overflow-hidden'}>
-                       <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
-                         setPassword(e.target.value);
-                         if (!isMobile) setError('');
-                       }} required minLength={6} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />
-                     </div>
+                     {showPassword && <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
+              setPassword(e.target.value);
+              if (!isMobile) setError('');
+            }} required minLength={6} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />}
                       {error && !isMobile && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                          {error}
                        </div>}
-                     <div className={showPassword ? 'block' : 'invisible h-0 overflow-hidden'}>
-                       <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
+                     {showPassword && <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
                         {loading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                             {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
                           </> : mode === 'signup' && signupCooldown > 0 ? `${t('authModal.wait')} ${signupCooldown}s` : t('authModal.continueWithEmail')}
-                      </Button>
-                     </div>
+                      </Button>}
                    </form>
 
                   <div className="mt-4 text-center space-x-2 text-sm">
@@ -1178,7 +1173,6 @@ export default function AuthModal({
           className="h-auto p-0" 
           style={{ 
             maxHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
-            minHeight: mode === 'complete-profile' ? '70dvh' : '80dvh',
             position: 'fixed',
             bottom: 0,
             left: 0,
@@ -1186,9 +1180,7 @@ export default function AuthModal({
             paddingBottom: 'env(safe-area-inset-bottom)',
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
-            transform: 'translateZ(0)',
-            willChange: 'transform'
+            overflow: 'visible'
           }}
         >
           <DrawerHeader className="sr-only">
