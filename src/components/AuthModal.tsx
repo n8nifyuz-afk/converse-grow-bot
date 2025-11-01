@@ -46,7 +46,6 @@ export default function AuthModal({
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
   const [isPhoneInputFocused, setIsPhoneInputFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [hasStartedEmailFlow, setHasStartedEmailFlow] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const drawerContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -114,13 +113,8 @@ export default function AuthModal({
       setError('');
       setShowPassword(false);
       setShowPhoneValidation(false);
-      // Reset email focus state on mobile
-      if (isMobile) {
-        setIsEmailFocused(false);
-        setHasStartedEmailFlow(false);
-      }
     }
-  }, [isOpen, isMobile]);
+  }, [isOpen]);
 
   // Reset phone validation when changing modes
   useEffect(() => {
@@ -718,7 +712,6 @@ export default function AuthModal({
               setPassword('');
               setShowPassword(false);
               setIsEmailFocused(false);
-              setHasStartedEmailFlow(false);
               // Scroll to top
               setTimeout(() => {
                 if (drawerContentRef.current) {
@@ -993,7 +986,7 @@ export default function AuthModal({
                     ← Back to sign up
                    </button>
                  </form> : <>
-                   {!showPassword && !(isMobile && hasStartedEmailFlow) && <>
+                   {!showPassword && !(isMobile && isEmailFocused) && <>
                       <Button onClick={handleGoogleSignIn} disabled={googleLoading || appleLoading || loading} className="w-full h-11 md:h-12 mb-3 bg-gray-500 hover:bg-gray-600 text-white dark:bg-gray-600 dark:hover:bg-gray-700 text-base">
                         {googleLoading ? <>
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-3" />
@@ -1072,30 +1065,30 @@ export default function AuthModal({
                      onChange={e => {
                           setEmail(e.target.value);
                           if (!isMobile) setError('');
-                          // On desktop, show/hide password based on email content
-                          // On mobile, keep password visible once email flow has started
-                          if (!isMobile) {
-                            if (e.target.value.trim()) {
-                              setShowPassword(true);
-                            } else {
-                              setShowPassword(false);
+                          if (e.target.value.trim()) {
+                            setShowPassword(true);
+                          } else {
+                            setShowPassword(false);
+                            // Reset to default modal state on mobile when email is cleared
+                            if (isMobile) {
+                              setIsEmailFocused(false);
+                              // Scroll to top when keyboard closes
+                              setTimeout(() => {
+                                if (drawerContentRef.current) {
+                                  drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                              }, 100);
                             }
                           }
                         }}
                        onFocus={() => {
                          if (isMobile) {
                            setIsEmailFocused(true);
-                           setHasStartedEmailFlow(true);
-                           setShowPassword(true);
                          }
                        }}
                        onBlur={() => {
                          if (isMobile) {
                            setIsEmailFocused(false);
-                           // Hide password field if email is empty when blurring
-                           if (!email.trim()) {
-                             setShowPassword(false);
-                           }
                          }
                        }}
                        required
@@ -1114,36 +1107,6 @@ export default function AuthModal({
                             {mode === 'signin' ? t('authModal.signingIn') : t('authModal.sendingVerification')}
                           </> : mode === 'signup' && signupCooldown > 0 ? `${t('authModal.wait')} ${signupCooldown}s` : t('authModal.continueWithEmail')}
                       </Button>}
-                      {showPassword && isMobile && (
-                        <button 
-                          type="button" 
-                          onClick={() => {
-                            // Blur the email input to prevent immediate re-focus
-                            if (emailInputRef.current) {
-                              emailInputRef.current.blur();
-                            }
-                            
-                            // Reset all email flow states
-                            setEmail('');
-                            setPassword('');
-                            setShowPassword(false);
-                            setIsEmailFocused(false);
-                            setHasStartedEmailFlow(false);
-                            setError('');
-                            setMode('signin');
-                            
-                            // Scroll to top after states are reset
-                            setTimeout(() => {
-                              if (drawerContentRef.current) {
-                                drawerContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-                              }
-                            }, 50);
-                          }} 
-                          className="text-sm text-primary hover:underline"
-                        >
-                          ← Back to sign in
-                        </button>
-                      )}
                    </form>
 
                   <div className="mt-4 text-center space-x-2 text-sm">
