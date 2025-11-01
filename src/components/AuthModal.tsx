@@ -1056,7 +1056,7 @@ export default function AuthModal({
                       </div>
                     </>}
 
-                   <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3">
+                   <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-3 py-20">
                      <Input 
                        ref={emailInputRef}
                        type="email" 
