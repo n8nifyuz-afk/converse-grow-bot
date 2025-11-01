@@ -1059,19 +1059,17 @@ export default function AuthModal({
                     </>}
 
                    <div className="space-y-3">
-                     <Button 
-                       type="button"
+                     <Input 
+                       ref={emailInputRef}
+                       type="email" 
+                       placeholder={t('authModal.enterEmail')} 
+                       value=""
+                       readOnly
                        onClick={() => {
                          setShowEmailPasswordModal(true);
-                         if (isMobile) {
-                           onClose();
-                         }
                        }}
-                       variant="outline"
-                       className="w-full h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base"
-                     >
-                       {t('authModal.continueWithEmail')}
-                     </Button>
+                       className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
+                     />
                    </div>
 
                   <div className="mt-4 text-center space-x-2 text-sm">
