@@ -1071,9 +1071,30 @@ export default function AuthModal({
                         }}
                        onFocus={(e) => {
                          if (isMobile) {
-                           setTimeout(() => {
-                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                           }, 300);
+                           console.log('📧 Email input focused on mobile');
+                           const scrollToInput = () => {
+                             const element = e.target;
+                             console.log('🔄 Attempting to scroll email input into view');
+                             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                             
+                             // Double-check after a moment and retry if needed
+                             setTimeout(() => {
+                               const rect = element.getBoundingClientRect();
+                               const viewportHeight = window.innerHeight;
+                               console.log('📏 Input position:', { top: rect.top, bottom: rect.bottom, viewportHeight });
+                               
+                               // If input is in bottom 40% of viewport (likely behind keyboard), scroll again
+                               if (rect.bottom > viewportHeight * 0.6) {
+                                 console.log('⚠️ Input still too low, scrolling again');
+                                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                               } else {
+                                 console.log('✅ Input properly positioned above keyboard');
+                               }
+                             }, 500);
+                           };
+                           
+                           // Initial scroll after keyboard animation starts
+                           setTimeout(scrollToInput, 300);
                          }
                        }}
                        required
