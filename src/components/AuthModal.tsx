@@ -1085,6 +1085,7 @@ export default function AuthModal({
                          if (isMobile) {
                            setIsEmailFocused(true);
                          }
+                         setShowPassword(true);
                        }}
                        onBlur={() => {
                          if (isMobile) {
