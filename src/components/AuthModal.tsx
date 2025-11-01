@@ -249,30 +249,16 @@ export default function AuthModal({
         body: { email: pendingEmail, code: verificationCode }
       });
 
-      // Handle invocation errors - extract clean error message
+      // Handle invocation errors
       if (invokeError) {
         console.error('Verification invocation error:', invokeError);
-        
-        // Try to parse error message from edge function response
-        let cleanError = invokeError.message || "Verification failed. Please try again.";
-        
-        // If error contains JSON, extract the error field
-        try {
-          const errorMatch = cleanError.match(/\{"error":"([^"]+)"\}/);
-          if (errorMatch && errorMatch[1]) {
-            cleanError = errorMatch[1];
-          }
-        } catch (e) {
-          // Keep original error if parsing fails
-        }
-        
-        setError(cleanError);
+        setError("An unexpected error occurred. Please try again.");
         return;
       }
 
-      // Handle error responses from the function
-      if (data?.error) {
-        setError(data.error);
+      // Handle error responses from the function (including success: false)
+      if (data?.error || data?.success === false) {
+        setError(data.error || "Verification failed. Please try again.");
         return;
       }
 
