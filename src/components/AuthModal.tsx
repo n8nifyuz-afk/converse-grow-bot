@@ -1041,13 +1041,6 @@ export default function AuthModal({
                            setShowPassword(false);
                          }
                        }}
-                       onFocus={(e) => {
-                         if (isMobile) {
-                           setTimeout(() => {
-                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                           }, 300);
-                         }
-                       }}
                        required 
                        className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" 
                      />
@@ -1129,18 +1122,14 @@ export default function AuthModal({
           ref={drawerContentRef}
           className="h-auto p-0" 
           style={{ 
-            maxHeight: mode === 'complete-profile' ? '75dvh' : 'calc(100vh - 20px)',
+            maxHeight: mode === 'complete-profile' ? '75dvh' : '90vh',
             position: 'fixed',
             bottom: 0,
             left: 0,
             right: 0,
-            transform: 'translate3d(0, 0, 0)',
-            WebkitTransform: 'translate3d(0, 0, 0)',
-            transition: 'none',
             paddingBottom: 'env(safe-area-inset-bottom)',
             overflow: 'hidden',
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'contain'
+            touchAction: 'none'
           }}
         >
           <DrawerHeader className="sr-only">
