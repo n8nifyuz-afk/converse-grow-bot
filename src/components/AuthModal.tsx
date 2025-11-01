@@ -310,16 +310,28 @@ export default function AuthModal({
             setEmail(pendingEmail);
           }
         } 
-        // Case 2: New user created successfully
+        // Case 2: New user created successfully - automatically sign in
         else if (data.newUser) {
           toast({
             title: "Success!",
-            description: data.message,
-            duration: 5000
+            description: "Your account has been created. Signing you in...",
+            duration: 3000
           });
-          setMode('signin');
-          // Pre-fill email for convenience
-          setEmail(pendingEmail);
+          
+          // Automatically sign in the user
+          const { error: signInError } = await signIn(pendingEmail, password);
+          
+          if (signInError) {
+            // If auto sign-in fails, switch to signin mode
+            setMode('signin');
+            setEmail(pendingEmail);
+            toast({
+              title: "Please sign in",
+              description: "Your account was created. Please sign in to continue.",
+              duration: 5000
+            });
+          }
+          // If sign-in succeeds, the useEffect will handle closing the modal
         }
         
         // Clean up verification state
