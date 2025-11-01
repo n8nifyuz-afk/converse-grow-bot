@@ -1072,10 +1072,14 @@ export default function AuthModal({
                      onChange={e => {
                           setEmail(e.target.value);
                           if (!isMobile) setError('');
-                          if (e.target.value.trim()) {
-                            setShowPassword(true);
-                          } else {
-                            setShowPassword(false);
+                          // On desktop, show/hide password based on email content
+                          // On mobile, keep password visible once email flow has started
+                          if (!isMobile) {
+                            if (e.target.value.trim()) {
+                              setShowPassword(true);
+                            } else {
+                              setShowPassword(false);
+                            }
                           }
                         }}
                        onFocus={() => {
