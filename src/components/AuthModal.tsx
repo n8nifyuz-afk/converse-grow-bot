@@ -635,7 +635,7 @@ export default function AuthModal({
 
   const authContent = <div className="flex flex-col h-full">
            {/* Auth Form */}
-           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe relative">
+           <div className="w-full px-4 md:px-6 py-8 md:py-12 flex flex-col pb-safe relative overflow-y-auto md:overflow-visible">
              {/* Main Heading - Hide during profile completion */}
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
@@ -1044,15 +1044,19 @@ export default function AuthModal({
                        onFocus={(e) => {
                          if (isMobile && drawerContentRef.current) {
                            setTimeout(() => {
-                             e.target.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                           }, 300);
+                             e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                             drawerContentRef.current?.scrollTo({ 
+                               top: e.target.offsetTop - 100, 
+                               behavior: 'smooth' 
+                             });
+                           }, 350);
                          }
                        }}
                        onBlur={() => {
                          if (isMobile && drawerContentRef.current) {
                            setTimeout(() => {
                              drawerContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                           }, 100);
+                           }, 150);
                          }
                        }}
                        required 
@@ -1136,7 +1140,7 @@ export default function AuthModal({
           ref={drawerContentRef}
           className="h-auto p-0" 
           style={{ 
-            maxHeight: mode === 'complete-profile' ? '75dvh' : '85dvh',
+            maxHeight: mode === 'complete-profile' ? '75dvh' : '95dvh',
             position: 'fixed',
             bottom: 0,
             left: 0,
@@ -1144,7 +1148,8 @@ export default function AuthModal({
             paddingBottom: 'env(safe-area-inset-bottom)',
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'visible'
+            overflow: 'auto',
+            WebkitOverflowScrolling: 'touch'
           }}
         >
           <DrawerHeader className="sr-only">
