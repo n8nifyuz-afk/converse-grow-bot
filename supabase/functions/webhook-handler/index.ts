@@ -326,10 +326,10 @@ serve(async (req) => {
         is_first_message: isFirstMessage,
         has_image: !!imageUrl,
         image_url: imageUrl,
-        // Include stored Google Ads params from database
+        // Include stored Google Ads params from database (matching registration format)
         gclid: storedGclid,
-        url_params: storedUrlParams,
-        initial_referer: storedReferer,
+        urlParams: JSON.stringify(storedUrlParams || {}), // Stringified JSON like registration
+        referer: storedReferer || "null", // Match registration format
         timestamp: new Date().toISOString()
       };
       
