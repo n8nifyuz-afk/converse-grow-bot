@@ -479,6 +479,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       toast({
         title: t('toast.accountDeleted'),
         description: t('toast.accountDeletedDesc'),
+        duration: 3000,
+        hideClose: true,
       });
       
       // Sign out and close modal
