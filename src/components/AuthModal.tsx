@@ -135,7 +135,11 @@ export default function AuthModal({
       if (signInError) {
         // Check if this is an OAuth-only account
         if (signInError.code === 'oauth_only_account') {
-          setError(signInError.message);
+          if (isMobile) {
+            sonnerToast.error("OAuth Account", { description: signInError.message, duration: 3000 });
+          } else {
+            setError(signInError.message);
+          }
         } else if (signInError.code === 'password_reset_sent') {
           // Password reset email was sent
           toast({
@@ -146,12 +150,20 @@ export default function AuthModal({
           setEmail('');
           setPassword('');
         } else {
-          setError("Email or password is incorrect");
+          if (isMobile) {
+            sonnerToast.error("Sign In Failed", { description: "Email or password is incorrect", duration: 3000 });
+          } else {
+            setError("Email or password is incorrect");
+          }
         }
       }
       // If sign in succeeds, the useEffect will handle closing the modal and redirecting
     } catch (error) {
-      setError("An error occurred. Please try again later.");
+      if (isMobile) {
+        sonnerToast.error("Error", { description: "An error occurred. Please try again later.", duration: 3000 });
+      } else {
+        setError("An error occurred. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -204,7 +216,11 @@ export default function AuthModal({
 
       // Handle error responses from the function
       if (data?.error) {
-        setError(data.error);
+        if (isMobile) {
+          sonnerToast.error("Sign Up Failed", { description: data.error, duration: 3000 });
+        } else {
+          setError(data.error);
+        }
         return;
       }
 
@@ -1033,9 +1049,9 @@ export default function AuthModal({
                        type="email" 
                        placeholder={t('authModal.enterEmail')} 
                        value={email} 
-                       onChange={e => {
+                     onChange={e => {
                          setEmail(e.target.value);
-                         setError('');
+                         if (!isMobile) setError('');
                          if (e.target.value.trim()) {
                            setShowPassword(true);
                          } else {
@@ -1057,9 +1073,9 @@ export default function AuthModal({
                      />
                      {showPassword && <Input type="password" placeholder={mode === 'signup' ? 'Password (min 6 characters)' : 'Password'} value={password} onChange={e => {
               setPassword(e.target.value);
-              setError('');
+              if (!isMobile) setError('');
             }} required minLength={6} className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base" />}
-                      {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
+                      {error && !isMobile && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                          {error}
                        </div>}
                      {showPassword && <Button type="submit" disabled={loading || !email || !password || mode === 'signup' && signupCooldown > 0} className="w-full h-11 md:h-12 text-base">
