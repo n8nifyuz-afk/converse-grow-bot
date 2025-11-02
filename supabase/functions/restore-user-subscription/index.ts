@@ -83,6 +83,32 @@ serve(async (req) => {
     const customer = customers.data[0];
     logStep("Found Stripe customer", { customerId: customer.id });
 
+    // SECURITY: Check if this Stripe customer is already assigned to another user
+    const { data: existingAssignment } = await supabaseClient
+      .from('user_subscriptions')
+      .select('user_id')
+      .eq('stripe_customer_id', customer.id)
+      .neq('user_id', userId)
+      .maybeSingle();
+
+    if (existingAssignment) {
+      logStep("SECURITY BLOCK: Stripe customer already assigned to another user", { 
+        stripeCustomerId: customer.id,
+        assignedToUserId: existingAssignment.user_id,
+        attemptedByUserId: userId
+      });
+      return new Response(JSON.stringify({ 
+        restored: false,
+        error: 'This subscription is already assigned to another account',
+        message: 'Security check failed: Stripe customer already linked to a different user'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403 // Forbidden
+      });
+    }
+
+    logStep("Security check passed - customer not assigned to other users");
+
     // Get active subscriptions
     const subscriptions = await stripe.subscriptions.list({
       customer: customer.id,
