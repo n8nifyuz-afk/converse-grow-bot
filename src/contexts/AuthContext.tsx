@@ -273,6 +273,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let initialCheckComplete = false;
+    let authStateDebounceTimer: NodeJS.Timeout | null = null;
     
     // Check for OAuth errors in URL parameters (e.g., after failed account linking)
     const checkOAuthErrors = () => {
@@ -322,12 +323,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener - FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // Clear any pending debounce timer
+        if (authStateDebounceTimer) {
+          clearTimeout(authStateDebounceTimer);
+        }
+        
         // CRITICAL: Only synchronous state updates here to prevent auth loops
         if (event === 'SIGNED_IN' && session) {
           setSession(session);
           setUser(session.user);
-          
-          // CRITICAL: Set loading to false immediately for OAuth redirects to prevent blank screen
           setLoading(false);
           
           // Clean URL - remove hash fragments from OAuth redirects AFTER session is established
@@ -335,251 +339,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
-          // Defer async operations to prevent blocking auth flow
-          setTimeout(async () => {
-            // Check if this was an OAuth login (not a page refresh)
-            const wasOAuthLogin = sessionStorage.getItem('oauth_login_initiated') === 'true';
+          // CRITICAL: Debounce async operations to prevent rate limiting
+          authStateDebounceTimer = setTimeout(async () => {
+            // Only log activity once per session to avoid rate limits
+            const lastActivityLog = sessionStorage.getItem('last_activity_log');
+            const now = Date.now();
             
-            if (wasOAuthLogin) {
-              // Clear the flag
-              sessionStorage.removeItem('oauth_login_initiated');
-              
-              // Log the OAuth login
+            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
+              sessionStorage.setItem('last_activity_log', now.toString());
               await logUserActivity(session.user.id, 'login');
             }
             
-            // Check if this is a new signup and track registration
-            // The trackRegistrationComplete function has its own deduplication via localStorage
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('id, created_at')
-              .eq('user_id', session.user.id)
-              .single();
-            
-            if (profile) {
-              const profileCreated = new Date(session.user.created_at).getTime();
-              const now = Date.now();
-              // Profile created within last 60 seconds = new signup
-              const isNewSignup = (now - profileCreated) < 60000;
-              
-              // Always attempt to track registration (deduplication handled in function)
-              trackRegistrationComplete();
-              
-              // Send webhook only for new signups
-              if (isNewSignup) {
-                // CRITICAL: Check if webhook already sent to prevent duplicates during OAuth flow
-                const webhookSentKey = `webhook_sent_${session.user.id}`;
-                const webhookAlreadySent = sessionStorage.getItem(webhookSentKey);
-                
-                if (webhookAlreadySent) {
-                  console.log('[SIGNUP-WEBHOOK] Webhook already sent for this signup, skipping duplicate');
-                } else {
-                  // Send subscriber webhook for new user with IP/country from client
-                  try {
-                  // Get IPv4 address and country using ipapi.co (returns IPv4 only)
-                  let ipAddress = 'Unknown';
-                  let country = 'Unknown';
-                  
-                  try {
-                    // Use ipapi.co to get IP and country
-                    const ipResponse = await fetch('https://ipapi.co/json/');
-                    if (ipResponse.ok) {
-                      const ipData = await ipResponse.json();
-                      const rawIp = ipData.ip || 'Unknown';
-                      // Clean and format the IP address properly
-                      ipAddress = cleanIpAddress(rawIp);
-                      country = ipData.country_code || ipData.country || 'Unknown';
-                      console.log('[SIGNUP-WEBHOOK] Got IP address:', ipAddress, 'Country:', country);
-                    } else {
-                      // Fallback to ip-api.com
-                      const fallbackResponse = await fetch('https://api.ipify.org?format=json');
-                      if (fallbackResponse.ok) {
-                        const fallbackData = await fallbackResponse.json();
-                        const rawIp = fallbackData.ip || 'Unknown';
-                        // Clean and format the IP address properly
-                        ipAddress = cleanIpAddress(rawIp);
-                        // Get country separately
-                        const geoResponse = await fetch(`https://ipapi.co/${ipAddress}/country/`);
-                        if (geoResponse.ok) {
-                          country = await geoResponse.text();
-                        }
-                      }
-                    }
-                  } catch (traceError) {
-                    console.warn('Failed to get IP address:', traceError);
-                  }
-                  
-                  // Capture URL parameters (GCLID, UTM params, etc.)
-                  const urlParams = new URLSearchParams(window.location.search);
-                  const gclid = urlParams.get('gclid') || localStorage.getItem('gclid') || null;
-                  
-                  // Get URL params from current URL or localStorage (for OAuth redirects)
-                  let urlParamsObj: Record<string, string> = {};
-                  urlParams.forEach((value, key) => {
-                    urlParamsObj[key] = value;
-                  });
-                  
-                  // If no URL params in current URL, try to get from localStorage (OAuth case)
-                  if (Object.keys(urlParamsObj).length === 0) {
-                    const storedParams = localStorage.getItem('url_params');
-                    if (storedParams) {
-                      try {
-                        urlParamsObj = JSON.parse(storedParams);
-                        console.log('[SIGNUP] Restored URL params from localStorage:', urlParamsObj);
-                      } catch (e) {
-                        console.warn('[SIGNUP] Failed to parse stored URL params');
-                      }
-                    }
-                  }
-                  
-                  // Extract and log Google Ads parameters specifically
-                  const googleAdsParams = {
-                    gclid: urlParamsObj.gclid || gclid,
-                    gad_source: urlParamsObj.gad_source,
-                    gad_campaignid: urlParamsObj.gad_campaignid,
-                    gbraid: urlParamsObj.gbraid,
-                    utm_source: urlParamsObj.utm_source,
-                    utm_medium: urlParamsObj.utm_medium,
-                    utm_campaign: urlParamsObj.utm_campaign
-                  };
-                  
-                  console.log('🎯 [SIGNUP-GOOGLE-ADS] Google Ads Parameters Captured:', googleAdsParams);
-                  console.log('📊 [SIGNUP-ALL-PARAMS] All URL Parameters:', urlParamsObj);
-                  
-                  // Store GCLID in localStorage for future use (Google Click ID should persist)
-                  if (gclid && !localStorage.getItem('gclid')) {
-                    localStorage.setItem('gclid', gclid);
-                  }
-                  
-                  // Save GCLID and URL params to database
-                  const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({
-                      gclid: gclid,
-                      url_params: urlParamsObj,
-                      initial_referer: document.referrer || null
-                    })
-                    .eq('user_id', session.user.id);
-                  
-                  if (updateError) {
-                    console.error('❌ [SIGNUP-DB] Failed to save params to database:', updateError);
-                  } else {
-                    console.log('✅ [SIGNUP-DB] Successfully saved to database:', {
-                      gclid,
-                      gad_source: urlParamsObj.gad_source,
-                      gad_campaignid: urlParamsObj.gad_campaignid,
-                      gbraid: urlParamsObj.gbraid,
-                      all_params: urlParamsObj
-                    });
-                  }
-                  
-                  // Fetch profile data including phone_number and display_name
-                  const { data: profileData } = await supabase
-                    .from('profiles')
-                    .select('signup_method, phone_number, display_name')
-                    .eq('user_id', session.user.id)
-                    .single();
-
-                  // For phone signups: use phone_number when email is null
-                  const emailOrPhone = session.user.email || profileData?.phone_number || '';
-                  // For username: use display_name from profile
-                  const username = profileData?.display_name || 
-                                   session.user.user_metadata?.name || 
-                                   session.user.user_metadata?.display_name || 
-                                   session.user.email?.split('@')[0] || 
-                                   'User';
-
-                  console.log('📤 [SIGNUP-WEBHOOK] Sending webhook with Google Ads data:', {
-                    gclid: gclid,
-                    gad_source: urlParamsObj.gad_source,
-                    gad_campaignid: urlParamsObj.gad_campaignid,
-                    gbraid: urlParamsObj.gbraid
-                  });
-                  
-                  // Mark webhook as sent BEFORE invoking to prevent race condition duplicates
-                  sessionStorage.setItem(webhookSentKey, 'true');
-                  
-                  await supabase.functions.invoke('send-subscriber-webhook', {
-                    body: {
-                      userId: session.user.id,
-                      email: emailOrPhone,
-                      username: username,
-                      ipAddress,
-                      country,
-                      signupMethod: profileData?.signup_method || 'email',
-                      gclid: gclid,
-                      urlParams: urlParamsObj,
-                      referer: document.referrer || null,
-                    }
-                  });
-                  
-                  console.log('[SIGNUP-WEBHOOK] Successfully sent and marked as complete');
-                  } catch (webhookError) {
-                    console.error('Failed to send subscriber webhook:', webhookError);
-                  }
-                } // End webhookAlreadySent check
-              } // End if (isNewSignup)
-              
-              // IMPORTANT: Always try to capture GCLID for ALL logins (not just new signups)
-              // This handles cases where user signs up without params, then returns with ?gclid=ABC
-              try {
-                const { data: existingProfile } = await supabase
-                  .from('profiles')
-                  .select('gclid, url_params, initial_referer')
-                  .eq('user_id', session.user.id)
-                  .single();
-                
-                // Capture current URL params and GCLID from URL or localStorage
-                const currentUrlParams = new URLSearchParams(window.location.search);
-                const currentGclid = currentUrlParams.get('gclid') || localStorage.getItem('gclid') || null;
-                
-                // Update if we have a NEW gclid OR if profile has no gclid yet
-                const shouldUpdate = (currentGclid && !existingProfile?.gclid) || 
-                                    (currentGclid && currentGclid !== existingProfile?.gclid);
-                
-                if (shouldUpdate && currentGclid) {
-                  let urlParamsObj: Record<string, string> = {};
-                  currentUrlParams.forEach((value, key) => {
-                    urlParamsObj[key] = value;
-                  });
-                  
-                  // If no URL params in current URL, try to get from localStorage (OAuth case)
-                  if (Object.keys(urlParamsObj).length === 0) {
-                    const storedParams = localStorage.getItem('url_params');
-                    if (storedParams) {
-                      try {
-                        urlParamsObj = JSON.parse(storedParams);
-                      } catch (e) {
-                        // Silent error
-                      }
-                    }
-                  }
-                  
-                  // Store in localStorage for persistence
-                  if (!localStorage.getItem('gclid')) {
-                    localStorage.setItem('gclid', currentGclid);
-                  }
-                  
-                  await supabase
-                    .from('profiles')
-                    .update({
-                      gclid: currentGclid,
-                      url_params: Object.keys(urlParamsObj).length > 0 ? urlParamsObj : existingProfile?.url_params,
-                      initial_referer: document.referrer || existingProfile?.initial_referer || null
-                    })
-                    .eq('user_id', session.user.id);
-                  
-                  console.log('[LOGIN] Updated GCLID for user:', currentGclid);
-                }
-              } catch (err) {
-                console.warn('Failed to update user GCLID on login:', err);
-              }
-            }
-            
-            syncOAuthProfile(session);
-            checkSubscription();
-          }, 500);
+            // Fetch profile and sync OAuth data - DEBOUNCED
+            await fetchUserProfile(session.user.id);
+            await syncOAuthProfile(session);
+            await checkSubscription();
+          }, 500); // 500ms debounce to prevent rapid-fire API calls
         } else if (event === 'SIGNED_OUT') {
+          // Clear debounce timer on sign out
+          if (authStateDebounceTimer) {
+            clearTimeout(authStateDebounceTimer);
+          }
+          
           setSession(null);
           setUser(null);
           setUserProfile(null);
@@ -595,8 +376,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           clearCachedSubscription();
           
-          // Clear pricing modal auth flag on sign-out so it can show again on next sign-in
+          // Clear activity log timestamp to prevent rate limit issues on re-login
+          sessionStorage.removeItem('last_activity_log');
           sessionStorage.removeItem('pricing_modal_shown_auth');
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Only update session, don't trigger API calls to avoid rate limits
+          setSession(session);
         }
         
         // Set loading to false for other auth state changes if initial check is complete
@@ -620,6 +405,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       subscription.unsubscribe();
+      // Clear any pending debounce timer on unmount
+      if (authStateDebounceTimer) {
+        clearTimeout(authStateDebounceTimer);
+      }
     };
   }, []); // Empty dependency array - only run once on mount
 
@@ -1046,7 +835,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Rate limiting for checkSubscription to prevent excessive API calls
+  let lastSubscriptionCheck = 0;
+  const SUBSCRIPTION_CHECK_COOLDOWN = 5000; // 5 seconds minimum between checks
+
   const checkSubscription = async () => {
+    // CRITICAL: Rate limit to prevent excessive API calls (429 errors)
+    const now = Date.now();
+    if (now - lastSubscriptionCheck < SUBSCRIPTION_CHECK_COOLDOWN) {
+      console.log('[SUBSCRIPTION] Skipping check - too soon since last check');
+      return;
+    }
+    
     if (!user || isCheckingSubscription) {
       if (!user) {
         // Don't clear cache here - keep existing subscription status
@@ -1056,6 +856,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    lastSubscriptionCheck = now;
     setIsCheckingSubscription(true);
     setLoadingSubscription(true);
     try {
