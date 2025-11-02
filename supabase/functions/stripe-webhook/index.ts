@@ -414,12 +414,23 @@ serve(async (req) => {
             .single();
           
           if (!existingLimits) {
+            // Get subscription created_at from database to use as period_start
+            const { data: subscription } = await supabaseClient
+              .from('user_subscriptions')
+              .select('created_at')
+              .eq('user_id', user.id)
+              .single();
+            
+            const periodStartDate = subscription?.created_at 
+              ? new Date(subscription.created_at)
+              : new Date(); // Fallback to now if no subscription found
+            
             // Create new usage_limits
             const { error: limitsError } = await supabaseClient
               .from('usage_limits')
               .insert({
                 user_id: user.id,
-                period_start: new Date().toISOString(),
+                period_start: periodStartDate.toISOString(),
                 period_end: periodEndDate.toISOString(),
                 image_generations_used: 0,
                 image_generations_limit: imageLimit
