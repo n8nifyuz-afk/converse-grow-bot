@@ -73,7 +73,7 @@ export function useUsageLimits() {
 
   useEffect(() => {
     checkLimits();
-  }, [user?.id, subscriptionStatus.subscribed]);
+  }, [user?.id, subscriptionStatus.subscribed, checkLimits]);
 
   // Listen for custom event to refresh limits after image generation
   useEffect(() => {

@@ -160,7 +160,7 @@ export default function Chat() {
   const location = useLocation();
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
-  const { usageLimits, loading: limitsLoading } = useUsageLimits();
+  const { usageLimits, loading: limitsLoading, incrementUsage } = useUsageLimits();
   const { 
     canSendMessage, 
     isAtLimit, 
@@ -1948,6 +1948,18 @@ export default function Chat() {
         setLoading(false);
         return;
       }
+      
+      // CRITICAL: Increment usage counter BEFORE generating
+      console.log('[IMAGE-GEN] Incrementing usage counter...');
+      const canIncrement = await incrementUsage();
+      if (!canIncrement) {
+        toast.error('Failed to update usage limits', {
+          description: 'Please try again or contact support if the issue persists.'
+        });
+        setLoading(false);
+        return;
+      }
+      console.log('[IMAGE-GEN] Usage counter incremented successfully');
       
       try {
         // First, ensure the chat exists
