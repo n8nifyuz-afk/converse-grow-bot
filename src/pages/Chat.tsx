@@ -1949,17 +1949,8 @@ export default function Chat() {
         return;
       }
       
-      // CRITICAL: Increment usage counter BEFORE generating
-      console.log('[IMAGE-GEN] Incrementing usage counter...');
-      const canIncrement = await incrementUsage();
-      if (!canIncrement) {
-        toast.error('Failed to update usage limits', {
-          description: 'Please try again or contact support if the issue persists.'
-        });
-        setLoading(false);
-        return;
-      }
-      console.log('[IMAGE-GEN] Usage counter incremented successfully');
+      // NOTE: Usage counter is incremented by webhook-handler AFTER successful generation
+      // This prevents counting failed generations and avoids double-counting
       
       try {
         // First, ensure the chat exists

@@ -96,17 +96,9 @@ export default function ImageGeneration() {
     setIsGenerating(true);
 
     try {
-      // CRITICAL: Increment usage counter BEFORE generating
-      console.log('[IMAGE-GEN] Incrementing usage counter...');
-      const canIncrement = await incrementUsage();
-      if (!canIncrement) {
-        toast.error('Failed to update usage limits. Please try again.');
-        setIsGenerating(false);
-        setNewPrompt(promptText);
-        return;
-      }
-      console.log('[IMAGE-GEN] Usage counter incremented successfully');
-
+      // NOTE: Usage counter is incremented by webhook-handler AFTER successful generation
+      // This prevents counting failed generations and avoids double-counting
+      
       // Create new chat with the prompt
       const { data: newChat, error } = await supabase
         .from('chats')
