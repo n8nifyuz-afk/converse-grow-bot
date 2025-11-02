@@ -63,6 +63,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const [showEmailLinkModal, setShowEmailLinkModal] = React.useState(false);
   const [linkedIdentities, setLinkedIdentities] = React.useState<any[]>([]);
   const [unlinkingIdentity, setUnlinkingIdentity] = React.useState<any>(null);
+  const [hasStripeCustomer, setHasStripeCustomer] = React.useState(false);
   const { theme, accentColor, setTheme, setAccentColor } = useTheme();
   const { toast } = useToast();
   const { user, signOut, userProfile, subscriptionStatus, checkSubscription, refreshUserProfile, unlinkAuthMethod } = useAuth();
@@ -83,6 +84,27 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       fetchIdentities();
     }
   }, [user, open, userProfile]);
+
+  // Check if user has ever had a subscription (has Stripe customer ID)
+  React.useEffect(() => {
+    const checkStripeCustomer = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('user_subscriptions')
+          .select('stripe_customer_id')
+          .eq('user_id', user.id)
+          .not('stripe_customer_id', 'is', null)
+          .limit(1)
+          .single();
+        
+        setHasStripeCustomer(!!data?.stripe_customer_id);
+      }
+    };
+    
+    if (open) {
+      checkStripeCustomer();
+    }
+  }, [user, open]);
 
   // Initialize display name and birth date from profile
   React.useEffect(() => {
@@ -1061,7 +1083,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               )}
 
               {/* Manage Subscription */}
-              {subscriptionStatus.subscribed && (
+              {(subscriptionStatus.subscribed || hasStripeCustomer) && (
                 <Card className="shadow-sm">
                   <CardContent className="p-4 md:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
