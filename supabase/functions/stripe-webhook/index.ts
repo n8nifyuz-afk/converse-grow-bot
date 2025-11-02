@@ -426,17 +426,29 @@ serve(async (req) => {
               : new Date();
             
             // CRITICAL: Count existing generated images to preserve usage
-            const { count: imageCount } = await supabaseClient
-              .from('messages')
-              .select('id', { count: 'exact', head: true })
-              .eq('chat_id', supabaseClient
-                .from('chats')
-                .select('id')
-                .eq('user_id', user.id)
-              )
-              .eq('role', 'assistant')
-              .not('file_attachments', 'is', null)
-              .gte('created_at', periodStartDate.toISOString());
+            const { data: userChats } = await supabaseClient
+              .from('chats')
+              .select('id')
+              .eq('user_id', user.id);
+            
+            const chatIds = userChats?.map(c => c.id) || [];
+            
+            let imageCount = 0;
+            if (chatIds.length > 0) {
+              const { data: imageMessages } = await supabaseClient
+                .from('messages')
+                .select('id, file_attachments')
+                .in('chat_id', chatIds)
+                .eq('role', 'assistant')
+                .not('file_attachments', 'is', null)
+                .gte('created_at', periodStartDate.toISOString());
+              
+              // Count only messages with generated-images URLs
+              imageCount = imageMessages?.filter(m => {
+                const attachments = m.file_attachments as any[];
+                return attachments?.some(att => att.url?.includes('generated-images'));
+              }).length || 0;
+            }
             
             // Create new usage_limits with actual usage count
             const { error: limitsError } = await supabaseClient
