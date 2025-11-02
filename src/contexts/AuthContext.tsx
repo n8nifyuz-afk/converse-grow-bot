@@ -964,11 +964,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('status', 'active')
           .maybeSingle();
         
+        // CRITICAL FIX: If database shows active subscription but edge function returns false,
+        // trust the database (handles edge function timeout/failure cases)
+        const dbHasActiveSubscription = dbSub && new Date(dbSub.current_period_end) > new Date();
+        
         const previousSubscribed = subscriptionStatus.subscribed;
         const newStatus = {
-          subscribed: data.subscribed || false,
-          product_id: data.product_id || null,
-          subscription_end: data.subscription_end || null,
+          subscribed: dbHasActiveSubscription ? true : (data.subscribed || false),
+          product_id: dbHasActiveSubscription ? dbSub.product_id : (data.product_id || null),
+          subscription_end: dbHasActiveSubscription ? dbSub.current_period_end : (data.subscription_end || null),
           plan: dbSub?.plan || null,
           plan_name: dbSub?.plan_name || null
         };
