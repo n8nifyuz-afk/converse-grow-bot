@@ -549,7 +549,7 @@ export default function ChatSidebar({
                        <Settings className="mr-2 h-4 w-4" />
                        {t('chat.settings')}
                      </DropdownMenuItem>
-                     <DropdownMenuItem onClick={() => navigate('/help-center')}>
+                     <DropdownMenuItem onClick={() => navigate('/help')}>
                        <HelpCircle className="mr-2 h-4 w-4" />
                        {t('chat.help')}
                      </DropdownMenuItem>
