@@ -218,18 +218,15 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                         Country
                       </p>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs sm:text-sm font-semibold truncate">{getCountryName(userInfo.country)}</p>
-                        {userInfo.country && (
-                          <Badge variant="secondary" className="text-[10px] flex-shrink-0">{userInfo.country.toUpperCase()}</Badge>
+                        {userInfo.country ? (
+                          <>
+                            <p className="text-xs sm:text-sm font-semibold truncate">{getCountryName(userInfo.country)}</p>
+                            <Badge variant="secondary" className="text-[10px] flex-shrink-0">{userInfo.country.toUpperCase()}</Badge>
+                          </>
+                        ) : (
+                          <span className="text-xs sm:text-sm text-muted-foreground italic">Not available</span>
                         )}
                       </div>
-                    </div>
-                    <div>
-                      <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
-                        <Clock className="h-3 w-3 flex-shrink-0" />
-                        Timezone
-                      </p>
-                      <p className="text-xs sm:text-sm font-semibold truncate">{userInfo.timezone || 'Unknown'}</p>
                     </div>
                     <div>
                       <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1 mb-1">
