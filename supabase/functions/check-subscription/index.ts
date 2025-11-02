@@ -117,7 +117,28 @@ serve(async (req) => {
       .eq('stripe_customer_id', customerId)
       .maybeSingle();
 
-    if (subscriptionOwnership && subscriptionOwnership.user_id !== user.id) {
+    // Block if:
+    // 1. Subscription exists in DB but belongs to another user
+    // 2. Subscription doesn't exist in DB at all (prevents Stripe-only access)
+    if (!subscriptionOwnership) {
+      logStep("SECURITY BLOCK: No database subscription found for this customer", {
+        stripeCustomerId: customerId,
+        userId: user.id,
+        userEmail: user.email
+      });
+
+      return new Response(JSON.stringify({
+        subscribed: false,
+        product_id: null,
+        subscription_end: null,
+        error: 'No active subscription found in database'
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    if (subscriptionOwnership.user_id !== user.id) {
       logStep("SECURITY BLOCK: Stripe customer belongs to another user", {
         stripeCustomerId: customerId,
         actualOwner: subscriptionOwnership.user_id,
@@ -132,7 +153,7 @@ serve(async (req) => {
         error: 'This subscription belongs to a different account'
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200, // Return 200 to avoid errors, but subscribed: false
+        status: 200,
       });
     }
 
