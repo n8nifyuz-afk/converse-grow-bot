@@ -160,7 +160,7 @@ serve(async (req) => {
     console.log('[WEBHOOK-HANDLER] Parsed responseContent:', responseContent?.substring(0, 100) || 'EMPTY');
 
     // Handle image generation (from root level or response_data)
-    const imageData = image_base64 || response_data?.image_base64;
+    let imageData = image_base64 || response_data?.image_base64;
     console.log('[WEBHOOK-HANDLER] ===== IMAGE PROCESSING =====');
     console.log('[WEBHOOK-HANDLER] Final imageData exists?', !!imageData);
     
@@ -168,6 +168,12 @@ serve(async (req) => {
       console.log('[WEBHOOK-HANDLER] Processing generated image...');
       
       try {
+        // Strip data URI prefix if present (e.g., "data:image/png;base64,")
+        if (imageData.includes('base64,')) {
+          imageData = imageData.split('base64,')[1];
+          console.log('[WEBHOOK-HANDLER] Stripped data URI prefix from base64');
+        }
+        
         // Convert base64 to blob
         const imageBytes = Uint8Array.from(atob(imageData), c => c.charCodeAt(0));
         console.log('[WEBHOOK-HANDLER] Converted image size:', imageBytes.length, 'bytes');
