@@ -411,7 +411,7 @@ serve(async (req) => {
             .select('*')
             .eq('user_id', user.id)
             .gt('period_end', new Date().toISOString())
-            .single();
+            .maybeSingle(); // Use maybeSingle to avoid errors when no records exist
           
           if (!existingLimits) {
             // Get subscription created_at from database to use as period_start
@@ -423,23 +423,40 @@ serve(async (req) => {
             
             const periodStartDate = subscription?.created_at 
               ? new Date(subscription.created_at)
-              : new Date(); // Fallback to now if no subscription found
+              : new Date();
             
-            // Create new usage_limits
+            // CRITICAL: Count existing generated images to preserve usage
+            const { count: imageCount } = await supabaseClient
+              .from('messages')
+              .select('id', { count: 'exact', head: true })
+              .eq('chat_id', supabaseClient
+                .from('chats')
+                .select('id')
+                .eq('user_id', user.id)
+              )
+              .eq('role', 'assistant')
+              .not('file_attachments', 'is', null)
+              .gte('created_at', periodStartDate.toISOString());
+            
+            // Create new usage_limits with actual usage count
             const { error: limitsError } = await supabaseClient
               .from('usage_limits')
               .insert({
                 user_id: user.id,
                 period_start: periodStartDate.toISOString(),
                 period_end: periodEndDate.toISOString(),
-                image_generations_used: 0,
+                image_generations_used: imageCount || 0, // Preserve existing usage
                 image_generations_limit: imageLimit
               });
             
             if (limitsError) {
               logStep("ERROR: Failed to create usage_limits", { error: limitsError.message });
             } else {
-              logStep("Created usage_limits", { userId: user.id, limit: imageLimit });
+              logStep("Created usage_limits with existing count", { 
+                userId: user.id, 
+                limit: imageLimit,
+                existingImages: imageCount 
+              });
             }
           } else {
             // Update existing limits
