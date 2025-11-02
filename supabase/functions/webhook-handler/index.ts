@@ -103,9 +103,10 @@ serve(async (req) => {
     body = validationResult.data;
 
     // Handle N8n structure: { body: { chatId: "..." }, image_base64: "..." }
+    // Also handle fully nested structure: { body: { chatId: "...", image_base64: "..." } }
     const chat_id = body.body?.chatId || body.chat_id || body.chatId;
     const user_id = body.body?.userId || body.user_id || body.userId;
-    const image_base64 = body.image_base64;
+    const image_base64 = body.body?.image_base64 || body.image_base64;
     const response_data = body.response_data || body.response || body.text || body.content;
     const model = body.model || body.body?.model || body.type; // Extract model from request
     
