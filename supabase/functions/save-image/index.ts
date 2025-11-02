@@ -14,7 +14,13 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, fileName, chatId, userId, imageType = 'edited' } = await req.json();
+    const body = await req.json();
+    // Support both camelCase (frontend) and snake_case (n8n) field names
+    const imageBase64 = body.imageBase64 || body.image_base64;
+    const fileName = body.fileName || body.image_name || 'image.png';
+    const chatId = body.chatId;
+    const userId = body.userId;
+    const imageType = body.imageType || body.image_type || 'generated';
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
