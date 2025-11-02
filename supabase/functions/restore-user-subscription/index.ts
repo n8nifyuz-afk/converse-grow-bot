@@ -194,25 +194,60 @@ serve(async (req) => {
     }
 
     if (imageGenerationsLimit > 0) {
-      const { error: limitsError } = await supabaseClient
+      // CRITICAL: Check if usage_limits already exist - only insert if missing!
+      const { data: existingLimits } = await supabaseClient
         .from('usage_limits')
-        .upsert({
-          user_id: userId,
-          period_start: new Date().toISOString(),
-          period_end: periodEnd,
-          image_generations_used: 0,
-          image_generations_limit: imageGenerationsLimit,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id'
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existingLimits) {
+        // User already has limits - only update limit and period_end, preserve usage!
+        logStep("Usage limits already exist, preserving usage", { 
+          currentUsage: existingLimits.image_generations_used,
+          currentLimit: existingLimits.image_generations_limit 
         });
 
-      if (limitsError) {
-        logStep("Error upserting usage limits", { error: limitsError });
-        throw limitsError;
-      }
+        const { error: updateError } = await supabaseClient
+          .from('usage_limits')
+          .update({
+            image_generations_limit: imageGenerationsLimit,
+            period_end: periodEnd,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
 
-      logStep("Usage limits restored", { limit: imageGenerationsLimit });
+        if (updateError) {
+          logStep("Error updating usage limits", { error: updateError });
+          throw updateError;
+        }
+
+        logStep("Usage limits updated without resetting usage", { 
+          limit: imageGenerationsLimit,
+          preservedUsage: existingLimits.image_generations_used 
+        });
+      } else {
+        // No existing limits - create new with 0 usage
+        logStep("Creating new usage limits", { limit: imageGenerationsLimit });
+
+        const { error: insertError } = await supabaseClient
+          .from('usage_limits')
+          .insert({
+            user_id: userId,
+            period_start: new Date().toISOString(),
+            period_end: periodEnd,
+            image_generations_used: 0,
+            image_generations_limit: imageGenerationsLimit,
+            updated_at: new Date().toISOString()
+          });
+
+        if (insertError) {
+          logStep("Error inserting usage limits", { error: insertError });
+          throw insertError;
+        }
+
+        logStep("Usage limits created", { limit: imageGenerationsLimit });
+      }
     }
 
     logStep("Subscription restoration complete");
