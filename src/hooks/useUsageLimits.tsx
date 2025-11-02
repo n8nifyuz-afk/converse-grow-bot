@@ -71,9 +71,13 @@ export function useUsageLimits() {
     }
   };
 
+  // Only check limits on mount and when subscription changes, not on every login
   useEffect(() => {
-    checkLimits();
-  }, [user?.id, subscriptionStatus.subscribed, checkLimits]);
+    // Don't check on every user.id change as it causes unnecessary calls
+    if (user && subscriptionStatus.subscribed) {
+      checkLimits();
+    }
+  }, [subscriptionStatus.subscribed, checkLimits]);
 
   // Listen for custom event to refresh limits after image generation
   useEffect(() => {
