@@ -1164,7 +1164,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // IMPORTANT: Use 'local' scope to only sign out from current device/browser
+    // This prevents signing out from all devices when user just wants to log out locally
+    await supabase.auth.signOut({ scope: 'local' });
     
     // Clear subscription status and cache
     const resetStatus = {
