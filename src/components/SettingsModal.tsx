@@ -856,31 +856,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 </CardContent>
               </Card>
 
-              {/* Email/Phone Section */}
-              <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
-                <CardContent className="p-3 md:p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 md:gap-2.5">
-                      <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
-                        <Mail className="h-3.5 w-3.5 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm">
-                          {user?.email ? t('profile.emailAddress') : 'Phone Number'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {user?.email ? t('profile.yourAccountEmail') : 'Your registered phone number'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="ml-0 md:ml-9 mt-1.5">
-                      <p className="font-medium text-foreground bg-muted/40 px-2.5 py-1.5 rounded-lg border border-border/30 break-all text-sm">
-                        {user?.email || user?.phone || userProfile?.phone_number || 'Not available'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Login Methods Section */}
               <Card className="border border-border/40 bg-gradient-to-r from-card/80 to-card/40 backdrop-blur-sm shadow-sm">
@@ -896,7 +871,30 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       </div>
                     </div>
                     
-                    <div className="ml-0 md:ml-9 space-y-2.5">{/* Google Provider */}
+                    <div className="ml-0 md:ml-9 space-y-2.5">
+                      {/* Email/Phone Provider */}
+                      {(user?.email || user?.phone || userProfile?.phone_number) && (
+                        <div className="flex items-center justify-between gap-2.5 p-2.5 md:p-3 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
+                            <div className="p-1.5 bg-primary/10 rounded-lg flex-shrink-0">
+                              <Mail className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-foreground text-sm break-all">
+                                {user?.email || user?.phone || userProfile?.phone_number}
+                              </p>
+                              <p className="text-xs text-muted-foreground hidden sm:block">
+                                {user?.email ? t('profile.emailAddress') : 'Phone Number'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="p-1 bg-green-100 rounded-full flex-shrink-0">
+                            <Check className="h-3.5 w-3.5 text-green-600" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Google Provider */}
                       {user?.app_metadata?.providers?.includes('google') && (
                         <div className="flex items-center justify-between gap-2.5 p-2.5 md:p-3 bg-background/60 rounded-xl border border-border/30 backdrop-blur-sm">
                           <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
