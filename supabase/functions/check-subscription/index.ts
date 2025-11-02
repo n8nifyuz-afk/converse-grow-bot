@@ -109,6 +109,35 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
+    // CRITICAL SECURITY CHECK: Verify this Stripe customer is assigned to THIS user
+    // Prevents users from accessing subscriptions that belong to other accounts
+    const { data: subscriptionOwnership } = await supabaseClient
+      .from('user_subscriptions')
+      .select('user_id')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle();
+
+    if (subscriptionOwnership && subscriptionOwnership.user_id !== user.id) {
+      logStep("SECURITY BLOCK: Stripe customer belongs to another user", {
+        stripeCustomerId: customerId,
+        actualOwner: subscriptionOwnership.user_id,
+        attemptedBy: user.id,
+        attemptedByEmail: user.email
+      });
+
+      return new Response(JSON.stringify({
+        subscribed: false,
+        product_id: null,
+        subscription_end: null,
+        error: 'This subscription belongs to a different account'
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, // Return 200 to avoid errors, but subscribed: false
+      });
+    }
+
+    logStep("Security check passed - customer ownership verified");
+
     // Fetch ALL active and trialing subscriptions to handle upgrade scenarios
     // IMPORTANT: Include "trialing" status to recognize trial subscriptions
     const allSubscriptions = await Promise.all([
