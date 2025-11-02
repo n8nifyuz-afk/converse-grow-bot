@@ -741,6 +741,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      sync_image_usage_from_messages: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
