@@ -398,40 +398,57 @@ serve(async (req) => {
         const imageLimit = plan === 'ultra_pro' ? 2000 : plan === 'pro' ? 500 : 0;
         
         if (imageLimit > 0) {
-          // Delete expired usage_limits first
-          await supabaseClient
-            .from('usage_limits')
-            .delete()
-            .eq('user_id', user.id)
-            .lt('period_end', new Date().toISOString());
-          
-          // Check if active usage_limits exist
-          const { data: existingLimits } = await supabaseClient
+          // CRITICAL: Check if active usage_limits exist FIRST
+          logStep("Checking existing usage_limits", { userId: user.id });
+          const { data: existingLimits, error: existingError } = await supabaseClient
             .from('usage_limits')
             .select('*')
             .eq('user_id', user.id)
-            .gt('period_end', new Date().toISOString())
-            .maybeSingle(); // Use maybeSingle to avoid errors when no records exist
+            .maybeSingle();
+          
+          logStep("Existing limits result", { 
+            exists: !!existingLimits,
+            currentUsage: existingLimits?.image_generations_used,
+            currentLimit: existingLimits?.image_generations_limit,
+            periodStart: existingLimits?.period_start,
+            periodEnd: existingLimits?.period_end,
+            error: existingError?.message
+          });
           
           if (!existingLimits) {
-            // Get subscription created_at from database to use as period_start
-            const { data: subscription } = await supabaseClient
+            // NO existing limits - create new one
+            logStep("No existing limits found, creating new record", { userId: user.id });
+            
+            // Get the EARLIEST subscription for this user as the true period_start
+            const { data: subscription, error: subError } = await supabaseClient
               .from('user_subscriptions')
               .select('created_at')
               .eq('user_id', user.id)
-              .single();
+              .order('created_at', { ascending: true })
+              .limit(1)
+              .maybeSingle();
+            
+            if (subError) {
+              logStep("ERROR: Failed to fetch subscription for period_start", { error: subError.message });
+            }
             
             const periodStartDate = subscription?.created_at 
               ? new Date(subscription.created_at)
               : new Date();
             
-            // CRITICAL: Count existing generated images to preserve usage
+            logStep("Period start determined", { 
+              periodStart: periodStartDate.toISOString(),
+              source: subscription?.created_at ? 'subscription' : 'fallback'
+            });
+            
+            // Count existing generated images to preserve usage
             const { data: userChats } = await supabaseClient
               .from('chats')
               .select('id')
               .eq('user_id', user.id);
             
             const chatIds = userChats?.map(c => c.id) || [];
+            logStep("User chats found", { chatCount: chatIds.length });
             
             let imageCount = 0;
             if (chatIds.length > 0) {
@@ -448,30 +465,35 @@ serve(async (req) => {
                 const attachments = m.file_attachments as any[];
                 return attachments?.some(att => att.url?.includes('generated-images'));
               }).length || 0;
+              
+              logStep("Image count calculated", { imageCount, totalMessages: imageMessages?.length });
             }
             
-            // Create new usage_limits with actual usage count
+            // Create new usage_limits
             const { error: limitsError } = await supabaseClient
               .from('usage_limits')
               .insert({
                 user_id: user.id,
                 period_start: periodStartDate.toISOString(),
                 period_end: periodEndDate.toISOString(),
-                image_generations_used: imageCount || 0, // Preserve existing usage
+                image_generations_used: imageCount,
                 image_generations_limit: imageLimit
               });
             
             if (limitsError) {
               logStep("ERROR: Failed to create usage_limits", { error: limitsError.message });
             } else {
-              logStep("Created usage_limits with existing count", { 
+              logStep("✅ Created usage_limits", { 
                 userId: user.id, 
                 limit: imageLimit,
-                existingImages: imageCount 
+                used: imageCount,
+                periodStart: periodStartDate.toISOString()
               });
             }
           } else {
-            // Update existing limits
+            // Existing limits found - only update limit and period_end, NEVER touch usage or period_start
+            logStep("Existing limits found, updating only limit and period_end", { userId: user.id });
+            
             const { error: updateError } = await supabaseClient
               .from('usage_limits')
               .update({
@@ -479,13 +501,17 @@ serve(async (req) => {
                 period_end: periodEndDate.toISOString(),
                 updated_at: new Date().toISOString()
               })
-              .eq('user_id', user.id)
-              .gt('period_end', new Date().toISOString());
+              .eq('user_id', user.id);
             
             if (updateError) {
               logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
             } else {
-              logStep("Updated usage_limits", { userId: user.id, limit: imageLimit });
+              logStep("✅ Updated usage_limits", { 
+                userId: user.id, 
+                limit: imageLimit,
+                preservedUsage: existingLimits.image_generations_used,
+                preservedPeriodStart: existingLimits.period_start
+              });
             }
           }
         }
