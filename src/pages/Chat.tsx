@@ -3524,6 +3524,12 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
           filePath = urlParts[1];
           bucketName = 'chat-images';
         } 
+        // Check for generated-images bucket
+        else if (imageUrl.includes('/storage/v1/object/public/generated-images/')) {
+          const urlParts = imageUrl.split('/storage/v1/object/public/generated-images/');
+          filePath = urlParts[1];
+          bucketName = 'generated-images';
+        }
         // Check for chat-files bucket
         else if (imageUrl.includes('/storage/v1/object/public/chat-files/')) {
           const urlParts = imageUrl.split('/storage/v1/object/public/chat-files/');
