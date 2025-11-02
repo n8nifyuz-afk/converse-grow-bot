@@ -21,12 +21,17 @@ function getSessionId(): string {
   return sessionId;
 }
 
-// Parse URL parameters
+// Parse URL parameters (filter out auth error params)
 function getUrlParams(): Record<string, string> {
   const params: Record<string, string> = {};
   const searchParams = new URLSearchParams(window.location.search);
+  const errorKeys = ['error', 'error_code', 'error_description', 'error_subcode'];
+  
   searchParams.forEach((value, key) => {
-    params[key] = value;
+    // Skip error parameters from OAuth/auth flows
+    if (!errorKeys.includes(key)) {
+      params[key] = value;
+    }
   });
   return params;
 }
