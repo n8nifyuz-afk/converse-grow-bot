@@ -129,6 +129,8 @@ serve(async (req) => {
     const finalGclid = verification.gclid || gclid || null;
     const finalUrlParams = verification.url_params || urlParams || {};
     const finalReferer = verification.initial_referer || initialReferer || null;
+    const finalIpAddress = verification.ip_address || null;
+    const finalCountry = verification.country || null;
 
     // Create new user with verified email
     const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
@@ -140,6 +142,8 @@ serve(async (req) => {
         gclid: finalGclid,
         url_params: finalUrlParams,
         referer: finalReferer,
+        ip_address: finalIpAddress,
+        country: finalCountry,
       }
     });
 

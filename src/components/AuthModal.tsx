@@ -215,6 +215,10 @@ export default function AuthModal({
       const urlParams = localStorage.getItem('url_params');
       const initialReferer = localStorage.getItem('initial_referer');
       
+      // Fetch IP and country
+      const { fetchIPAndCountry } = await import('@/utils/webhookMetadata');
+      const { ip, country } = await fetchIPAndCountry();
+      
       // Use Supabase client to invoke edge function
       const { data, error: invokeError } = await supabase.functions.invoke('send-verification-code', {
         body: { 
@@ -222,7 +226,9 @@ export default function AuthModal({
           password,
           gclid,
           urlParams: urlParams ? JSON.parse(urlParams) : {},
-          initialReferer
+          initialReferer,
+          ipAddress: ip,
+          country
         }
       });
 

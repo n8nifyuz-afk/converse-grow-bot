@@ -88,12 +88,14 @@ export type Database = {
       email_verifications: {
         Row: {
           code: string
+          country: string | null
           created_at: string | null
           email: string
           expires_at: string
           gclid: string | null
           id: string
           initial_referer: string | null
+          ip_address: string | null
           password_hash: string
           updated_at: string | null
           url_params: Json | null
@@ -101,12 +103,14 @@ export type Database = {
         }
         Insert: {
           code: string
+          country?: string | null
           created_at?: string | null
           email: string
           expires_at: string
           gclid?: string | null
           id?: string
           initial_referer?: string | null
+          ip_address?: string | null
           password_hash: string
           updated_at?: string | null
           url_params?: Json | null
@@ -114,12 +118,14 @@ export type Database = {
         }
         Update: {
           code?: string
+          country?: string | null
           created_at?: string | null
           email?: string
           expires_at?: string
           gclid?: string | null
           id?: string
           initial_referer?: string | null
+          ip_address?: string | null
           password_hash?: string
           updated_at?: string | null
           url_params?: Json | null
