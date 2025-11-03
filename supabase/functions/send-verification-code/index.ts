@@ -38,7 +38,7 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
     logStep("Parsing request body");
-    const { email, password } = await req.json();
+    const { email, password, gclid, urlParams, initialReferer } = await req.json();
     
     if (!email || !password) {
       logStep("Missing email or password");
@@ -113,6 +113,9 @@ serve(async (req) => {
         code: code,
         password_hash: password, // Store plain password (encrypted by Supabase)
         expires_at: expiresAt.toISOString(),
+        gclid: gclid || null,
+        url_params: urlParams || {},
+        initial_referer: initialReferer || null,
       })
       .select()
       .single();
@@ -126,6 +129,9 @@ serve(async (req) => {
           password_hash: password, // Store plain password (encrypted by Supabase)
           expires_at: expiresAt.toISOString(),
           verified: false,
+          gclid: gclid || null,
+          url_params: urlParams || {},
+          initial_referer: initialReferer || null,
         })
         .eq('email', email)
         .select()

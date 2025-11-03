@@ -26,7 +26,7 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { code, email } = await req.json();
+    const { code, email, gclid, urlParams, initialReferer } = await req.json();
     
     if (!code || !email) {
       throw new Error("Code and email are required");
@@ -125,6 +125,11 @@ serve(async (req) => {
 
     logStep("Creating new user");
 
+    // Use tracking data from verification record, fallback to request body
+    const finalGclid = verification.gclid || gclid || null;
+    const finalUrlParams = verification.url_params || urlParams || {};
+    const finalReferer = verification.initial_referer || initialReferer || null;
+
     // Create new user with verified email
     const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
       email: email,
@@ -132,6 +137,9 @@ serve(async (req) => {
       email_confirm: true, // Auto-confirm the email
       user_metadata: {
         signup_method: 'email',
+        gclid: finalGclid,
+        url_params: finalUrlParams,
+        referer: finalReferer,
       }
     });
 

@@ -91,9 +91,12 @@ export type Database = {
           created_at: string | null
           email: string
           expires_at: string
+          gclid: string | null
           id: string
+          initial_referer: string | null
           password_hash: string
           updated_at: string | null
+          url_params: Json | null
           verified: boolean | null
         }
         Insert: {
@@ -101,9 +104,12 @@ export type Database = {
           created_at?: string | null
           email: string
           expires_at: string
+          gclid?: string | null
           id?: string
+          initial_referer?: string | null
           password_hash: string
           updated_at?: string | null
+          url_params?: Json | null
           verified?: boolean | null
         }
         Update: {
@@ -111,9 +117,12 @@ export type Database = {
           created_at?: string | null
           email?: string
           expires_at?: string
+          gclid?: string | null
           id?: string
+          initial_referer?: string | null
           password_hash?: string
           updated_at?: string | null
+          url_params?: Json | null
           verified?: boolean | null
         }
         Relationships: []
