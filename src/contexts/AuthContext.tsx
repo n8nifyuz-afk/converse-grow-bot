@@ -531,11 +531,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
-          // CRITICAL: Sync OAuth profile IMMEDIATELY for new signups (no debounce)
-          // This ensures GCLID and tracking data are saved to database instantly
-          syncOAuthProfile(session).catch(error => {
-            console.error('❌ [Auth] Failed to sync OAuth profile:', error);
-          });
+          // CRITICAL: Only sync OAuth profile ONCE per session to prevent rate limiting
+          // Check if we've already synced in this session
+          const lastOAuthSync = sessionStorage.getItem('last_oauth_sync');
+          const shouldSyncImmediately = !lastOAuthSync;
+          
+          if (shouldSyncImmediately) {
+            // Mark as synced immediately to prevent duplicate calls
+            sessionStorage.setItem('last_oauth_sync', Date.now().toString());
+            
+            // Sync immediately for first auth in session (captures new signups)
+            syncOAuthProfile(session).catch(error => {
+              console.error('❌ [Auth] Failed to sync OAuth profile:', error);
+            });
+          }
           
           // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
