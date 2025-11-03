@@ -994,19 +994,26 @@ export default function AuthModal({
                           value={verificationCode[index] || ''}
                           onChange={(e) => {
                             const value = e.target.value.replace(/\D/g, '');
-                            if (value) {
-                              const newCode = verificationCode.split('');
-                              newCode[index] = value;
-                              setVerificationCode(newCode.join(''));
-                              // Auto-focus next input
-                              if (index < 5) {
-                                document.getElementById(`code-${index + 1}`)?.focus();
-                              }
+                            const newCode = verificationCode.split('');
+                            newCode[index] = value;
+                            setVerificationCode(newCode.join(''));
+                            
+                            // Auto-focus next input if value was entered
+                            if (value && index < 5) {
+                              document.getElementById(`code-${index + 1}`)?.focus();
                             }
                           }}
                           onKeyDown={(e) => {
-                            if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
-                              document.getElementById(`code-${index - 1}`)?.focus();
+                            if (e.key === 'Backspace') {
+                              if (verificationCode[index]) {
+                                // Clear current input
+                                const newCode = verificationCode.split('');
+                                newCode[index] = '';
+                                setVerificationCode(newCode.join(''));
+                              } else if (index > 0) {
+                                // Move to previous input if current is empty
+                                document.getElementById(`code-${index - 1}`)?.focus();
+                              }
                             }
                           }}
                           onPaste={(e) => {
