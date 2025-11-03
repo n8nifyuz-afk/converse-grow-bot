@@ -182,6 +182,7 @@ export async function logUserActivity(
   metadata: Record<string, any> = {}
 ): Promise<void> {
   try {
+    console.log('[logUserActivity] 📤 Calling edge function:', { userId, activityType });
     const trackingData = getFullTrackingData(activityType);
     
     const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL || 'https://lciaiunzacgvvbvcshdh.supabase.co'}/functions/v1/log-user-activity`, {
@@ -198,9 +199,13 @@ export async function logUserActivity(
     });
     
     if (!response.ok) {
-      throw new Error('Failed to log activity');
+      const errorText = await response.text();
+      console.error('[logUserActivity] ❌ Edge function error:', response.status, errorText);
+      throw new Error(`Failed to log activity: ${response.status} ${errorText}`);
     }
+    
+    console.log('[logUserActivity] ✅ Activity logged successfully');
   } catch (error) {
-    console.warn('Failed to log user activity:', error);
+    console.error('[logUserActivity] ❌ Exception:', error);
   }
 }
