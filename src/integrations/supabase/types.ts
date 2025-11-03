@@ -536,7 +536,6 @@ export type Database = {
           language: string | null
           metadata: Json | null
           os: string | null
-          referrer: string | null
           screen_resolution: string | null
           user_agent: string | null
           user_id: string | null
@@ -552,7 +551,6 @@ export type Database = {
           language?: string | null
           metadata?: Json | null
           os?: string | null
-          referrer?: string | null
           screen_resolution?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -568,7 +566,6 @@ export type Database = {
           language?: string | null
           metadata?: Json | null
           os?: string | null
-          referrer?: string | null
           screen_resolution?: string | null
           user_agent?: string | null
           user_id?: string | null
