@@ -937,7 +937,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const gclid = currentParams.get('gclid');
     const urlParamsObj: Record<string, string> = {};
     currentParams.forEach((value, key) => {
-      urlParamsObj[key] = value;
+      // Skip internal/system parameters
+      if (!key.startsWith('__') && key !== 'code' && key !== 'state') {
+        urlParamsObj[key] = value;
+      }
     });
     
     if (gclid) {
@@ -954,6 +957,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (referer && referer !== 'Direct') {
       localStorage.setItem('initial_referer', referer);
       console.log('[OAuth] Stored referer before redirect:', referer);
+    }
+    
+    // Fetch IP and country for immediate capture
+    let ipAddress = null;
+    let country = null;
+    try {
+      const ipData = await fetchIPAndCountry();
+      ipAddress = ipData.ip;
+      country = ipData.country;
+      console.log('[OAuth] Captured IP and country:', { ipAddress, country });
+    } catch (error) {
+      console.warn('[OAuth] Failed to fetch IP/country:', error);
     }
     
     // Build redirect URL with ALL preserved URL parameters (not just gclid)
@@ -973,7 +988,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         redirectTo: redirectUrl,
         scopes: 'email profile openid',
         queryParams: {
-          signup_method: 'google',
           access_type: 'offline',
           prompt: 'consent'
         }
