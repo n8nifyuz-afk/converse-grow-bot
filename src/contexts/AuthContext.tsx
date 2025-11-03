@@ -350,6 +350,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.log('⏭️ Skipping activity log - session restoration from storage');
             }
             
+            // CRITICAL: Update profile with stored tracking data after OAuth callback
+            const storedTrackingData = sessionStorage.getItem('oauth_tracking_data');
+            if (storedTrackingData && !isRestoringSession) {
+              try {
+                const trackingData = JSON.parse(storedTrackingData);
+                console.log('📊 Updating profile with stored tracking data:', trackingData);
+                
+                const updateData: any = {};
+                if (trackingData.gclid) updateData.gclid = trackingData.gclid;
+                if (trackingData.url_params && Object.keys(trackingData.url_params).length > 0) {
+                  updateData.url_params = trackingData.url_params;
+                }
+                if (trackingData.referer) updateData.initial_referer = trackingData.referer;
+                if (trackingData.ip_address) updateData.ip_address = trackingData.ip_address;
+                if (trackingData.country) updateData.country = trackingData.country;
+                
+                if (Object.keys(updateData).length > 0) {
+                  await supabase
+                    .from('profiles')
+                    .update(updateData)
+                    .eq('user_id', session.user.id);
+                  
+                  console.log('✅ Profile updated with tracking data');
+                }
+                
+                // Clear after use
+                sessionStorage.removeItem('oauth_tracking_data');
+              } catch (error) {
+                console.error('❌ Failed to update profile with tracking data:', error);
+              }
+            }
+            
             // Fetch profile and sync OAuth data - DEBOUNCED
             await fetchUserProfile(session.user.id);
             await syncOAuthProfile(session);
@@ -624,6 +656,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use production domain for email confirmation
     const redirectUrl = 'https://www.chatl.ai/';
     
+    // CRITICAL: Capture tracking parameters from localStorage (stored by GTM tracking)
+    const gclid = localStorage.getItem('gclid') || null;
+    const storedUrlParams = localStorage.getItem('url_params');
+    const urlParams = storedUrlParams ? JSON.parse(storedUrlParams) : {};
+    const referer = document.referrer || null;
+    
     const signupData: any = {
       signup_method: 'email'
     };
@@ -638,6 +676,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (country) {
       signupData.country = country;
+    }
+    
+    // Add tracking parameters
+    if (gclid) {
+      signupData.gclid = gclid;
+    }
+    
+    if (Object.keys(urlParams).length > 0) {
+      signupData.url_params = JSON.stringify(urlParams);
+    }
+    
+    if (referer) {
+      signupData.referer = referer;
     }
     
     const { error, data } = await supabase.auth.signUp({
@@ -726,6 +777,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
     
+    // CRITICAL: Store tracking parameters in sessionStorage BEFORE OAuth redirect
+    // These will be retrieved after OAuth callback completes
+    const gclid = localStorage.getItem('gclid') || null;
+    const storedUrlParams = localStorage.getItem('url_params');
+    const urlParams = storedUrlParams ? JSON.parse(storedUrlParams) : {};
+    const referer = document.referrer || null;
+    
+    // Get IP and country
+    let ipAddress: string | undefined;
+    let country: string | undefined;
+    try {
+      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+      if (geoResponse.ok) {
+        const text = await geoResponse.text();
+        const geoData = Object.fromEntries(
+          text.trim().split('\n').map(line => line.split('='))
+        );
+        ipAddress = geoData.ip;
+        country = geoData.loc;
+      }
+    } catch (error) {
+      // Continue without geo data
+    }
+    
+    // Store in sessionStorage to persist through OAuth redirect
+    sessionStorage.setItem('oauth_tracking_data', JSON.stringify({
+      gclid,
+      url_params: urlParams,
+      referer,
+      ip_address: ipAddress,
+      country
+    }));
+    
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
     
@@ -749,6 +833,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
     
+    // CRITICAL: Store tracking parameters in sessionStorage BEFORE OAuth redirect
+    const gclid = localStorage.getItem('gclid') || null;
+    const storedUrlParams = localStorage.getItem('url_params');
+    const urlParams = storedUrlParams ? JSON.parse(storedUrlParams) : {};
+    const referer = document.referrer || null;
+    
+    // Get IP and country
+    let ipAddress: string | undefined;
+    let country: string | undefined;
+    try {
+      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+      if (geoResponse.ok) {
+        const text = await geoResponse.text();
+        const geoData = Object.fromEntries(
+          text.trim().split('\n').map(line => line.split('='))
+        );
+        ipAddress = geoData.ip;
+        country = geoData.loc;
+      }
+    } catch (error) {
+      // Continue without geo data
+    }
+    
+    // Store in sessionStorage to persist through OAuth redirect
+    sessionStorage.setItem('oauth_tracking_data', JSON.stringify({
+      gclid,
+      url_params: urlParams,
+      referer,
+      ip_address: ipAddress,
+      country
+    }));
+    
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
     
@@ -769,6 +885,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use production domain
     const redirectUrl = 'https://www.chatl.ai/';
     
+    // CRITICAL: Store tracking parameters in sessionStorage BEFORE OAuth redirect
+    const gclid = localStorage.getItem('gclid') || null;
+    const storedUrlParams = localStorage.getItem('url_params');
+    const urlParams = storedUrlParams ? JSON.parse(storedUrlParams) : {};
+    const referer = document.referrer || null;
+    
+    // Get IP and country
+    let ipAddress: string | undefined;
+    let country: string | undefined;
+    try {
+      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+      if (geoResponse.ok) {
+        const text = await geoResponse.text();
+        const geoData = Object.fromEntries(
+          text.trim().split('\n').map(line => line.split('='))
+        );
+        ipAddress = geoData.ip;
+        country = geoData.loc;
+      }
+    } catch (error) {
+      // Continue without geo data
+    }
+    
+    // Store in sessionStorage to persist through OAuth redirect
+    sessionStorage.setItem('oauth_tracking_data', JSON.stringify({
+      gclid,
+      url_params: urlParams,
+      referer,
+      ip_address: ipAddress,
+      country
+    }));
+    
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
     
@@ -787,12 +935,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithPhone = async (phone: string) => {
+    // CRITICAL: Capture tracking parameters for phone signup
+    const gclid = localStorage.getItem('gclid') || null;
+    const storedUrlParams = localStorage.getItem('url_params');
+    const urlParams = storedUrlParams ? JSON.parse(storedUrlParams) : {};
+    const referer = document.referrer || null;
+    
+    // Get IP and country
+    let ipAddress: string | undefined;
+    let country: string | undefined;
+    try {
+      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+      if (geoResponse.ok) {
+        const text = await geoResponse.text();
+        const geoData = Object.fromEntries(
+          text.trim().split('\n').map(line => line.split('='))
+        );
+        ipAddress = geoData.ip;
+        country = geoData.loc;
+      }
+    } catch (error) {
+      // Continue without geo data
+    }
+    
+    const metadata: any = {
+      signup_method: 'phone'
+    };
+    
+    if (gclid) metadata.gclid = gclid;
+    if (Object.keys(urlParams).length > 0) metadata.url_params = JSON.stringify(urlParams);
+    if (referer) metadata.referer = referer;
+    if (ipAddress) metadata.ip_address = ipAddress;
+    if (country) metadata.country = country;
+    
     const { error } = await supabase.auth.signInWithOtp({
       phone,
       options: {
-        data: {
-          signup_method: 'phone'
-        }
+        data: metadata
       }
     });
     
