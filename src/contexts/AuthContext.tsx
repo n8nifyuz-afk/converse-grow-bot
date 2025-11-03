@@ -100,6 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   // CRITICAL: Track last activity log to prevent duplicates (session token + timestamp)
   const lastActivityLogRef = useRef<{ sessionToken: string; timestamp: number } | null>(null);
+  
+  // CRITICAL: Track if this is initial page load (to prevent logging on session restoration)
+  const isInitialLoadRef = useRef(true);
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -552,7 +555,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // CRITICAL: Only log activity on ACTUAL sign-in/sign-up events with strict deduplication
           // This block only runs when event === 'SIGNED_IN', so we know it's a real auth event
-          // Prevents duplicates from OAuth redirects (multiple SIGNED_IN events in quick succession)
+          // Prevents duplicates from OAuth redirects AND session restoration on page refresh
           
           const now = Date.now();
           const lastLog = lastActivityLogRef.current;
@@ -560,8 +563,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const timeSinceLastLog = lastLog ? now - lastLog.timestamp : Infinity;
           const hasEnoughTimePassed = timeSinceLastLog > 10000; // 10 seconds minimum between logs
           
-          // Only log if: new session OR 10+ seconds passed since last log
-          const shouldLogActivity = isNewSession || hasEnoughTimePassed;
+          // CRITICAL: Skip logging if this is initial page load (session restoration)
+          // Only log for actual authentication events AFTER initial load
+          const isSessionRestoration = isInitialLoadRef.current;
+          const shouldLogActivity = !isSessionRestoration && (isNewSession || hasEnoughTimePassed);
           
           if (shouldLogActivity) {
             // Detect if this is a SIGNUP or LOGIN
@@ -665,6 +670,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Mark initial check as complete and set loading to false
       initialCheckComplete = true;
       setLoading(false);
+      
+      // Mark initial load as complete after a short delay
+      // This ensures SIGNED_IN events during initial load are ignored for activity logging
+      setTimeout(() => {
+        isInitialLoadRef.current = false;
+        console.log('[Auth] ✅ Initial load complete, activity logging now enabled');
+      }, 1000);
     });
 
     return () => {
