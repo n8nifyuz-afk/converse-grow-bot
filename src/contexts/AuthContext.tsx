@@ -547,9 +547,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
+          // CRITICAL: Log activity IMMEDIATELY for all logins (no debounce, no throttle)
+          // This ensures all OAuth providers (Google, Microsoft, Apple) are properly tracked
+          const provider = session.user.app_metadata?.provider || 'email';
+          const now = Date.now();
+          console.log(`[Auth] ⚡ Immediately logging ${provider} login activity for user:`, session.user.id);
+          logUserActivity(session.user.id, 'login').catch(error => {
+            console.error('❌ [Auth] Failed to log activity:', error);
+          });
+          
           // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
           // Use a ref to track last sync time (resets on page reload, not tab visibility)
-          const now = Date.now();
           const lastSync = lastOAuthSyncRef.current || 0;
           const timeSinceLastSync = now - lastSync;
           
@@ -566,20 +574,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Log all authentication events as "login" with reduced throttling (5 seconds)
-            const lastActivityLog = sessionStorage.getItem('last_activity_log');
-            const now = Date.now();
-            
-            // Reduced throttle from 60s to 5s to ensure logins are properly logged
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 5000) {
-              sessionStorage.setItem('last_activity_log', now.toString());
-              const provider = session.user.app_metadata?.provider || 'email';
-              console.log(`[Auth] ⏰ Logging ${provider} login activity for user:`, session.user.id);
-              await logUserActivity(session.user.id, 'login');
-            } else {
-              console.log('[Auth] ⏭️ Skipping activity log - throttled (logged', Math.floor((now - parseInt(lastActivityLog)) / 1000), 'seconds ago)');
-            }
-            
             // Track registration completion for GTM/GA (with deduplication)
             trackRegistrationComplete();
             
