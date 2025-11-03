@@ -29,7 +29,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const { userId, activityType, browserInfo, deviceInfo, referrer, metadata } = await req.json()
+    const { userId, activityType, browserInfo, deviceInfo, metadata } = await req.json()
 
     // Get IP address from request headers and clean it
     const rawIpAddress = req.headers.get('x-forwarded-for') || 
@@ -65,7 +65,6 @@ serve(async (req) => {
         os: browserInfo?.os,
         screen_resolution: deviceInfo?.screenResolution,
         language: deviceInfo?.language,
-        referrer: referrer,
         metadata: {
           browserInfo,
           deviceInfo,
