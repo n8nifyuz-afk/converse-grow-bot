@@ -76,9 +76,9 @@ verify_jwt = false
 [functions.verify-email-code]
 verify_jwt = false
 
-# Subscriber webhook notification (requires authentication)
+# Subscriber webhook notification (called by database trigger - must be public)
 [functions.send-subscriber-webhook]
-verify_jwt = true
+verify_jwt = false
 
 # Update external ID from n8n (public webhook)
 [functions.update-external-id]
