@@ -273,6 +273,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let initialCheckComplete = false;
+    let isRestoringSession = true; // Track if we're restoring session from storage
     let authStateDebounceTimer: NodeJS.Timeout | null = null;
     
     // Check for OAuth errors in URL parameters (e.g., after failed account linking)
@@ -341,13 +342,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // CRITICAL: Debounce async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Only log activity once per session to avoid rate limits
-            const lastActivityLog = sessionStorage.getItem('last_activity_log');
-            const now = Date.now();
-            
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
-              sessionStorage.setItem('last_activity_log', now.toString());
+            // ONLY log activity for actual sign-in/sign-up, NOT for session restoration
+            if (!isRestoringSession) {
+              console.log('🔐 Logging user activity for actual sign in/sign up');
               await logUserActivity(session.user.id, 'login');
+            } else {
+              console.log('⏭️ Skipping activity log - session restoration from storage');
             }
             
             // Fetch profile and sync OAuth data - DEBOUNCED
@@ -376,8 +376,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           clearCachedSubscription();
           
-          // Clear activity log timestamp to prevent rate limit issues on re-login
-          sessionStorage.removeItem('last_activity_log');
+          // Reset flag to allow logging on next sign in
+          isRestoringSession = false;
           sessionStorage.removeItem('pricing_modal_shown_auth');
         } else if (event === 'TOKEN_REFRESHED') {
           // Only update session, don't trigger API calls to avoid rate limits
@@ -401,6 +401,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Mark initial check as complete and set loading to false
       initialCheckComplete = true;
       setLoading(false);
+      
+      // CRITICAL: After initial session check, allow future sign-ins to be logged
+      // This ensures session restoration doesn't log, but new sign-ins do
+      setTimeout(() => {
+        isRestoringSession = false;
+      }, 1000);
     });
 
     return () => {
