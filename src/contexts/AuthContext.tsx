@@ -168,25 +168,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // CRITICAL: Sync GCLID and url_params from localStorage if not already in database
       const gclid = localStorage.getItem('gclid');
       const storedUrlParams = localStorage.getItem('url_params');
-      const referer = document.referrer || 'Direct';
+      const storedReferer = localStorage.getItem('initial_referer');
+      
+      console.log('[OAuth Profile Sync] Retrieved from localStorage:', {
+        gclid,
+        storedUrlParams,
+        storedReferer,
+        currentProfile_gclid: currentProfile?.gclid,
+        currentProfile_url_params: currentProfile?.url_params,
+        currentProfile_initial_referer: currentProfile?.initial_referer
+      });
       
       // Only update GCLID if not already set in database
       if (gclid && !currentProfile?.gclid) {
         updateData.gclid = gclid;
+        console.log('[OAuth Profile Sync] Will save GCLID:', gclid);
       }
       
       // Only update url_params if not already set in database
       if (storedUrlParams && !currentProfile?.url_params) {
         try {
           updateData.url_params = JSON.parse(storedUrlParams);
+          console.log('[OAuth Profile Sync] Will save url_params:', updateData.url_params);
         } catch (e) {
-          console.warn('Failed to parse stored url_params:', e);
+          console.warn('[OAuth Profile Sync] Failed to parse stored url_params:', e);
         }
       }
       
-      // Only update referer if not already set in database
+      // Only update referer if not already set in database (prefer stored over document.referrer)
+      const referer = storedReferer || document.referrer || 'Direct';
       if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
         updateData.initial_referer = referer;
+        console.log('[OAuth Profile Sync] Will save initial_referer:', referer);
       }
 
       
@@ -742,8 +755,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const signInWithGoogle = async () => {
-    // Use production domain
-    const redirectUrl = 'https://www.chatl.ai/';
+    // CRITICAL: Store current URL params in localStorage BEFORE OAuth redirect
+    const currentParams = new URLSearchParams(window.location.search);
+    const gclid = currentParams.get('gclid');
+    const urlParamsObj: Record<string, string> = {};
+    currentParams.forEach((value, key) => {
+      urlParamsObj[key] = value;
+    });
+    
+    if (gclid) {
+      localStorage.setItem('gclid', gclid);
+      console.log('[OAuth] Stored GCLID before redirect:', gclid);
+    }
+    if (Object.keys(urlParamsObj).length > 0) {
+      localStorage.setItem('url_params', JSON.stringify(urlParamsObj));
+      console.log('[OAuth] Stored URL params before redirect:', urlParamsObj);
+    }
+    
+    // Store initial referer
+    const referer = document.referrer || 'Direct';
+    if (referer && referer !== 'Direct') {
+      localStorage.setItem('initial_referer', referer);
+      console.log('[OAuth] Stored referer before redirect:', referer);
+    }
+    
+    // Use current origin to preserve domain
+    const redirectUrl = `${window.location.origin}/`;
     
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
@@ -765,8 +802,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithApple = async () => {
-    // Use production domain
-    const redirectUrl = 'https://www.chatl.ai/';
+    // CRITICAL: Store current URL params in localStorage BEFORE OAuth redirect
+    const currentParams = new URLSearchParams(window.location.search);
+    const gclid = currentParams.get('gclid');
+    const urlParamsObj: Record<string, string> = {};
+    currentParams.forEach((value, key) => {
+      urlParamsObj[key] = value;
+    });
+    
+    if (gclid) {
+      localStorage.setItem('gclid', gclid);
+      console.log('[OAuth] Stored GCLID before redirect:', gclid);
+    }
+    if (Object.keys(urlParamsObj).length > 0) {
+      localStorage.setItem('url_params', JSON.stringify(urlParamsObj));
+      console.log('[OAuth] Stored URL params before redirect:', urlParamsObj);
+    }
+    
+    // Store initial referer
+    const referer = document.referrer || 'Direct';
+    if (referer && referer !== 'Direct') {
+      localStorage.setItem('initial_referer', referer);
+      console.log('[OAuth] Stored referer before redirect:', referer);
+    }
+    
+    // Use current origin to preserve domain
+    const redirectUrl = `${window.location.origin}/`;
     
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
@@ -785,8 +846,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithMicrosoft = async () => {
-    // Use production domain
-    const redirectUrl = 'https://www.chatl.ai/';
+    // CRITICAL: Store current URL params in localStorage BEFORE OAuth redirect
+    const currentParams = new URLSearchParams(window.location.search);
+    const gclid = currentParams.get('gclid');
+    const urlParamsObj: Record<string, string> = {};
+    currentParams.forEach((value, key) => {
+      urlParamsObj[key] = value;
+    });
+    
+    if (gclid) {
+      localStorage.setItem('gclid', gclid);
+      console.log('[OAuth] Stored GCLID before redirect:', gclid);
+    }
+    if (Object.keys(urlParamsObj).length > 0) {
+      localStorage.setItem('url_params', JSON.stringify(urlParamsObj));
+      console.log('[OAuth] Stored URL params before redirect:', urlParamsObj);
+    }
+    
+    // Store initial referer
+    const referer = document.referrer || 'Direct';
+    if (referer && referer !== 'Direct') {
+      localStorage.setItem('initial_referer', referer);
+      console.log('[OAuth] Stored referer before redirect:', referer);
+    }
+    
+    // Use current origin to preserve domain
+    const redirectUrl = `${window.location.origin}/`;
     
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
