@@ -412,13 +412,13 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                       {activityLogs.map((log, idx) => (
                         <div key={idx} className="p-2.5 sm:p-3 border rounded-lg">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                            <Badge variant="outline" className="text-xs w-fit">{log.activity_type}</Badge>
+                            <Badge variant="outline" className="text-xs w-fit capitalize">{log.activity_type || 'Unknown'}</Badge>
                             <span className="text-[10px] sm:text-xs text-muted-foreground">
-                              {formatInCyprusTime(log.created_at, 'PP p')}
+                              {log.created_at ? formatInCyprusTime(log.created_at, 'PP p') : 'No date'}
                             </span>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                            {log.ip_address && (
+                            {log.ip_address && log.ip_address !== 'Unknown' && (
                               <div>
                                 <span className="font-medium">IP:</span> {formatIpForDisplay(log.ip_address)}
                               </div>
@@ -433,9 +433,19 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                                 <span className="font-medium">Browser:</span> {log.browser}
                               </div>
                             )}
+                            {log.os && (
+                              <div>
+                                <span className="font-medium">OS:</span> {log.os}
+                              </div>
+                            )}
                             {log.device_type && (
                               <div>
                                 <span className="font-medium">Device:</span> {log.device_type}
+                              </div>
+                            )}
+                            {log.referrer && log.referrer !== 'Direct' && (
+                              <div className="col-span-1 sm:col-span-2">
+                                <span className="font-medium">Referrer:</span> <span className="text-[9px] sm:text-[10px] break-all">{log.referrer}</span>
                               </div>
                             )}
                           </div>
