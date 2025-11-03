@@ -443,11 +443,6 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                                 <span className="font-medium">Device:</span> {log.device_type}
                               </div>
                             )}
-                            {log.referrer && log.referrer !== 'Direct' && (
-                              <div className="col-span-1 sm:col-span-2">
-                                <span className="font-medium">Referrer:</span> <span className="text-[9px] sm:text-[10px] break-all">{log.referrer}</span>
-                              </div>
-                            )}
                           </div>
                         </div>
                       ))}
