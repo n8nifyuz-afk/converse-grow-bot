@@ -904,11 +904,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[OAuth] Stored referer before redirect:', referer);
     }
     
-    // Build redirect URL with preserved GCLID parameter
-    let redirectUrl = `${window.location.origin}/`;
-    if (gclid) {
-      redirectUrl += `?gclid=${gclid}`;
-      console.log('[OAuth] Preserving GCLID in redirect URL:', gclid);
+    // Build redirect URL with ALL preserved URL parameters (not just gclid)
+    let redirectUrl = `${window.location.origin}`;
+    if (Object.keys(urlParamsObj).length > 0) {
+      const params = new URLSearchParams(urlParamsObj);
+      redirectUrl += `?${params.toString()}`;
+      console.log('[OAuth] Preserving ALL URL parameters in redirect:', urlParamsObj);
     }
     
     // Mark that we're initiating OAuth login
@@ -955,11 +956,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[OAuth] Stored referer before redirect:', referer);
     }
     
-    // Build redirect URL with preserved GCLID parameter
-    let redirectUrl = `${window.location.origin}/`;
-    if (gclid) {
-      redirectUrl += `?gclid=${gclid}`;
-      console.log('[OAuth] Preserving GCLID in redirect URL:', gclid);
+    // Build redirect URL with ALL preserved URL parameters (not just gclid)
+    let redirectUrl = `${window.location.origin}`;
+    if (Object.keys(urlParamsObj).length > 0) {
+      const params = new URLSearchParams(urlParamsObj);
+      redirectUrl += `?${params.toString()}`;
+      console.log('[OAuth] Preserving ALL URL parameters in redirect:', urlParamsObj);
     }
     
     // Mark that we're initiating OAuth login
@@ -1003,11 +1005,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[OAuth] Stored referer before redirect:', referer);
     }
     
-    // Build redirect URL with preserved GCLID parameter
-    let redirectUrl = `${window.location.origin}/`;
-    if (gclid) {
-      redirectUrl += `?gclid=${gclid}`;
-      console.log('[OAuth] Preserving GCLID in redirect URL:', gclid);
+    // Build redirect URL with ALL preserved URL parameters (not just gclid)
+    let redirectUrl = `${window.location.origin}`;
+    if (Object.keys(urlParamsObj).length > 0) {
+      const params = new URLSearchParams(urlParamsObj);
+      redirectUrl += `?${params.toString()}`;
+      console.log('[OAuth] Preserving ALL URL parameters in redirect:', urlParamsObj);
     }
     
     // Mark that we're initiating OAuth login
