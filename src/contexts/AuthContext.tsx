@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { trackPaymentComplete, trackRegistrationComplete } from '@/utils/gtmTracking';
@@ -94,6 +94,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     plan_name: null
   });
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
+  
+  // Ref to track last OAuth sync time to prevent 429 rate limiting
+  const lastOAuthSyncRef = useRef<number>(0);
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -531,16 +534,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
-          // CRITICAL: Only sync OAuth profile ONCE per session to prevent rate limiting
-          // Check if we've already synced in this session
-          const lastOAuthSync = sessionStorage.getItem('last_oauth_sync');
-          const shouldSyncImmediately = !lastOAuthSync;
+          // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
+          // Use a ref to track last sync time (resets on page reload, not tab visibility)
+          const now = Date.now();
+          const lastSync = lastOAuthSyncRef.current || 0;
+          const timeSinceLastSync = now - lastSync;
           
-          if (shouldSyncImmediately) {
-            // Mark as synced immediately to prevent duplicate calls
-            sessionStorage.setItem('last_oauth_sync', Date.now().toString());
+          // Sync immediately if:
+          // 1. First sync (lastSync = 0) - captures new signups instantly
+          // 2. Or more than 30 seconds since last sync - prevents 429 from rapid tab switches
+          if (timeSinceLastSync === now || timeSinceLastSync > 30000) {
+            lastOAuthSyncRef.current = now;
             
-            // Sync immediately for first auth in session (captures new signups)
             syncOAuthProfile(session).catch(error => {
               console.error('❌ [Auth] Failed to sync OAuth profile:', error);
             });
