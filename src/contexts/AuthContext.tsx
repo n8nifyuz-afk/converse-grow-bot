@@ -904,8 +904,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[OAuth] Stored referer before redirect:', referer);
     }
     
-    // Use current origin to preserve domain
-    const redirectUrl = `${window.location.origin}/`;
+    // Build redirect URL with preserved GCLID parameter
+    let redirectUrl = `${window.location.origin}/`;
+    if (gclid) {
+      redirectUrl += `?gclid=${gclid}`;
+      console.log('[OAuth] Preserving GCLID in redirect URL:', gclid);
+    }
     
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
@@ -951,8 +955,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[OAuth] Stored referer before redirect:', referer);
     }
     
-    // Use current origin to preserve domain
-    const redirectUrl = `${window.location.origin}/`;
+    // Build redirect URL with preserved GCLID parameter
+    let redirectUrl = `${window.location.origin}/`;
+    if (gclid) {
+      redirectUrl += `?gclid=${gclid}`;
+      console.log('[OAuth] Preserving GCLID in redirect URL:', gclid);
+    }
     
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
@@ -995,8 +1003,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[OAuth] Stored referer before redirect:', referer);
     }
     
-    // Use current origin to preserve domain
-    const redirectUrl = `${window.location.origin}/`;
+    // Build redirect URL with preserved GCLID parameter
+    let redirectUrl = `${window.location.origin}/`;
+    if (gclid) {
+      redirectUrl += `?gclid=${gclid}`;
+      console.log('[OAuth] Preserving GCLID in redirect URL:', gclid);
+    }
     
     // Mark that we're initiating OAuth login
     sessionStorage.setItem('oauth_login_initiated', 'true');
