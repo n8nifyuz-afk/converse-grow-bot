@@ -98,8 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Ref to track last OAuth sync time to prevent 429 rate limiting
   const lastOAuthSyncRef = useRef<number>(0);
   
-  // CRITICAL: Track last logged session to prevent duplicate activity logging on page refresh
-  const lastLoggedSessionRef = useRef<string | null>(null);
+  // CRITICAL: Track last activity log to prevent duplicates (session token + timestamp)
+  const lastActivityLogRef = useRef<{ sessionToken: string; timestamp: number } | null>(null);
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -550,32 +550,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
-          // CRITICAL: Only log activity on ACTUAL sign-in events, not page refreshes
-          // Check both event type AND session uniqueness to prevent duplicate logging
-          // - event === 'SIGNED_IN': Actual login (not INITIAL_SESSION which fires on page load)
-          // - session.access_token !== lastLoggedSessionRef.current: New session (prevents duplicates)
-          const isNewLogin = event === 'SIGNED_IN' && session.access_token !== lastLoggedSessionRef.current;
+          // CRITICAL: Only log activity on ACTUAL sign-in events with strict deduplication
+          // Prevents duplicates from:
+          // 1. Page refreshes (INITIAL_SESSION events)
+          // 2. OAuth redirects (multiple SIGNED_IN events in quick succession)
+          // 3. Tab visibility changes
           
-          if (isNewLogin) {
+          const now = Date.now();
+          const lastLog = lastActivityLogRef.current;
+          const isSignInEvent = event === 'SIGNED_IN';
+          const isNewSession = !lastLog || lastLog.sessionToken !== session.access_token;
+          const timeSinceLastLog = lastLog ? now - lastLog.timestamp : Infinity;
+          const hasEnoughTimePassed = timeSinceLastLog > 10000; // 10 seconds minimum between logs
+          
+          // Only log if: it's a SIGNED_IN event AND (new session OR 10+ seconds passed)
+          const shouldLogActivity = isSignInEvent && (isNewSession || hasEnoughTimePassed);
+          
+          if (shouldLogActivity) {
             const provider = session.user.app_metadata?.provider || 'email';
-            console.log(`[Auth] ⚡ NEW LOGIN DETECTED with ${provider}, logging activity for:`, session.user.id);
+            console.log(`[Auth] ⚡ LOGGING ACTIVITY: ${provider} sign-in`, {
+              userId: session.user.id,
+              event,
+              isNewSession,
+              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${timeSinceLastLog}ms`
+            });
             
-            // Mark this session as logged to prevent duplicate logging
-            lastLoggedSessionRef.current = session.access_token;
+            // Update last activity log tracking
+            lastActivityLogRef.current = {
+              sessionToken: session.access_token,
+              timestamp: now
+            };
             
             logUserActivity(session.user.id, 'login').catch(error => {
               console.error('❌ [Auth] Failed to log activity:', error);
             });
           } else {
-            console.log(`[Auth] 🔄 Session restored (page refresh) - NOT logging activity`, {
+            console.log(`[Auth] ⏭️ SKIPPING activity log`, {
               event,
-              isNewSession: session.access_token !== lastLoggedSessionRef.current
+              isSignInEvent,
+              isNewSession,
+              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${timeSinceLastLog}ms`,
+              reason: !isSignInEvent ? 'not a sign-in event' : 'too soon after last log'
             });
           }
           
           // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
           // Use a ref to track last sync time (resets on page reload, not tab visibility)
-          const now = Date.now();
           const lastSync = lastOAuthSyncRef.current || 0;
           const timeSinceLastSync = now - lastSync;
           
