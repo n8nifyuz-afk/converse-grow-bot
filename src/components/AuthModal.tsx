@@ -210,9 +210,20 @@ export default function AuthModal({
     setError('');
     
     try {
+      // Capture tracking data from localStorage
+      const gclid = localStorage.getItem('gclid');
+      const urlParams = localStorage.getItem('url_params');
+      const initialReferer = localStorage.getItem('initial_referer');
+      
       // Use Supabase client to invoke edge function
       const { data, error: invokeError } = await supabase.functions.invoke('send-verification-code', {
-        body: { email, password }
+        body: { 
+          email, 
+          password,
+          gclid,
+          urlParams: urlParams ? JSON.parse(urlParams) : {},
+          initialReferer
+        }
       });
 
       // Handle errors from edge function (including 409 status codes)
@@ -323,8 +334,19 @@ export default function AuthModal({
     setError('');
     
     try {
+      // Capture tracking data from localStorage
+      const gclid = localStorage.getItem('gclid');
+      const urlParams = localStorage.getItem('url_params');
+      const initialReferer = localStorage.getItem('initial_referer');
+      
       const { data, error: invokeError } = await supabase.functions.invoke('verify-email-code', {
-        body: { email: pendingEmail, code: verificationCode }
+        body: { 
+          email: pendingEmail, 
+          code: verificationCode,
+          gclid,
+          urlParams: urlParams ? JSON.parse(urlParams) : {},
+          initialReferer
+        }
       });
 
       // Handle invocation errors
