@@ -122,6 +122,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       hashParams.has('access_token');
     const wasOAuthInitiated = sessionStorage.getItem('oauth_login_initiated') === 'true';
     
+    // CRITICAL: Clear the flag IMMEDIATELY after reading it (before SIGNED_IN event fires)
+    // This prevents activity logging on page refresh with existing session
+    if (wasOAuthInitiated) {
+      sessionStorage.removeItem('oauth_login_initiated');
+      console.log('[Auth] 🧹 Cleared oauth_login_initiated flag');
+    }
+    
     initialOAuthStateRef.current = {
       isOAuthCallback,
       wasOAuthInitiated,
@@ -620,9 +627,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               timeSinceCreation: `${Math.round(timeSinceCreation / 1000)}s ago`,
               timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${Math.round(timeSinceLastLog)}ms ago`
             });
-            
-            // Clear OAuth initiation flag after logging
-            sessionStorage.removeItem('oauth_login_initiated');
             
             // Update last activity log tracking
             lastActivityLogRef.current = {
