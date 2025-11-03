@@ -547,17 +547,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
-          // CRITICAL: Log activity IMMEDIATELY for all logins (no debounce, no throttle)
-          // This ensures all OAuth providers (Google, Microsoft, Apple) are properly tracked
-          const provider = session.user.app_metadata?.provider || 'email';
-          const now = Date.now();
-          console.log(`[Auth] ⚡ Immediately logging ${provider} login activity for user:`, session.user.id);
-          logUserActivity(session.user.id, 'login').catch(error => {
-            console.error('❌ [Auth] Failed to log activity:', error);
-          });
+          // CRITICAL: Only log activity on ACTUAL sign-in events, not page refreshes
+          // Events: SIGNED_IN = actual login, INITIAL_SESSION = page load with existing session
+          if (event === 'SIGNED_IN') {
+            const provider = session.user.app_metadata?.provider || 'email';
+            console.log(`[Auth] ⚡ User signed in with ${provider}, logging activity for:`, session.user.id);
+            logUserActivity(session.user.id, 'login').catch(error => {
+              console.error('❌ [Auth] Failed to log activity:', error);
+            });
+          }
           
           // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
           // Use a ref to track last sync time (resets on page reload, not tab visibility)
+          const now = Date.now();
           const lastSync = lastOAuthSyncRef.current || 0;
           const timeSinceLastSync = now - lastSync;
           
