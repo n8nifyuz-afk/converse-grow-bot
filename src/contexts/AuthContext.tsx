@@ -195,11 +195,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // CRITICAL: Sync GCLID and url_params from localStorage if not already in database
+      console.log('🔍 [OAuth Profile Sync] Checking localStorage for tracking data...');
       const gclid = localStorage.getItem('gclid');
       const storedUrlParams = localStorage.getItem('url_params');
       const storedReferer = localStorage.getItem('initial_referer');
       
-      console.log('[OAuth Profile Sync] Retrieved from localStorage:', {
+      console.log('📋 [OAuth Profile Sync] Retrieved from localStorage:', {
         gclid,
         storedUrlParams,
         storedReferer,
@@ -302,20 +303,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Apple-specific data (limited due to Apple privacy)
       
+      console.log('📋 [OAuth Profile Sync] Profile update data prepared:', updateData);
+      
       // Only update if there are changes
       if (Object.keys(updateData).length > 2 && currentProfile) { // More than just updated_at + oauth_provider
+        console.log('📤 [OAuth Profile Sync] Updating profile in database...');
         await supabase
           .from('profiles')
           .update(updateData)
           .eq('user_id', user.id);
         
-        console.log('[OAuth Profile Sync] Profile updated successfully');
+        console.log('✅ [OAuth Profile Sync] Profile updated successfully');
         
         // CRITICAL: Send webhook for ALL new OAuth signups
         if (isNewSignup) {
-          console.log('[OAuth Profile Sync] Sending webhook for new OAuth signup');
+          console.log('📤 [OAuth Profile Sync] Sending webhook for new OAuth signup');
           
           try {
+            console.log('🔍 [OAuth Profile Sync] Fetching updated profile for webhook...');
+            const { data: updatedProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('user_id', user.id)
+              .single();
+            
+            const webhookData = {
+              userId: user.id,
+              email: user.email || currentProfile.email,
+              username: updateData.display_name || currentProfile.display_name,
+              ipAddress: updatedProfile?.ip_address || updateData.ip_address,
+              country: updatedProfile?.country || updateData.country,
+              signupMethod: provider,
+              gclid: updatedProfile?.gclid || updateData.gclid,
+              urlParams: updatedProfile?.url_params || updateData.url_params || {},
+              referer: updatedProfile?.initial_referer || updateData.initial_referer
+            };
+            
+            console.log('📋 [OAuth Profile Sync] Webhook payload:', webhookData);
+            console.log('📤 [OAuth Profile Sync] Sending webhook request...');
+            
             const webhookResponse = await fetch(
               'https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook',
               {
@@ -323,24 +349,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 headers: {
                   'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                  userId: user.id,
-                  email: user.email || currentProfile.email,
-                  username: updateData.display_name || currentProfile.display_name,
-                  ipAddress: updateData.ip_address || currentProfile.ip_address,
-                  country: updateData.country || currentProfile.country,
-                  signupMethod: provider,
-                  gclid: updateData.gclid || currentProfile.gclid || null,
-                  urlParams: updateData.url_params || currentProfile.url_params || {},
-                  referer: updateData.initial_referer || currentProfile.initial_referer || 'Direct'
-                })
+                body: JSON.stringify(webhookData)
               }
             );
             
             if (webhookResponse.ok) {
-              console.log('[OAuth Profile Sync] ✅ Webhook sent successfully');
+              console.log('✅ [OAuth Profile Sync] Webhook sent successfully');
             } else {
-              console.error('[OAuth Profile Sync] ❌ Webhook failed:', await webhookResponse.text());
+              console.error('❌ [OAuth Profile Sync] Webhook failed:', await webhookResponse.text());
             }
           } catch (webhookError) {
             console.error('[OAuth Profile Sync] ❌ Webhook error:', webhookError);
@@ -705,6 +721,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let ipAddress: string | undefined;
     let country: string | undefined;
     
+    console.log('🔍 [EMAIL-SIGNUP] Starting geo data fetch...');
     try {
       const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
       if (geoResponse.ok) {
@@ -714,10 +731,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         ipAddress = geoData.ip;
         country = geoData.loc;
+        console.log('✅ [EMAIL-SIGNUP] Geo data fetched:', { ipAddress, country });
       }
     } catch (geoError) {
       // Silently fail - continue signup without geo data
-      console.error('Failed to fetch geo data:', geoError);
+      console.error('❌ [EMAIL-SIGNUP] Failed to fetch geo data:', geoError);
     }
     
     // Use production domain for email confirmation
@@ -740,24 +758,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // CRITICAL: Add Google Ads tracking data from localStorage (stored by GTM)
+    console.log('🔍 [EMAIL-SIGNUP] Checking localStorage for tracking data...');
     const gclid = localStorage.getItem('gclid');
     if (gclid) {
       signupData.gclid = gclid;
+      console.log('✅ [EMAIL-SIGNUP] GCLID found:', gclid);
+    } else {
+      console.log('⚠️ [EMAIL-SIGNUP] No GCLID in localStorage');
     }
     
     const urlParamsStr = localStorage.getItem('url_params');
     if (urlParamsStr) {
       try {
         signupData.url_params = JSON.parse(urlParamsStr);
+        console.log('✅ [EMAIL-SIGNUP] URL params found:', signupData.url_params);
       } catch (e) {
-        console.error('[SIGNUP] Failed to parse url_params:', e);
+        console.error('❌ [EMAIL-SIGNUP] Failed to parse url_params:', e);
       }
+    } else {
+      console.log('⚠️ [EMAIL-SIGNUP] No url_params in localStorage');
     }
     
     // Capture referer for attribution
-    if (document.referrer) {
-      signupData.referer = document.referrer;
+    const referer = document.referrer || 'Direct';
+    if (referer && referer !== 'Direct') {
+      signupData.referer = referer;
+      console.log('✅ [EMAIL-SIGNUP] Referer captured:', referer);
+    } else {
+      console.log('⚠️ [EMAIL-SIGNUP] No referer (Direct traffic)');
     }
+    
+    console.log('📤 [EMAIL-SIGNUP] Calling supabase.auth.signUp with data:', signupData);
     
     const { error, data } = await supabase.auth.signUp({
       email,
@@ -767,6 +798,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: signupData
       }
     });
+    
+    if (error) {
+      console.error('❌ [EMAIL-SIGNUP] Signup failed:', error);
+    } else {
+      console.log('✅ [EMAIL-SIGNUP] Signup successful, user ID:', data.user?.id);
+      console.log('📋 [EMAIL-SIGNUP] Complete signup data sent to Supabase:', signupData);
+    }
     
     // Check if user already exists and has confirmed their email
     if (data?.user && !data?.session && !error) {
@@ -982,6 +1020,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let ipAddress: string | undefined;
     let country: string | undefined;
     
+    console.log('🔍 [PHONE-SIGNUP] Starting geo data fetch...');
     try {
       const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
       if (geoResponse.ok) {
@@ -991,9 +1030,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         ipAddress = geoData.ip;
         country = geoData.loc;
+        console.log('✅ [PHONE-SIGNUP] Geo data fetched:', { ipAddress, country });
       }
     } catch (geoError) {
-      console.error('Failed to fetch geo data:', geoError);
+      console.error('❌ [PHONE-SIGNUP] Failed to fetch geo data:', geoError);
     }
     
     const signupData: any = {
@@ -1009,24 +1049,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // CRITICAL: Add Google Ads tracking data from localStorage
+    console.log('🔍 [PHONE-SIGNUP] Checking localStorage for tracking data...');
     const gclid = localStorage.getItem('gclid');
     if (gclid) {
       signupData.gclid = gclid;
+      console.log('✅ [PHONE-SIGNUP] GCLID found:', gclid);
+    } else {
+      console.log('⚠️ [PHONE-SIGNUP] No GCLID in localStorage');
     }
     
     const urlParamsStr = localStorage.getItem('url_params');
     if (urlParamsStr) {
       try {
         signupData.url_params = JSON.parse(urlParamsStr);
+        console.log('✅ [PHONE-SIGNUP] URL params found:', signupData.url_params);
       } catch (e) {
-        console.error('[PHONE-SIGNUP] Failed to parse url_params:', e);
+        console.error('❌ [PHONE-SIGNUP] Failed to parse url_params:', e);
       }
+    } else {
+      console.log('⚠️ [PHONE-SIGNUP] No url_params in localStorage');
     }
     
     // Capture referer for attribution
-    if (document.referrer) {
-      signupData.referer = document.referrer;
+    const referer = document.referrer || 'Direct';
+    if (referer && referer !== 'Direct') {
+      signupData.referer = referer;
+      console.log('✅ [PHONE-SIGNUP] Referer captured:', referer);
+    } else {
+      console.log('⚠️ [PHONE-SIGNUP] No referer (Direct traffic)');
     }
+    
+    console.log('📤 [PHONE-SIGNUP] Calling supabase.auth.signInWithOtp with data:', signupData);
     
     const { error } = await supabase.auth.signInWithOtp({
       phone,
@@ -1034,6 +1087,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: signupData
       }
     });
+    
+    if (error) {
+      console.error('❌ [PHONE-SIGNUP] Signup failed:', error);
+    } else {
+      console.log('✅ [PHONE-SIGNUP] OTP sent successfully');
+      console.log('📋 [PHONE-SIGNUP] Complete signup data sent to Supabase:', signupData);
+    }
     
     return { error };
   };
