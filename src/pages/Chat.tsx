@@ -1070,8 +1070,8 @@ export default function Chat() {
           countryCode: metadata.countryCode,
           isMobile: metadata.isMobile,
           gclid: metadata.gclid,
-          urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-          referer: metadata.referer ? String(metadata.referer) : "null", // String format
+          urlParams: metadata.urlParams || {}, // Send as object
+          referer: metadata.referer || null,
           hasDocument: "false"
         })
       });
@@ -1316,8 +1316,8 @@ export default function Chat() {
           countryCode: metadata.countryCode,
           isMobile: metadata.isMobile,
           gclid: metadata.gclid,
-          urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-          referer: metadata.referer ? String(metadata.referer) : "null", // String format
+          urlParams: metadata.urlParams || {}, // Send as object
+          referer: metadata.referer || null,
           hasDocument: "false"
         })
       });
@@ -2077,8 +2077,8 @@ export default function Chat() {
             countryCode: metadata.countryCode,
             isMobile: metadata.isMobile,
             gclid: metadata.gclid,
-            urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-            referer: metadata.referer ? String(metadata.referer) : "null", // String format
+            urlParams: metadata.urlParams || {}, // Send as object
+            referer: metadata.referer || null,
             hasDocument: "false"
           })
         });
@@ -2495,8 +2495,8 @@ export default function Chat() {
               countryCode: metadata.countryCode,
               isMobile: metadata.isMobile,
               gclid: metadata.gclid,
-              urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
-              referer: metadata.referer ? String(metadata.referer) : "null", // String format
+              urlParams: metadata.urlParams || {}, // Send as object
+              referer: metadata.referer || null,
               hasDocument: "true"
             };
             
