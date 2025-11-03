@@ -34,24 +34,45 @@ export const initializeGTMWithGCLID = () => {
     });
 
     // CRITICAL: Store GCLID in localStorage if found in URL (for later use during signup)
-    if (gclidFromUrl && gclidFromUrl !== gclidFromStorage) {
+    // NEVER overwrite if one already exists (preserves original tracking data)
+    if (gclidFromUrl && !gclidFromStorage) {
       localStorage.setItem('gclid', gclidFromUrl);
       console.log('✅ [GTM] GCLID saved to localStorage:', gclidFromUrl);
+    } else if (gclidFromStorage) {
+      console.log('ℹ️ [GTM] Preserving existing GCLID from localStorage:', gclidFromStorage);
     }
 
     // Collect all URL parameters for attribution
     const allUrlParams: Record<string, string> = {};
     urlParams.forEach((value, key) => {
-      allUrlParams[key] = value;
+      // Skip internal/system parameters that shouldn't be tracked
+      if (!key.startsWith('__') && key !== 'code' && key !== 'state') {
+        allUrlParams[key] = value;
+      }
     });
 
     console.log('🔍 [GTM] URL parameters found:', allUrlParams);
 
-    // CRITICAL: Store ALL URL parameters in localStorage (for later use during OAuth signup)
+    // CRITICAL: MERGE new URL parameters with existing ones (never overwrite)
     // This ensures utm_source, utm_medium, gad_source, etc. persist through OAuth redirects
-    if (Object.keys(allUrlParams).length > 0) {
-      localStorage.setItem('url_params', JSON.stringify(allUrlParams));
-      console.log('✅ [GTM] URL parameters saved to localStorage:', allUrlParams);
+    const existingParamsStr = localStorage.getItem('url_params');
+    let mergedParams = allUrlParams;
+    
+    if (existingParamsStr) {
+      try {
+        const existingParams = JSON.parse(existingParamsStr);
+        // Merge: keep existing params, only add new ones if they don't exist
+        mergedParams = { ...allUrlParams, ...existingParams };
+        console.log('🔄 [GTM] Merged with existing URL parameters:', { existing: existingParams, new: allUrlParams, merged: mergedParams });
+      } catch (e) {
+        console.warn('⚠️ [GTM] Failed to parse existing url_params:', e);
+      }
+    }
+
+    // Only save if we have tracking parameters (not just system parameters)
+    if (Object.keys(mergedParams).length > 0) {
+      localStorage.setItem('url_params', JSON.stringify(mergedParams));
+      console.log('✅ [GTM] URL parameters saved to localStorage:', mergedParams);
     }
 
     // If we have GCLID or URL params, push to dataLayer
