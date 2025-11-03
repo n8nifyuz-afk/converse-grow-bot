@@ -87,14 +87,14 @@ serve(async (req) => {
       .from('profiles')
       .select('email, display_name')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     // STEP 2: Get subscription info before deletion
     const { data: subscription } = await supabaseAdmin
       .from('user_subscriptions')
       .select('plan, status, stripe_subscription_id, current_period_end')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     console.log(`Deleting user ${userId}:`, {
       email: profile?.email,
