@@ -51,7 +51,7 @@ function parseBrowserInfo(): BrowserInfo {
   let osVersion = 'Unknown';
   let device = 'Unknown';
   
-  // Detect browser - Order matters: check mobile-specific identifiers first
+  // Detect browser - Order matters: check most specific first
   if (ua.includes('CriOS/')) {
     // Chrome on iOS
     browser = 'Chrome';
@@ -68,10 +68,14 @@ function parseBrowserInfo(): BrowserInfo {
     // Opera on iOS
     browser = 'Opera';
     browserVersion = ua.match(/OPiOS\/(\d+\.\d+)/)?.[1] || 'Unknown';
-  } else if (ua.includes('Edg/') || ua.includes('EdgA/')) {
+  } else if (ua.includes('YaBrowser/') || ua.includes('Yandex')) {
+    // Yandex Browser
+    browser = 'Yandex';
+    browserVersion = ua.match(/YaBrowser\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('Edg/') || ua.includes('EdgA/') || ua.includes('Edge/')) {
     // Edge on desktop or Android
     browser = 'Edge';
-    browserVersion = ua.match(/(?:Edg|EdgA)\/(\d+\.\d+)/)?.[1] || 'Unknown';
+    browserVersion = ua.match(/(?:Edg|EdgA|Edge)\/(\d+\.\d+)/)?.[1] || 'Unknown';
   } else if (ua.includes('OPR/') || ua.includes('Opera/')) {
     // Opera on desktop or Android
     browser = 'Opera';
@@ -80,12 +84,20 @@ function parseBrowserInfo(): BrowserInfo {
     // Firefox on desktop or Android
     browser = 'Firefox';
     browserVersion = ua.match(/Firefox\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('Chrome/') && !ua.includes('Safari/')) {
+    // Chrome standalone (without Safari in UA)
+    browser = 'Chrome';
+    browserVersion = ua.match(/Chrome\/(\d+\.\d+)/)?.[1] || 'Unknown';
+  } else if (ua.includes('Safari/') && !ua.includes('Chrome/') && ua.includes('Version/')) {
+    // Safari (genuine Safari has Version/ and Safari/ but NOT Chrome/)
+    browser = 'Safari';
+    browserVersion = ua.match(/Version\/(\d+\.\d+)/)?.[1] || 'Unknown';
   } else if (ua.includes('Chrome/')) {
-    // Chrome on desktop or Android (must check after other Chromium-based browsers)
+    // Chromium-based browser fallback
     browser = 'Chrome';
     browserVersion = ua.match(/Chrome\/(\d+\.\d+)/)?.[1] || 'Unknown';
   } else if (ua.includes('Safari/')) {
-    // Safari (must be last since other browsers also include Safari in UA)
+    // Safari fallback
     browser = 'Safari';
     browserVersion = ua.match(/Version\/(\d+\.\d+)/)?.[1] || 'Unknown';
   }
