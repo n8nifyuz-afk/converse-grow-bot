@@ -1925,6 +1925,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
 
+      // CRITICAL: Refresh session to ensure identity list is updated immediately
+      await supabase.auth.refreshSession();
+
       // Update profile and auth.users to remove credentials completely
       if (provider === 'phone') {
         // Clear phone from both auth and profile
