@@ -101,8 +101,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // CRITICAL: Track last activity log to prevent duplicates (session token + timestamp)
   const lastActivityLogRef = useRef<{ sessionToken: string; timestamp: number } | null>(null);
   
-  // CRITICAL: Track if this is initial page load (to prevent logging on session restoration)
-  const isInitialLoadRef = useRef(true);
+  // CRITICAL: Track component mount time to prevent logging on initial page load
+  const mountTimeRef = useRef(Date.now());
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -563,10 +563,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const timeSinceLastLog = lastLog ? now - lastLog.timestamp : Infinity;
           const hasEnoughTimePassed = timeSinceLastLog > 10000; // 10 seconds minimum between logs
           
-          // CRITICAL: Skip logging if this is initial page load (session restoration)
-          // Only log for actual authentication events AFTER initial load
-          const isSessionRestoration = isInitialLoadRef.current;
-          const shouldLogActivity = !isSessionRestoration && (isNewSession || hasEnoughTimePassed);
+          // CRITICAL: Skip logging if this SIGNED_IN event happened within 2 seconds of component mount
+          // This prevents logging on initial page load / session restoration
+          const timeSinceMount = now - mountTimeRef.current;
+          const isInitialLoad = timeSinceMount < 2000; // Skip events within first 2 seconds
+          const shouldLogActivity = !isInitialLoad && (isNewSession || hasEnoughTimePassed);
           
           if (shouldLogActivity) {
             // Detect if this is a SIGNUP or LOGIN
@@ -581,6 +582,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               userId: session.user.id,
               activityType,
               isNewSession,
+              timeSinceMount: `${Math.round(timeSinceMount / 1000)}s`,
               timeSinceCreation: `${Math.round(timeSinceCreation / 1000)}s ago`,
               timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${Math.round(timeSinceLastLog)}ms ago`
             });
@@ -596,7 +598,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('❌ [Auth] Failed to log activity:', error);
             });
           } else {
-            console.log(`[Auth] ⏭️ SKIPPING duplicate activity log (too soon after last event: ${Math.round(timeSinceLastLog)}ms ago)`);
+            console.log(`[Auth] ⏭️ SKIPPING activity log`, {
+              reason: isInitialLoad ? 'initial page load' : 'too soon after last event',
+              timeSinceMount: `${Math.round(timeSinceMount / 1000)}s`,
+              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${Math.round(timeSinceLastLog)}ms ago`
+            });
           }
           
           // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
@@ -670,11 +676,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Mark initial check as complete and set loading to false
       initialCheckComplete = true;
       setLoading(false);
-      
-      // CRITICAL: Mark initial load as complete IMMEDIATELY after session restoration
-      // This prevents session restoration events from triggering activity logs
-      isInitialLoadRef.current = false;
-      console.log('[Auth] ✅ Initial load complete, activity logging now enabled');
     });
 
     return () => {
