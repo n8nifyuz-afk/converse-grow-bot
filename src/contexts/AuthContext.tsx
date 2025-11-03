@@ -339,12 +339,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // This ensures tracking data (GCLID, url_params) is saved to database
       if (currentProfile) {
         console.log('📤 [OAuth Profile Sync] Updating profile in database...');
-        await supabase
+        console.log('📋 [OAuth Profile Sync] Update data:', JSON.stringify(updateData, null, 2));
+        
+        const { data, error } = await supabase
           .from('profiles')
           .update(updateData)
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .select();
         
-        console.log('✅ [OAuth Profile Sync] Profile updated successfully');
+        if (error) {
+          console.error('❌ [OAuth Profile Sync] Profile update FAILED:', error);
+          throw error;
+        }
+        
+        console.log('✅ [OAuth Profile Sync] Profile updated successfully:', data);
       }
       
       // CRITICAL: Send webhook for new OAuth signups (with proper deduplication)
