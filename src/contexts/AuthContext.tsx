@@ -551,28 +551,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           
           // CRITICAL: Only log activity on ACTUAL sign-in events with strict deduplication
-          // Prevents duplicates from:
-          // 1. Page refreshes (INITIAL_SESSION events)
-          // 2. OAuth redirects (multiple SIGNED_IN events in quick succession)
-          // 3. Tab visibility changes
+          // This block only runs when event === 'SIGNED_IN', so we know it's a real login
+          // Prevents duplicates from OAuth redirects (multiple SIGNED_IN events in quick succession)
           
           const now = Date.now();
           const lastLog = lastActivityLogRef.current;
-          const isSignInEvent = event === 'SIGNED_IN';
           const isNewSession = !lastLog || lastLog.sessionToken !== session.access_token;
           const timeSinceLastLog = lastLog ? now - lastLog.timestamp : Infinity;
           const hasEnoughTimePassed = timeSinceLastLog > 10000; // 10 seconds minimum between logs
           
-          // Only log if: it's a SIGNED_IN event AND (new session OR 10+ seconds passed)
-          const shouldLogActivity = isSignInEvent && (isNewSession || hasEnoughTimePassed);
+          // Only log if: new session OR 10+ seconds passed since last log
+          const shouldLogActivity = isNewSession || hasEnoughTimePassed;
           
           if (shouldLogActivity) {
             const provider = session.user.app_metadata?.provider || 'email';
             console.log(`[Auth] ⚡ LOGGING ACTIVITY: ${provider} sign-in`, {
               userId: session.user.id,
-              event,
               isNewSession,
-              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${timeSinceLastLog}ms`
+              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${Math.round(timeSinceLastLog)}ms ago`
             });
             
             // Update last activity log tracking
@@ -581,17 +577,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               timestamp: now
             };
             
+            // Log activity to database
             logUserActivity(session.user.id, 'login').catch(error => {
               console.error('❌ [Auth] Failed to log activity:', error);
             });
           } else {
-            console.log(`[Auth] ⏭️ SKIPPING activity log`, {
-              event,
-              isSignInEvent,
-              isNewSession,
-              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${timeSinceLastLog}ms`,
-              reason: !isSignInEvent ? 'not a sign-in event' : 'too soon after last log'
-            });
+            console.log(`[Auth] ⏭️ SKIPPING duplicate activity log (too soon after last login: ${Math.round(timeSinceLastLog)}ms ago)`);
           }
           
           // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
