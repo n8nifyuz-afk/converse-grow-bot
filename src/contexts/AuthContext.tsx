@@ -97,6 +97,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   // Ref to track last OAuth sync time to prevent 429 rate limiting
   const lastOAuthSyncRef = useRef<number>(0);
+  
+  // CRITICAL: Track last logged session to prevent duplicate activity logging on page refresh
+  const lastLoggedSessionRef = useRef<string | null>(null);
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -548,12 +551,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           
           // CRITICAL: Only log activity on ACTUAL sign-in events, not page refreshes
-          // Events: SIGNED_IN = actual login, INITIAL_SESSION = page load with existing session
-          if (event === 'SIGNED_IN') {
+          // Check both event type AND session uniqueness to prevent duplicate logging
+          // - event === 'SIGNED_IN': Actual login (not INITIAL_SESSION which fires on page load)
+          // - session.access_token !== lastLoggedSessionRef.current: New session (prevents duplicates)
+          const isNewLogin = event === 'SIGNED_IN' && session.access_token !== lastLoggedSessionRef.current;
+          
+          if (isNewLogin) {
             const provider = session.user.app_metadata?.provider || 'email';
-            console.log(`[Auth] ⚡ User signed in with ${provider}, logging activity for:`, session.user.id);
+            console.log(`[Auth] ⚡ NEW LOGIN DETECTED with ${provider}, logging activity for:`, session.user.id);
+            
+            // Mark this session as logged to prevent duplicate logging
+            lastLoggedSessionRef.current = session.access_token;
+            
             logUserActivity(session.user.id, 'login').catch(error => {
               console.error('❌ [Auth] Failed to log activity:', error);
+            });
+          } else {
+            console.log(`[Auth] 🔄 Session restored (page refresh) - NOT logging activity`, {
+              event,
+              isNewSession: session.access_token !== lastLoggedSessionRef.current
             });
           }
           
