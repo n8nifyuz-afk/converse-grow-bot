@@ -203,52 +203,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // CRITICAL: Sync GCLID and url_params from localStorage if not already in database
-      console.log('🔍 [OAuth Profile Sync] Checking localStorage for tracking data...');
-      const gclid = localStorage.getItem('gclid');
-      const storedUrlParams = localStorage.getItem('url_params');
-      const storedReferer = localStorage.getItem('initial_referer');
-      
-      console.log('📋 [OAuth Profile Sync] Retrieved from localStorage:', {
-        gclid,
-        storedUrlParams,
-        storedReferer,
-        currentProfile_gclid: currentProfile?.gclid,
-        currentProfile_url_params: currentProfile?.url_params,
-        currentProfile_initial_referer: currentProfile?.initial_referer
-      });
-      
-      // CRITICAL: ALWAYS preserve existing tracking data or add new data from localStorage
-      // This ensures we never lose tracking data on subsequent profile updates
-      if (gclid && !currentProfile?.gclid) {
-        updateData.gclid = gclid;
-        console.log('[OAuth Profile Sync] Will save NEW GCLID from localStorage:', gclid);
-      } else if (currentProfile?.gclid && !updateData.gclid) {
-        updateData.gclid = currentProfile.gclid;
-        console.log('[OAuth Profile Sync] Preserving EXISTING GCLID:', currentProfile.gclid);
-      }
-      
-      // CRITICAL: ALWAYS preserve existing url_params or add new from localStorage
-      if (storedUrlParams && !currentProfile?.url_params) {
-        try {
-          updateData.url_params = JSON.parse(storedUrlParams);
-          console.log('[OAuth Profile Sync] Will save NEW url_params from localStorage:', updateData.url_params);
-        } catch (e) {
-          console.warn('[OAuth Profile Sync] Failed to parse stored url_params:', e);
+      // CRITICAL: ONLY sync tracking data for NEW signups (preserves original attribution)
+      // On subsequent logins, we NEVER update GCLID/url_params/referer
+      if (isNewSignup) {
+        console.log('🔍 [OAuth Profile Sync] NEW SIGNUP - Checking localStorage for tracking data...');
+        const gclid = localStorage.getItem('gclid');
+        const storedUrlParams = localStorage.getItem('url_params');
+        const storedReferer = localStorage.getItem('initial_referer');
+        
+        console.log('📋 [OAuth Profile Sync] Retrieved from localStorage:', {
+          gclid,
+          storedUrlParams,
+          storedReferer,
+          currentProfile_gclid: currentProfile?.gclid,
+          currentProfile_url_params: currentProfile?.url_params,
+          currentProfile_initial_referer: currentProfile?.initial_referer
+        });
+        
+        // Save GCLID from localStorage if database doesn't have it
+        if (gclid && !currentProfile?.gclid) {
+          updateData.gclid = gclid;
+          console.log('[OAuth Profile Sync] ✅ Saving SIGNUP GCLID from localStorage:', gclid);
         }
-      } else if (currentProfile?.url_params && !updateData.url_params) {
-        updateData.url_params = currentProfile.url_params;
-        console.log('[OAuth Profile Sync] Preserving EXISTING url_params');
-      }
-      
-      // CRITICAL: ALWAYS preserve existing referer or add new from localStorage/document
-      const referer = storedReferer || document.referrer || 'Direct';
-      if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
-        updateData.initial_referer = referer;
-        console.log('[OAuth Profile Sync] Will save NEW initial_referer:', referer);
-      } else if (currentProfile?.initial_referer && !updateData.initial_referer) {
-        updateData.initial_referer = currentProfile.initial_referer;
-        console.log('[OAuth Profile Sync] Preserving EXISTING initial_referer:', currentProfile.initial_referer);
+        
+        // Save url_params from localStorage if database doesn't have it
+        if (storedUrlParams && !currentProfile?.url_params) {
+          try {
+            updateData.url_params = JSON.parse(storedUrlParams);
+            console.log('[OAuth Profile Sync] ✅ Saving SIGNUP url_params from localStorage:', updateData.url_params);
+          } catch (e) {
+            console.warn('[OAuth Profile Sync] Failed to parse stored url_params:', e);
+          }
+        }
+        
+        // Save initial_referer from localStorage if database doesn't have it
+        const referer = storedReferer || document.referrer || 'Direct';
+        if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
+          updateData.initial_referer = referer;
+          console.log('[OAuth Profile Sync] ✅ Saving SIGNUP referer:', referer);
+        }
+      } else {
+        // On subsequent logins, ALWAYS preserve existing tracking data (never update)
+        console.log('🔒 [OAuth Profile Sync] EXISTING USER - Preserving original signup tracking data');
+        if (currentProfile?.gclid) {
+          updateData.gclid = currentProfile.gclid;
+          console.log('[OAuth Profile Sync] 🔒 Preserving ORIGINAL signup GCLID:', currentProfile.gclid);
+        }
+        if (currentProfile?.url_params) {
+          updateData.url_params = currentProfile.url_params;
+          console.log('[OAuth Profile Sync] 🔒 Preserving ORIGINAL signup url_params');
+        }
+        if (currentProfile?.initial_referer) {
+          updateData.initial_referer = currentProfile.initial_referer;
+          console.log('[OAuth Profile Sync] 🔒 Preserving ORIGINAL signup referer:', currentProfile.initial_referer);
+        }
       }
 
       
