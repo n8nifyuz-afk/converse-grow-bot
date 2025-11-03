@@ -553,13 +553,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Only log activity once per session to avoid rate limits
-            const lastActivityLog = sessionStorage.getItem('last_activity_log');
-            const now = Date.now();
+            // Check if this is a new signup by checking profile tracking data
+            const { data: currentProfile } = await supabase
+              .from('profiles')
+              .select('gclid, url_params, initial_referer, created_at')
+              .eq('user_id', session.user.id)
+              .maybeSingle();
             
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
-              sessionStorage.setItem('last_activity_log', now.toString());
-              await logUserActivity(session.user.id, 'login');
+            const isNewSignup = !currentProfile?.gclid && 
+                                !currentProfile?.url_params && 
+                                !currentProfile?.initial_referer;
+            
+            // For NEW signups: ALWAYS log activity immediately (no throttling)
+            // For existing users: throttle to prevent rate limiting
+            if (isNewSignup) {
+              // NEW SIGNUP - Log immediately without throttling
+              console.log('[Auth] 🆕 New signup detected - logging activity immediately');
+              await logUserActivity(session.user.id, 'signup');
+            } else {
+              // EXISTING USER - Throttle activity logging
+              const lastActivityLog = sessionStorage.getItem('last_activity_log');
+              const now = Date.now();
+              
+              if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
+                sessionStorage.setItem('last_activity_log', now.toString());
+                console.log('[Auth] 🔄 Existing user login - logging activity');
+                await logUserActivity(session.user.id, 'login');
+              }
             }
             
             // Fetch profile and check subscription - DEBOUNCED
