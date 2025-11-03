@@ -169,34 +169,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const webhookSentKey = `webhook_sent_${user.id}`;
       const webhookAlreadySent = localStorage.getItem(webhookSentKey);
       
-      // Check if this is a new signup (created within last 5 minutes)
-      const isNewSignup = currentProfile?.created_at && 
-        (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 5 * 60 * 1000;
+      // SIMPLIFIED: Check if this is a NEW signup by checking if tracking data is missing
+      // If database has NO tracking data (gclid, url_params, referer all empty), it's a new signup
+      const isNewSignup = !currentProfile?.gclid && 
+                          !currentProfile?.url_params && 
+                          !currentProfile?.initial_referer;
       
       // Determine if we should send webhook (new signup AND webhook not sent yet)
       const shouldSendWebhook = isNewSignup && !webhookAlreadySent;
       
-      console.log('[OAuth Profile Sync] Webhook status check:', {
+      console.log('[OAuth Profile Sync] Signup detection:', {
         isNewSignup,
+        hasGclid: !!currentProfile?.gclid,
+        hasUrlParams: !!currentProfile?.url_params,
+        hasReferer: !!currentProfile?.initial_referer,
         webhookAlreadySent: !!webhookAlreadySent,
         shouldSendWebhook,
-        created_at: currentProfile?.created_at,
-        age_seconds: currentProfile?.created_at ? 
-          (new Date().getTime() - new Date(currentProfile.created_at).getTime()) / 1000 : 'N/A'
+        created_at: currentProfile?.created_at
       });
       
-      // CRITICAL: For new signups, fetch IP and country if missing
+      // CRITICAL: For new signups (missing tracking data), fetch IP and country
       if (isNewSignup && (!currentProfile?.ip_address || !currentProfile?.country)) {
-        console.log('[OAuth Profile Sync] Fetching IP and country for new signup...');
+        console.log('[OAuth Profile Sync] NEW SIGNUP detected - Fetching IP and country...');
         try {
           const { ip, country } = await fetchIPAndCountry();
           if (ip && !currentProfile?.ip_address) {
             updateData.ip_address = ip;
-            console.log('[OAuth Profile Sync] Will save IP address:', ip);
+            console.log('[OAuth Profile Sync] ✅ Will save IP address:', ip);
           }
           if (country && !currentProfile?.country) {
             updateData.country = country;
-            console.log('[OAuth Profile Sync] Will save country:', country);
+            console.log('[OAuth Profile Sync] ✅ Will save country:', country);
           }
         } catch (error) {
           console.error('[OAuth Profile Sync] Failed to fetch IP/country:', error);
