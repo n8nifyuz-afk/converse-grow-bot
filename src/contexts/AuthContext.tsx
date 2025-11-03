@@ -531,7 +531,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
           }
           
-          // CRITICAL: Debounce async operations to prevent rate limiting
+          // CRITICAL: Sync OAuth profile IMMEDIATELY for new signups (no debounce)
+          // This ensures GCLID and tracking data are saved to database instantly
+          syncOAuthProfile(session).catch(error => {
+            console.error('❌ [Auth] Failed to sync OAuth profile:', error);
+          });
+          
+          // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
             // Only log activity once per session to avoid rate limits
             const lastActivityLog = sessionStorage.getItem('last_activity_log');
@@ -542,9 +548,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               await logUserActivity(session.user.id, 'login');
             }
             
-            // Fetch profile and sync OAuth data - DEBOUNCED
+            // Fetch profile and check subscription - DEBOUNCED
             await fetchUserProfile(session.user.id);
-            await syncOAuthProfile(session);
             await checkSubscription();
           }, 500); // 500ms debounce to prevent rapid-fire API calls
         } else if (event === 'SIGNED_OUT') {
