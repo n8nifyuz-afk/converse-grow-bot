@@ -420,13 +420,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // CRITICAL: Debounce async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Only log activity once per session to avoid rate limits
-            const lastActivityLog = sessionStorage.getItem('last_activity_log');
+            // Log activity on each SIGNED_IN event (actual login, not token refresh)
+            // Use per-user cache to avoid duplicate logs during rapid auth state changes
+            const cacheKey = `last_activity_log_${session.user.id}`;
+            const lastActivityLog = sessionStorage.getItem(cacheKey);
             const now = Date.now();
             
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
-              sessionStorage.setItem('last_activity_log', now.toString());
-              await logUserActivity(session.user.id, 'login');
+            // Only skip if logged within last 10 seconds (prevents duplicates from rapid auth changes)
+            if (!lastActivityLog || now - parseInt(lastActivityLog) > 10000) {
+              sessionStorage.setItem(cacheKey, now.toString());
+              console.log('[AUTH] Logging user activity for user:', session.user.id);
+              try {
+                await logUserActivity(session.user.id, 'login');
+              } catch (error) {
+                console.warn('[AUTH] Failed to log activity (non-critical):', error);
+              }
+            } else {
+              console.log('[AUTH] Skipping activity log - logged recently (< 10 seconds ago)');
             }
             
             // Fetch profile and sync OAuth data - DEBOUNCED
@@ -455,8 +465,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           clearCachedSubscription();
           
-          // Clear activity log timestamp to prevent rate limit issues on re-login
-          sessionStorage.removeItem('last_activity_log');
+          // Clear activity log timestamp to allow fresh login tracking
+          sessionStorage.clear(); // Clear all cached activity logs
           sessionStorage.removeItem('pricing_modal_shown_auth');
         } else if (event === 'TOKEN_REFRESHED') {
           // Only update session, don't trigger API calls to avoid rate limits
