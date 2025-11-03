@@ -553,16 +553,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Check if this is a new signup by checking profile tracking data
-            const { data: currentProfile } = await supabase
-              .from('profiles')
-              .select('gclid, url_params, initial_referer, created_at')
+            // Check if this is a new signup by checking if user has ANY activity logs
+            // This is more reliable than checking GCLID which may not be set yet for OAuth
+            const { data: existingLogs, error: logsError } = await supabase
+              .from('user_activity_logs')
+              .select('id')
               .eq('user_id', session.user.id)
-              .maybeSingle();
+              .limit(1);
             
-            const isNewSignup = !currentProfile?.gclid && 
-                                !currentProfile?.url_params && 
-                                !currentProfile?.initial_referer;
+            const isNewSignup = !logsError && (!existingLogs || existingLogs.length === 0);
             
             // For NEW signups: ALWAYS log activity immediately (no throttling)
             // For existing users: throttle to prevent rate limiting
