@@ -671,12 +671,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       initialCheckComplete = true;
       setLoading(false);
       
-      // Mark initial load as complete after a short delay
-      // This ensures SIGNED_IN events during initial load are ignored for activity logging
-      setTimeout(() => {
-        isInitialLoadRef.current = false;
-        console.log('[Auth] ✅ Initial load complete, activity logging now enabled');
-      }, 1000);
+      // CRITICAL: Mark initial load as complete IMMEDIATELY after session restoration
+      // This prevents session restoration events from triggering activity logs
+      isInitialLoadRef.current = false;
+      console.log('[Auth] ✅ Initial load complete, activity logging now enabled');
     });
 
     return () => {
