@@ -341,11 +341,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // CRITICAL: Debounce async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Only log activity once per session to avoid rate limits
+            // Log activity for EVERY sign in/sign up - only prevent rapid duplicates within 3 seconds
             const lastActivityLog = sessionStorage.getItem('last_activity_log');
             const now = Date.now();
             
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
+            if (!lastActivityLog || now - parseInt(lastActivityLog) > 3000) {
               sessionStorage.setItem('last_activity_log', now.toString());
               await logUserActivity(session.user.id, 'login');
             }
