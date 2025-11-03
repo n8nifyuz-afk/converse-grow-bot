@@ -563,6 +563,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               await logUserActivity(session.user.id, 'login');
             }
             
+            // Track registration completion for GTM/GA (with deduplication)
+            trackRegistrationComplete();
+            
             // Fetch profile and check subscription - DEBOUNCED
             await fetchUserProfile(session.user.id);
             await checkSubscription();
