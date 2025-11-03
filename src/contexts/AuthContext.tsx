@@ -161,11 +161,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
       
       
+      // Get browser and device tracking data
+      const trackingData = getFullTrackingData('login');
+      
       // Extract comprehensive OAuth data - STORE EVERYTHING
       const updateData: any = {
         updated_at: new Date().toISOString(),
         oauth_provider: provider,
-        oauth_metadata: metadata // Store COMPLETE OAuth metadata for admin analysis
+        oauth_metadata: metadata, // Store COMPLETE OAuth metadata for admin analysis
+        browser_info: JSON.parse(JSON.stringify(trackingData.browserInfo)),
+        device_info: JSON.parse(JSON.stringify(trackingData.deviceInfo))
       };
       
       // CRITICAL: Check if webhook was already sent for this user (deduplication)
