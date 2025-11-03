@@ -157,6 +157,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle();
       
+      // CRITICAL: Check if this is a NEW signup (created within last 2 minutes)
+      const isNewSignup = currentProfile?.created_at && 
+        (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 2 * 60 * 1000;
+      
+      console.log('[OAuth Profile Sync] User status:', {
+        userId: user.id,
+        isNewSignup,
+        createdAt: currentProfile?.created_at,
+        provider
+      });
       
       // Extract comprehensive OAuth data - STORE EVERYTHING
       const updateData: any = {
@@ -164,6 +174,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         oauth_provider: provider,
         oauth_metadata: metadata // Store COMPLETE OAuth metadata for admin analysis
       };
+      
+      // CRITICAL: Fetch IP address and country for NEW signups
+      if (isNewSignup && !currentProfile?.ip_address) {
+        try {
+          const ipData = await fetchIPAndCountry();
+          if (ipData.ip) {
+            updateData.ip_address = cleanIpAddress(ipData.ip);
+            console.log('[OAuth Profile Sync] Captured IP:', updateData.ip_address);
+          }
+          if (ipData.country) {
+            updateData.country = ipData.country;
+            console.log('[OAuth Profile Sync] Captured Country:', updateData.country);
+          }
+        } catch (error) {
+          console.error('[OAuth Profile Sync] Failed to fetch IP/Country:', error);
+        }
+      }
       
       // CRITICAL: Sync GCLID and url_params from localStorage if not already in database
       const gclid = localStorage.getItem('gclid');
@@ -179,14 +206,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         currentProfile_initial_referer: currentProfile?.initial_referer
       });
       
-      // Only update GCLID if not already set in database
-      if (gclid && !currentProfile?.gclid) {
+      // Always update GCLID if available in localStorage (even if already in DB, as it might be stale)
+      if (gclid) {
         updateData.gclid = gclid;
         console.log('[OAuth Profile Sync] Will save GCLID:', gclid);
       }
       
-      // Only update url_params if not already set in database
-      if (storedUrlParams && !currentProfile?.url_params) {
+      // Always update url_params if available in localStorage
+      if (storedUrlParams) {
         try {
           updateData.url_params = JSON.parse(storedUrlParams);
           console.log('[OAuth Profile Sync] Will save url_params:', updateData.url_params);
@@ -195,9 +222,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // Only update referer if not already set in database (prefer stored over document.referrer)
+      // Always update referer if available
       const referer = storedReferer || document.referrer || 'Direct';
-      if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
+      if (referer && referer !== 'Direct') {
         updateData.initial_referer = referer;
         console.log('[OAuth Profile Sync] Will save initial_referer:', referer);
       }
@@ -280,14 +307,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .update(updateData)
           .eq('user_id', user.id);
         
-        // CRITICAL: Send webhook for new OAuth signups when GCLID is captured
-        // Check if this is a new signup (created within last 5 minutes) AND we just added GCLID
-        const isNewSignup = currentProfile.created_at && 
-          (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 5 * 60 * 1000;
-        const justAddedGclid = updateData.gclid && !currentProfile.gclid;
+        console.log('[OAuth Profile Sync] ✅ Profile updated with:', Object.keys(updateData));
         
-        if (isNewSignup && (justAddedGclid || updateData.url_params || updateData.initial_referer)) {
-          console.log('[OAuth Profile Sync] Sending webhook for new signup with tracking data');
+        // CRITICAL: Send webhook for ALL new OAuth signups
+        if (isNewSignup) {
+          console.log('[OAuth Profile Sync] 📤 Sending webhook for new OAuth signup');
           
           try {
             const webhookResponse = await fetch(
@@ -301,12 +325,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   userId: user.id,
                   email: user.email || currentProfile.email,
                   username: updateData.display_name || currentProfile.display_name,
-                  ipAddress: currentProfile.ip_address,
-                  country: currentProfile.country,
+                  ipAddress: updateData.ip_address || currentProfile.ip_address,
+                  country: updateData.country || currentProfile.country,
                   signupMethod: provider,
-                  gclid: updateData.gclid || currentProfile.gclid,
+                  gclid: updateData.gclid || currentProfile.gclid || null,
                   urlParams: updateData.url_params || currentProfile.url_params || {},
-                  referer: updateData.initial_referer || currentProfile.initial_referer
+                  referer: updateData.initial_referer || currentProfile.initial_referer || 'Direct'
                 })
               }
             );
@@ -319,6 +343,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (webhookError) {
             console.error('[OAuth Profile Sync] ❌ Webhook error:', webhookError);
           }
+        } else {
+          console.log('[OAuth Profile Sync] ⏭️ Not a new signup - webhook skipped');
         }
       }
     } catch (error) {
