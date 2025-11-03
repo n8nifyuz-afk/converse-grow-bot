@@ -85,9 +85,18 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
 }) => {
   if (!userInfo) return null;
 
-  const browserInfo = userInfo.browser_info || {};
-  const deviceInfo = userInfo.device_info || {};
-  const oauthMetadata = userInfo.oauth_metadata || {};
+  // Parse browser and device info with better error handling
+  const browserInfo = typeof userInfo.browser_info === 'string' 
+    ? JSON.parse(userInfo.browser_info) 
+    : (userInfo.browser_info || {});
+    
+  const deviceInfo = typeof userInfo.device_info === 'string' 
+    ? JSON.parse(userInfo.device_info) 
+    : (userInfo.device_info || {});
+    
+  const oauthMetadata = typeof userInfo.oauth_metadata === 'string'
+    ? JSON.parse(userInfo.oauth_metadata)
+    : (userInfo.oauth_metadata || {});
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
