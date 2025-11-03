@@ -1296,13 +1296,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('⚠️ [PHONE-SIGNUP] No url_params in localStorage');
     }
     
-    // Capture referer for attribution
-    const referer = document.referrer || 'Direct';
-    if (referer && referer !== 'Direct') {
-      signupData.referer = referer;
-      console.log('✅ [PHONE-SIGNUP] Referer captured:', referer);
+    // Use initial_referer from localStorage (captures original traffic source)
+    const initialReferer = localStorage.getItem('initial_referer');
+    if (initialReferer) {
+      signupData.referer = initialReferer;
+      console.log('✅ [PHONE-SIGNUP] Initial referer captured:', initialReferer);
     } else {
-      console.log('⚠️ [PHONE-SIGNUP] No referer (Direct traffic)');
+      console.log('⚠️ [PHONE-SIGNUP] No initial_referer in localStorage');
     }
     
     console.log('📤 [PHONE-SIGNUP] Calling supabase.auth.signInWithOtp with data:', signupData);
