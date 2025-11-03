@@ -553,32 +553,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Check if this is a new signup by checking if user has ANY activity logs
-            // This is more reliable than checking GCLID which may not be set yet for OAuth
-            const { data: existingLogs, error: logsError } = await supabase
-              .from('user_activity_logs')
-              .select('id')
-              .eq('user_id', session.user.id)
-              .limit(1);
+            // Log all authentication events as "login" with throttling
+            const lastActivityLog = sessionStorage.getItem('last_activity_log');
+            const now = Date.now();
             
-            const isNewSignup = !logsError && (!existingLogs || existingLogs.length === 0);
-            
-            // For NEW signups: ALWAYS log activity immediately (no throttling)
-            // For existing users: throttle to prevent rate limiting
-            if (isNewSignup) {
-              // NEW SIGNUP - Log immediately without throttling
-              console.log('[Auth] 🆕 New signup detected - logging activity immediately');
-              await logUserActivity(session.user.id, 'signup');
-            } else {
-              // EXISTING USER - Throttle activity logging
-              const lastActivityLog = sessionStorage.getItem('last_activity_log');
-              const now = Date.now();
-              
-              if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
-                sessionStorage.setItem('last_activity_log', now.toString());
-                console.log('[Auth] 🔄 Existing user login - logging activity');
-                await logUserActivity(session.user.id, 'login');
-              }
+            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
+              sessionStorage.setItem('last_activity_log', now.toString());
+              console.log('[Auth] ⏰ Logging login activity');
+              await logUserActivity(session.user.id, 'login');
             }
             
             // Fetch profile and check subscription - DEBOUNCED
