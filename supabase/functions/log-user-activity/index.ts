@@ -39,68 +39,16 @@ serve(async (req) => {
     // Clean and format IP address using the utility function
     const ipAddress = cleanIpAddress(rawIpAddress)
 
-    // Fetch country from IP with multiple fallback services
+    // Fetch country from IP
     let country = null
-    
-    // Skip lookup if IP is Unknown or localhost
-    if (ipAddress && ipAddress !== 'Unknown' && !ipAddress.startsWith('127.') && !ipAddress.startsWith('192.168.') && ipAddress !== '::1') {
-      // Try primary service: ipapi.co
-      try {
-        console.log(`[IP-LOOKUP] Attempting ipapi.co for IP: ${ipAddress}`)
-        const ipResponse = await fetch(`https://ipapi.co/${ipAddress}/json/`, {
-          headers: { 'User-Agent': 'curl/7.64.1' }
-        })
-        
-        if (ipResponse.ok) {
-          const ipData = await ipResponse.json()
-          country = ipData.country_code || ipData.country || null
-          console.log(`[IP-LOOKUP] ipapi.co result: ${country}`)
-        } else {
-          console.warn(`[IP-LOOKUP] ipapi.co failed with status: ${ipResponse.status}`)
-        }
-      } catch (error) {
-        console.warn('[IP-LOOKUP] ipapi.co error:', error)
+    try {
+      const ipResponse = await fetch(`https://ipapi.co/${ipAddress}/json/`)
+      if (ipResponse.ok) {
+        const ipData = await ipResponse.json()
+        country = ipData.country_code || null
       }
-      
-      // Fallback 1: ip-api.com (if primary failed)
-      if (!country) {
-        try {
-          console.log(`[IP-LOOKUP] Attempting fallback ip-api.com for IP: ${ipAddress}`)
-          const fallbackResponse = await fetch(`http://ip-api.com/json/${ipAddress}?fields=countryCode`)
-          
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json()
-            country = fallbackData.countryCode || null
-            console.log(`[IP-LOOKUP] ip-api.com result: ${country}`)
-          }
-        } catch (error) {
-          console.warn('[IP-LOOKUP] ip-api.com error:', error)
-        }
-      }
-      
-      // Fallback 2: ipinfo.io (if both failed)
-      if (!country) {
-        try {
-          console.log(`[IP-LOOKUP] Attempting fallback ipinfo.io for IP: ${ipAddress}`)
-          const fallbackResponse2 = await fetch(`https://ipinfo.io/${ipAddress}/json`)
-          
-          if (fallbackResponse2.ok) {
-            const fallbackData2 = await fallbackResponse2.json()
-            country = fallbackData2.country || null
-            console.log(`[IP-LOOKUP] ipinfo.io result: ${country}`)
-          }
-        } catch (error) {
-          console.warn('[IP-LOOKUP] ipinfo.io error:', error)
-        }
-      }
-      
-      if (country) {
-        console.log(`[IP-LOOKUP] Final country detected: ${country} for IP: ${ipAddress}`)
-      } else {
-        console.warn(`[IP-LOOKUP] All country lookup services failed for IP: ${ipAddress}`)
-      }
-    } else {
-      console.log(`[IP-LOOKUP] Skipping country lookup for IP: ${ipAddress}`)
+    } catch (error) {
+      console.warn('Failed to fetch country from IP:', error)
     }
 
     // Insert activity log
@@ -132,33 +80,16 @@ serve(async (req) => {
 
     // Update profile with browser and device info
     if (userId) {
-      // First get current profile data
+      // First get current login count
       const { data: currentProfile } = await supabase
         .from('profiles')
-        .select('login_count, last_login_at')
+        .select('login_count')
         .eq('user_id', userId)
         .single()
 
       const currentLoginCount = currentProfile?.login_count || 0
-      const lastLoginAt = currentProfile?.last_login_at
 
-      // Only increment login count if this is a login activity AND 
-      // last login was more than 2 minutes ago (prevents double counting on page refresh)
-      let newLoginCount = currentLoginCount
-      const now = new Date()
-      const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000)
-      
-      const shouldIncrementCount = activityType === 'login' && 
-        (!lastLoginAt || new Date(lastLoginAt) < twoMinutesAgo)
-
-      if (shouldIncrementCount) {
-        newLoginCount = currentLoginCount + 1
-        console.log(`[LOGIN-COUNT] Incrementing login count from ${currentLoginCount} to ${newLoginCount}`)
-      } else {
-        console.log(`[LOGIN-COUNT] Not incrementing - Activity: ${activityType}, Last login: ${lastLoginAt}`)
-      }
-
-      // Update profile
+      // Update profile with incremented login count
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -168,15 +99,15 @@ serve(async (req) => {
           country: country,
           timezone: deviceInfo?.timezone,
           locale: deviceInfo?.language,
-          last_login_at: now.toISOString(),
-          login_count: newLoginCount
+          last_login_at: new Date().toISOString(),
+          login_count: currentLoginCount + 1
         })
         .eq('user_id', userId)
 
       if (profileError) {
-        console.warn('[PROFILE-UPDATE] Failed to update profile:', profileError)
+        console.warn('Failed to update profile:', profileError)
       } else {
-        console.log(`[PROFILE-UPDATE] Updated profile for user ${userId} - login count: ${newLoginCount}`)
+        console.log(`Updated profile for user ${userId} - login count: ${currentLoginCount + 1}`)
       }
     }
 
