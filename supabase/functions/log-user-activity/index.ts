@@ -132,16 +132,33 @@ serve(async (req) => {
 
     // Update profile with browser and device info
     if (userId) {
-      // First get current login count
+      // First get current profile data
       const { data: currentProfile } = await supabase
         .from('profiles')
-        .select('login_count')
+        .select('login_count, last_login_at')
         .eq('user_id', userId)
         .single()
 
       const currentLoginCount = currentProfile?.login_count || 0
+      const lastLoginAt = currentProfile?.last_login_at
 
-      // Update profile with incremented login count
+      // Only increment login count if this is a login activity AND 
+      // last login was more than 2 minutes ago (prevents double counting on page refresh)
+      let newLoginCount = currentLoginCount
+      const now = new Date()
+      const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000)
+      
+      const shouldIncrementCount = activityType === 'login' && 
+        (!lastLoginAt || new Date(lastLoginAt) < twoMinutesAgo)
+
+      if (shouldIncrementCount) {
+        newLoginCount = currentLoginCount + 1
+        console.log(`[LOGIN-COUNT] Incrementing login count from ${currentLoginCount} to ${newLoginCount}`)
+      } else {
+        console.log(`[LOGIN-COUNT] Not incrementing - Activity: ${activityType}, Last login: ${lastLoginAt}`)
+      }
+
+      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -151,15 +168,15 @@ serve(async (req) => {
           country: country,
           timezone: deviceInfo?.timezone,
           locale: deviceInfo?.language,
-          last_login_at: new Date().toISOString(),
-          login_count: currentLoginCount + 1
+          last_login_at: now.toISOString(),
+          login_count: newLoginCount
         })
         .eq('user_id', userId)
 
       if (profileError) {
-        console.warn('Failed to update profile:', profileError)
+        console.warn('[PROFILE-UPDATE] Failed to update profile:', profileError)
       } else {
-        console.log(`Updated profile for user ${userId} - login count: ${currentLoginCount + 1}`)
+        console.log(`[PROFILE-UPDATE] Updated profile for user ${userId} - login count: ${newLoginCount}`)
       }
     }
 
