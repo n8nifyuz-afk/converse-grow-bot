@@ -646,8 +646,8 @@ export default function ProjectPage() {
                   countryCode: metadata.countryCode,
                   isMobile: metadata.isMobile,
                   gclid: metadata.gclid,
-                  urlParams: metadata.urlParams || {}, // Send as object
-                  referer: metadata.referer || null,
+                  urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+                  referer: metadata.referer ? String(metadata.referer) : "null", // String format
                   hasDocument: "false"
                 })
               });
@@ -713,8 +713,8 @@ export default function ProjectPage() {
                 countryCode: metadata.countryCode,
                 isMobile: metadata.isMobile,
                 gclid: metadata.gclid,
-                urlParams: metadata.urlParams || {}, // Send as object
-                referer: metadata.referer || null,
+                urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+                referer: metadata.referer ? String(metadata.referer) : "null", // String format
                 hasDocument: "true"
               })
             });

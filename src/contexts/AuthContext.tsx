@@ -157,16 +157,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle();
       
-      // CRITICAL: Check if this is a NEW signup (created within last 2 minutes)
-      const isNewSignup = currentProfile?.created_at && 
-        (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 2 * 60 * 1000;
-      
-      console.log('[OAuth Profile Sync] User status:', {
-        userId: user.id,
-        isNewSignup,
-        createdAt: currentProfile?.created_at,
-        provider
-      });
       
       // Extract comprehensive OAuth data - STORE EVERYTHING
       const updateData: any = {
@@ -174,23 +164,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         oauth_provider: provider,
         oauth_metadata: metadata // Store COMPLETE OAuth metadata for admin analysis
       };
-      
-      // CRITICAL: Fetch IP address and country for NEW signups
-      if (isNewSignup && !currentProfile?.ip_address) {
-        try {
-          const ipData = await fetchIPAndCountry();
-          if (ipData.ip) {
-            updateData.ip_address = cleanIpAddress(ipData.ip);
-            console.log('[OAuth Profile Sync] Captured IP:', updateData.ip_address);
-          }
-          if (ipData.country) {
-            updateData.country = ipData.country;
-            console.log('[OAuth Profile Sync] Captured Country:', updateData.country);
-          }
-        } catch (error) {
-          console.error('[OAuth Profile Sync] Failed to fetch IP/Country:', error);
-        }
-      }
       
       // CRITICAL: Sync GCLID and url_params from localStorage if not already in database
       const gclid = localStorage.getItem('gclid');
@@ -206,14 +179,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         currentProfile_initial_referer: currentProfile?.initial_referer
       });
       
-      // Always update GCLID if available in localStorage (even if already in DB, as it might be stale)
-      if (gclid) {
+      // Only update GCLID if not already set in database
+      if (gclid && !currentProfile?.gclid) {
         updateData.gclid = gclid;
         console.log('[OAuth Profile Sync] Will save GCLID:', gclid);
       }
       
-      // Always update url_params if available in localStorage
-      if (storedUrlParams) {
+      // Only update url_params if not already set in database
+      if (storedUrlParams && !currentProfile?.url_params) {
         try {
           updateData.url_params = JSON.parse(storedUrlParams);
           console.log('[OAuth Profile Sync] Will save url_params:', updateData.url_params);
@@ -222,9 +195,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // Always update referer if available
+      // Only update referer if not already set in database (prefer stored over document.referrer)
       const referer = storedReferer || document.referrer || 'Direct';
-      if (referer && referer !== 'Direct') {
+      if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
         updateData.initial_referer = referer;
         console.log('[OAuth Profile Sync] Will save initial_referer:', referer);
       }
@@ -307,11 +280,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .update(updateData)
           .eq('user_id', user.id);
         
-        console.log('[OAuth Profile Sync] ✅ Profile updated with:', Object.keys(updateData));
+        // CRITICAL: Send webhook for new OAuth signups when GCLID is captured
+        // Check if this is a new signup (created within last 5 minutes) AND we just added GCLID
+        const isNewSignup = currentProfile.created_at && 
+          (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 5 * 60 * 1000;
+        const justAddedGclid = updateData.gclid && !currentProfile.gclid;
         
-        // CRITICAL: Send webhook for ALL new OAuth signups
-        if (isNewSignup) {
-          console.log('[OAuth Profile Sync] 📤 Sending webhook for new OAuth signup');
+        if (isNewSignup && (justAddedGclid || updateData.url_params || updateData.initial_referer)) {
+          console.log('[OAuth Profile Sync] Sending webhook for new signup with tracking data');
           
           try {
             const webhookResponse = await fetch(
@@ -325,12 +301,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   userId: user.id,
                   email: user.email || currentProfile.email,
                   username: updateData.display_name || currentProfile.display_name,
-                  ipAddress: updateData.ip_address || currentProfile.ip_address,
-                  country: updateData.country || currentProfile.country,
+                  ipAddress: currentProfile.ip_address,
+                  country: currentProfile.country,
                   signupMethod: provider,
-                  gclid: updateData.gclid || currentProfile.gclid || null,
+                  gclid: updateData.gclid || currentProfile.gclid,
                   urlParams: updateData.url_params || currentProfile.url_params || {},
-                  referer: updateData.initial_referer || currentProfile.initial_referer || 'Direct'
+                  referer: updateData.initial_referer || currentProfile.initial_referer
                 })
               }
             );
@@ -343,8 +319,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (webhookError) {
             console.error('[OAuth Profile Sync] ❌ Webhook error:', webhookError);
           }
-        } else {
-          console.log('[OAuth Profile Sync] ⏭️ Not a new signup - webhook skipped');
         }
       }
     } catch (error) {
@@ -446,23 +420,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // CRITICAL: Debounce async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Log activity on each SIGNED_IN event (actual login, not token refresh)
-            // Use per-user cache to avoid duplicate logs during rapid auth state changes
-            const cacheKey = `last_activity_log_${session.user.id}`;
-            const lastActivityLog = sessionStorage.getItem(cacheKey);
+            // Only log activity once per session to avoid rate limits
+            const lastActivityLog = sessionStorage.getItem('last_activity_log');
             const now = Date.now();
             
-            // Only skip if logged within last 10 seconds (prevents duplicates from rapid auth changes)
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 10000) {
-              sessionStorage.setItem(cacheKey, now.toString());
-              console.log('[AUTH] Logging user activity for user:', session.user.id);
-              try {
-                await logUserActivity(session.user.id, 'login');
-              } catch (error) {
-                console.warn('[AUTH] Failed to log activity (non-critical):', error);
-              }
-            } else {
-              console.log('[AUTH] Skipping activity log - logged recently (< 10 seconds ago)');
+            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
+              sessionStorage.setItem('last_activity_log', now.toString());
+              await logUserActivity(session.user.id, 'login');
             }
             
             // Fetch profile and sync OAuth data - DEBOUNCED
@@ -491,8 +455,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           clearCachedSubscription();
           
-          // Clear activity log timestamp to allow fresh login tracking
-          sessionStorage.clear(); // Clear all cached activity logs
+          // Clear activity log timestamp to prevent rate limit issues on re-login
+          sessionStorage.removeItem('last_activity_log');
           sessionStorage.removeItem('pricing_modal_shown_auth');
         } else if (event === 'TOKEN_REFRESHED') {
           // Only update session, don't trigger API calls to avoid rate limits
@@ -988,60 +952,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithPhone = async (phone: string) => {
-    // Get IP address and country
-    let ipAddress: string | undefined;
-    let country: string | undefined;
-    
-    try {
-      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
-      if (geoResponse.ok) {
-        const text = await geoResponse.text();
-        const geoData = Object.fromEntries(
-          text.trim().split('\n').map(line => line.split('='))
-        );
-        ipAddress = geoData.ip;
-        country = geoData.loc;
-      }
-    } catch (geoError) {
-      console.error('Failed to fetch geo data:', geoError);
-    }
-    
-    const signupData: any = {
-      signup_method: 'phone'
-    };
-    
-    if (ipAddress) {
-      signupData.ip_address = ipAddress;
-    }
-    
-    if (country) {
-      signupData.country = country;
-    }
-    
-    // CRITICAL: Add Google Ads tracking data from localStorage
-    const gclid = localStorage.getItem('gclid');
-    if (gclid) {
-      signupData.gclid = gclid;
-    }
-    
-    const urlParamsStr = localStorage.getItem('url_params');
-    if (urlParamsStr) {
-      try {
-        signupData.url_params = JSON.parse(urlParamsStr);
-      } catch (e) {
-        console.error('[PHONE-SIGNUP] Failed to parse url_params:', e);
-      }
-    }
-    
-    // Capture referer for attribution
-    if (document.referrer) {
-      signupData.referer = document.referrer;
-    }
-    
     const { error } = await supabase.auth.signInWithOtp({
       phone,
       options: {
-        data: signupData
+        data: {
+          signup_method: 'phone'
+        }
       }
     });
     
