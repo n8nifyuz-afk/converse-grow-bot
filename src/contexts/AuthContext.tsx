@@ -558,14 +558,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Log all authentication events as "login" with throttling
+            // Log all authentication events as "login" with reduced throttling (5 seconds)
             const lastActivityLog = sessionStorage.getItem('last_activity_log');
             const now = Date.now();
             
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 60000) {
+            // Reduced throttle from 60s to 5s to ensure logins are properly logged
+            if (!lastActivityLog || now - parseInt(lastActivityLog) > 5000) {
               sessionStorage.setItem('last_activity_log', now.toString());
               console.log('[Auth] ⏰ Logging login activity');
               await logUserActivity(session.user.id, 'login');
+            } else {
+              console.log('[Auth] ⏭️ Skipping activity log - throttled (logged', Math.floor((now - parseInt(lastActivityLog)) / 1000), 'seconds ago)');
             }
             
             // Track registration completion for GTM/GA (with deduplication)
