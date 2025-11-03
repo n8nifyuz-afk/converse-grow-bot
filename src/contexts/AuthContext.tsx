@@ -165,6 +165,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         oauth_metadata: metadata // Store COMPLETE OAuth metadata for admin analysis
       };
       
+      // Check if this is a new signup (created within last 2 minutes)
+      const isNewSignup = currentProfile?.created_at && 
+        (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 2 * 60 * 1000;
+      
+      console.log('[OAuth Profile Sync] New signup check:', {
+        isNewSignup,
+        created_at: currentProfile?.created_at,
+        age_seconds: currentProfile?.created_at ? 
+          (new Date().getTime() - new Date(currentProfile.created_at).getTime()) / 1000 : 'N/A'
+      });
+      
+      // CRITICAL: For new signups, fetch IP and country if missing
+      if (isNewSignup && (!currentProfile?.ip_address || !currentProfile?.country)) {
+        console.log('[OAuth Profile Sync] Fetching IP and country for new signup...');
+        try {
+          const { ip, country } = await fetchIPAndCountry();
+          if (ip && !currentProfile?.ip_address) {
+            updateData.ip_address = ip;
+            console.log('[OAuth Profile Sync] Will save IP address:', ip);
+          }
+          if (country && !currentProfile?.country) {
+            updateData.country = country;
+            console.log('[OAuth Profile Sync] Will save country:', country);
+          }
+        } catch (error) {
+          console.error('[OAuth Profile Sync] Failed to fetch IP/country:', error);
+        }
+      }
+      
       // CRITICAL: Sync GCLID and url_params from localStorage if not already in database
       const gclid = localStorage.getItem('gclid');
       const storedUrlParams = localStorage.getItem('url_params');
@@ -280,14 +309,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .update(updateData)
           .eq('user_id', user.id);
         
-        // CRITICAL: Send webhook for new OAuth signups when GCLID is captured
-        // Check if this is a new signup (created within last 5 minutes) AND we just added GCLID
-        const isNewSignup = currentProfile.created_at && 
-          (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 5 * 60 * 1000;
-        const justAddedGclid = updateData.gclid && !currentProfile.gclid;
+        console.log('[OAuth Profile Sync] Profile updated successfully');
         
-        if (isNewSignup && (justAddedGclid || updateData.url_params || updateData.initial_referer)) {
-          console.log('[OAuth Profile Sync] Sending webhook for new signup with tracking data');
+        // CRITICAL: Send webhook for ALL new OAuth signups
+        if (isNewSignup) {
+          console.log('[OAuth Profile Sync] Sending webhook for new OAuth signup');
           
           try {
             const webhookResponse = await fetch(
@@ -301,12 +327,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   userId: user.id,
                   email: user.email || currentProfile.email,
                   username: updateData.display_name || currentProfile.display_name,
-                  ipAddress: currentProfile.ip_address,
-                  country: currentProfile.country,
+                  ipAddress: updateData.ip_address || currentProfile.ip_address,
+                  country: updateData.country || currentProfile.country,
                   signupMethod: provider,
-                  gclid: updateData.gclid || currentProfile.gclid,
+                  gclid: updateData.gclid || currentProfile.gclid || null,
                   urlParams: updateData.url_params || currentProfile.url_params || {},
-                  referer: updateData.initial_referer || currentProfile.initial_referer
+                  referer: updateData.initial_referer || currentProfile.initial_referer || 'Direct'
                 })
               }
             );
@@ -952,12 +978,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithPhone = async (phone: string) => {
+    // Get IP address and country using Cloudflare trace (supports CORS)
+    let ipAddress: string | undefined;
+    let country: string | undefined;
+    
+    try {
+      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+      if (geoResponse.ok) {
+        const text = await geoResponse.text();
+        const geoData = Object.fromEntries(
+          text.trim().split('\n').map(line => line.split('='))
+        );
+        ipAddress = geoData.ip;
+        country = geoData.loc;
+      }
+    } catch (geoError) {
+      console.error('Failed to fetch geo data:', geoError);
+    }
+    
+    const signupData: any = {
+      signup_method: 'phone'
+    };
+    
+    if (ipAddress) {
+      signupData.ip_address = ipAddress;
+    }
+    
+    if (country) {
+      signupData.country = country;
+    }
+    
+    // CRITICAL: Add Google Ads tracking data from localStorage
+    const gclid = localStorage.getItem('gclid');
+    if (gclid) {
+      signupData.gclid = gclid;
+    }
+    
+    const urlParamsStr = localStorage.getItem('url_params');
+    if (urlParamsStr) {
+      try {
+        signupData.url_params = JSON.parse(urlParamsStr);
+      } catch (e) {
+        console.error('[PHONE-SIGNUP] Failed to parse url_params:', e);
+      }
+    }
+    
+    // Capture referer for attribution
+    if (document.referrer) {
+      signupData.referer = document.referrer;
+    }
+    
     const { error } = await supabase.auth.signInWithOtp({
       phone,
       options: {
-        data: {
-          signup_method: 'phone'
-        }
+        data: signupData
       }
     });
     
