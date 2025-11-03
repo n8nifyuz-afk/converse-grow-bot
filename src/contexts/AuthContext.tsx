@@ -988,12 +988,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithPhone = async (phone: string) => {
+    // Get IP address and country
+    let ipAddress: string | undefined;
+    let country: string | undefined;
+    
+    try {
+      const geoResponse = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+      if (geoResponse.ok) {
+        const text = await geoResponse.text();
+        const geoData = Object.fromEntries(
+          text.trim().split('\n').map(line => line.split('='))
+        );
+        ipAddress = geoData.ip;
+        country = geoData.loc;
+      }
+    } catch (geoError) {
+      console.error('Failed to fetch geo data:', geoError);
+    }
+    
+    const signupData: any = {
+      signup_method: 'phone'
+    };
+    
+    if (ipAddress) {
+      signupData.ip_address = ipAddress;
+    }
+    
+    if (country) {
+      signupData.country = country;
+    }
+    
+    // CRITICAL: Add Google Ads tracking data from localStorage
+    const gclid = localStorage.getItem('gclid');
+    if (gclid) {
+      signupData.gclid = gclid;
+    }
+    
+    const urlParamsStr = localStorage.getItem('url_params');
+    if (urlParamsStr) {
+      try {
+        signupData.url_params = JSON.parse(urlParamsStr);
+      } catch (e) {
+        console.error('[PHONE-SIGNUP] Failed to parse url_params:', e);
+      }
+    }
+    
+    // Capture referer for attribution
+    if (document.referrer) {
+      signupData.referer = document.referrer;
+    }
+    
     const { error } = await supabase.auth.signInWithOtp({
       phone,
       options: {
-        data: {
-          signup_method: 'phone'
-        }
+        data: signupData
       }
     });
     
