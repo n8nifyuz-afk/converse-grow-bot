@@ -165,12 +165,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         oauth_metadata: metadata // Store COMPLETE OAuth metadata for admin analysis
       };
       
-      // Check if this is a new signup (created within last 2 minutes)
-      const isNewSignup = currentProfile?.created_at && 
-        (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 2 * 60 * 1000;
+      // CRITICAL: Check if webhook was already sent for this user (deduplication)
+      const webhookSentKey = `webhook_sent_${user.id}`;
+      const webhookAlreadySent = localStorage.getItem(webhookSentKey);
       
-      console.log('[OAuth Profile Sync] New signup check:', {
+      // Check if this is a new signup (created within last 5 minutes)
+      const isNewSignup = currentProfile?.created_at && 
+        (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 5 * 60 * 1000;
+      
+      // Determine if we should send webhook (new signup AND webhook not sent yet)
+      const shouldSendWebhook = isNewSignup && !webhookAlreadySent;
+      
+      console.log('[OAuth Profile Sync] Webhook status check:', {
         isNewSignup,
+        webhookAlreadySent: !!webhookAlreadySent,
+        shouldSendWebhook,
         created_at: currentProfile?.created_at,
         age_seconds: currentProfile?.created_at ? 
           (new Date().getTime() - new Date(currentProfile.created_at).getTime()) / 1000 : 'N/A'
@@ -315,8 +324,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       console.log('📋 [OAuth Profile Sync] Profile update data prepared:', updateData);
       
-      // Only update if there are changes
-      if (Object.keys(updateData).length > 2 && currentProfile) { // More than just updated_at + oauth_provider
+      // CRITICAL: Always update profile for OAuth signups (even if minimal changes)
+      // This ensures tracking data (GCLID, url_params) is saved to database
+      if (currentProfile) {
         console.log('📤 [OAuth Profile Sync] Updating profile in database...');
         await supabase
           .from('profiles')
@@ -324,54 +334,86 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('user_id', user.id);
         
         console.log('✅ [OAuth Profile Sync] Profile updated successfully');
+      }
+      
+      // CRITICAL: Send webhook for new OAuth signups (with proper deduplication)
+      if (shouldSendWebhook) {
+        console.log('📤 [OAuth Profile Sync] Sending webhook for new OAuth signup...');
         
-        // CRITICAL: Send webhook for ALL new OAuth signups
-        if (isNewSignup) {
-          console.log('📤 [OAuth Profile Sync] Sending webhook for new OAuth signup');
+        try {
+          // Fetch the FINAL profile state with all tracking data
+          console.log('🔍 [OAuth Profile Sync] Fetching final profile state for webhook...');
+          const { data: finalProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
           
-          try {
-            console.log('🔍 [OAuth Profile Sync] Fetching updated profile for webhook...');
-            const { data: updatedProfile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('user_id', user.id)
-              .single();
-            
-            const webhookData = {
-              userId: user.id,
-              email: user.email || currentProfile.email,
-              username: updateData.display_name || currentProfile.display_name,
-              ipAddress: updatedProfile?.ip_address || updateData.ip_address,
-              country: updatedProfile?.country || updateData.country,
-              signupMethod: provider,
-              gclid: updatedProfile?.gclid || updateData.gclid,
-              urlParams: updatedProfile?.url_params || updateData.url_params || {},
-              referer: updatedProfile?.initial_referer || updateData.initial_referer
-            };
-            
-            console.log('📋 [OAuth Profile Sync] Webhook payload:', webhookData);
-            console.log('📤 [OAuth Profile Sync] Sending webhook request...');
-            
-            const webhookResponse = await fetch(
-              'https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook',
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(webhookData)
-              }
-            );
-            
-            if (webhookResponse.ok) {
-              console.log('✅ [OAuth Profile Sync] Webhook sent successfully');
-            } else {
-              console.error('❌ [OAuth Profile Sync] Webhook failed:', await webhookResponse.text());
+          // Fetch IP and country if not already available
+          let ipAddress = finalProfile?.ip_address || updateData.ip_address;
+          let country = finalProfile?.country || updateData.country;
+          
+          if (!ipAddress || !country) {
+            console.log('🌍 [OAuth Profile Sync] Fetching IP and country for webhook...');
+            try {
+              const { ip, country: ipCountry } = await fetchIPAndCountry();
+              ipAddress = ipAddress || ip;
+              country = country || ipCountry;
+            } catch (error) {
+              console.warn('⚠️ [OAuth Profile Sync] Failed to fetch IP/country:', error);
             }
-          } catch (webhookError) {
-            console.error('[OAuth Profile Sync] ❌ Webhook error:', webhookError);
           }
+          
+          // Parse url_params to ensure correct format (object, not string)
+          let urlParams = finalProfile?.url_params || updateData.url_params || {};
+          if (typeof urlParams === 'string') {
+            try {
+              urlParams = JSON.parse(urlParams);
+            } catch (e) {
+              console.warn('⚠️ [OAuth Profile Sync] Failed to parse url_params:', e);
+              urlParams = {};
+            }
+          }
+          
+          const webhookData = {
+            userId: user.id,
+            email: user.email || finalProfile?.email,
+            username: finalProfile?.display_name || updateData.display_name || 'User',
+            ipAddress: ipAddress || null,
+            country: country || null,
+            signupMethod: provider,
+            gclid: finalProfile?.gclid || updateData.gclid || null,
+            urlParams: urlParams, // Already an object
+            referer: finalProfile?.initial_referer || updateData.initial_referer || null
+          };
+          
+          console.log('📋 [OAuth Profile Sync] Webhook payload:', webhookData);
+          console.log('📤 [OAuth Profile Sync] Sending webhook request...');
+          
+          const webhookResponse = await fetch(
+            'https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(webhookData)
+            }
+          );
+          
+          if (webhookResponse.ok) {
+            // Mark webhook as sent (deduplication)
+            localStorage.setItem(webhookSentKey, new Date().toISOString());
+            console.log('✅ [OAuth Profile Sync] Webhook sent successfully and marked as sent');
+          } else {
+            const errorText = await webhookResponse.text();
+            console.error('❌ [OAuth Profile Sync] Webhook failed:', errorText);
+          }
+        } catch (webhookError) {
+          console.error('[OAuth Profile Sync] ❌ Webhook error:', webhookError);
         }
+      } else if (isNewSignup && webhookAlreadySent) {
+        console.log('⏭️  [OAuth Profile Sync] Webhook already sent for this user, skipping');
       }
     } catch (error) {
       // OAuth profile sync failed
