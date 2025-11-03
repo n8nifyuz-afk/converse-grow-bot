@@ -1956,6 +1956,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const updateData: any = {
           oauth_provider: null,
           oauth_metadata: null,
+          external_id: null, // CRITICAL: Clear external_id to allow re-signup with same OAuth account
           updated_at: new Date().toISOString()
         };
 
