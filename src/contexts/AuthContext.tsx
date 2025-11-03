@@ -148,6 +148,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const provider = isGoogleSignIn ? 'google' : isAppleSignIn ? 'apple' : isMicrosoftSignIn ? 'microsoft' : 'email';
       
+      console.log(`[OAuth Profile Sync] Detected provider: ${provider}`, {
+        isGoogleSignIn,
+        isAppleSignIn,
+        isMicrosoftSignIn,
+        metadata_iss: metadata?.iss,
+        app_provider: appMetadata?.provider
+      });
+      
       // REMOVED: updateLoginGeoData call - profile is already updated by log-user-activity edge function
       
       // Only sync profile data for OAuth providers
@@ -565,7 +573,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Reduced throttle from 60s to 5s to ensure logins are properly logged
             if (!lastActivityLog || now - parseInt(lastActivityLog) > 5000) {
               sessionStorage.setItem('last_activity_log', now.toString());
-              console.log('[Auth] ⏰ Logging login activity');
+              const provider = session.user.app_metadata?.provider || 'email';
+              console.log(`[Auth] ⏰ Logging ${provider} login activity for user:`, session.user.id);
               await logUserActivity(session.user.id, 'login');
             } else {
               console.log('[Auth] ⏭️ Skipping activity log - throttled (logged', Math.floor((now - parseInt(lastActivityLog)) / 1000), 'seconds ago)');
