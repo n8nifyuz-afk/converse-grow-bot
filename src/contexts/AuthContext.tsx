@@ -165,6 +165,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         oauth_metadata: metadata // Store COMPLETE OAuth metadata for admin analysis
       };
       
+      // CRITICAL: Sync GCLID and url_params from localStorage if not already in database
+      const gclid = localStorage.getItem('gclid');
+      const storedUrlParams = localStorage.getItem('url_params');
+      const referer = document.referrer || 'Direct';
+      
+      // Only update GCLID if not already set in database
+      if (gclid && !currentProfile?.gclid) {
+        updateData.gclid = gclid;
+      }
+      
+      // Only update url_params if not already set in database
+      if (storedUrlParams && !currentProfile?.url_params) {
+        try {
+          updateData.url_params = JSON.parse(storedUrlParams);
+        } catch (e) {
+          console.warn('Failed to parse stored url_params:', e);
+        }
+      }
+      
+      // Only update referer if not already set in database
+      if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
+        updateData.initial_referer = referer;
+      }
+
+      
       // Extract display name (works for all providers)
       const latestName = metadata?.full_name || metadata?.name || metadata?.display_name || metadata?.given_name || currentProfile?.display_name;
       if (latestName && currentProfile?.display_name !== latestName) {
