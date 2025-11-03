@@ -273,6 +273,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let initialCheckComplete = false;
+    let isInitialSessionLoad = true; // Track if this is initial page load
     let authStateDebounceTimer: NodeJS.Timeout | null = null;
     
     // Check for OAuth errors in URL parameters (e.g., after failed account linking)
@@ -341,13 +342,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // CRITICAL: Debounce async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Log activity for EVERY sign in/sign up - only prevent rapid duplicates within 3 seconds
-            const lastActivityLog = sessionStorage.getItem('last_activity_log');
-            const now = Date.now();
-            
-            if (!lastActivityLog || now - parseInt(lastActivityLog) > 3000) {
-              sessionStorage.setItem('last_activity_log', now.toString());
-              await logUserActivity(session.user.id, 'login');
+            // ONLY log activity for ACTUAL sign in/sign up - NOT for session restoration on page load/refresh
+            if (!isInitialSessionLoad) {
+              const lastActivityLog = sessionStorage.getItem('last_activity_log');
+              const now = Date.now();
+              
+              // Prevent duplicate logs within 3 seconds
+              if (!lastActivityLog || now - parseInt(lastActivityLog) > 3000) {
+                sessionStorage.setItem('last_activity_log', now.toString());
+                console.log('🔐 Logging user activity for actual sign in/sign up');
+                await logUserActivity(session.user.id, 'login');
+              }
+            } else {
+              console.log('⏭️ Skipping activity log - this is session restoration on page load');
             }
             
             // Fetch profile and sync OAuth data - DEBOUNCED
@@ -397,6 +404,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(data.session);
         setUser(data.session.user);
       }
+      
+      // Mark initial session check as complete
+      isInitialSessionLoad = false;
       
       // Mark initial check as complete and set loading to false
       initialCheckComplete = true;
