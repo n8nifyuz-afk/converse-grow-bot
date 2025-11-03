@@ -101,8 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // CRITICAL: Track last activity log to prevent duplicates (session token + timestamp)
   const lastActivityLogRef = useRef<{ sessionToken: string; timestamp: number } | null>(null);
   
-  // CRITICAL: Track component mount time to prevent logging on initial page load
-  const mountTimeRef = useRef(Date.now());
+  // Removed: Using sessionStorage 'oauth_login_initiated' instead (already set in signInWithGoogle/Apple/Email)
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -563,11 +562,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const timeSinceLastLog = lastLog ? now - lastLog.timestamp : Infinity;
           const hasEnoughTimePassed = timeSinceLastLog > 10000; // 10 seconds minimum between logs
           
-          // CRITICAL: Skip logging if this SIGNED_IN event happened within 2 seconds of component mount
-          // This prevents logging on initial page load / session restoration
-          const timeSinceMount = now - mountTimeRef.current;
-          const isInitialLoad = timeSinceMount < 2000; // Skip events within first 2 seconds
-          const shouldLogActivity = !isInitialLoad && (isNewSession || hasEnoughTimePassed);
+          // CRITICAL: Only log activity during actual auth flows, NOT session restorations
+          // Check if this is an OAuth callback (URL contains code/access_token)
+          const urlParams = new URLSearchParams(window.location.search);
+          const isOAuthCallback = urlParams.has('code') || urlParams.has('access_token') || window.location.hash.includes('access_token');
+          
+          // Check if user explicitly initiated OAuth login (set in signInWithGoogle/Apple/Email)
+          const wasOAuthInitiated = sessionStorage.getItem('oauth_login_initiated') === 'true';
+          
+          // Only log if this is an OAuth callback AND user explicitly initiated OAuth
+          // NEVER log for session restorations (page refresh with existing session)
+          const shouldLogActivity = isOAuthCallback && wasOAuthInitiated;
           
           if (shouldLogActivity) {
             // Detect if this is a SIGNUP or LOGIN
@@ -582,10 +587,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               userId: session.user.id,
               activityType,
               isNewSession,
-              timeSinceMount: `${Math.round(timeSinceMount / 1000)}s`,
+              isOAuthCallback,
+              wasOAuthInitiated,
               timeSinceCreation: `${Math.round(timeSinceCreation / 1000)}s ago`,
               timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${Math.round(timeSinceLastLog)}ms ago`
             });
+            
+            // Clear OAuth initiation flag after logging
+            sessionStorage.removeItem('oauth_login_initiated');
             
             // Update last activity log tracking
             lastActivityLogRef.current = {
@@ -598,10 +607,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('❌ [Auth] Failed to log activity:', error);
             });
           } else {
-            console.log(`[Auth] ⏭️ SKIPPING activity log`, {
-              reason: isInitialLoad ? 'initial page load' : 'too soon after last event',
-              timeSinceMount: `${Math.round(timeSinceMount / 1000)}s`,
-              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${Math.round(timeSinceLastLog)}ms ago`
+            console.log(`[Auth] ⏭️ SKIPPING activity log (session restoration)`, {
+              isOAuthCallback,
+              wasOAuthInitiated,
+              isNewSession,
+              event,
+              reason: 'Not an actual sign-in - just session restoration'
             });
           }
           
