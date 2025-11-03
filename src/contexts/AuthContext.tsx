@@ -668,10 +668,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password
     });
     
-    // Log activity only on successful actual sign-in
-    if (!error && data?.user) {
-      await logUserActivity(data.user.id, 'login');
-    }
+    // Activity logging is handled by onAuthStateChange - no need to log here
     
     // If login fails, check if user exists with OAuth provider
     if (error && error.message?.toLowerCase().includes('invalid')) {
@@ -800,10 +797,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       type: 'sms'
     });
     
-    // Log activity on successful phone verification
-    if (!error && data?.user) {
-      await logUserActivity(data.user.id, 'login');
-    }
+    // Activity logging is handled by onAuthStateChange - no need to log here
     
     return { error };
   };
