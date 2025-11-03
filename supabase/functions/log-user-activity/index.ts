@@ -88,25 +88,33 @@ serve(async (req) => {
 
       const currentLoginCount = currentProfile?.login_count || 0
 
-      // Update profile with incremented login count
+      // CRITICAL: Only increment login_count for actual login activities, not signups
+      const updateData: any = {
+        browser_info: browserInfo,
+        device_info: deviceInfo,
+        ip_address: ipAddress,
+        country: country,
+        timezone: deviceInfo?.timezone,
+        locale: deviceInfo?.language,
+        last_login_at: new Date().toISOString()
+      }
+
+      // Only increment login count if this is a login activity
+      if (activityType === 'login') {
+        updateData.login_count = currentLoginCount + 1
+      }
+
+      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          browser_info: browserInfo,
-          device_info: deviceInfo,
-          ip_address: ipAddress,
-          country: country,
-          timezone: deviceInfo?.timezone,
-          locale: deviceInfo?.language,
-          last_login_at: new Date().toISOString(),
-          login_count: currentLoginCount + 1
-        })
+        .update(updateData)
         .eq('user_id', userId)
 
       if (profileError) {
         console.warn('Failed to update profile:', profileError)
       } else {
-        console.log(`Updated profile for user ${userId} - login count: ${currentLoginCount + 1}`)
+        const newCount = activityType === 'login' ? currentLoginCount + 1 : currentLoginCount
+        console.log(`Updated profile for user ${userId} - login count: ${newCount}`)
       }
     }
 
