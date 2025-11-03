@@ -279,6 +279,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .from('profiles')
           .update(updateData)
           .eq('user_id', user.id);
+        
+        // CRITICAL: Send webhook for new OAuth signups when GCLID is captured
+        // Check if this is a new signup (created within last 5 minutes) AND we just added GCLID
+        const isNewSignup = currentProfile.created_at && 
+          (new Date().getTime() - new Date(currentProfile.created_at).getTime()) < 5 * 60 * 1000;
+        const justAddedGclid = updateData.gclid && !currentProfile.gclid;
+        
+        if (isNewSignup && (justAddedGclid || updateData.url_params || updateData.initial_referer)) {
+          console.log('[OAuth Profile Sync] Sending webhook for new signup with tracking data');
+          
+          try {
+            const webhookResponse = await fetch(
+              'https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  userId: user.id,
+                  email: user.email || currentProfile.email,
+                  username: updateData.display_name || currentProfile.display_name,
+                  ipAddress: currentProfile.ip_address,
+                  country: currentProfile.country,
+                  signupMethod: provider,
+                  gclid: updateData.gclid || currentProfile.gclid,
+                  urlParams: updateData.url_params || currentProfile.url_params || {},
+                  referer: updateData.initial_referer || currentProfile.initial_referer
+                })
+              }
+            );
+            
+            if (webhookResponse.ok) {
+              console.log('[OAuth Profile Sync] ✅ Webhook sent successfully');
+            } else {
+              console.error('[OAuth Profile Sync] ❌ Webhook failed:', await webhookResponse.text());
+            }
+          } catch (webhookError) {
+            console.error('[OAuth Profile Sync] ❌ Webhook error:', webhookError);
+          }
+        }
       }
     } catch (error) {
       // OAuth profile sync failed
@@ -670,6 +711,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (country) {
       signupData.country = country;
+    }
+    
+    // CRITICAL: Add Google Ads tracking data from localStorage (stored by GTM)
+    const gclid = localStorage.getItem('gclid');
+    if (gclid) {
+      signupData.gclid = gclid;
+    }
+    
+    const urlParamsStr = localStorage.getItem('url_params');
+    if (urlParamsStr) {
+      try {
+        signupData.url_params = JSON.parse(urlParamsStr);
+      } catch (e) {
+        console.error('[SIGNUP] Failed to parse url_params:', e);
+      }
+    }
+    
+    // Capture referer for attribution
+    if (document.referrer) {
+      signupData.referer = document.referrer;
     }
     
     const { error, data } = await supabase.auth.signUp({
