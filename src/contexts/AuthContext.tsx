@@ -209,27 +209,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         currentProfile_initial_referer: currentProfile?.initial_referer
       });
       
-      // Only update GCLID if not already set in database
+      // CRITICAL: ALWAYS preserve existing tracking data or add new data from localStorage
+      // This ensures we never lose tracking data on subsequent profile updates
       if (gclid && !currentProfile?.gclid) {
         updateData.gclid = gclid;
-        console.log('[OAuth Profile Sync] Will save GCLID:', gclid);
+        console.log('[OAuth Profile Sync] Will save NEW GCLID from localStorage:', gclid);
+      } else if (currentProfile?.gclid && !updateData.gclid) {
+        updateData.gclid = currentProfile.gclid;
+        console.log('[OAuth Profile Sync] Preserving EXISTING GCLID:', currentProfile.gclid);
       }
       
-      // Only update url_params if not already set in database
+      // CRITICAL: ALWAYS preserve existing url_params or add new from localStorage
       if (storedUrlParams && !currentProfile?.url_params) {
         try {
           updateData.url_params = JSON.parse(storedUrlParams);
-          console.log('[OAuth Profile Sync] Will save url_params:', updateData.url_params);
+          console.log('[OAuth Profile Sync] Will save NEW url_params from localStorage:', updateData.url_params);
         } catch (e) {
           console.warn('[OAuth Profile Sync] Failed to parse stored url_params:', e);
         }
+      } else if (currentProfile?.url_params && !updateData.url_params) {
+        updateData.url_params = currentProfile.url_params;
+        console.log('[OAuth Profile Sync] Preserving EXISTING url_params');
       }
       
-      // Only update referer if not already set in database (prefer stored over document.referrer)
+      // CRITICAL: ALWAYS preserve existing referer or add new from localStorage/document
       const referer = storedReferer || document.referrer || 'Direct';
       if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
         updateData.initial_referer = referer;
-        console.log('[OAuth Profile Sync] Will save initial_referer:', referer);
+        console.log('[OAuth Profile Sync] Will save NEW initial_referer:', referer);
+      } else if (currentProfile?.initial_referer && !updateData.initial_referer) {
+        updateData.initial_referer = currentProfile.initial_referer;
+        console.log('[OAuth Profile Sync] Preserving EXISTING initial_referer:', currentProfile.initial_referer);
       }
 
       
