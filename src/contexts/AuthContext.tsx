@@ -101,7 +101,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // CRITICAL: Track last activity log to prevent duplicates (session token + timestamp)
   const lastActivityLogRef = useRef<{ sessionToken: string; timestamp: number } | null>(null);
   
-  // Removed: Using sessionStorage 'oauth_login_initiated' instead (already set in signInWithGoogle/Apple/Email)
+  // CRITICAL: Capture OAuth callback state IMMEDIATELY on component mount (before URL gets cleaned)
+  const initialOAuthStateRef = useRef<{
+    isOAuthCallback: boolean;
+    wasOAuthInitiated: boolean;
+    captured: boolean;
+  }>({
+    isOAuthCallback: false,
+    wasOAuthInitiated: false,
+    captured: false
+  });
+  
+  // Capture OAuth state on mount (only once)
+  if (!initialOAuthStateRef.current.captured) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const isOAuthCallback = 
+      urlParams.has('code') || 
+      urlParams.has('access_token') || 
+      hashParams.has('access_token');
+    const wasOAuthInitiated = sessionStorage.getItem('oauth_login_initiated') === 'true';
+    
+    initialOAuthStateRef.current = {
+      isOAuthCallback,
+      wasOAuthInitiated,
+      captured: true
+    };
+    
+    console.log('[Auth] 📸 Captured OAuth state on mount:', {
+      isOAuthCallback,
+      wasOAuthInitiated,
+      url: window.location.href
+    });
+  }
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -563,12 +595,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const hasEnoughTimePassed = timeSinceLastLog > 10000; // 10 seconds minimum between logs
           
           // CRITICAL: Only log activity during actual auth flows, NOT session restorations
-          // Check if this is an OAuth callback (URL contains code/access_token)
-          const urlParams = new URLSearchParams(window.location.search);
-          const isOAuthCallback = urlParams.has('code') || urlParams.has('access_token') || window.location.hash.includes('access_token');
-          
-          // Check if user explicitly initiated OAuth login (set in signInWithGoogle/Apple/Email)
-          const wasOAuthInitiated = sessionStorage.getItem('oauth_login_initiated') === 'true';
+          // Use the CAPTURED OAuth state from mount (before URL gets cleaned by router)
+          const { isOAuthCallback, wasOAuthInitiated } = initialOAuthStateRef.current;
           
           // Only log if this is an OAuth callback AND user explicitly initiated OAuth
           // NEVER log for session restorations (page refresh with existing session)
