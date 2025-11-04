@@ -303,7 +303,7 @@ export default function PhoneAuthModal({
           await supabase.functions.invoke('send-subscriber-webhook', {
             body: {
               userId: user?.id,
-              email: user?.email || null,
+              email: user?.email || phone,
               username: fullName,
               signupMethod: 'phone',
               phoneNumber: phone,
