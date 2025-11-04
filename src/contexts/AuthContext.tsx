@@ -76,6 +76,41 @@ const clearCachedSubscription = () => {
   }
 };
 
+// CRITICAL: Universal auth initiation tracking using sessionStorage
+// These are exported so components like GoogleOneTab can use them
+// This persists across OAuth redirects and page reloads
+export const markAuthInitiated = () => {
+  sessionStorage.setItem('auth_initiated', 'true');
+  sessionStorage.setItem('auth_initiated_time', Date.now().toString());
+  console.log('[Auth] 🎯 User explicitly initiated authentication');
+};
+
+// Helper to check if auth was recently initiated (within last 30 seconds)
+export const wasAuthRecentlyInitiated = () => {
+  const initiated = sessionStorage.getItem('auth_initiated') === 'true';
+  const timeStr = sessionStorage.getItem('auth_initiated_time');
+  
+  if (!initiated || !timeStr) return false;
+  
+  const timestamp = parseInt(timeStr);
+  const timeSinceInitiation = Date.now() - timestamp;
+  const isRecent = timeSinceInitiation < 30000; // 30 seconds
+  
+  if (!isRecent) {
+    // Clear if too old
+    clearAuthInitiated();
+    return false;
+  }
+  
+  return true;
+};
+
+// Helper to clear auth initiated flag
+export const clearAuthInitiated = () => {
+  sessionStorage.removeItem('auth_initiated');
+  sessionStorage.removeItem('auth_initiated_time');
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -100,41 +135,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   // CRITICAL: Track last activity log to prevent duplicates (session token + timestamp)
   const lastActivityLogRef = useRef<{ sessionToken: string; timestamp: number } | null>(null);
-  
-  // CRITICAL: Universal auth initiation tracking using sessionStorage
-  // This persists across OAuth redirects and page reloads
-  const markAuthInitiated = () => {
-    sessionStorage.setItem('auth_initiated', 'true');
-    sessionStorage.setItem('auth_initiated_time', Date.now().toString());
-    console.log('[Auth] 🎯 User explicitly initiated authentication');
-  };
-  
-  // Helper to check if auth was recently initiated (within last 30 seconds)
-  const wasAuthRecentlyInitiated = () => {
-    const initiated = sessionStorage.getItem('auth_initiated') === 'true';
-    const timeStr = sessionStorage.getItem('auth_initiated_time');
-    
-    if (!initiated || !timeStr) return false;
-    
-    const timestamp = parseInt(timeStr);
-    const timeSinceInitiation = Date.now() - timestamp;
-    const isRecent = timeSinceInitiation < 30000; // 30 seconds
-    
-    if (!isRecent) {
-      // Clear if too old
-      sessionStorage.removeItem('auth_initiated');
-      sessionStorage.removeItem('auth_initiated_time');
-      return false;
-    }
-    
-    return true;
-  };
-  
-  // Helper to clear auth initiated flag
-  const clearAuthInitiated = () => {
-    sessionStorage.removeItem('auth_initiated');
-    sessionStorage.removeItem('auth_initiated_time');
-  };
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
