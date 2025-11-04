@@ -287,6 +287,7 @@ export default function Index() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const tempTranscriptRef = useRef<string>('');
   const {
     isMobile
   } = useSidebar();
@@ -458,6 +459,7 @@ export default function Index() {
           for (let i = 0; i < event.results.length; i++) {
             transcript += event.results[i][0].transcript;
           }
+          tempTranscriptRef.current = transcript;
           setTempTranscript(transcript);
         };
         
@@ -539,9 +541,10 @@ export default function Index() {
     setIsRecording(false);
     setAudioLevels(Array(100).fill(0));
     
-    // Now set the message from temporary transcript
-    setMessage(tempTranscript);
+    // Now set the message from temporary transcript ref (not state to avoid stale closure)
+    setMessage(tempTranscriptRef.current);
     setTempTranscript('');
+    tempTranscriptRef.current = '';
     
     // Focus textarea after stopping to show the text
     setTimeout(() => {
@@ -578,6 +581,7 @@ export default function Index() {
     
     // Discard the transcript without saving
     setTempTranscript('');
+    tempTranscriptRef.current = '';
   };
   const handleStartChat = async () => {
     console.log('[INDEX] ✅ handleStartChat CALLED', {
