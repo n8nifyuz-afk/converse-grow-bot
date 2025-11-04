@@ -235,7 +235,7 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          request_three_d_secure: 'automatic', // Authenticate during checkout, then reuse for off-session charges
+          request_three_d_secure: 'always', // Always request 3DS to authenticate payment method for future recurring charges
         },
       },
       automatic_tax: {
