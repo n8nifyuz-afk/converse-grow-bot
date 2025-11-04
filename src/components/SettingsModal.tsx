@@ -364,36 +364,77 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     });
 
     try {
-      // Fetch all chats and messages
+      console.log('[EXPORT] Starting export for user:', user.id);
+      
+      // Fetch all chats first
       const { data: chats, error: chatsError } = await supabase
         .from('chats')
-        .select(`
-          *,
-          messages (*)
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
-      if (chatsError) throw chatsError;
+      if (chatsError) {
+        console.error('[EXPORT] Error fetching chats:', chatsError);
+        throw new Error(`Failed to fetch chats: ${chatsError.message}`);
+      }
 
-      // Fetch user profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      console.log(`[EXPORT] Found ${chats?.length || 0} chats`);
 
-      if (profileError) throw profileError;
+      if (!chats || chats.length === 0) {
+        toast({
+          title: t('toast.exportCompleted'),
+          description: 'No chats to export',
+        });
+        return;
+      }
+
+      // Fetch messages for each chat separately to avoid timeouts
+      const chatsWithMessages = await Promise.all(
+        chats.map(async (chat) => {
+          const { data: messages, error: messagesError } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('chat_id', chat.id)
+            .order('created_at', { ascending: true });
+
+          if (messagesError) {
+            console.error(`[EXPORT] Error fetching messages for chat ${chat.id}:`, messagesError);
+            return { ...chat, messages: [] };
+          }
+
+          return { ...chat, messages: messages || [] };
+        })
+      );
+
+      console.log('[EXPORT] Fetched all messages');
+
+      // Fetch user profile (optional - don't fail export if missing)
+      let profile = null;
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (!profileError) {
+          profile = profileData;
+        }
+      } catch (error) {
+        console.warn('[EXPORT] Could not fetch profile:', error);
+      }
 
       // Create ZIP file
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
 
+      console.log('[EXPORT] Creating ZIP file');
+
       // 1. conversations.json
       const conversationsJson = {
         exportDate: new Date().toISOString(),
-        totalChats: chats?.length || 0,
-        conversations: chats?.map(chat => ({
+        totalChats: chatsWithMessages.length,
+        conversations: chatsWithMessages.map(chat => ({
           id: chat.id,
           title: chat.title,
           createdAt: chat.created_at,
@@ -405,7 +446,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             createdAt: msg.created_at,
             fileAttachments: msg.file_attachments
           }))
-        })) || []
+        }))
       };
       zip.file('conversations.json', JSON.stringify(conversationsJson, null, 2));
 
@@ -436,12 +477,12 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     <div class="container">
         <div class="header">
             <h1>Chat Export</h1>
-            <p><strong>User:</strong> ${profile?.display_name || 'Unknown'} (${profile?.email || 'No email'})</p>
+            <p><strong>User:</strong> ${profile?.display_name || 'Unknown'} (${profile?.email || user.email || 'No email'})</p>
             <p><strong>Export Date:</strong> ${new Date().toLocaleString()}</p>
-            <p><strong>Total Conversations:</strong> ${chats?.length || 0}</p>
+            <p><strong>Total Conversations:</strong> ${chatsWithMessages.length}</p>
         </div>
         
-        ${chats?.map(chat => `
+        ${chatsWithMessages.map(chat => `
             <div class="chat">
                 <div class="chat-title">${chat.title}</div>
                 <div class="chat-meta">
@@ -456,7 +497,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     </div>
                 `).join('')}
             </div>
-        `).join('') || '<p>No conversations found.</p>'}
+        `).join('')}
     </div>
 </body>
 </html>`;
@@ -475,16 +516,25 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           accentColor: accentColor
         },
         statistics: {
-          totalChats: chats?.length || 0,
-          totalMessages: chats?.reduce((acc, chat) => acc + chat.messages.length, 0) || 0,
-          firstChatDate: chats?.[0]?.created_at,
-          lastChatDate: chats?.[chats.length - 1]?.created_at
+          totalChats: chatsWithMessages.length,
+          totalMessages: chatsWithMessages.reduce((acc, chat) => acc + chat.messages.length, 0),
+          firstChatDate: chatsWithMessages[0]?.created_at,
+          lastChatDate: chatsWithMessages[chatsWithMessages.length - 1]?.created_at
         }
       };
       zip.file('metadata.json', JSON.stringify(metadata, null, 2));
 
+      console.log('[EXPORT] Generating ZIP file');
+
       // Generate and download ZIP
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipBlob = await zip.generateAsync({ 
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 }
+      });
+      
+      console.log('[EXPORT] ZIP file generated, size:', zipBlob.size);
+      
       const url = URL.createObjectURL(zipBlob);
       const link = document.createElement('a');
       link.href = url;
@@ -494,15 +544,28 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
+      console.log('[EXPORT] Export completed successfully');
+
       toast({
         title: t('toast.exportCompleted'),
         description: t('toast.exportCompletedDesc'),
       });
-    } catch (error) {
-      console.error('Export error:', error);
+    } catch (error: any) {
+      console.error('[EXPORT] Export error:', error);
+      
+      // Provide more specific error messages
+      let errorDescription = t('toast.exportFailedDesc');
+      if (error.message) {
+        errorDescription = error.message;
+      } else if (error.code === 'PGRST116') {
+        errorDescription = 'Database query failed - please try again';
+      } else if (error.name === 'QuotaExceededError') {
+        errorDescription = 'Not enough storage space to create export file';
+      }
+      
       toast({
         title: t('toast.exportFailed'),
-        description: t('toast.exportFailedDesc'),
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {
