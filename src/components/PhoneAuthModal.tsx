@@ -42,17 +42,19 @@ export default function PhoneAuthModal({
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // Close modal when user is authenticated (except in complete-profile mode)
+  // Close modal when user is authenticated (except in complete-profile or verify mode)
   useEffect(() => {
     console.log('[PHONE-AUTH-EFFECT] State check:', { 
       hasUser: !!user, 
       isOpen, 
       mode,
-      shouldClose: user && isOpen && mode !== 'complete-profile'
+      shouldClose: user && isOpen && mode === 'phone'
     });
     
-    if (user && isOpen && mode !== 'complete-profile') {
-      console.log('[PHONE-AUTH-EFFECT] 🚪 Closing modal - user authenticated and not in profile completion');
+    // Only auto-close if we're in 'phone' mode and user is authenticated
+    // Don't close during 'verify' or 'complete-profile' modes
+    if (user && isOpen && mode === 'phone') {
+      console.log('[PHONE-AUTH-EFFECT] 🚪 Closing modal - user authenticated and in phone mode');
       onClose();
       onSuccess?.();
     }
