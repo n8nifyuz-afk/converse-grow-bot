@@ -962,6 +962,149 @@
       "2": "Analizzare contenuto nutrizionale",
       "3": "Verificare informazioni dietetiche",
       "4": "Calcolare calorie del pasto"
+    },
+    "categories": {
+      "creative": "Creazione creativa",
+      "productivity": "Produttività",
+      "learning": "Apprendimento",
+      "technical": "Assistenza tecnica",
+      "writing": "Miglioramento della scrittura"
+    },
+    "suggestions": {
+      "creative1": "Scrivi una storia breve su...",
+      "creative2": "Genera idee per...",
+      "creative3": "Crea un poema su...",
+      "productivity1": "Riassumi questo documento",
+      "productivity2": "Crea un piano d'azione per...",
+      "productivity3": "Organizza queste informazioni su...",
+      "learning1": "Spiega il concetto di...",
+      "learning2": "Quali sono le differenze tra...",
+      "learning3": "Insegnami riguardo a...",
+      "technical1": "Come posso risolvere...",
+      "technical2": "Qual è il modo migliore per...",
+      "technical3": "Aiutami a capire...",
+      "writing1": "Migliora questo testo",
+      "writing2": "Rendilo più professionale",
+      "writing3": "Correggi grammatica ed ortografia"
     }
+  },
+  "help": {
+    "title": "Centro Assistenza",
+    "subtitle": "Trova risposte alle domande frequenti e impara a sfruttare al meglio la nostra piattaforma",
+    "searchPlaceholder": "Cerca nella guida...",
+    "noResults": "Nessun risultato trovato per la tua ricerca.",
+    "quickLinks": "Link Rapidi",
+    "contactSupport": "Contatta l'Assistenza",
+    "sections": {
+      "billing": {
+        "title": "Fatturazione e Pagamenti",
+        "questions": {
+          "q1": {
+            "question": "Come aggiorno il mio piano?",
+            "answer": "Puoi aggiornare il tuo piano in qualsiasi momento accedendo alle tue Impostazioni Account e selezionando 'Abbonamento'. Scegli il piano desiderato e segui le istruzioni di pagamento."
+          },
+          "q2": {
+            "question": "Quali metodi di pagamento accettate?",
+            "answer": "Accettiamo tutte le principali carte di credito e debito, incluse Visa, MasterCard, American Express e Discover. Gestiamo i pagamenti in modo sicuro tramite Stripe."
+          },
+          "q3": {
+            "question": "Posso cancellare in qualsiasi momento?",
+            "answer": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento. Continuerai ad avere accesso alle funzionalità premium fino alla fine del periodo di fatturazione corrente."
+          },
+          "q4": {
+            "question": "Offrite rimborsi?",
+            "answer": "Offriamo rimborsi caso per caso. Contatta il nostro team di assistenza con i dettagli della tua richiesta e ti aiuteremo a risolvere qualsiasi problema."
+          }
+        }
+      },
+      "account": {
+        "title": "Gestione Account",
+        "questions": {
+          "q1": {
+            "question": "Come elimino il mio account?",
+            "answer": "Per eliminare il tuo account, vai su Impostazioni > Controllo Dati e seleziona 'Elimina Account'. Tieni presente che questa azione è irreversibile e rimuoverà permanentemente tutti i tuoi dati."
+          },
+          "q2": {
+            "question": "Come cambio la mia email?",
+            "answer": "Vai su Impostazioni > Profilo per aggiornare il tuo indirizzo email. Dovrai verificare il nuovo indirizzo email prima che le modifiche abbiano effetto."
+          },
+          "q3": {
+            "question": "Posso collegare account multipli?",
+            "answer": "Sì, puoi collegare il tuo account email con l'accesso Google per un'esperienza di accesso senza interruzioni su entrambi i metodi."
+          },
+          "q4": {
+            "question": "Come resetto la mia password?",
+            "answer": "Clicca su 'Password dimenticata?' nella pagina di accesso. Ti invieremo un link per resettare la password via email. Segui le istruzioni nell'email per creare una nuova password."
+          }
+        }
+      },
+      "ai": {
+        "title": "Modelli e Funzionalità AI",
+        "questions": {
+          "q1": {
+            "question": "Quali modelli AI sono disponibili?",
+            "answer": "Offriamo accesso a diversi modelli AI leader, inclusi ChatGPT (GPT-4), Claude (Opus, Sonnet, Haiku), Gemini (Pro, Flash) e DeepSeek. Ogni modello ha punti di forza unici per compiti diversi."
+          },
+          "q2": {
+            "question": "Come uso la generazione di immagini?",
+            "answer": "Vai alla funzionalità Genera Immagini dal menu chat. Descrivi l'immagine che vuoi creare e il nostro AI genererà immagini personalizzate basate sul tuo prompt. Gli utenti Pro hanno accesso a funzionalità avanzate e più generazioni."
+          },
+          "q3": {
+            "question": "Posso caricare e analizzare immagini?",
+            "answer": "Sì, puoi caricare immagini nella chat e i nostri modelli AI possono analizzarle, rispondere a domande su di esse e fornire informazioni basate sul contenuto visivo."
+          },
+          "q4": {
+            "question": "Qual è il modo migliore per usare ciascun modello AI?",
+            "answer": "ChatGPT eccelle nelle conversazioni generali e nella risoluzione creativa di problemi. Claude è ottimo per compiti analitici e scrittura lunga. Gemini è veloce e efficiente per domande rapide. DeepSeek è specializzato in compiti tecnici e di codifica."
+          }
+        }
+      },
+      "technical": {
+        "title": "Supporto Tecnico",
+        "questions": {
+          "q1": {
+            "question": "Quali browser sono supportati?",
+            "answer": "Supportiamo le versioni più recenti di Chrome, Firefox, Safari ed Edge. Per un'esperienza ottimale, consigliamo di mantenere il browser aggiornato all'ultima versione."
+          },
+          "q2": {
+            "question": "Posso usare l'app su mobile?",
+            "answer": "Sì! La nostra piattaforma è completamente responsiva e funziona perfettamente su tutti i dispositivi, inclusi smartphone e tablet."
+          },
+          "q3": {
+            "question": "Come esporto le mie conversazioni?",
+            "answer": "Vai su Impostazioni > Controllo Dati e seleziona 'Esporta Dati'. Riceverai un file JSON contenente tutte le tue conversazioni che puoi salvare o trasferire."
+          },
+          "q4": {
+            "question": "Cosa faccio se incontro un errore?",
+            "answer": "Se incontri problemi, prova prima ad aggiornare la pagina. Se il problema persiste, contatta il nostro team di assistenza con una descrizione dettagliata del problema e ti aiuteremo prontamente."
+          }
+        }
+      },
+      "privacy": {
+        "title": "Privacy e Sicurezza",
+        "questions": {
+          "q1": {
+            "question": "Come vengono usati i miei dati?",
+            "answer": "I tuoi dati vengono usati esclusivamente per fornire e migliorare i nostri servizi. Non vendiamo mai i tuoi dati personali a terze parti. Visita la nostra Informativa sulla Privacy per informazioni dettagliate."
+          },
+          "q2": {
+            "question": "Le mie conversazioni sono private?",
+            "answer": "Sì, le tue conversazioni sono private e criptate. Solo tu e il nostro sistema AI hanno accesso alle tue chat. Non condividiamo il contenuto delle tue conversazioni con nessuno."
+          },
+          "q3": {
+            "question": "Posso eliminare i miei dati?",
+            "answer": "Assolutamente. Puoi eliminare conversazioni individuali in qualsiasi momento, oppure puoi richiedere la completa cancellazione dei dati attraverso le Impostazioni Account. Rispettiamo i tuoi diritti sui dati."
+          },
+          "q4": {
+            "question": "Come proteggete il mio account?",
+            "answer": "Usiamo crittografia di livello industriale, connessioni sicure (HTTPS) e regolari verifiche di sicurezza per proteggere il tuo account. Ti consigliamo di usare una password forte e unica."
+          }
+        }
+      }
+    },
+    "stillNeedHelp": "Hai ancora bisogno di aiuto?",
+    "contactDescription": "Non riesci a trovare la risposta che cerchi? Il nostro team di assistenza è qui per aiutarti.",
+    "emailUs": "Inviaci un'email",
+    "visitContact": "Visita la nostra pagina di contatto"
   }
 }
