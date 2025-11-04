@@ -132,20 +132,25 @@ export default function PhoneAuthModal({
     try {
       console.log('[PHONE-AUTH] 🔐 Verifying OTP...');
       
+      // CRITICAL: Set mode BEFORE verifyOtp to prevent modal from closing
+      // when user becomes authenticated
+      setMode('complete-profile');
+      
       const { error } = await verifyOtp(phone, otp);
       
       if (error) {
         console.error('[PHONE-AUTH] ❌ OTP verification failed:', error);
         setError("Invalid verification code. Please try again.");
+        setMode('verify'); // Reset back to verify on error
         return;
       }
 
       console.log('[PHONE-AUTH] ✅ OTP verified successfully');
       
-      // Wait a bit for auth state to stabilize
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for auth state to stabilize
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Check if profile is complete by checking user metadata
+      // Check if profile is complete
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       
       console.log('[PHONE-AUTH] 📊 Current user metadata:', {
@@ -155,20 +160,21 @@ export default function PhoneAuthModal({
         full_metadata: currentUser?.user_metadata
       });
       
-      // Check if this is a new signup (no profile data)
-      if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
-        console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
-        setMode('complete-profile');
-        setProfileStep(1);
-      } else {
+      // If profile is already complete (returning user), close modal
+      if (currentUser?.user_metadata?.first_name && currentUser?.user_metadata?.date_of_birth) {
         console.log('[PHONE-AUTH] ✅ Profile already complete - closing modal');
         await refreshUserProfile();
         onClose();
         onSuccess?.();
+      } else {
+        // New user - profile form will show because mode is already 'complete-profile'
+        console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
+        setProfileStep(1);
       }
     } catch (error) {
       console.error('[PHONE-AUTH] ❌ Verification error:', error);
       setError("An error occurred during verification.");
+      setMode('verify');
     } finally {
       setLoading(false);
     }
