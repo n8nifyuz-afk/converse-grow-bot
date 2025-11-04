@@ -524,6 +524,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // CRITICAL: Only synchronous state updates here to prevent auth loops
         if (event === 'SIGNED_IN' && session) {
+          console.log('🔐 [AUTH STATE] SIGNED_IN event triggered');
+          console.log('🔐 [AUTH STATE] User ID:', session.user.id);
+          console.log('🔐 [AUTH STATE] User email:', session.user.email);
+          console.log('🔐 [AUTH STATE] User identities:', session.user.identities?.map(id => ({
+            provider: id.provider,
+            identity_id: id.identity_id,
+            id: id.id
+          })));
+          
           setSession(session);
           setUser(session.user);
           setLoading(false);
@@ -1012,6 +1021,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const signInWithGoogle = async () => {
+    console.log('🔐 [GOOGLE SIGNIN] Initiating Google sign-in...');
+    
     // CRITICAL: Store current URL params in localStorage BEFORE OAuth redirect
     const currentParams = new URLSearchParams(window.location.search);
     const gclid = currentParams.get('gclid');
@@ -1025,18 +1036,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (gclid) {
       localStorage.setItem('gclid', gclid);
-      console.log('[OAuth] Stored GCLID before redirect:', gclid);
+      console.log('🔐 [GOOGLE SIGNIN] Stored GCLID before redirect:', gclid);
     }
     if (Object.keys(urlParamsObj).length > 0) {
       localStorage.setItem('url_params', JSON.stringify(urlParamsObj));
-      console.log('[OAuth] Stored URL params before redirect:', urlParamsObj);
+      console.log('🔐 [GOOGLE SIGNIN] Stored URL params before redirect:', urlParamsObj);
     }
     
     // Store initial referer
     const referer = document.referrer || 'Direct';
     if (referer && referer !== 'Direct') {
       localStorage.setItem('initial_referer', referer);
-      console.log('[OAuth] Stored referer before redirect:', referer);
+      console.log('🔐 [GOOGLE SIGNIN] Stored referer before redirect:', referer);
     }
     
     // Fetch IP and country for immediate capture
@@ -1046,9 +1057,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const ipData = await fetchIPAndCountry();
       ipAddress = ipData.ip;
       country = ipData.country;
-      console.log('[OAuth] Captured IP and country:', { ipAddress, country });
+      console.log('🔐 [GOOGLE SIGNIN] Captured IP and country:', { ipAddress, country });
     } catch (error) {
-      console.warn('[OAuth] Failed to fetch IP/country:', error);
+      console.warn('🔐 [GOOGLE SIGNIN] Failed to fetch IP/country:', error);
     }
     
     // Build redirect URL with ALL preserved URL parameters (not just gclid)
@@ -1056,11 +1067,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (Object.keys(urlParamsObj).length > 0) {
       const params = new URLSearchParams(urlParamsObj);
       redirectUrl += `?${params.toString()}`;
-      console.log('[OAuth] Preserving ALL URL parameters in redirect:', urlParamsObj);
+      console.log('🔐 [GOOGLE SIGNIN] Preserving ALL URL parameters in redirect:', urlParamsObj);
     }
     
     // Mark that we're initiating OAuth login
     markAuthInitiated();
+    
+    console.log('🔐 [GOOGLE SIGNIN] Calling Supabase OAuth with redirect URL:', redirectUrl);
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -1073,6 +1086,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     });
+    
+    if (error) {
+      console.error('🔐 [GOOGLE SIGNIN] ❌ OAuth error:', error);
+    } else {
+      console.log('🔐 [GOOGLE SIGNIN] ✅ Redirecting to Google...');
+    }
     
     return { error };
   };
@@ -1846,43 +1865,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const unlinkAuthMethod = async (provider: string): Promise<{ error: any }> => {
     try {
+      console.log('🔓 [UNLINK] Starting unlink process for provider:', provider);
+      
       if (!user) {
+        console.error('🔓 [UNLINK] No user logged in');
         return { error: { message: 'No user logged in' } };
       }
+
+      console.log('🔓 [UNLINK] Current user ID:', user.id);
 
       // Get user identities to check count
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       const identities = currentUser?.identities || [];
 
+      console.log('🔓 [UNLINK] Current identities:', identities.map(id => ({
+        provider: id.provider,
+        id: id.id,
+        identity_id: id.identity_id
+      })));
+
       if (identities.length <= 1) {
+        console.error('🔓 [UNLINK] Cannot unlink - this is the last authentication method');
         return { error: { message: 'Cannot unlink last authentication method. Add another method first.' } };
       }
 
       // Find the identity to unlink
       const identityToUnlink = identities.find(id => id.provider === provider);
       if (!identityToUnlink) {
+        console.error('🔓 [UNLINK] Identity not found for provider:', provider);
         return { error: { message: 'Authentication method not found' } };
       }
+
+      console.log('🔓 [UNLINK] Unlinking identity:', {
+        provider: identityToUnlink.provider,
+        identity_id: identityToUnlink.identity_id,
+        id: identityToUnlink.id
+      });
 
       const { error } = await supabase.auth.unlinkIdentity(identityToUnlink);
 
       if (error) {
-        console.error('Unlink error:', error);
+        console.error('🔓 [UNLINK] Failed to unlink identity:', error);
         return { error };
       }
 
+      console.log('🔓 [UNLINK] Identity unlinked successfully from Supabase auth');
+
       // CRITICAL: Refresh session to ensure identity list is updated immediately
+      console.log('🔓 [UNLINK] Refreshing session to update identity list...');
       await supabase.auth.refreshSession();
 
       // Update profile and auth.users to remove credentials completely
       if (provider === 'phone') {
+        console.log('🔓 [UNLINK] Clearing phone credentials from auth and profile...');
         // Clear phone from both auth and profile
         await supabase.auth.updateUser({ phone: '' });
         await supabase.from('profiles').update({
           phone_number: null,
           updated_at: new Date().toISOString()
         }).eq('user_id', user.id);
+        console.log('🔓 [UNLINK] Phone cleared successfully');
       } else if (provider === 'email') {
+        console.log('🔓 [UNLINK] Clearing email credentials from auth...');
         // Clear email and password from auth.users completely
         // This makes the email available for new signups
         const randomPassword = crypto.randomUUID() + crypto.randomUUID();
@@ -1894,13 +1938,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: null,
           updated_at: new Date().toISOString()
         }).eq('user_id', user.id);
+        console.log('🔓 [UNLINK] Email cleared successfully');
       } else if (['google', 'apple', 'azure'].includes(provider)) {
+        console.log('🔓 [UNLINK] Processing OAuth provider unlink...');
         // When unlinking OAuth, also clear email and avatar if signup was not via email/oauth
         const { data: profile } = await supabase
           .from('profiles')
           .select('signup_method')
           .eq('user_id', user.id)
           .single();
+
+        console.log('🔓 [UNLINK] User signup method:', profile?.signup_method);
 
         const updateData: any = {
           oauth_provider: null,
@@ -1911,18 +1959,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // If user signed up with phone, also clear email and avatar from OAuth
         if (profile?.signup_method === 'phone') {
+          console.log('🔓 [UNLINK] Phone signup detected - clearing OAuth email and avatar');
           updateData.email = null;
           updateData.avatar_url = null;
         }
 
+        console.log('🔓 [UNLINK] Updating profile with:', updateData);
         await supabase.from('profiles').update(updateData).eq('user_id', user.id);
+        console.log('🔓 [UNLINK] OAuth profile data cleared successfully');
       }
 
-      console.log('✅ Authentication method unlinked:', provider);
+      console.log('🔓 [UNLINK] ✅ Authentication method unlinked successfully:', provider);
+      console.log('🔓 [UNLINK] Refreshing user profile...');
       await refreshUserProfile();
+      
+      // Get final identities after unlink
+      const { data: { user: finalUser } } = await supabase.auth.getUser();
+      console.log('🔓 [UNLINK] Remaining identities after unlink:', 
+        finalUser?.identities?.map(id => ({
+          provider: id.provider,
+          id: id.id
+        }))
+      );
+      
       return { error: null };
     } catch (error) {
-      console.error('Unlink exception:', error);
+      console.error('🔓 [UNLINK] ❌ Unlink exception:', error);
       return { error };
     }
   };
