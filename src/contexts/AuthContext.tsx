@@ -101,46 +101,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // CRITICAL: Track last activity log to prevent duplicates (session token + timestamp)
   const lastActivityLogRef = useRef<{ sessionToken: string; timestamp: number } | null>(null);
   
-  // CRITICAL: Capture OAuth callback state IMMEDIATELY on component mount (before URL gets cleaned)
-  const initialOAuthStateRef = useRef<{
-    isOAuthCallback: boolean;
-    wasOAuthInitiated: boolean;
-    captured: boolean;
-  }>({
-    isOAuthCallback: false,
-    wasOAuthInitiated: false,
-    captured: false
-  });
+  // CRITICAL: Universal auth initiation tracking using sessionStorage
+  // This persists across OAuth redirects and page reloads
+  const markAuthInitiated = () => {
+    sessionStorage.setItem('auth_initiated', 'true');
+    sessionStorage.setItem('auth_initiated_time', Date.now().toString());
+    console.log('[Auth] 🎯 User explicitly initiated authentication');
+  };
   
-  // Capture OAuth state on mount (only once)
-  if (!initialOAuthStateRef.current.captured) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const isOAuthCallback = 
-      urlParams.has('code') || 
-      urlParams.has('access_token') || 
-      hashParams.has('access_token');
-    const wasOAuthInitiated = sessionStorage.getItem('oauth_login_initiated') === 'true';
+  // Helper to check if auth was recently initiated (within last 30 seconds)
+  const wasAuthRecentlyInitiated = () => {
+    const initiated = sessionStorage.getItem('auth_initiated') === 'true';
+    const timeStr = sessionStorage.getItem('auth_initiated_time');
     
-    // CRITICAL: Clear the flag IMMEDIATELY after reading it (before SIGNED_IN event fires)
-    // This prevents activity logging on page refresh with existing session
-    if (wasOAuthInitiated) {
-      sessionStorage.removeItem('oauth_login_initiated');
-      console.log('[Auth] 🧹 Cleared oauth_login_initiated flag');
+    if (!initiated || !timeStr) return false;
+    
+    const timestamp = parseInt(timeStr);
+    const timeSinceInitiation = Date.now() - timestamp;
+    const isRecent = timeSinceInitiation < 30000; // 30 seconds
+    
+    if (!isRecent) {
+      // Clear if too old
+      sessionStorage.removeItem('auth_initiated');
+      sessionStorage.removeItem('auth_initiated_time');
+      return false;
     }
     
-    initialOAuthStateRef.current = {
-      isOAuthCallback,
-      wasOAuthInitiated,
-      captured: true
-    };
-    
-    console.log('[Auth] 📸 Captured OAuth state on mount:', {
-      isOAuthCallback,
-      wasOAuthInitiated,
-      url: window.location.href
-    });
-  }
+    return true;
+  };
+  
+  // Helper to clear auth initiated flag
+  const clearAuthInitiated = () => {
+    sessionStorage.removeItem('auth_initiated');
+    sessionStorage.removeItem('auth_initiated_time');
+  };
 
   // Update user profile with geo data on login (NO activity logging here - done in onAuthStateChange)
   const updateLoginGeoData = async (userId: string) => {
@@ -592,26 +586,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           
           // CRITICAL: Only log activity on ACTUAL sign-in/sign-up events with strict deduplication
-          // This block only runs when event === 'SIGNED_IN', so we know it's a real auth event
-          // Prevents duplicates from OAuth redirects AND session restoration on page refresh
+          // This works for ALL auth methods: OAuth, email/password, phone, Google One Tap
           
           const now = Date.now();
           const lastLog = lastActivityLogRef.current;
           const isNewSession = !lastLog || lastLog.sessionToken !== session.access_token;
-          const timeSinceLastLog = lastLog ? now - lastLog.timestamp : Infinity;
-          const hasEnoughTimePassed = timeSinceLastLog > 10000; // 10 seconds minimum between logs
           
-          // CRITICAL: Only log activity during actual auth flows, NOT session restorations
-          // Use the CAPTURED OAuth state from mount (before URL gets cleaned by router)
-          const { isOAuthCallback, wasOAuthInitiated } = initialOAuthStateRef.current;
+          // Check if user explicitly initiated auth (via any method)
+          const wasInitiated = wasAuthRecentlyInitiated();
           
-          // Only log if this is an OAuth callback AND user explicitly initiated OAuth
-          // NEVER log for session restorations (page refresh with existing session)
-          const shouldLogActivity = isOAuthCallback && wasOAuthInitiated;
+          // Only log if user explicitly initiated auth AND this is a new session
+          const shouldLogActivity = wasInitiated && isNewSession;
           
           if (shouldLogActivity) {
+            // Clear the auth initiated flag after using it
+            clearAuthInitiated();
+            
             // Detect if this is a SIGNUP or LOGIN
-            // If user was created within last 10 seconds, it's a signup, otherwise it's a login
             const userCreatedAt = new Date(session.user.created_at).getTime();
             const timeSinceCreation = now - userCreatedAt;
             const isSignup = timeSinceCreation < 10000; // User created within last 10 seconds = signup
@@ -622,10 +613,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               userId: session.user.id,
               activityType,
               isNewSession,
-              isOAuthCallback,
-              wasOAuthInitiated,
-              timeSinceCreation: `${Math.round(timeSinceCreation / 1000)}s ago`,
-              timeSinceLastLog: timeSinceLastLog === Infinity ? 'never' : `${Math.round(timeSinceLastLog)}ms ago`
+              timeSinceCreation: `${Math.round(timeSinceCreation / 1000)}s ago`
             });
             
             // Update last activity log tracking
@@ -640,11 +628,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
           } else {
             console.log(`[Auth] ⏭️ SKIPPING activity log (session restoration)`, {
-              isOAuthCallback,
-              wasOAuthInitiated,
+              wasInitiated,
               isNewSession,
               event,
-              reason: 'Not an actual sign-in - just session restoration'
+              reason: wasInitiated ? 'Same session' : 'Not explicitly initiated - just page refresh'
             });
           }
           
@@ -1023,15 +1010,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    // Mark that user explicitly initiated authentication
+    markAuthInitiated();
+    
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    // Log activity only on successful actual sign-in
-    if (!error && data?.user) {
-      await logUserActivity(data.user.id, 'login');
-    }
+    // Activity logging is now handled centrally in onAuthStateChange
     
     // If login fails, check if user exists with OAuth provider
     if (error && error.message?.toLowerCase().includes('invalid')) {
@@ -1125,7 +1112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Mark that we're initiating OAuth login
-    sessionStorage.setItem('oauth_login_initiated', 'true');
+    markAuthInitiated();
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -1176,7 +1163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Mark that we're initiating OAuth login
-    sessionStorage.setItem('oauth_login_initiated', 'true');
+    markAuthInitiated();
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
@@ -1225,7 +1212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Mark that we're initiating OAuth login
-    sessionStorage.setItem('oauth_login_initiated', 'true');
+    markAuthInitiated();
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'azure',
@@ -1242,6 +1229,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithPhone = async (phone: string) => {
+    // Mark that user explicitly initiated authentication
+    markAuthInitiated();
+    
     // Get IP address and country using Cloudflare trace (supports CORS)
     let ipAddress: string | undefined;
     let country: string | undefined;
@@ -1325,17 +1315,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const verifyOtp = async (phone: string, token: string) => {
+    // Mark that user explicitly initiated authentication (OTP verification)
+    markAuthInitiated();
+    
     const { data, error } = await supabase.auth.verifyOtp({
       phone,
       token,
       type: 'sms'
     });
     
-    // Log activity on successful phone verification
-    if (!error && data?.user) {
-      await logUserActivity(data.user.id, 'login');
-    }
-    
+    // Activity logging is now handled centrally in onAuthStateChange
     return { error };
   };
 
@@ -1821,6 +1810,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: { message: 'No user logged in' } };
       }
 
+      // Mark that user explicitly initiated authentication
+      markAuthInitiated();
+
       // CRITICAL: Use linkIdentity for OAuth linking
       const { error } = await supabase.auth.linkIdentity({
         provider: 'google',
@@ -1849,6 +1841,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: { message: 'No user logged in' } };
       }
 
+      // Mark that user explicitly initiated authentication
+      markAuthInitiated();
+
       const { error } = await supabase.auth.linkIdentity({
         provider: 'apple',
         options: {
@@ -1875,6 +1870,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!user) {
         return { error: { message: 'No user logged in' } };
       }
+
+      // Mark that user explicitly initiated authentication
+      markAuthInitiated();
 
       const { error } = await supabase.auth.linkIdentity({
         provider: 'azure',
