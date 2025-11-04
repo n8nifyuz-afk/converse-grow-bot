@@ -297,12 +297,13 @@ serve(async (req) => {
     let storedGclid = null;
     let storedUrlParams = null;
     let storedReferer = null;
+    let storedExternalId = null;
     
     if (user_id) {
       console.log('[WEBHOOK-HANDLER] Fetching stored Google Ads params for user:', user_id);
       const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
-        .select('gclid, url_params, initial_referer')
+        .select('gclid, url_params, initial_referer, external_id')
         .eq('user_id', user_id)
         .single();
       
@@ -312,10 +313,12 @@ serve(async (req) => {
         storedGclid = profile.gclid;
         storedUrlParams = profile.url_params;
         storedReferer = profile.initial_referer;
+        storedExternalId = profile.external_id;
         console.log('[WEBHOOK-HANDLER] 🎯 Stored Google Ads params:', {
           gclid: storedGclid,
           url_params: storedUrlParams,
-          initial_referer: storedReferer
+          initial_referer: storedReferer,
+          external_id: storedExternalId
         });
       }
     }
@@ -328,6 +331,7 @@ serve(async (req) => {
         message_id: data.id,
         chat_id: chat_id,
         user_id: user_id,
+        external_id: storedExternalId,
         content: messageContent,
         model: model,
         is_first_message: isFirstMessage,
