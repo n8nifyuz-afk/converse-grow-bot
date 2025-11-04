@@ -542,17 +542,13 @@ export default function Chat() {
   // Add visibility change detection to prevent duplicate sends when switching tabs
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        console.log('[TAB-VISIBILITY] Tab hidden - user switched away');
-      } else {
-        console.log('[TAB-VISIBILITY] Tab visible - user returned');
+      if (!document.hidden) {
         // Clear any stale locks when returning to tab
         const sendLockKey = `sending_${chatId}`;
         const lockTime = sessionStorage.getItem(`${sendLockKey}_time`);
         if (lockTime) {
           const elapsed = Date.now() - parseInt(lockTime);
           if (elapsed > 15000) { // Clear if older than 15 seconds
-            console.log('[TAB-VISIBILITY] Clearing stale send lock');
             sessionStorage.removeItem(sendLockKey);
             sessionStorage.removeItem(`${sendLockKey}_time`);
             sendingInProgressRef.current = false;
@@ -682,32 +678,20 @@ export default function Chat() {
   const initialMessage = location.state?.initialMessage;
   if ((initialMessage || (initialFiles && initialFiles?.length > 0)) && chatId && !hasProcessedInitialData.current) {
     shouldAutoSend.current = true;
-    console.log('[CHAT-INITIAL] Set shouldAutoSend to true BEFORE chat init');
   }
   
   useEffect(() => {
     const initialFiles = location.state?.initialFiles;
     const initialMessage = location.state?.initialMessage;
     
-    console.log('[CHAT-INITIAL] Checking for initial data:', {
-      chatId,
-      hasInitialMessage: !!initialMessage,
-      hasInitialFiles: !!initialFiles,
-      filesCount: initialFiles?.length || 0,
-      hasProcessed: hasProcessedInitialData.current
-    });
-    
     // Handle message with or without files
     if ((initialMessage || (initialFiles && initialFiles.length > 0)) && chatId && !hasProcessedInitialData.current) {
-      console.log('[CHAT-INITIAL] Processing from home page:', { initialFiles, initialMessage: initialMessage?.substring(0, 50) });
       hasProcessedInitialData.current = true;
       shouldAutoSend.current = true;
       
       // Set the message and files
       setInput(initialMessage || '');
       setSelectedFiles(initialFiles || []);
-      
-      console.log('[CHAT-INITIAL] Set input and files, will auto-send');
       
       // Clear the navigation state to prevent re-triggering
       window.history.replaceState({}, document.title);
@@ -717,17 +701,8 @@ export default function Chat() {
   // Auto-send when data is ready after being set from navigation
   useEffect(() => {
     if (shouldAutoSend.current && (input || selectedFiles.length > 0) && !loading && !loadingSubscription && chatId) {
-      console.log('[CHAT-INITIAL] Auto-sending message:', {
-        hasInput: !!input,
-        filesCount: selectedFiles.length,
-        chatId,
-        isSubscribed: subscriptionStatus.subscribed,
-        files: selectedFiles.map(f => ({ name: f.name, type: f.type, size: f.size }))
-      });
-      
       // CRITICAL: Check if user is authenticated
       if (!user) {
-        console.log('[CHAT-INITIAL] User not authenticated, showing auth modal');
         setShowAuthModal(true);
         shouldAutoSend.current = false;
         return;
@@ -738,7 +713,6 @@ export default function Chat() {
       const isProModel = selectedModelInfo?.type === 'pro';
       
       if (isProModel && !subscriptionStatus.subscribed) {
-        console.log('[CHAT-INITIAL] Pro model requires subscription');
         toast.error('This model requires a Pro or Ultra Pro subscription', {
           description: 'Upgrade to access all premium AI models',
           action: {

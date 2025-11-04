@@ -347,15 +347,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Apple-specific data (limited due to Apple privacy)
-      
-      console.log('📋 [OAuth Profile Sync] Profile update data prepared:', updateData);
-      
       // CRITICAL: Always update profile for OAuth signups (even if minimal changes)
       // This ensures tracking data (GCLID, url_params) is saved to database
       if (currentProfile) {
-        console.log('📤 [OAuth Profile Sync] Updating profile in database...');
-        console.log('📋 [OAuth Profile Sync] Update data:', JSON.stringify(updateData, null, 2));
-        
         const { data, error } = await supabase
           .from('profiles')
           .update(updateData)
@@ -363,7 +357,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .select();
         
         if (error) {
-          console.error('❌ [OAuth Profile Sync] Profile update FAILED:', error);
+          console.error('[OAuth Profile Sync] Profile update failed:', error);
           throw error;
         }
       }
@@ -524,15 +518,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // CRITICAL: Only synchronous state updates here to prevent auth loops
         if (event === 'SIGNED_IN' && session) {
-          console.log('🔐 [AUTH STATE] SIGNED_IN event triggered');
-          console.log('🔐 [AUTH STATE] User ID:', session.user.id);
-          console.log('🔐 [AUTH STATE] User email:', session.user.email);
-          console.log('🔐 [AUTH STATE] User identities:', session.user.identities?.map(id => ({
-            provider: id.provider,
-            identity_id: id.identity_id,
-            id: id.id
-          })));
-          
           setSession(session);
           setUser(session.user);
           setLoading(false);
@@ -565,14 +550,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const isSignup = timeSinceCreation < 10000; // User created within last 10 seconds = signup
             const activityType = isSignup ? 'signup' : 'login';
             
-            const provider = session.user.app_metadata?.provider || 'email';
-            console.log(`[Auth] ⚡ LOGGING ACTIVITY: ${activityType.toUpperCase()} via ${provider}`, {
-              userId: session.user.id,
-              activityType,
-              isNewSession,
-              timeSinceCreation: `${Math.round(timeSinceCreation / 1000)}s ago`
-            });
-            
             // Update last activity log tracking
             lastActivityLogRef.current = {
               sessionToken: session.access_token,
@@ -580,16 +557,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             
             // Log activity to database (signup or login)
-            logUserActivity(session.user.id, activityType).catch(error => {
-              console.error('❌ [Auth] Failed to log activity:', error);
+            logUserActivity(session.user.id, activityType).catch(() => {
+              // Silent error
             });
           } else {
-            console.log(`[Auth] ⏭️ SKIPPING activity log (session restoration)`, {
-              wasInitiated,
-              isNewSession,
-              event,
-              reason: wasInitiated ? 'Same session' : 'Not explicitly initiated - just page refresh'
-            });
+            // Session restoration - skip logging
           }
           
           // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
@@ -899,39 +871,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // CRITICAL: Add Google Ads tracking data from localStorage (stored by GTM)
-    console.log('🔍 [EMAIL-SIGNUP] Checking localStorage for tracking data...');
     const gclid = localStorage.getItem('gclid');
     if (gclid) {
       signupData.gclid = gclid;
-      console.log('✅ [EMAIL-SIGNUP] GCLID found:', gclid);
-    } else {
-      console.log('⚠️ [EMAIL-SIGNUP] No GCLID in localStorage');
     }
     
     const urlParamsStr = localStorage.getItem('url_params');
     if (urlParamsStr) {
       try {
         signupData.url_params = JSON.parse(urlParamsStr);
-        console.log('✅ [EMAIL-SIGNUP] URL params found:', signupData.url_params);
       } catch (e) {
-        console.error('❌ [EMAIL-SIGNUP] Failed to parse url_params:', e);
+        // Silent error
       }
-    } else {
-      console.log('⚠️ [EMAIL-SIGNUP] No url_params in localStorage');
     }
     
     // Capture referer for attribution
     const referer = document.referrer || 'Direct';
     if (referer && referer !== 'Direct') {
       signupData.referer = referer;
-      console.log('✅ [EMAIL-SIGNUP] Referer captured:', referer);
-    } else {
-      console.log('⚠️ [EMAIL-SIGNUP] No referer (Direct traffic)');
     }
     
-    console.log('📤 [EMAIL-SIGNUP] Calling supabase.auth.signUp with data:', signupData);
-    
-    const { error, data } = await supabase.auth.signUp({
+    const { error, data} = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -939,13 +899,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: signupData
       }
     });
-    
-    if (error) {
-      console.error('❌ [EMAIL-SIGNUP] Signup failed:', error);
-    } else {
-      console.log('✅ [EMAIL-SIGNUP] Signup successful, user ID:', data.user?.id);
-      console.log('📋 [EMAIL-SIGNUP] Complete signup data sent to Supabase:', signupData);
-    }
     
     // Check if user already exists and has confirmed their email
     if (data?.user && !data?.session && !error) {
@@ -1047,7 +1000,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const referer = document.referrer || 'Direct';
     if (referer && referer !== 'Direct') {
       localStorage.setItem('initial_referer', referer);
-      console.log('🔐 [GOOGLE SIGNIN] Stored referer before redirect:', referer);
     }
     
     // Fetch IP and country for immediate capture
@@ -1057,9 +1009,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const ipData = await fetchIPAndCountry();
       ipAddress = ipData.ip;
       country = ipData.country;
-      console.log('🔐 [GOOGLE SIGNIN] Captured IP and country:', { ipAddress, country });
     } catch (error) {
-      console.warn('🔐 [GOOGLE SIGNIN] Failed to fetch IP/country:', error);
+      // Silent error
     }
     
     // Build redirect URL with ALL preserved URL parameters (not just gclid)
@@ -1067,13 +1018,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (Object.keys(urlParamsObj).length > 0) {
       const params = new URLSearchParams(urlParamsObj);
       redirectUrl += `?${params.toString()}`;
-      console.log('🔐 [GOOGLE SIGNIN] Preserving ALL URL parameters in redirect:', urlParamsObj);
     }
     
     // Mark that we're initiating OAuth login
     markAuthInitiated();
-    
-    console.log('🔐 [GOOGLE SIGNIN] Calling Supabase OAuth with redirect URL:', redirectUrl);
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -1086,12 +1034,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     });
-    
-    if (error) {
-      console.error('🔐 [GOOGLE SIGNIN] ❌ OAuth error:', error);
-    } else {
-      console.log('🔐 [GOOGLE SIGNIN] ✅ Redirecting to Google...');
-    }
     
     return { error };
   };
@@ -1107,18 +1049,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (gclid) {
       localStorage.setItem('gclid', gclid);
-      console.log('[OAuth] Stored GCLID before redirect:', gclid);
     }
     if (Object.keys(urlParamsObj).length > 0) {
       localStorage.setItem('url_params', JSON.stringify(urlParamsObj));
-      console.log('[OAuth] Stored URL params before redirect:', urlParamsObj);
     }
     
     // Store initial referer
     const referer = document.referrer || 'Direct';
     if (referer && referer !== 'Direct') {
       localStorage.setItem('initial_referer', referer);
-      console.log('[OAuth] Stored referer before redirect:', referer);
     }
     
     // Build redirect URL with ALL preserved URL parameters (not just gclid)
@@ -1126,7 +1065,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (Object.keys(urlParamsObj).length > 0) {
       const params = new URLSearchParams(urlParamsObj);
       redirectUrl += `?${params.toString()}`;
-      console.log('[OAuth] Preserving ALL URL parameters in redirect:', urlParamsObj);
     }
     
     // Mark that we're initiating OAuth login

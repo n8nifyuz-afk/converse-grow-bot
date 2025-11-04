@@ -34,9 +34,8 @@ export const clearTrackingData = () => {
     localStorage.removeItem('gclid_timestamp');
     localStorage.removeItem('url_params');
     localStorage.removeItem('url_params_timestamp');
-    console.log('🧹 [GTM] Tracking data cleared');
   } catch (error) {
-    console.error('❌ [GTM] Error clearing tracking data:', error);
+    // Silent error
   }
 };
 
@@ -52,9 +51,8 @@ export const clearTrackingDataAfterConversion = () => {
     localStorage.removeItem('gclid_timestamp');
     localStorage.removeItem('url_params');
     localStorage.removeItem('url_params_timestamp');
-    console.log('✅ [GTM] Tracking data cleared after conversion');
   } catch (error) {
-    console.error('❌ [GTM] Error clearing tracking data:', error);
+    // Silent error
   }
 };
 
@@ -76,7 +74,6 @@ export const initializeGTMWithGCLID = () => {
     // Check if stored GCLID has expired
     const hasExpiredGCLID = gclidFromStorage && isGCLIDExpired();
     if (hasExpiredGCLID) {
-      console.log('⏰ [GTM] GCLID expired (>90 days), clearing...');
       clearTrackingData();
     }
     
@@ -87,7 +84,6 @@ export const initializeGTMWithGCLID = () => {
     if (gclidFromUrl && !gclidFromStorage) {
       localStorage.setItem('gclid', gclidFromUrl);
       localStorage.setItem('gclid_timestamp', Date.now().toString());
-      console.log('💾 [GTM] New GCLID stored with 90-day expiry');
     }
 
     // Collect all URL parameters for attribution
@@ -137,7 +133,7 @@ export const initializeGTMWithGCLID = () => {
       window.dataLayer.push(eventData);
     }
   } catch (error) {
-    console.error('❌ [GTM] Error initializing:', error);
+    // Silent error
   }
 };
 

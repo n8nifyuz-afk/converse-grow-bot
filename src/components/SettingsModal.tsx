@@ -256,9 +256,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     try {
       // First revoke the refresh token which invalidates all sessions globally
       const { error: revokeError } = await supabase.auth.admin.signOut(user?.id || '');
-      if (revokeError) {
-        console.log('Admin signout not available, using regular global signout');
-      }
 
       // Use global signout scope to sign out from all devices
       const { error } = await supabase.auth.signOut({ scope: 'global' });
@@ -1236,11 +1233,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => {
-                                    console.log('🔘 [UNLINK BUTTON] Clicked for provider:', identity.provider);
-                                    setUnlinkingIdentity(identity);
-                                    console.log('🔘 [UNLINK BUTTON] Set unlinkingIdentity, dialog should open');
-                                  }}
+                                  onClick={() => setUnlinkingIdentity(identity)}
                                   className="text-xs text-destructive hover:text-destructive"
                                 >
                                   Unlink
@@ -1619,9 +1612,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       <AlertDialog 
         open={!!unlinkingIdentity} 
         onOpenChange={(open) => {
-          console.log('🔘 [UNLINK DIALOG] Dialog state changed:', open);
           if (!open) {
-            console.log('🔘 [UNLINK DIALOG] Dialog closed, clearing unlinkingIdentity');
             setUnlinkingIdentity(null);
           }
         }}
@@ -1636,14 +1627,11 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              console.log('🔘 [UNLINK DIALOG] Cancel clicked');
-            }}>
+            <AlertDialogCancel>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
-                console.log('🔘 [UNLINK DIALOG] Confirm clicked - proceeding with unlink');
                 try {
                   const { error } = await unlinkAuthMethod(unlinkingIdentity.provider);
                   if (error) throw error;
