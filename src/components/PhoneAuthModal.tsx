@@ -293,12 +293,25 @@ export default function PhoneAuthModal({
         
         // Send webhook for phone signup after profile completion
         try {
+          // Fetch complete profile data for webhook
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user?.id)
+            .single();
+          
           await supabase.functions.invoke('send-subscriber-webhook', {
             body: {
               userId: user?.id,
               email: user?.email || null,
               username: fullName,
-              signupMethod: 'phone'
+              signupMethod: 'phone',
+              phoneNumber: phone,
+              country: profileData?.country || null,
+              ipAddress: profileData?.ip_address || null,
+              gclid: profileData?.gclid || null,
+              urlParams: profileData?.url_params || {},
+              initialReferer: profileData?.initial_referer || null
             }
           });
         } catch (webhookError) {
