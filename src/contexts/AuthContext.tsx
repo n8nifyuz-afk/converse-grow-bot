@@ -231,7 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const { ip, country } = await fetchIPAndCountry();
           if (ip && !currentProfile?.ip_address) {
-            updateData.ip_address = ip;
+            updateData.ip_address = cleanIpAddress(ip);
           }
           if (country && !currentProfile?.country) {
             updateData.country = country;
