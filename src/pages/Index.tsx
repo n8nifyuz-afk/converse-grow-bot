@@ -844,11 +844,16 @@ export default function Index() {
   const handleStyleSelect = (style: typeof imageStyles[0]) => {
     setMessage(style.prompt);
     setIsStylesOpen(false);
-    setIsImageMode(false); // Exit image mode when style is selected
-    setSelectedStyle(null); // Reset style selection to return to default state
+    // Keep isImageMode true so user can edit and send the prompt
+    setSelectedStyle(style.name);
 
     setTimeout(() => {
-      textareaRef.current?.focus();
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        // Resize textarea to show full prompt
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      }
     }, 0);
   };
   const handleCreateImageClick = () => {
