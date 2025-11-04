@@ -839,6 +839,21 @@
       "visitContact": "Visit our Contact Page"
     }
   },
+  "chatPage": {
+    "howCanIHelp": "How can I help, {{name}}?",
+    "askMeAnything": "ask me anything...",
+    "describeImage": "Describe an image...",
+    "generateImage": "Generate an image",
+    "selectStyle": "Select a style",
+    "chooseStyle": "Choose a style for your image",
+    "startTyping": "Start typing to chat with AI",
+    "attachFile": "Attach file",
+    "recordVoice": "Record voice message",
+    "sendMessage": "Send message",
+    "stopGenerating": "Stop generating",
+    "newChat": "New Chat",
+    "imageStyles": "Image Styles"
+  },
   "helpCenter": {
     "title": "Help Center",
     "seoDescription": "Find answers to frequently asked questions about ChatLearn, tutorials, and comprehensive guides for using our AI platform.",

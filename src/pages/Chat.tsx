@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -158,6 +159,7 @@ import { ImageEditModal } from '@/components/ImageEditModal';
 export default function Chat() {
   const { chatId } = useParams();
   const location = useLocation();
+  const { t } = useTranslation();
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
   const { usageLimits, loading: limitsLoading, incrementUsage } = useUsageLimits();
@@ -3822,7 +3824,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
           {messages.length === 0 ? <div className="flex items-center justify-center h-full min-h-[70vh]">
               <div className="text-center max-w-md">
                 <h3 className="text-2xl font-normal mb-6 text-foreground">
-                  How can I help, {userProfile?.display_name || user?.email?.split('@')[0] || 'there'}?
+                  {t('chatPage.howCanIHelp', { name: userProfile?.display_name || user?.email?.split('@')[0] || 'there' })}
                 </h3>
               </div>
              </div> : <div className="space-y-6" key={`messages-${messages.length}-${messages[messages.length - 1]?.id || 'empty'}`}>
@@ -4225,7 +4227,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                 e.stopPropagation();
                 // The parent div handles the actual drop logic
               }}
-              placeholder={isImageMode ? "Describe an image..." : "ask me anything..."} 
+              placeholder={isImageMode ? t('chatPage.describeImage') : t('chatPage.askMeAnything')} 
               className="w-full min-h-[24px] border-0 resize-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 outline-none px-0 py-0 mb-3 text-sm" 
               rows={1}
             />
@@ -4364,7 +4366,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                             aria-label="Create an image"
                           >
                             <ImageIcon className="h-4 w-4 mr-2" />
-                            <span>Generate an image</span>
+                            <span>{t('chatPage.generateImage')}</span>
                           </Button>
                         )}
                       </>
