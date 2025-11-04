@@ -175,7 +175,7 @@ export default function PhoneAuthModal({
       } else {
         // New user - show profile form
         console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
-        setIsVerifyingOtp(false); // Clear flag so modal can work normally
+        // Keep isVerifyingOtp true to prevent modal from auto-closing during profile completion
         setProfileStep(1);
       }
     } catch (error) {
@@ -271,6 +271,7 @@ export default function PhoneAuthModal({
         }
         
         await refreshUserProfile();
+        setIsVerifyingOtp(false); // Clear flag before closing
         onClose();
         onSuccess?.();
       } catch (error) {
