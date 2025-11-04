@@ -255,12 +255,15 @@ export default function PhoneAuthModal({
       setError('');
       
       try {
+        const fullName = `${firstName} ${lastName}`.trim();
+        
         // Update user metadata with profile information
         const { error: updateError } = await supabase.auth.updateUser({
           data: {
             first_name: firstName,
             last_name: lastName,
-            date_of_birth: dateOfBirth
+            date_of_birth: dateOfBirth,
+            display_name: fullName
           }
         });
         
@@ -268,8 +271,27 @@ export default function PhoneAuthModal({
           throw updateError;
         }
         
+        // Convert DD/MM/YYYY to YYYY-MM-DD for database
+        const [day, month, year] = dateOfBirth.split('/');
+        const dbDateFormat = `${year}-${month}-${day}`;
+        
+        // Update profiles table directly to ensure immediate reflection
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            display_name: fullName,
+            date_of_birth: dbDateFormat
+          })
+          .eq('user_id', user?.id);
+        
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+        }
+        
+        // Refresh profile to get latest data
         await refreshUserProfile();
-        setIsVerifyingOtp(false); // Clear flag before closing
+        
+        setIsVerifyingOtp(false);
         onClose();
         onSuccess?.();
       } catch (error) {
