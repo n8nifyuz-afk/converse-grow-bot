@@ -42,7 +42,7 @@ export default function PhoneAuthModal({
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // Close modal when user is authenticated (except in complete-profile or verify mode)
+  // Close modal when user is authenticated - but NOT during verification or profile completion
   useEffect(() => {
     console.log('[PHONE-AUTH-EFFECT] State check:', { 
       hasUser: !!user, 
@@ -51,12 +51,23 @@ export default function PhoneAuthModal({
       shouldClose: user && isOpen && mode === 'phone'
     });
     
-    // Only auto-close if we're in 'phone' mode and user is authenticated
-    // Don't close during 'verify' or 'complete-profile' modes
+    // CRITICAL: Only auto-close if we're in 'phone' mode
+    // Never close during 'verify' or 'complete-profile' modes
     if (user && isOpen && mode === 'phone') {
       console.log('[PHONE-AUTH-EFFECT] 🚪 Closing modal - user authenticated and in phone mode');
-      onClose();
-      onSuccess?.();
+      
+      // Check if profile needs completion before closing
+      supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+        if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
+          console.log('[PHONE-AUTH-EFFECT] 📝 Profile incomplete - keeping modal open');
+          setMode('complete-profile');
+          setProfileStep(1);
+        } else {
+          console.log('[PHONE-AUTH-EFFECT] ✅ Profile complete - closing modal');
+          onClose();
+          onSuccess?.();
+        }
+      });
     }
   }, [user, isOpen, mode, onClose, onSuccess]);
 
