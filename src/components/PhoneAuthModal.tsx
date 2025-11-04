@@ -291,6 +291,20 @@ export default function PhoneAuthModal({
         // Refresh profile to get latest data
         await refreshUserProfile();
         
+        // Send webhook for phone signup after profile completion
+        try {
+          await supabase.functions.invoke('send-subscriber-webhook', {
+            body: {
+              userId: user?.id,
+              email: user?.email || null,
+              username: fullName,
+              signupMethod: 'phone'
+            }
+          });
+        } catch (webhookError) {
+          console.error('Webhook error (non-critical):', webhookError);
+        }
+        
         setIsVerifyingOtp(false);
         onClose();
         onSuccess?.();
