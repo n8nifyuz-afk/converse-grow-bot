@@ -164,7 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Sync OAuth profile data (Google, Apple, Microsoft) on sign-in
+  // Sync OAuth profile data (Google, Apple, Microsoft) AND phone signups on sign-in
   const syncOAuthProfile = async (session: Session) => {
     try {
       const user = session.user;
@@ -184,12 +184,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         appMetadata?.provider === 'azure' ||
         appMetadata?.provider === 'microsoft';
       
-      const provider = isGoogleSignIn ? 'google' : isAppleSignIn ? 'apple' : isMicrosoftSignIn ? 'microsoft' : 'email';
+      // Detect phone signup: user has phone but no OAuth provider
+      const isPhoneSignIn = 
+        user.phone && 
+        !isGoogleSignIn && 
+        !isAppleSignIn && 
+        !isMicrosoftSignIn &&
+        metadata?.signup_method === 'phone';
+      
+      const provider = isGoogleSignIn ? 'google' : isAppleSignIn ? 'apple' : isMicrosoftSignIn ? 'microsoft' : isPhoneSignIn ? 'phone' : 'email';
       
       // REMOVED: updateLoginGeoData call - profile is already updated by log-user-activity edge function
       
-      // Only sync profile data for OAuth providers
-      if (!isGoogleSignIn && !isAppleSignIn && !isMicrosoftSignIn) return;
+      // Only sync profile data for OAuth providers and phone signups
+      // Email-only signups don't need this sync as they're handled separately
+      if (!isGoogleSignIn && !isAppleSignIn && !isMicrosoftSignIn && !isPhoneSignIn) return;
       
       // Get current profile
       const { data: currentProfile } = await supabase
@@ -205,11 +214,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Extract comprehensive OAuth data - STORE EVERYTHING
       const updateData: any = {
         updated_at: new Date().toISOString(),
-        oauth_provider: provider,
-        oauth_metadata: metadata, // Store COMPLETE OAuth metadata for admin analysis
         browser_info: JSON.parse(JSON.stringify(trackingData.browserInfo)),
         device_info: JSON.parse(JSON.stringify(trackingData.deviceInfo))
       };
+      
+      // Set oauth_provider and oauth_metadata only for OAuth providers, not for phone
+      if (isGoogleSignIn || isAppleSignIn || isMicrosoftSignIn) {
+        updateData.oauth_provider = provider;
+        updateData.oauth_metadata = metadata; // Store COMPLETE OAuth metadata for admin analysis
+      }
       
       // CRITICAL: Check if webhook was already sent for this user (deduplication)
       const webhookSentKey = `webhook_sent_${user.id}`;
@@ -401,7 +414,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           const webhookData = {
             userId: user.id,
-            email: user.email || finalProfile?.email,
+            email: user.email || finalProfile?.email || finalProfile?.phone_number || user.phone,
             username: finalProfile?.display_name || updateData.display_name || 'User',
             ipAddress: ipAddress || null,
             country: country || null,
