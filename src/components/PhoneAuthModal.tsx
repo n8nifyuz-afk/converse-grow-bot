@@ -98,6 +98,8 @@ export default function PhoneAuthModal({
     setError('');
     
     try {
+      console.log('[PHONE-AUTH-MODAL] Sending OTP to:', phone);
+      
       // Add 30 second timeout to detect slow backend responses
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Request timeout')), 30000)
@@ -111,12 +113,14 @@ export default function PhoneAuthModal({
       ]) as { error: any };
       
       if (error) {
+        console.error('[PHONE-AUTH-MODAL] OTP send failed:', error);
         toast({
           title: "Failed to send code",
           description: error.message,
           variant: "destructive"
         });
       } else {
+        console.log('[PHONE-AUTH-MODAL] OTP sent successfully');
         setMode('verify');
         setOtpTimer(60);
         setShowPhoneValidation(false);
@@ -126,6 +130,7 @@ export default function PhoneAuthModal({
         });
       }
     } catch (error: any) {
+      console.error('[PHONE-AUTH-MODAL] Exception during OTP send:', error);
       const isTimeout = error?.message === 'Request timeout';
       toast({
         title: isTimeout ? "Request taking longer than expected" : "An error occurred",
@@ -439,12 +444,10 @@ export default function PhoneAuthModal({
             </>
           ) : mode === 'complete-profile' ? (
             <>
-              <div className="mb-6 text-center">
-                <h2 className="text-2xl md:text-3xl font-bold">Complete Your Profile</h2>
-              </div>
+              {/* Profile completion header removed per user request */}
               <form onSubmit={handleCompleteProfile} className="space-y-5 pb-safe">
-                <div className="text-center mb-2">
-                  <h3 className="text-xl font-bold mb-1">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl md:text-2xl font-bold mb-2">
                     {profileStep === 1 && "What's your first name?"}
                     {profileStep === 2 && "What's your last name?"}
                     {profileStep === 3 && "When's your birthday?"}
