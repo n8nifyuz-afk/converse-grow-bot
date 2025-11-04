@@ -51,15 +51,15 @@ export default function PhoneAuthModal({
       shouldClose: user && isOpen && mode === 'phone'
     });
     
-    // CRITICAL: Only auto-close if we're in 'phone' mode
-    // Never close during 'verify' or 'complete-profile' modes
+    // CRITICAL: NEVER auto-close during 'verify' or 'complete-profile' modes
+    // Only consider closing if in 'phone' mode AND user is authenticated
     if (user && isOpen && mode === 'phone') {
-      console.log('[PHONE-AUTH-EFFECT] 🚪 Closing modal - user authenticated and in phone mode');
+      console.log('[PHONE-AUTH-EFFECT] 🚪 User authenticated in phone mode');
       
       // Check if profile needs completion before closing
       supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
         if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
-          console.log('[PHONE-AUTH-EFFECT] 📝 Profile incomplete - keeping modal open');
+          console.log('[PHONE-AUTH-EFFECT] 📝 Profile incomplete - switching to complete-profile mode');
           setMode('complete-profile');
           setProfileStep(1);
         } else {
@@ -153,15 +153,9 @@ export default function PhoneAuthModal({
         return;
       }
 
-      console.log('[PHONE-AUTH] ✅ OTP verified successfully - setting mode to complete-profile');
+      console.log('[PHONE-AUTH] ✅ OTP verified successfully');
       
-      // CRITICAL: Set mode to complete-profile immediately and keep it there
-      setMode('complete-profile');
-      setProfileStep(1);
-      
-      console.log('[PHONE-AUTH] 📝 Mode set to complete-profile, profile step set to 1');
-      
-      // Refresh user profile
+      // Refresh user profile first
       await refreshUserProfile();
       
       // Check if profile is complete by checking user metadata
@@ -176,8 +170,11 @@ export default function PhoneAuthModal({
       });
       
       if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
-        console.log('[PHONE-AUTH] 📝 Profile incomplete - staying in complete-profile mode');
-        // Already set mode to 'complete-profile' above, just keep it there
+        console.log('[PHONE-AUTH] 📝 Profile incomplete - switching to complete-profile mode');
+        // CRITICAL: Set mode to complete-profile and it will stay there until form is submitted
+        setMode('complete-profile');
+        setProfileStep(1);
+        console.log('[PHONE-AUTH] 📝 Mode set to complete-profile, profile step set to 1');
       } else {
         console.log('[PHONE-AUTH] ✅ Profile already complete - closing modal');
         onClose();
