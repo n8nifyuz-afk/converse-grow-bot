@@ -1652,9 +1652,26 @@ export default function Chat() {
     setIsStylesOpen(false);
     setIsImageMode(false); // Reset to original state after selecting style
 
-    // Focus the textarea after setting the style
+    // Focus the textarea and trigger auto-resize after setting the style
     setTimeout(() => {
-      textareaRef.current?.focus();
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        
+        // Trigger auto-resize for the new content
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.overflowY = 'hidden';
+        const scrollHeight = textareaRef.current.scrollHeight;
+        const maxHeight = 240;
+        const minHeight = 24;
+
+        if (scrollHeight <= maxHeight) {
+          textareaRef.current.style.height = `${Math.max(scrollHeight, minHeight)}px`;
+          textareaRef.current.style.overflowY = 'hidden';
+        } else {
+          textareaRef.current.style.height = `${maxHeight}px`;
+          textareaRef.current.style.overflowY = 'auto';
+        }
+      }
     }, 0);
   };
   const handleCreateImageClick = () => {
