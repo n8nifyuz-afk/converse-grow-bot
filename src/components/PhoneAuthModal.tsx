@@ -44,7 +44,15 @@ export default function PhoneAuthModal({
 
   // Close modal when user is authenticated (except in complete-profile mode)
   useEffect(() => {
+    console.log('[PHONE-AUTH-EFFECT] State check:', { 
+      hasUser: !!user, 
+      isOpen, 
+      mode,
+      shouldClose: user && isOpen && mode !== 'complete-profile'
+    });
+    
     if (user && isOpen && mode !== 'complete-profile') {
+      console.log('[PHONE-AUTH-EFFECT] 🚪 Closing modal - user authenticated and not in profile completion');
       onClose();
       onSuccess?.();
     }
@@ -122,30 +130,44 @@ export default function PhoneAuthModal({
     setError('');
     
     try {
-      const tempMode = mode;
-      setMode('complete-profile');
+      console.log('[PHONE-AUTH] 🔐 Verifying OTP...');
       
       const { error } = await verifyOtp(phone, otp);
       
       if (error) {
+        console.error('[PHONE-AUTH] ❌ OTP verification failed:', error);
         setError("Invalid verification code. Please try again.");
-        setMode(tempMode);
         return;
       }
 
+      console.log('[PHONE-AUTH] ✅ OTP verified successfully');
+      
+      // CRITICAL: Set mode to complete-profile BEFORE checking profile
+      setMode('complete-profile');
+      
       await refreshUserProfile();
       
       // Check if profile is complete by checking user metadata
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       
+      console.log('[PHONE-AUTH] 📊 Current user metadata:', {
+        has_first_name: !!currentUser?.user_metadata?.first_name,
+        has_last_name: !!currentUser?.user_metadata?.last_name,
+        has_date_of_birth: !!currentUser?.user_metadata?.date_of_birth,
+        full_metadata: currentUser?.user_metadata
+      });
+      
       if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
+        console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
         setProfileStep(1);
+        // Keep mode as 'complete-profile' to show the form
       } else {
+        console.log('[PHONE-AUTH] ✅ Profile already complete - closing modal');
         onClose();
         onSuccess?.();
       }
     } catch (error) {
-      console.error('Verification error:', error);
+      console.error('[PHONE-AUTH] ❌ Verification error:', error);
       setError("An error occurred during verification.");
       setMode('verify');
     } finally {
