@@ -1224,6 +1224,17 @@
     "sendMessage": "إرسال رسالة",
     "stopGenerating": "إيقاف التوليد",
     "newChat": "محادثة جديدة",
-    "imageStyles": "أنماط الصور"
+    "imageStyles": "أنماط الصور",
+    "styles": {
+      "cyberpunk": "سايبربانك",
+      "anime": "أنمي",
+      "dramaticHeadshot": "صورة درامية",
+      "coloringBook": "كتاب تلوين",
+      "photoShoot": "جلسة تصوير",
+      "retroCartoon": "كرتون ريترو",
+      "glam80s": "جلامور الثمانينات",
+      "artNouveau": "آرت نوفو",
+      "synthwave": "سينثويف"
+    }
   }
 }

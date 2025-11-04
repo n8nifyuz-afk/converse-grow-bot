@@ -850,7 +850,18 @@
     "sendMessage": "Send message",
     "stopGenerating": "Stop generating",
     "newChat": "New Chat",
-    "imageStyles": "Image Styles"
+    "imageStyles": "Image Styles",
+    "styles": {
+      "cyberpunk": "Cyberpunk",
+      "anime": "Anime",
+      "dramaticHeadshot": "Dramatic Headshot",
+      "coloringBook": "Coloring Book",
+      "photoShoot": "Photo Shoot",
+      "retroCartoon": "Retro Cartoon",
+      "glam80s": "80s Glam",
+      "artNouveau": "Art Nouveau",
+      "synthwave": "Synthwave"
+    }
   },
   "helpCenter": {
     "title": "Help Center",

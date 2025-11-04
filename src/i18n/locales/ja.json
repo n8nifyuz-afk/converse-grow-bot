@@ -1224,6 +1224,17 @@
     "sendMessage": "メッセージを送信",
     "stopGenerating": "生成を停止",
     "newChat": "新しいチャット",
-    "imageStyles": "画像スタイル"
+    "imageStyles": "画像スタイル",
+    "styles": {
+      "cyberpunk": "サイバーパンク",
+      "anime": "アニメ",
+      "dramaticHeadshot": "ドラマチックな肖像",
+      "coloringBook": "ぬりえ",
+      "photoShoot": "フォトシュート",
+      "retroCartoon": "レトロアニメ",
+      "glam80s": "80年代グラム",
+      "artNouveau": "アールヌーヴォー",
+      "synthwave": "シンセウェイブ"
+    }
   }
 }

@@ -1224,6 +1224,17 @@
     "sendMessage": "Отправить сообщение",
     "stopGenerating": "Остановить генерацию",
     "newChat": "Новый чат",
-    "imageStyles": "Стили изображений"
+    "imageStyles": "Стили изображений",
+    "styles": {
+      "cyberpunk": "Киберпанк",
+      "anime": "Аниме",
+      "dramaticHeadshot": "Драматический портрет",
+      "coloringBook": "Раскраска",
+      "photoShoot": "Фотосессия",
+      "retroCartoon": "Ретро мультфильм",
+      "glam80s": "Гламур 80-х",
+      "artNouveau": "Ар-нуво",
+      "synthwave": "Синтвейв"
+    }
   }
 }

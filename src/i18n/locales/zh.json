@@ -1224,6 +1224,17 @@
     "sendMessage": "发送消息",
     "stopGenerating": "停止生成",
     "newChat": "新聊天",
-    "imageStyles": "图片样式"
+    "imageStyles": "图片样式",
+    "styles": {
+      "cyberpunk": "赛博朋克",
+      "anime": "动漫",
+      "dramaticHeadshot": "戏剧性头像",
+      "coloringBook": "涂色书",
+      "photoShoot": "摄影",
+      "retroCartoon": "复古卡通",
+      "glam80s": "80年代魅力",
+      "artNouveau": "新艺术",
+      "synthwave": "合成波"
+    }
   }
 }

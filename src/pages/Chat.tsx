@@ -1621,31 +1621,40 @@ export default function Chat() {
     return 'file';
   };
   const imageStyles = [{
-    name: 'Cyberpunk',
+    id: 'cyberpunk',
+    name: t('chatPage.styles.cyberpunk'),
     prompt: 'Create an image in a cyberpunk aesthetic: vivid neon accents, futuristic textures, glowing details, and high-contrast lighting.'
   }, {
-    name: 'Anime',
+    id: 'anime',
+    name: t('chatPage.styles.anime'),
     prompt: 'Create an image in a detailed anime aesthetic: expressive eyes, smooth cel-shaded coloring, and clean linework. Emphasize emotion and character presence, with a sense of motion or atmosphere typical of anime scenes.'
   }, {
-    name: 'Dramatic Headshot',
+    id: 'dramaticHeadshot',
+    name: t('chatPage.styles.dramaticHeadshot'),
     prompt: 'Create an ultra-realistic high-contrast black-and-white headshot, close up, black shadow background, 35mm lens, 4K quality, aspect ratio 4:3.'
   }, {
-    name: 'Coloring Book',
+    id: 'coloringBook',
+    name: t('chatPage.styles.coloringBook'),
     prompt: 'Create an image in a children\'s coloring book style: bold, even black outlines on white, no shading or tone. Simplify textures into playful, easily recognizable shapes.'
   }, {
-    name: 'Photo Shoot',
+    id: 'photoShoot',
+    name: t('chatPage.styles.photoShoot'),
     prompt: 'Create an ultra-realistic professional photo shoot with soft lighting.'
   }, {
-    name: 'Retro Cartoon',
+    id: 'retroCartoon',
+    name: t('chatPage.styles.retroCartoon'),
     prompt: 'Create a retro 1950s cartoon style image, minimal vector art, Art Deco inspired, clean flat colors, geometric shapes, mid-century modern design, elegant silhouettes, UPA style animation, smooth lines, limited color palette (black, red, beige, brown, white), grainy paper texture background, vintage jazz club atmosphere, subtle lighting, slightly exaggerated character proportions, classy and stylish mood.'
   }, {
-    name: '80s Glam',
+    id: 'glam80s',
+    name: t('chatPage.styles.glam80s'),
     prompt: 'Create a selfie styled like a cheesy 1980s mall glamour shot, foggy soft lighting, teal and magenta lasers in the background, feathered hair, shoulder pads, portrait studio vibes, ironic \'glam 4 life\' caption.'
   }, {
-    name: 'Art Nouveau',
+    id: 'artNouveau',
+    name: t('chatPage.styles.artNouveau'),
     prompt: 'Create an image in an Art Nouveau style: flowing lines, organic shapes, floral motifs, and soft, decorative elegance.'
   }, {
-    name: 'Synthwave',
+    id: 'synthwave',
+    name: t('chatPage.styles.synthwave'),
     prompt: 'Create an image in a synthwave aesthetic: retro-futuristic 1980s vibe with neon grids, glowing sunset, vibrant magenta-and-cyan gradients, chrome highlights, and a nostalgic outrun atmosphere.'
   }];
   const handleStyleSelect = (style: typeof imageStyles[0]) => {
@@ -1689,25 +1698,25 @@ export default function Chat() {
     setSelectedStyle(null);
     setInput('');
   };
-  const getStyleBackground = (styleName: string) => {
-    switch (styleName) {
-      case 'Cyberpunk':
+  const getStyleBackground = (styleId: string) => {
+    switch (styleId) {
+      case 'cyberpunk':
         return 'bg-gradient-to-br from-cyan-500/30 to-purple-600/40 border border-cyan-400/20';
-      case 'Anime':
+      case 'anime':
         return 'bg-gradient-to-br from-pink-400/30 to-orange-400/40 border border-pink-300/20';
-      case 'Dramatic Headshot':
+      case 'dramaticHeadshot':
         return 'bg-gradient-to-br from-gray-800/50 to-gray-200/30 border border-gray-400/20';
-      case 'Coloring Book':
+      case 'coloringBook':
         return 'bg-white border-2 border-black/60';
-      case 'Photo Shoot':
+      case 'photoShoot':
         return 'bg-gradient-to-br from-amber-300/30 to-orange-300/40 border border-amber-200/30';
-      case 'Retro Cartoon':
+      case 'retroCartoon':
         return 'bg-gradient-to-br from-red-600/40 to-amber-600/30 border border-red-400/20';
-      case '80s Glam':
+      case 'glam80s':
         return 'bg-gradient-to-br from-teal-400/40 to-fuchsia-500/40 border border-teal-300/30';
-      case 'Art Nouveau':
+      case 'artNouveau':
         return 'bg-gradient-to-br from-emerald-400/30 to-yellow-500/30 border border-emerald-300/20';
-      case 'Synthwave':
+      case 'synthwave':
         return 'bg-gradient-to-br from-fuchsia-500/40 to-cyan-400/40 border border-fuchsia-400/30';
       default:
         return 'bg-gradient-to-br from-primary/20 to-primary/40';
@@ -4345,8 +4354,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                                       className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors text-center focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-muted" 
                                       aria-label={`Select ${style.name} style`}
                                     >
-                                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getStyleBackground(style.name)}`}>
-                                        <span className={`text-xs font-medium ${style.name === 'Coloring Book' ? 'text-black' : 'text-foreground'}`}>
+                                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getStyleBackground(style.id)}`}>
+                                        <span className={`text-xs font-medium ${style.id === 'coloringBook' ? 'text-black' : 'text-foreground'}`}>
                                           {style.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
                                         </span>
                                       </div>

@@ -1108,6 +1108,17 @@
     "sendMessage": "Nachricht senden",
     "stopGenerating": "Generierung stoppen",
     "newChat": "Neuer Chat",
-    "imageStyles": "Bildstile"
+    "imageStyles": "Bildstile",
+    "styles": {
+      "cyberpunk": "Cyberpunk",
+      "anime": "Anime",
+      "dramaticHeadshot": "Dramatisches Porträt",
+      "coloringBook": "Malbuch",
+      "photoShoot": "Fotoshooting",
+      "retroCartoon": "Retro-Cartoon",
+      "glam80s": "80er-Glamour",
+      "artNouveau": "Jugendstil",
+      "synthwave": "Synthwave"
+    }
   }
 }
