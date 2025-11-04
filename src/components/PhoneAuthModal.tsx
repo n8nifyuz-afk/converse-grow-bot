@@ -132,22 +132,18 @@ export default function PhoneAuthModal({
     try {
       console.log('[PHONE-AUTH] 🔐 Verifying OTP...');
       
-      // CRITICAL FIX: Set mode to complete-profile BEFORE verifyOtp
-      // This prevents the useEffect from closing the modal when user is authenticated
-      setMode('complete-profile');
-      
       const { error } = await verifyOtp(phone, otp);
       
       if (error) {
         console.error('[PHONE-AUTH] ❌ OTP verification failed:', error);
         setError("Invalid verification code. Please try again.");
-        setMode('verify'); // Reset mode on error
         return;
       }
 
       console.log('[PHONE-AUTH] ✅ OTP verified successfully');
       
-      await refreshUserProfile();
+      // Wait a bit for auth state to stabilize
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Check if profile is complete by checking user metadata
       const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -159,19 +155,20 @@ export default function PhoneAuthModal({
         full_metadata: currentUser?.user_metadata
       });
       
+      // Check if this is a new signup (no profile data)
       if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
         console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
+        setMode('complete-profile');
         setProfileStep(1);
-        // Keep mode as 'complete-profile' to show the form
       } else {
         console.log('[PHONE-AUTH] ✅ Profile already complete - closing modal');
+        await refreshUserProfile();
         onClose();
         onSuccess?.();
       }
     } catch (error) {
       console.error('[PHONE-AUTH] ❌ Verification error:', error);
       setError("An error occurred during verification.");
-      setMode('verify');
     } finally {
       setLoading(false);
     }
