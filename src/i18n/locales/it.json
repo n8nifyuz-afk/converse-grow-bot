@@ -1118,5 +1118,20 @@
       "noteDescription": "Se la tua domanda riguarda fatturazione, accesso o problemi tecnici, includi una breve descrizione o uno screenshot. Questo ci aiuta a risolvere la tua richiesta molto più velocemente.",
       "visitContact": "Visita la Nostra Pagina di Contatto"
     }
+  },
+  "chatPage": {
+    "howCanIHelp": "Come posso aiutarti, {{name}}?",
+    "askMeAnything": "chiedimi qualsiasi cosa...",
+    "describeImage": "Descrivi un'immagine...",
+    "generateImage": "Genera un'immagine",
+    "selectStyle": "Seleziona uno stile",
+    "chooseStyle": "Scegli uno stile per la tua immagine",
+    "startTyping": "Inizia a digitare per chattare con l'IA",
+    "attachFile": "Allega file",
+    "recordVoice": "Registra messaggio vocale",
+    "sendMessage": "Invia messaggio",
+    "stopGenerating": "Ferma generazione",
+    "newChat": "Nuova Chat",
+    "imageStyles": "Stili Immagine"
   }
 }

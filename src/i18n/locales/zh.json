@@ -1210,5 +1210,20 @@
       "noteDescription": "如果您的问题涉及账单、登录或技术问题，请附上简短描述或屏幕截图。这有助于我们更快地解决您的请求。",
       "visitContact": "访问我们的联系页面"
     }
+  },
+  "chatPage": {
+    "howCanIHelp": "我能帮你什么，{{name}}？",
+    "askMeAnything": "问我任何事...",
+    "describeImage": "描述一张图片...",
+    "generateImage": "生成图片",
+    "selectStyle": "选择样式",
+    "chooseStyle": "为您的图片选择样式",
+    "startTyping": "开始输入以与AI聊天",
+    "attachFile": "附加文件",
+    "recordVoice": "录制语音消息",
+    "sendMessage": "发送消息",
+    "stopGenerating": "停止生成",
+    "newChat": "新聊天",
+    "imageStyles": "图片样式"
   }
 }
