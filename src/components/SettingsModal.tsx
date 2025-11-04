@@ -112,7 +112,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       setDisplayName(userProfile.display_name);
     }
     if (userProfile?.date_of_birth) {
-      setBirthDate(userProfile.date_of_birth);
+      // Convert from database format (YYYY-MM-DD) to display format (DD/MM/YYYY)
+      setBirthDate(convertToDisplayFormat(userProfile.date_of_birth));
     }
   }, [userProfile]);
 
@@ -208,14 +209,95 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     }
   };
 
+  // Helper function to format date input as DD/MM/YYYY
+  const formatDateInput = (value: string) => {
+    // Remove all non-numeric characters
+    const numbers = value.replace(/\D/g, '');
+    
+    // Add slashes automatically
+    if (numbers.length <= 2) {
+      return numbers;
+    } else if (numbers.length <= 4) {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    } else {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
+    }
+  };
+
+  // Helper function to validate DD/MM/YYYY date
+  const isValidDate = (dateString: string) => {
+    // Check format DD/MM/YYYY
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const match = dateString.match(regex);
+    
+    if (!match) return false;
+    
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    
+    // Check ranges
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
+    if (year < 1900 || year > new Date().getFullYear()) return false;
+    
+    // Check day validity for month
+    const daysInMonth = new Date(year, month, 0).getDate();
+    if (day > daysInMonth) return false;
+    
+    // Check if user is at least 13 years old
+    const birthDateObj = new Date(year, month - 1, day);
+    const today = new Date();
+    const age = today.getFullYear() - birthDateObj.getFullYear();
+    const monthDiff = today.getMonth() - birthDateObj.getMonth();
+    const dayDiff = today.getDate() - birthDateObj.getDate();
+    
+    if (age < 13 || (age === 13 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)))) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Convert DD/MM/YYYY to YYYY-MM-DD for database
+  const convertToDbFormat = (ddmmyyyy: string): string => {
+    const [day, month, year] = ddmmyyyy.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+
+  // Convert YYYY-MM-DD to DD/MM/YYYY for display
+  const convertToDisplayFormat = (yyyymmdd: string): string => {
+    if (!yyyymmdd) return '';
+    const [year, month, day] = yyyymmdd.split('-');
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatDateInput(e.target.value);
+    setBirthDate(formatted);
+  };
+
   const handleUpdateBirthDate = async () => {
     if (!user || !birthDate) return;
     
+    // Validate date format
+    if (!isValidDate(birthDate)) {
+      toast({
+        title: 'Invalid Date',
+        description: 'Please enter a valid date in DD/MM/YYYY format. You must be at least 13 years old.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setIsUpdatingBirthDate(true);
     try {
+      // Convert to database format (YYYY-MM-DD)
+      const dbDate = convertToDbFormat(birthDate);
+      
       const { error } = await supabase
         .from('profiles')
-        .update({ date_of_birth: birthDate })
+        .update({ date_of_birth: dbDate })
         .eq('user_id', user.id);
 
       if (error) throw error;
@@ -822,14 +904,14 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-foreground text-sm">Birth Date</p>
-                        <p className="text-xs text-muted-foreground">Your date of birth (YYYY-MM-DD)</p>
+                        <p className="text-xs text-muted-foreground">Your date of birth (DD/MM/YYYY)</p>
                       </div>
                     </div>
                     <div className="ml-0 md:ml-9 space-y-2">
                       <input
                         type="text"
                         value={birthDate}
-                        onChange={(e) => setBirthDate(e.target.value)}
+                        onChange={handleBirthDateChange}
                         onFocus={(e) => {
                           if (isMobile) {
                             setTimeout(() => {
@@ -837,12 +919,13 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                             }, 300);
                           }
                         }}
-                        placeholder="YYYY-MM-DD"
+                        placeholder="DD/MM/YYYY"
+                        maxLength={10}
                         className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                       <Button 
                         onClick={handleUpdateBirthDate}
-                        disabled={isUpdatingBirthDate || !birthDate || birthDate === userProfile?.date_of_birth}
+                        disabled={isUpdatingBirthDate || !birthDate || birthDate === convertToDisplayFormat(userProfile?.date_of_birth || '')}
                         size="sm"
                         className="w-full sm:w-auto h-8 text-xs"
                       >
