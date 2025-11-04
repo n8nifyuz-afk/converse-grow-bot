@@ -133,7 +133,15 @@
     "fullName": "Nom complet",
     "yourDisplayName": "Votre nom d'affichage",
     "emailAddress": "Adresse e-mail",
-    "yourAccountEmail": "Votre e-mail de compte"
+    "yourAccountEmail": "Votre e-mail de compte",
+    "loginMethods": "Méthodes de connexion",
+    "connectedAuth": "Fournisseurs d'authentification connectés",
+    "linkMultipleSignIn": "Liez plusieurs méthodes de connexion pour accéder à votre compte de manière flexible. Votre abonnement fonctionne sur toutes les méthodes liées.",
+    "oauthLoginMethod": "Méthode de connexion OAuth",
+    "addMoreSignInMethods": "Ajouter plus de méthodes de connexion",
+    "linkPhoneNumber": "Lier le numéro de téléphone",
+    "linkSocialAccount": "Lier un compte social",
+    "google": "Google"
   },
   "languages": {
     "en": "English",

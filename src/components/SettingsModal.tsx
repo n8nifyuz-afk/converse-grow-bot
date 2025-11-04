@@ -1166,7 +1166,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                 <Card className="shadow-sm border-border/40">
                   <CardContent className="p-4 md:p-6 space-y-3">
                     <p className="text-xs md:text-sm text-muted-foreground mb-3">
-                      Link multiple sign-in methods to access your account flexibly. Your subscription works across all linked methods.
+                      {t('settings.linkMultipleSignIn')}
                     </p>
                     
                     {/* Show all linked identities */}
@@ -1221,7 +1221,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                                 <p className="text-xs text-muted-foreground truncate">
                                   {isPhone && (identity.identity_data?.phone || userProfile?.phone_number)}
                                   {isEmail && (identity.identity_data?.email || 'Email login')}
-                                  {(isGoogle || isApple || isMicrosoft) && 'OAuth login method'}
+                                  {(isGoogle || isApple || isMicrosoft) && t('settings.oauthLoginMethod')}
                                 </p>
                               </div>
                             </div>
@@ -1249,7 +1249,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
 
                     {/* Add more methods */}
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Add More Sign-In Methods</p>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">{t('settings.addMoreSignInMethods')}</p>
                       
                       {/* Add Phone (for email/OAuth users) */}
                       {!linkedIdentities.some(id => id.provider === 'phone') && (
@@ -1260,7 +1260,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           className="w-full justify-start gap-2 h-10"
                         >
                           <Mail className="h-4 w-4" />
-                          <span>Link Phone Number</span>
+                          <span>{t('settings.linkPhoneNumber')}</span>
                         </Button>
                       )}
 
@@ -1281,7 +1281,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                           </svg>
-                          <span>Link Social Account</span>
+                          <span>{t('settings.linkSocialAccount')}</span>
                         </Button>
                       )}
                     </div>

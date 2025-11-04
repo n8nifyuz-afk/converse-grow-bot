@@ -133,7 +133,15 @@
     "fullName": "الاسم الكامل",
     "yourDisplayName": "اسم العرض الخاص بك",
     "emailAddress": "عنوان البريد الإلكتروني",
-    "yourAccountEmail": "البريد الإلكتروني لحسابك"
+    "yourAccountEmail": "البريد الإلكتروني لحسابك",
+    "loginMethods": "طرق تسجيل الدخول",
+    "connectedAuth": "موفرو المصادقة المتصلون",
+    "linkMultipleSignIn": "اربط طرق تسجيل دخول متعددة للوصول إلى حسابك بمرونة. يعمل اشتراكك عبر جميع الطرق المرتبطة.",
+    "oauthLoginMethod": "طريقة تسجيل الدخول OAuth",
+    "addMoreSignInMethods": "إضافة المزيد من طرق تسجيل الدخول",
+    "linkPhoneNumber": "ربط رقم الهاتف",
+    "linkSocialAccount": "ربط حساب اجتماعي",
+    "google": "Google"
   },
   "languages": {
     "en": "English",

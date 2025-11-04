@@ -133,7 +133,15 @@
     "fullName": "Полное имя",
     "yourDisplayName": "Ваше отображаемое имя",
     "emailAddress": "Адрес электронной почты",
-    "yourAccountEmail": "Электронная почта вашего аккаунта"
+    "yourAccountEmail": "Электронная почта вашего аккаунта",
+    "loginMethods": "Методы входа",
+    "connectedAuth": "Подключенные поставщики аутентификации",
+    "linkMultipleSignIn": "Свяжите несколько методов входа для гибкого доступа к вашему аккаунту. Ваша подписка работает во всех связанных методах.",
+    "oauthLoginMethod": "Метод входа OAuth",
+    "addMoreSignInMethods": "Добавить больше методов входа",
+    "linkPhoneNumber": "Привязать номер телефона",
+    "linkSocialAccount": "Привязать социальный аккаунт",
+    "google": "Google"
   },
   "languages": {
     "en": "English",

@@ -133,7 +133,15 @@
     "fullName": "氏名",
     "yourDisplayName": "表示名",
     "emailAddress": "メールアドレス",
-    "yourAccountEmail": "アカウントのメールアドレス"
+    "yourAccountEmail": "アカウントのメールアドレス",
+    "loginMethods": "ログイン方法",
+    "connectedAuth": "接続されている認証プロバイダー",
+    "linkMultipleSignIn": "複数のログイン方法をリンクして、アカウントに柔軟にアクセスできます。サブスクリプションはすべてのリンクされた方法で機能します。",
+    "oauthLoginMethod": "OAuthログイン方法",
+    "addMoreSignInMethods": "さらにログイン方法を追加",
+    "linkPhoneNumber": "電話番号をリンク",
+    "linkSocialAccount": "ソーシャルアカウントをリンク",
+    "google": "Google"
   },
   "languages": {
     "en": "English",
