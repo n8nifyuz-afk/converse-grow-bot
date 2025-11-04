@@ -98,7 +98,17 @@ export default function PhoneAuthModal({
     setError('');
     
     try {
-      const { error } = await signInWithPhone(phone);
+      // Add 30 second timeout to detect slow backend responses
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 30000)
+      );
+      
+      const signInPromise = signInWithPhone(phone);
+      
+      const { error } = await Promise.race([
+        signInPromise,
+        timeoutPromise
+      ]) as { error: any };
       
       if (error) {
         toast({
@@ -115,12 +125,19 @@ export default function PhoneAuthModal({
           duration: 3000
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      const isTimeout = error?.message === 'Request timeout';
       toast({
-        title: "An error occurred",
-        description: "Please try again later.",
+        title: isTimeout ? "Request taking longer than expected" : "An error occurred",
+        description: isTimeout 
+          ? "SMS sending is slow. Your code may arrive in a few minutes. Please wait or try again."
+          : "Please try again later.",
         variant: "destructive"
       });
+      setError(isTimeout 
+        ? "Backend is slow. Code may still arrive - please wait."
+        : "An error occurred"
+      );
     } finally {
       setPhoneLoading(false);
     }
