@@ -47,6 +47,8 @@ export const CookieBanner = () => {
       timestamp: new Date().toISOString(),
     };
 
+    console.log('🍪 [Cookie Banner] Saving consent preferences:', consentData);
+
     // Save to localStorage
     localStorage.setItem('cookieConsent', JSON.stringify(consentData));
 
@@ -55,12 +57,18 @@ export const CookieBanner = () => {
 
     // Update Google Consent Mode
     if (window.gtag) {
-      window.gtag('consent', 'update', {
+      const consentUpdate = {
         analytics_storage: statistics ? 'granted' : 'denied',
         ad_storage: marketing ? 'granted' : 'denied',
         ad_user_data: marketing ? 'granted' : 'denied',
         ad_personalization: marketing ? 'granted' : 'denied',
-      });
+      };
+      
+      console.log('📊 [Cookie Banner] Updating Google Consent Mode:', consentUpdate);
+      window.gtag('consent', 'update', consentUpdate);
+      console.log('✅ [Cookie Banner] Consent updated successfully');
+    } else {
+      console.warn('⚠️ [Cookie Banner] gtag function not available');
     }
   };
 

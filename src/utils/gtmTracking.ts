@@ -61,7 +61,10 @@ export const clearTrackingDataAfterConversion = () => {
  * This should be called on app initialization to ensure Google Ads can track conversions
  */
 export const initializeGTMWithGCLID = () => {
+  console.log('🔍 [GTM] Initializing GTM with GCLID tracking...');
+  
   if (typeof window === 'undefined' || !window.dataLayer) {
+    console.warn('⚠️ [GTM] Window or dataLayer not available');
     return;
   }
 
@@ -71,9 +74,13 @@ export const initializeGTMWithGCLID = () => {
     const gclidFromUrl = urlParams.get('gclid');
     const gclidFromStorage = localStorage.getItem('gclid');
     
+    console.log('📍 [GTM] GCLID from URL:', gclidFromUrl || 'Not found');
+    console.log('💾 [GTM] GCLID from storage:', gclidFromStorage || 'Not found');
+    
     // Check if stored GCLID has expired
     const hasExpiredGCLID = gclidFromStorage && isGCLIDExpired();
     if (hasExpiredGCLID) {
+      console.log('⏰ [GTM] Stored GCLID expired, clearing...');
       clearTrackingData();
     }
     
@@ -82,8 +89,11 @@ export const initializeGTMWithGCLID = () => {
     // CRITICAL: Store GCLID with timestamp if found in URL
     // Only store if not already present (preserves original tracking)
     if (gclidFromUrl && !gclidFromStorage) {
+      console.log('💾 [GTM] Storing new GCLID:', gclidFromUrl);
       localStorage.setItem('gclid', gclidFromUrl);
       localStorage.setItem('gclid_timestamp', Date.now().toString());
+    } else if (gclid) {
+      console.log('✅ [GTM] Using existing GCLID:', gclid);
     }
 
     // Collect all URL parameters for attribution
@@ -130,10 +140,15 @@ export const initializeGTMWithGCLID = () => {
         eventData.url_params = allUrlParams;
       }
 
+      console.log('📤 [GTM] Pushing gtm_init event to dataLayer:', eventData);
       window.dataLayer.push(eventData);
+      console.log('✅ [GTM] Event pushed successfully');
+      console.log('📊 [GTM] Current dataLayer:', window.dataLayer);
+    } else {
+      console.log('ℹ️ [GTM] No tracking data to push');
     }
   } catch (error) {
-    // Silent error
+    console.error('❌ [GTM] Error initializing:', error);
   }
 };
 
@@ -151,15 +166,20 @@ const getCurrentGCLID = (): string | null => {
 };
 
 export const trackRegistrationComplete = () => {
+  console.log('🎯 [GTM] Tracking registration_complete event');
+  
   if (typeof window !== 'undefined' && window.dataLayer) {
     const trackedKey = 'gtm_registration_tracked';
     const alreadyTracked = localStorage.getItem(trackedKey);
     
     if (alreadyTracked) {
+      console.log('⏭️ [GTM] Registration already tracked, skipping');
       return;
     }
     
     const gclid = getCurrentGCLID();
+    console.log('📍 [GTM] Current GCLID:', gclid || 'None');
+    
     const eventData: Record<string, any> = {
       event: 'registration_complete'
     };
@@ -168,26 +188,36 @@ export const trackRegistrationComplete = () => {
       eventData.gclid = gclid;
     }
     
+    console.log('📤 [GTM] Pushing event:', eventData);
     window.dataLayer.push(eventData);
     localStorage.setItem(trackedKey, 'true');
+    console.log('✅ [GTM] Registration event tracked successfully');
     
     // Clear tracking data after successful conversion
     setTimeout(() => {
+      console.log('🧹 [GTM] Clearing tracking data after conversion');
       clearTrackingDataAfterConversion();
     }, 1000); // Small delay to ensure GTM processes the event
+  } else {
+    console.warn('⚠️ [GTM] Window or dataLayer not available');
   }
 };
 
 export const trackChatStart = (chatId?: string) => {
+  console.log('🎯 [GTM] Tracking chat_start event, Chat ID:', chatId || 'None');
+  
   if (typeof window !== 'undefined' && window.dataLayer) {
     const trackedKey = chatId ? `gtm_chat_start_${chatId}` : 'gtm_chat_start_temp';
     const trackedChats = sessionStorage.getItem('gtm_tracked_chats') || '';
     
     if (trackedChats.includes(trackedKey)) {
+      console.log('⏭️ [GTM] Chat start already tracked, skipping');
       return;
     }
     
     const gclid = getCurrentGCLID();
+    console.log('📍 [GTM] Current GCLID:', gclid || 'None');
+    
     const eventData: Record<string, any> = {
       event: 'chat_start'
     };
@@ -196,10 +226,14 @@ export const trackChatStart = (chatId?: string) => {
       eventData.gclid = gclid;
     }
     
+    console.log('📤 [GTM] Pushing event:', eventData);
     window.dataLayer.push(eventData);
     
     const newTrackedChats = trackedChats ? `${trackedChats},${trackedKey}` : trackedKey;
     sessionStorage.setItem('gtm_tracked_chats', newTrackedChats);
+    console.log('✅ [GTM] Chat start event tracked successfully');
+  } else {
+    console.warn('⚠️ [GTM] Window or dataLayer not available');
   }
 };
 
@@ -208,8 +242,12 @@ export const trackPaymentComplete = (
   planDuration: 'monthly' | '3_months' | 'yearly',
   planPrice: number
 ) => {
+  console.log('🎯 [GTM] Tracking payment_complete event');
+  console.log('💰 [GTM] Plan details:', { planType, planDuration, planPrice });
+  
   if (typeof window !== 'undefined' && window.dataLayer) {
     const gclid = getCurrentGCLID();
+    console.log('📍 [GTM] Current GCLID:', gclid || 'None');
     
     const eventData: Record<string, any> = {
       event: 'payment_complete',
@@ -224,11 +262,16 @@ export const trackPaymentComplete = (
       eventData.gclid = gclid;
     }
     
+    console.log('📤 [GTM] Pushing event:', eventData);
     window.dataLayer.push(eventData);
+    console.log('✅ [GTM] Payment event tracked successfully');
     
     // Clear tracking data after successful payment conversion
     setTimeout(() => {
+      console.log('🧹 [GTM] Clearing tracking data after conversion');
       clearTrackingDataAfterConversion();
     }, 1000); // Small delay to ensure GTM processes the event
+  } else {
+    console.warn('⚠️ [GTM] Window or dataLayer not available');
   }
 };
