@@ -403,13 +403,129 @@
   },
   "helpCenter": {
     "title": "帮助中心",
-    "subtitle": "找到问题的答案并学习如何充分利用 ChatLearn",
-    "searchPlaceholder": "搜索帮助...",
-    "aiChat": "AI 聊天",
-    "features": "功能",
-    "aiTools": "AI 工具",
-    "pricingPlans": "定价和计划",
-    "faq": "常见问题"
+    "subtitle": "查找您需要的答案",
+    "searchPlaceholder": "搜索常见问题...",
+    "quickLinks": "快速链接",
+    "billing": "账单",
+    "account": "账户",
+    "aiModels": "AI模型",
+    "technical": "技术",
+    "privacy": "隐私",
+    "contactSupport": "联系支持",
+    "noResults": "未找到结果",
+    "noResultsDescription": "请尝试使用其他关键词",
+    "contactSupportSection": "联系与支持",
+    "contactDescription": "找不到您需要的答案？",
+    "emailUs": "发送邮件至",
+    "visitContact": "或访问我们的",
+    "contactPage": "联系页面",
+    "sections": {
+      "billing": {
+        "title": "账单与订阅",
+        "questions": {
+          "q1": {
+            "question": "如何升级到专业版？",
+            "answer": "点击任何页面上的'升级'按钮，选择适合您的方案。我们接受所有主流信用卡和PayPal支付。"
+          },
+          "q2": {
+            "question": "我可以随时取消订阅吗？",
+            "answer": "可以。您可以随时从账户设置中取消订阅。您将保留访问权限直到当前计费周期结束。"
+          },
+          "q3": {
+            "question": "有退款政策吗？",
+            "answer": "我们提供7天退款保证。如果您不满意，请在购买后7天内联系我们，我们将全额退款。"
+          },
+          "q4": {
+            "question": "订阅会自动续订吗？",
+            "answer": "是的，订阅会自动续订以确保不中断服务。您会在续订前收到电子邮件提醒。"
+          }
+        }
+      },
+      "account": {
+        "title": "账户管理",
+        "questions": {
+          "q1": {
+            "question": "如何重置密码？",
+            "answer": "点击登录页面上的'忘记密码'链接。输入您的电子邮件地址，我们将向您发送重置说明。"
+          },
+          "q2": {
+            "question": "如何更改电子邮件地址？",
+            "answer": "进入账户设置 > 个人资料，点击电子邮件旁边的'更改'按钮。您需要验证新的电子邮件地址。"
+          },
+          "q3": {
+            "question": "如何删除账户？",
+            "answer": "进入账户设置 > 数据控制，向下滚动到'删除账户'部分。请注意，此操作无法撤销。"
+          },
+          "q4": {
+            "question": "如何导出数据？",
+            "answer": "您可以从账户设置 > 数据控制导出所有聊天记录和数据。导出将以JSON格式提供。"
+          }
+        }
+      },
+      "ai": {
+        "title": "AI模型",
+        "questions": {
+          "q1": {
+            "question": "有哪些可用的AI模型？",
+            "answer": "我们提供访问ChatGPT（GPT-4和GPT-3.5）、Claude（Opus、Sonnet和Haiku）、Gemini、Grok和DeepSeek。每个模型都有不同的优势。"
+          },
+          "q2": {
+            "question": "我如何选择模型？",
+            "answer": "在聊天界面中，点击顶部的模型选择器。您可以在对话期间随时切换模型。"
+          },
+          "q3": {
+            "question": "各种方案的消息限制是多少？",
+            "answer": "免费方案：每天10条消息。专业版：每天无限消息。消息限制在UTC午夜重置。"
+          },
+          "q4": {
+            "question": "我可以在同一聊天中使用多个模型吗？",
+            "answer": "可以！您可以在对话期间切换模型。这对于比较响应或为不同任务使用特定模型非常有用。"
+          }
+        }
+      },
+      "technical": {
+        "title": "技术支持",
+        "questions": {
+          "q1": {
+            "question": "我可以在移动设备上使用ChatL吗？",
+            "answer": "可以！ChatL完全响应式，可在所有设备上使用 - 桌面、平板和移动设备。"
+          },
+          "q2": {
+            "question": "支持哪些浏览器？",
+            "answer": "我们支持所有现代浏览器：Chrome、Firefox、Safari和Edge。为获得最佳体验，请保持浏览器更新。"
+          },
+          "q3": {
+            "question": "图像生成如何工作？",
+            "answer": "专业用户可以通过聊天界面访问AI图像生成。只需描述您想要的图像，我们的AI就会创建它。"
+          },
+          "q4": {
+            "question": "如何使用项目功能？",
+            "answer": "项目允许您组织相关的聊天记录。创建项目，为其命名，然后将聊天添加到其中以保持有序。"
+          }
+        }
+      },
+      "privacy": {
+        "title": "隐私与安全",
+        "questions": {
+          "q1": {
+            "question": "我的数据安全吗？",
+            "answer": "是的。我们使用行业标准加密并遵循最佳安全实践。您的数据永远不会与第三方共享。"
+          },
+          "q2": {
+            "question": "您会存储我的对话吗？",
+            "answer": "对话会安全存储在您的账户中。您可以随时删除任何聊天或导出数据。"
+          },
+          "q3": {
+            "question": "您使用我的数据进行训练吗？",
+            "answer": "不会。我们绝不会使用您的对话或数据来训练AI模型。您的隐私是我们的首要任务。"
+          },
+          "q4": {
+            "question": "我可以启用两步验证吗？",
+            "answer": "是的！进入账户设置 > 安全以启用两步验证，为您的账户增加额外的安全层。"
+          }
+        }
+      }
+    }
   },
   "faq": {
     "badge": "常见问题",
