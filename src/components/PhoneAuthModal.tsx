@@ -239,6 +239,20 @@ export default function PhoneAuthModal({
     }
   };
 
+  const isDateValid = (date: string): boolean => {
+    const dobRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    if (!dobRegex.test(date)) return false;
+    
+    const [day, month, year] = date.split('/').map(Number);
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+    
+    return age >= 13 && !(age === 13 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)));
+  };
+
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -255,23 +269,6 @@ export default function PhoneAuthModal({
     }
     
     if (profileStep === 3 && dateOfBirth) {
-      const dobRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-      if (!dobRegex.test(dateOfBirth)) {
-        setError('Please enter a valid date in DD/MM/YYYY format');
-        return;
-      }
-      
-      const [day, month, year] = dateOfBirth.split('/').map(Number);
-      const birthDate = new Date(year, month - 1, day);
-      const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      const dayDiff = today.getDate() - birthDate.getDate();
-      
-      if (age < 13 || (age === 13 && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)))) {
-        setError('You must be at least 13 years old to use this service');
-        return;
-      }
       
       setLoading(true);
       setError('');
@@ -529,7 +526,7 @@ export default function PhoneAuthModal({
                   )}
                   <Button 
                     type="submit" 
-                    disabled={loading}
+                    disabled={loading || (profileStep === 3 && !isDateValid(dateOfBirth))}
                     className={`h-12 md:h-13 text-base ${profileStep === 1 ? 'w-full' : 'flex-1'}`}
                   >
                     {loading ? (
