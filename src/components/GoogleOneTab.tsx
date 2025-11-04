@@ -60,9 +60,7 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
 
         // Display the One Tap prompt
         window.google.accounts.id.prompt((notification: any) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            logInfo('Google One Tap not displayed');
-          }
+          // Silent - no logging needed
         });
 
         isInitialized.current = true;
@@ -73,8 +71,6 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
 
     const handleCredentialResponse = async (response: any) => {
       try {
-        logInfo('Google One Tap: Starting authentication...');
-        
         // CRITICAL: Mark that auth was explicitly initiated by user
         markAuthInitiated();
         
@@ -110,8 +106,6 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
           // Verify session is actually set in Supabase
           const { data: sessionData } = await supabase.auth.getSession();
           if (sessionData?.session) {
-            logInfo('Google One Tap: Session verified, authentication complete');
-            
             // Activity logging is now handled centrally in AuthContext onAuthStateChange
             // No need to log here to prevent duplicates
             

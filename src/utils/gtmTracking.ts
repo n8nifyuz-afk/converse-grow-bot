@@ -12,10 +12,7 @@ declare global {
  * This should be called on app initialization to ensure Google Ads can track conversions
  */
 export const initializeGTMWithGCLID = () => {
-  console.log('🚀 [GTM] Initializing GTM with GCLID tracking...');
-  
   if (typeof window === 'undefined' || !window.dataLayer) {
-    console.warn('⚠️ [GTM] Window or dataLayer not available');
     return;
   }
 
@@ -26,20 +23,10 @@ export const initializeGTMWithGCLID = () => {
     const gclidFromStorage = localStorage.getItem('gclid');
     const gclid = gclidFromUrl || gclidFromStorage;
 
-    console.log('🔍 [GTM] GCLID check:', {
-      url: window.location.href,
-      gclidFromUrl,
-      gclidFromStorage,
-      finalGclid: gclid
-    });
-
     // CRITICAL: Store GCLID in localStorage if found in URL (for later use during signup)
     // NEVER overwrite if one already exists (preserves original tracking data)
     if (gclidFromUrl && !gclidFromStorage) {
       localStorage.setItem('gclid', gclidFromUrl);
-      console.log('✅ [GTM] GCLID saved to localStorage:', gclidFromUrl);
-    } else if (gclidFromStorage) {
-      console.log('ℹ️ [GTM] Preserving existing GCLID from localStorage:', gclidFromStorage);
     }
 
     // Collect all URL parameters for attribution
@@ -51,8 +38,6 @@ export const initializeGTMWithGCLID = () => {
       }
     });
 
-    console.log('🔍 [GTM] URL parameters found:', allUrlParams);
-
     // CRITICAL: MERGE new URL parameters with existing ones (never overwrite)
     // This ensures utm_source, utm_medium, gad_source, etc. persist through OAuth redirects
     const existingParamsStr = localStorage.getItem('url_params');
@@ -63,16 +48,14 @@ export const initializeGTMWithGCLID = () => {
         const existingParams = JSON.parse(existingParamsStr);
         // Merge: keep existing params, only add new ones if they don't exist
         mergedParams = { ...allUrlParams, ...existingParams };
-        console.log('🔄 [GTM] Merged with existing URL parameters:', { existing: existingParams, new: allUrlParams, merged: mergedParams });
       } catch (e) {
-        console.warn('⚠️ [GTM] Failed to parse existing url_params:', e);
+        // Silent error - continue with current params
       }
     }
 
     // Only save if we have tracking parameters (not just system parameters)
     if (Object.keys(mergedParams).length > 0) {
       localStorage.setItem('url_params', JSON.stringify(mergedParams));
-      console.log('✅ [GTM] URL parameters saved to localStorage:', mergedParams);
     }
 
     // If we have GCLID or URL params, push to dataLayer
@@ -89,11 +72,7 @@ export const initializeGTMWithGCLID = () => {
         eventData.url_params = allUrlParams;
       }
 
-      console.log('📤 [GTM] Pushing to dataLayer:', eventData);
       window.dataLayer.push(eventData);
-      console.log('✅ [GTM] Event pushed to dataLayer successfully');
-    } else {
-      console.log('ℹ️ [GTM] No GCLID or URL params found - skipping dataLayer push');
     }
   } catch (error) {
     console.error('❌ [GTM] Error initializing:', error);
@@ -118,13 +97,7 @@ export const trackRegistrationComplete = () => {
     const trackedKey = 'gtm_registration_tracked';
     const alreadyTracked = localStorage.getItem(trackedKey);
     
-    console.log('🔍 [GTM] Registration tracking check:', {
-      alreadyTracked,
-      trackedKey
-    });
-    
     if (alreadyTracked) {
-      console.log('⏭️ [GTM] Registration already tracked - skipping');
       return;
     }
     
@@ -135,15 +108,10 @@ export const trackRegistrationComplete = () => {
     
     if (gclid) {
       eventData.gclid = gclid;
-      console.log('✅ [GTM] Including GCLID in registration event:', gclid);
-    } else {
-      console.log('⚠️ [GTM] No GCLID available for registration event');
     }
     
-    console.log('📤 [GTM] Pushing registration_complete to dataLayer:', eventData);
     window.dataLayer.push(eventData);
     localStorage.setItem(trackedKey, 'true');
-    console.log('✅ [GTM] Registration tracked and marked in localStorage');
   }
 };
 

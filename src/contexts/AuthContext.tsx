@@ -82,7 +82,6 @@ const clearCachedSubscription = () => {
 export const markAuthInitiated = () => {
   sessionStorage.setItem('auth_initiated', 'true');
   sessionStorage.setItem('auth_initiated_time', Date.now().toString());
-  console.log('[Auth] 🎯 User explicitly initiated authentication');
 };
 
 // Helper to check if auth was recently initiated (within last 30 seconds)
@@ -186,14 +185,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const provider = isGoogleSignIn ? 'google' : isAppleSignIn ? 'apple' : isMicrosoftSignIn ? 'microsoft' : 'email';
       
-      console.log(`[OAuth Profile Sync] Detected provider: ${provider}`, {
-        isGoogleSignIn,
-        isAppleSignIn,
-        isMicrosoftSignIn,
-        metadata_iss: metadata?.iss,
-        app_provider: appMetadata?.provider
-      });
-      
       // REMOVED: updateLoginGeoData call - profile is already updated by log-user-activity edge function
       
       // Only sync profile data for OAuth providers
@@ -232,28 +223,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Determine if we should send webhook (new signup AND webhook not sent yet)
       const shouldSendWebhook = isNewSignup && !webhookAlreadySent;
       
-      console.log('[OAuth Profile Sync] Signup detection:', {
-        isNewSignup,
-        hasGclid: !!currentProfile?.gclid,
-        hasUrlParams: !!currentProfile?.url_params,
-        hasReferer: !!currentProfile?.initial_referer,
-        webhookAlreadySent: !!webhookAlreadySent,
-        shouldSendWebhook,
-        created_at: currentProfile?.created_at
-      });
-      
       // CRITICAL: For new signups (missing tracking data), fetch IP and country
       if (isNewSignup && (!currentProfile?.ip_address || !currentProfile?.country)) {
-        console.log('[OAuth Profile Sync] NEW SIGNUP detected - Fetching IP and country...');
         try {
           const { ip, country } = await fetchIPAndCountry();
           if (ip && !currentProfile?.ip_address) {
             updateData.ip_address = ip;
-            console.log('[OAuth Profile Sync] ✅ Will save IP address:', ip);
           }
           if (country && !currentProfile?.country) {
             updateData.country = country;
-            console.log('[OAuth Profile Sync] ✅ Will save country:', country);
           }
         } catch (error) {
           console.error('[OAuth Profile Sync] Failed to fetch IP/country:', error);
@@ -263,33 +241,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // CRITICAL: ONLY sync tracking data for NEW signups (preserves original attribution)
       // On subsequent logins, we NEVER update GCLID/url_params/referer
       if (isNewSignup) {
-        console.log('🔍 [OAuth Profile Sync] NEW SIGNUP - Checking localStorage for tracking data...');
         const gclid = localStorage.getItem('gclid');
         const storedUrlParams = localStorage.getItem('url_params');
         const storedReferer = localStorage.getItem('initial_referer');
         
-        console.log('📋 [OAuth Profile Sync] Retrieved from localStorage:', {
-          gclid,
-          storedUrlParams,
-          storedReferer,
-          currentProfile_gclid: currentProfile?.gclid,
-          currentProfile_url_params: currentProfile?.url_params,
-          currentProfile_initial_referer: currentProfile?.initial_referer
-        });
-        
         // Save GCLID from localStorage if database doesn't have it
         if (gclid && !currentProfile?.gclid) {
           updateData.gclid = gclid;
-          console.log('[OAuth Profile Sync] ✅ Saving SIGNUP GCLID from localStorage:', gclid);
         }
         
         // Save url_params from localStorage if database doesn't have it
         if (storedUrlParams && !currentProfile?.url_params) {
           try {
             updateData.url_params = JSON.parse(storedUrlParams);
-            console.log('[OAuth Profile Sync] ✅ Saving SIGNUP url_params from localStorage:', updateData.url_params);
           } catch (e) {
-            console.warn('[OAuth Profile Sync] Failed to parse stored url_params:', e);
+            // Silent error
           }
         }
         
@@ -297,22 +263,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const referer = storedReferer || document.referrer || 'Direct';
         if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
           updateData.initial_referer = referer;
-          console.log('[OAuth Profile Sync] ✅ Saving SIGNUP referer:', referer);
         }
       } else {
         // On subsequent logins, ALWAYS preserve existing tracking data (never update)
-        console.log('🔒 [OAuth Profile Sync] EXISTING USER - Preserving original signup tracking data');
         if (currentProfile?.gclid) {
           updateData.gclid = currentProfile.gclid;
-          console.log('[OAuth Profile Sync] 🔒 Preserving ORIGINAL signup GCLID:', currentProfile.gclid);
         }
         if (currentProfile?.url_params) {
           updateData.url_params = currentProfile.url_params;
-          console.log('[OAuth Profile Sync] 🔒 Preserving ORIGINAL signup url_params');
         }
         if (currentProfile?.initial_referer) {
           updateData.initial_referer = currentProfile.initial_referer;
-          console.log('[OAuth Profile Sync] 🔒 Preserving ORIGINAL signup referer:', currentProfile.initial_referer);
         }
       }
 
@@ -405,17 +366,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('❌ [OAuth Profile Sync] Profile update FAILED:', error);
           throw error;
         }
-        
-        console.log('✅ [OAuth Profile Sync] Profile updated successfully:', data);
       }
       
       // CRITICAL: Send webhook for new OAuth signups (with proper deduplication)
       if (shouldSendWebhook) {
-        console.log('📤 [OAuth Profile Sync] Sending webhook for new OAuth signup...');
-        
         try {
           // Fetch the FINAL profile state with all tracking data
-          console.log('🔍 [OAuth Profile Sync] Fetching final profile state for webhook...');
           const { data: finalProfile } = await supabase
             .from('profiles')
             .select('*')
@@ -427,13 +383,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           let country = finalProfile?.country || updateData.country;
           
           if (!ipAddress || !country) {
-            console.log('🌍 [OAuth Profile Sync] Fetching IP and country for webhook...');
             try {
               const { ip, country: ipCountry } = await fetchIPAndCountry();
               ipAddress = ipAddress || ip;
               country = country || ipCountry;
             } catch (error) {
-              console.warn('⚠️ [OAuth Profile Sync] Failed to fetch IP/country:', error);
+              // Silent error
             }
           }
           
@@ -443,7 +398,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
               urlParams = JSON.parse(urlParams);
             } catch (e) {
-              console.warn('⚠️ [OAuth Profile Sync] Failed to parse url_params:', e);
               urlParams = {};
             }
           }
@@ -460,9 +414,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             referer: finalProfile?.initial_referer || updateData.initial_referer || null
           };
           
-          console.log('📋 [OAuth Profile Sync] Webhook payload:', webhookData);
-          console.log('📤 [OAuth Profile Sync] Sending webhook request...');
-          
           const webhookResponse = await fetch(
             'https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook',
             {
@@ -477,7 +428,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (webhookResponse.ok) {
             // Mark webhook as sent (deduplication)
             localStorage.setItem(webhookSentKey, new Date().toISOString());
-            console.log('✅ [OAuth Profile Sync] Webhook sent successfully and marked as sent');
           } else {
             const errorText = await webhookResponse.text();
             console.error('❌ [OAuth Profile Sync] Webhook failed:', errorText);
@@ -485,8 +435,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (webhookError) {
           console.error('[OAuth Profile Sync] ❌ Webhook error:', webhookError);
         }
-      } else if (isNewSignup && webhookAlreadySent) {
-        console.log('⏭️  [OAuth Profile Sync] Webhook already sent for this user, skipping');
       }
     } catch (error) {
       // OAuth profile sync failed
