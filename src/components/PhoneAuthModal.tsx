@@ -246,6 +246,8 @@ export default function PhoneAuthModal({
       setError('');
       
       try {
+        console.log('[PHONE-AUTH] 💾 Saving profile:', { firstName, lastName, dateOfBirth });
+        
         // Update user metadata with profile information
         const { error: updateError } = await supabase.auth.updateUser({
           data: {
@@ -256,31 +258,42 @@ export default function PhoneAuthModal({
         });
         
         if (updateError) {
+          console.error('[PHONE-AUTH] ❌ Profile update error:', updateError);
           throw updateError;
         }
         
+        console.log('[PHONE-AUTH] ✅ Profile updated successfully');
         await refreshUserProfile();
         
         // Send webhook after profile completion for phone sign-ups
         const { data: { user: currentUser } } = await supabase.auth.getUser();
+        console.log('[PHONE-AUTH] 📤 Preparing to send webhook for user:', currentUser?.id);
+        
         if (currentUser) {
           try {
-            await fetch('https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook', {
+            const webhookData = {
+              userId: currentUser.id,
+              email: currentUser.email,
+              username: `${firstName} ${lastName}`,
+              firstName: firstName,
+              lastName: lastName,
+              dateOfBirth: dateOfBirth,
+              signupMethod: 'phone',
+              phoneNumber: phone
+            };
+            
+            console.log('[PHONE-AUTH] 📤 Sending webhook with data:', webhookData);
+            
+            const webhookResponse = await fetch('https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                userId: currentUser.id,
-                email: currentUser.email,
-                username: `${firstName} ${lastName}`,
-                firstName: firstName,
-                lastName: lastName,
-                dateOfBirth: dateOfBirth,
-                signupMethod: 'phone',
-                phoneNumber: phone
-              })
+              body: JSON.stringify(webhookData)
             });
+            
+            const webhookResult = await webhookResponse.json();
+            console.log('[PHONE-AUTH] ✅ Webhook sent successfully:', webhookResult);
           } catch (webhookError) {
-            console.error('[PHONE-AUTH] Webhook error:', webhookError);
+            console.error('[PHONE-AUTH] ❌ Webhook error:', webhookError);
             // Don't block user flow if webhook fails
           }
         }
@@ -288,6 +301,7 @@ export default function PhoneAuthModal({
         onClose();
         onSuccess?.();
       } catch (error) {
+        console.error('[PHONE-AUTH] ❌ Complete profile error:', error);
         setError('Failed to save profile. Please try again.');
       } finally {
         setLoading(false);
