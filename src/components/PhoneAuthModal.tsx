@@ -331,7 +331,7 @@ export default function PhoneAuthModal({
           <DrawerDescription>Sign in with phone number</DrawerDescription>
         </DrawerHeader>
         
-        <div className="w-full px-4 md:px-6 py-8 md:py-12">
+        <div className={`w-full px-4 md:px-6 ${mode === 'complete-profile' ? 'py-3 md:py-12' : 'py-8 md:py-12'}`}>
           {mode === 'phone' ? (
             <>
               <div className="mb-6 text-center">
