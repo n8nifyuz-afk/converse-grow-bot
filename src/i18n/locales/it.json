@@ -989,122 +989,136 @@
     }
   },
   "help": {
-    "title": "Centro Assistenza",
-    "subtitle": "Trova risposte alle domande frequenti e impara a sfruttare al meglio la nostra piattaforma",
-    "searchPlaceholder": "Cerca nella guida...",
-    "noResults": "Nessun risultato trovato per la tua ricerca.",
+    "title": "Benvenuto nel Centro Assistenza ChatLearn",
+    "description": "Dove troverai tutto ciò di cui hai bisogno per iniziare, risolvere problemi e imparare nuove funzionalità.",
+    "searchPlaceholder": "Cerca argomenti, domande o parole chiave…",
+    "searchResultsFor": "Risultati trovati per \"{query}\"",
+    "noResults": "Nessun risultato trovato per \"{query}\". Prova con parole chiave diverse o esplora le categorie qui sotto.",
+    "searchHint": "Come possiamo aiutarti? Inizia cercando o sfoglia gli argomenti popolari qui sotto.",
     "quickLinks": "Link Rapidi",
-    "contactSupport": "Contatta l'Assistenza",
+    "gettingStarted": "Iniziare",
+    "billingInvoices": "Fatturazione e fatture",
+    "accountLogin": "Account e accesso",
+    "upgradePlan": "Aggiorna a Pro / Ultra",
+    "dataPrivacy": "Dati e privacy",
     "sections": {
-      "billing": {
-        "title": "Fatturazione e Pagamenti",
-        "questions": {
-          "q1": {
-            "question": "Come aggiorno il mio piano?",
-            "answer": "Puoi aggiornare il tuo piano in qualsiasi momento accedendo alle tue Impostazioni Account e selezionando 'Abbonamento'. Scegli il piano desiderato e segui le istruzioni di pagamento."
-          },
-          "q2": {
-            "question": "Quali metodi di pagamento accettate?",
-            "answer": "Accettiamo tutte le principali carte di credito e debito, incluse Visa, MasterCard, American Express e Discover. Gestiamo i pagamenti in modo sicuro tramite Stripe."
-          },
-          "q3": {
-            "question": "Posso cancellare in qualsiasi momento?",
-            "answer": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento. Continuerai ad avere accesso alle funzionalità premium fino alla fine del periodo di fatturazione corrente."
-          },
-          "q4": {
-            "question": "Offrite rimborsi?",
-            "answer": "Offriamo rimborsi caso per caso. Contatta il nostro team di assistenza con i dettagli della tua richiesta e ti aiuteremo a risolvere qualsiasi problema."
-          }
-        }
-      },
-      "account": {
-        "title": "Gestione Account",
-        "questions": {
-          "q1": {
-            "question": "Come elimino il mio account?",
-            "answer": "Per eliminare il tuo account, vai su Impostazioni > Controllo Dati e seleziona 'Elimina Account'. Tieni presente che questa azione è irreversibile e rimuoverà permanentemente tutti i tuoi dati."
-          },
-          "q2": {
-            "question": "Come cambio la mia email?",
-            "answer": "Vai su Impostazioni > Profilo per aggiornare il tuo indirizzo email. Dovrai verificare il nuovo indirizzo email prima che le modifiche abbiano effetto."
-          },
-          "q3": {
-            "question": "Posso collegare account multipli?",
-            "answer": "Sì, puoi collegare il tuo account email con l'accesso Google per un'esperienza di accesso senza interruzioni su entrambi i metodi."
-          },
-          "q4": {
-            "question": "Come resetto la mia password?",
-            "answer": "Clicca su 'Password dimenticata?' nella pagina di accesso. Ti invieremo un link per resettare la password via email. Segui le istruzioni nell'email per creare una nuova password."
-          }
-        }
-      },
-      "ai": {
-        "title": "Modelli e Funzionalità AI",
-        "questions": {
-          "q1": {
-            "question": "Quali modelli AI sono disponibili?",
-            "answer": "Offriamo accesso a diversi modelli AI leader, inclusi ChatGPT (GPT-4), Claude (Opus, Sonnet, Haiku), Gemini (Pro, Flash) e DeepSeek. Ogni modello ha punti di forza unici per compiti diversi."
-          },
-          "q2": {
-            "question": "Come uso la generazione di immagini?",
-            "answer": "Vai alla funzionalità Genera Immagini dal menu chat. Descrivi l'immagine che vuoi creare e il nostro AI genererà immagini personalizzate basate sul tuo prompt. Gli utenti Pro hanno accesso a funzionalità avanzate e più generazioni."
-          },
-          "q3": {
-            "question": "Posso caricare e analizzare immagini?",
-            "answer": "Sì, puoi caricare immagini nella chat e i nostri modelli AI possono analizzarle, rispondere a domande su di esse e fornire informazioni basate sul contenuto visivo."
-          },
-          "q4": {
-            "question": "Qual è il modo migliore per usare ciascun modello AI?",
-            "answer": "ChatGPT eccelle nelle conversazioni generali e nella risoluzione creativa di problemi. Claude è ottimo per compiti analitici e scrittura lunga. Gemini è veloce e efficiente per domande rapide. DeepSeek è specializzato in compiti tecnici e di codifica."
-          }
-        }
-      },
-      "technical": {
-        "title": "Supporto Tecnico",
-        "questions": {
-          "q1": {
-            "question": "Quali browser sono supportati?",
-            "answer": "Supportiamo le versioni più recenti di Chrome, Firefox, Safari ed Edge. Per un'esperienza ottimale, consigliamo di mantenere il browser aggiornato all'ultima versione."
-          },
-          "q2": {
-            "question": "Posso usare l'app su mobile?",
-            "answer": "Sì! La nostra piattaforma è completamente responsiva e funziona perfettamente su tutti i dispositivi, inclusi smartphone e tablet."
-          },
-          "q3": {
-            "question": "Come esporto le mie conversazioni?",
-            "answer": "Vai su Impostazioni > Controllo Dati e seleziona 'Esporta Dati'. Riceverai un file JSON contenente tutte le tue conversazioni che puoi salvare o trasferire."
-          },
-          "q4": {
-            "question": "Cosa faccio se incontro un errore?",
-            "answer": "Se incontri problemi, prova prima ad aggiornare la pagina. Se il problema persiste, contatta il nostro team di assistenza con una descrizione dettagliata del problema e ti aiuteremo prontamente."
-          }
-        }
-      },
-      "privacy": {
-        "title": "Privacy e Sicurezza",
-        "questions": {
-          "q1": {
-            "question": "Come vengono usati i miei dati?",
-            "answer": "I tuoi dati vengono usati esclusivamente per fornire e migliorare i nostri servizi. Non vendiamo mai i tuoi dati personali a terze parti. Visita la nostra Informativa sulla Privacy per informazioni dettagliate."
-          },
-          "q2": {
-            "question": "Le mie conversazioni sono private?",
-            "answer": "Sì, le tue conversazioni sono private e criptate. Solo tu e il nostro sistema AI hanno accesso alle tue chat. Non condividiamo il contenuto delle tue conversazioni con nessuno."
-          },
-          "q3": {
-            "question": "Posso eliminare i miei dati?",
-            "answer": "Assolutamente. Puoi eliminare conversazioni individuali in qualsiasi momento, oppure puoi richiedere la completa cancellazione dei dati attraverso le Impostazioni Account. Rispettiamo i tuoi diritti sui dati."
-          },
-          "q4": {
-            "question": "Come proteggete il mio account?",
-            "answer": "Usiamo crittografia di livello industriale, connessioni sicure (HTTPS) e regolari verifiche di sicurezza per proteggere il tuo account. Ti consigliamo di usare una password forte e unica."
-          }
-        }
-      }
+      "billing": "Fatturazione e Pagamenti",
+      "account": "Account e Accesso",
+      "ai": "Utilizzo di ChatLearn e Funzionalità AI",
+      "technical": "Problemi Tecnici",
+      "privacy": "Legale e Privacy",
+      "contact": "Contatto e Supporto"
     },
-    "stillNeedHelp": "Hai ancora bisogno di aiuto?",
-    "contactDescription": "Non riesci a trovare la risposta che cerchi? Il nostro team di assistenza è qui per aiutarti.",
-    "emailUs": "Inviaci un'email",
-    "visitContact": "Visita la nostra pagina di contatto"
+    "billing": {
+      "q1": "Come posso aggiornare il mio piano?",
+      "a1": "Vai su Impostazioni → Abbonamento e clicca su Visualizza Piani. Scegli Pro o Ultra per sbloccare i modelli AI premium e le funzionalità avanzate.",
+      "q2": "Come posso aggiornare il mio metodo di pagamento?",
+      "a2": "Apri Impostazioni → Abbonamento, quindi scorri fino a Dettagli di Pagamento. Lì puoi aggiungere o sostituire la tua carta di credito o debito in qualsiasi momento.",
+      "q3": "Quando verrò addebitato dopo la mia prova?",
+      "a3": "Dopo la fine della tua prova di 3 giorni, il tuo piano si converte automaticamente in un abbonamento mensile a meno che non lo cancelli prima della scadenza della prova.",
+      "q4": "Come posso cancellare il mio abbonamento?",
+      "a4": "Vai su Impostazioni → Abbonamento e seleziona Cancella Piano. Il tuo account rimarrà attivo fino alla fine del periodo di fatturazione.",
+      "q5": "Posso scaricare le mie fatture?",
+      "a5": "Sì. Puoi visualizzare e scaricare le fatture direttamente da Impostazioni → Abbonamento → Cronologia Fatturazione.",
+      "q6": "Cosa succede se il mio pagamento fallisce?",
+      "a6": "Riproveremo automaticamente il tuo pagamento. Se continua a fallire, il tuo account potrebbe essere sospeso fino a quando non aggiorni il tuo metodo di pagamento."
+    },
+    "account": {
+      "q1": "Non riesco ad accedere — cosa devo fare?",
+      "a1_p1": "Prima di tutto, assicurati di utilizzare lo stesso metodo che hai usato quando ti sei registrato (Email, Google o Apple).",
+      "a1_p2": "Se hai usato un'email e hai dimenticato la password, clicca su Password Dimenticata nella schermata di accesso per reimpostarla.",
+      "q2": "Non ho ricevuto l'email di verifica o reimpostazione.",
+      "a2_p1": "Controlla la tua cartella Spam o Promozioni. Se non è lì, aspetta qualche minuto e riprova.",
+      "a2_p2": "Ancora niente? Contatta support@chatl.ai per assistenza.",
+      "q3": "Posso usare ChatLearn su più dispositivi?",
+      "a3": "Sì. Puoi accedere con lo stesso account su qualsiasi dispositivo — desktop, tablet o mobile — e la cronologia delle tue chat rimarrà sincronizzata.",
+      "q4": "Come posso eliminare definitivamente il mio account o i miei dati?",
+      "a4_p1": "Apri Impostazioni → Controllo Dati.",
+      "a4_li1": "Per eliminare tutte le tue chat, progetti e immagini, clicca su Elimina Tutti i Dati.",
+      "a4_li2": "Per eliminare completamente il tuo account e tutti i dati associati, clicca su Elimina Account.",
+      "a4_warning": "Queste azioni sono permanenti e non possono essere annullate.",
+      "q5": "Posso esportare i miei dati prima di eliminare il mio account?",
+      "a5": "Sì. In Impostazioni → Controllo Dati, clicca su Esporta per scaricare tutte le tue conversazioni e i dati dell'account prima dell'eliminazione."
+    },
+    "ai": {
+      "q1": "Quali modelli AI sono disponibili su ChatLearn?",
+      "a1_intro": "ChatLearn ti dà accesso a una gamma di modelli AI all'avanguardia.",
+      "a1_title": "Modelli disponibili:",
+      "a1_m1": "GPT-4o mini – Modello predefinito (veloce ed efficiente)",
+      "a1_m2": "GPT-4o – Opzione di alta qualità",
+      "a1_m3": "GPT-5 – Modello ChatLearn più avanzato",
+      "a1_m4": "Claude Haiku 4.5 (Ultra) – Modello intelligente ed efficiente di Anthropic",
+      "a1_m5": "Gemini 2.5 Flash – Modello veloce di Google",
+      "a1_m6": "DeepSeek V2 (Ultra) – Modello di ragionamento avanzato",
+      "a1_m7": "Grok 4 (Ultra) – IA potente di xAI",
+      "a1_m8": "Genera Immagine – Crea immagini con l'IA",
+      "a1_note": "I modelli disponibili dipendono dal tuo piano di abbonamento (Gratuito, Pro o Ultra).",
+      "q2": "Come posso generare immagini?",
+      "a2_p1": "Per creare immagini, seleziona prima il modello Genera Immagine dal menu dei modelli nella parte superiore della finestra di chat.",
+      "a2_p2": "Quindi, digita la tua descrizione (ad esempio: \"una città futuristica al tramonto\") e inviala.",
+      "a2_note": "La generazione di immagini è disponibile solo per gli utenti Pro e Ultra.",
+      "q3": "Posso caricare o analizzare immagini?",
+      "a3_p1": "Sì. Puoi caricare una foto o scattarne una direttamente con la tua fotocamera nella chat.",
+      "a3_p2": "Una volta caricata, puoi chiedere a ChatLearn di rispondere a domande sull'immagine — ad esempio:",
+      "a3_ex1": "\"Cosa significa questo?\"",
+      "a3_ex2": "\"Traduci il testo in questa foto\"",
+      "a3_ex3": "\"Descrivi cosa vedi qui.\"",
+      "a3_note": "La comprensione delle immagini è supportata su GPT-4o, GPT-5 e modelli Ultra.",
+      "q4": "Posso caricare e analizzare documenti?",
+      "a4_p1": "Sì. Puoi caricare file come PDF, documenti Word o file di testo direttamente nella chat.",
+      "a4_p2": "ChatLearn può riassumerli, estrarre i punti chiave o rispondere a domande specifiche basate sul contenuto.",
+      "a4_note": "Questa funzionalità funziona meglio con GPT-4o, GPT-5 e modelli Ultra.",
+      "q5": "Posso esportare o salvare le mie conversazioni?",
+      "a5": "Sì. Apri Impostazioni → Controllo Dati, quindi clicca su Esporta per scaricare tutte le tue conversazioni e i dati dell'account."
+    },
+    "technical": {
+      "q1": "La chat non risponde — cosa devo fare?",
+      "a1_p1": "Prova ad aggiornare la pagina o a chiudere e riaprire la finestra di chat.",
+      "a1_p2": "Se il problema persiste, disconnettiti e riconnettiti.",
+      "a1_p3": "Ancora bloccato? Contatta support@chatl.ai e descrivi il problema.",
+      "q2": "La generazione dell'immagine è fallita o non si è caricata.",
+      "a2_p1": "La creazione di immagini funziona solo quando è selezionato il modello Genera Immagine.",
+      "a2_p2": "Assicurati di essere passato a quel modello prima di inviare la tua richiesta.",
+      "a2_p3": "Se lo stavi già usando, aspetta qualche secondo e riprova — il servizio immagini potrebbe essere temporaneamente occupato.",
+      "q3": "Il sito sembra rotto o carica lentamente.",
+      "a3_p1": "Assicurati di utilizzare la versione più recente di Chrome, Safari o Edge.",
+      "a3_p2": "Cancella la cache e i cookie del browser, quindi ricarica la pagina.",
+      "a3_p3": "Per prestazioni migliori, consenti i cookie e abilita JavaScript.",
+      "q4": "La cronologia della mia chat è scomparsa.",
+      "a4_p1": "Non preoccuparti — i tuoi dati sono archiviati in modo sicuro.",
+      "a4_p2": "A volte ci vogliono alcuni secondi per sincronizzarsi dopo l'accesso.",
+      "a4_p3": "Se le tue chat non appaiono ancora, aggiorna la pagina o controlla in Controllo Dati → Esporta per confermare che i tuoi dati sono disponibili.",
+      "q5": "Qualcosa non funziona dopo un aggiornamento.",
+      "a5_p1": "Cancella la cache e aggiorna il sito per caricare la versione più recente.",
+      "a5_p2": "Se il problema persiste, invia un'email a support@chatl.ai con una breve descrizione e uno screenshot se possibile."
+    },
+    "privacy": {
+      "q1": "Come protegge ChatLearn i miei dati?",
+      "a1_p1": "La tua privacy e sicurezza sono una priorità assoluta.",
+      "a1_p2": "ChatLearn segue rigorosi standard GDPR e utilizza connessioni crittografate per proteggere i tuoi dati.",
+      "a1_p3": "Non vendiamo mai né condividiamo le tue informazioni personali con terze parti.",
+      "q2": "Posso richiedere l'eliminazione dei miei dati?",
+      "a2_p1": "Sì. Vai su Impostazioni → Controllo Dati, quindi clicca su Elimina Account.",
+      "a2_p2": "Questo eliminerà definitivamente tutte le tue chat, file e informazioni personali.",
+      "a2_warning": "Una volta confermata, questa azione non può essere annullata.",
+      "q3": "Posso esportare i miei dati prima di eliminare il mio account?",
+      "a3": "Assolutamente. In Impostazioni → Controllo Dati, clicca su Esporta per scaricare tutte le tue conversazioni e file archiviati prima dell'eliminazione.",
+      "q4": "Dove posso trovare i vostri Termini di Servizio e l'Informativa sulla Privacy?",
+      "a4_intro": "Puoi trovare entrambi in fondo al nostro sito web:",
+      "a4_terms": "Termini di Servizio",
+      "a4_privacy": "Informativa sulla Privacy",
+      "q5": "Chi posso contattare per domande relative alla privacy?",
+      "a5": "Per qualsiasi domanda sui tuoi dati o sui diritti alla privacy, contattaci all'indirizzo support@chatl.ai."
+    },
+    "contact": {
+      "title": "Hai bisogno di ulteriore aiuto?",
+      "description": "Il nostro team è sempre qui per aiutarti.",
+      "email": "Email:",
+      "emailAddress": "support@chatl.ai",
+      "response": "Rispondiamo generalmente entro 24 ore — più velocemente durante l'orario d'ufficio.",
+      "noteTitle": "Nota rapida:",
+      "noteDescription": "Se la tua domanda riguarda fatturazione, accesso o problemi tecnici, includi una breve descrizione o uno screenshot. Questo ci aiuta a risolvere la tua richiesta molto più velocemente.",
+      "visitContact": "Visita la Nostra Pagina di Contatto"
+    }
   }
 }
