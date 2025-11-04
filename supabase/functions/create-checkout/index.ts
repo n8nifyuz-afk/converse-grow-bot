@@ -235,7 +235,7 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          request_three_d_secure: 'automatic', // 3DS for initial payment when required, then MIT exemption for recurring charges
+          request_three_d_secure: 'any', // Always request 3DS for trial signup, then MIT exemption for recurring charges
         },
       },
       automatic_tax: {
