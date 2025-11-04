@@ -1291,7 +1291,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const { data: { session: currentSession } } = await supabase.auth.getSession();
           if (currentSession?.access_token) {
-            await supabase.functions.invoke('restore-user-subscription', {
+            const { data: restoreData, error: restoreError } = await supabase.functions.invoke('restore-user-subscription', {
               body: {
                 userId: user.id,
                 userEmail: user.email
@@ -1300,6 +1300,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 Authorization: `Bearer ${currentSession.access_token}`,
               },
             });
+            
+            // Track restored subscriptions in GTM/GA
+            if (restoreData?.restored && restoreData?.plan) {
+              console.log('🎯 Tracking restored subscription to Google Analytics...', restoreData);
+              
+              // Map plan to planType
+              const planType = restoreData.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+              
+              // Determine duration and price from plan_name
+              let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
+              let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default monthly prices
+              
+              const planNameLower = (restoreData.plan_name || '').toLowerCase();
+              
+              if (planNameLower.includes('trial') || planNameLower.includes('3 day')) {
+                planDuration = '3_months';
+                planPrice = 0.99; // 3-day trial price
+              } else if (planNameLower.includes('year') || planNameLower.includes('annual')) {
+                planDuration = 'yearly';
+                planPrice = planType === 'Ultra' ? 119.99 : 59.99;
+              } else if (planNameLower.includes('3 month') || planNameLower.includes('quarter')) {
+                planDuration = '3_months';
+                planPrice = planType === 'Ultra' ? 99.99 : 49.99;
+              }
+              
+              console.log('📊 Restored subscription tracking data:', { planType, planDuration, planPrice, plan: restoreData.plan, plan_name: restoreData.plan_name });
+              trackPaymentComplete(planType, planDuration, planPrice);
+            }
           }
         } catch (restoreError) {
           // Silent error - continue with normal subscription check
