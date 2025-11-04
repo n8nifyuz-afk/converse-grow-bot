@@ -546,9 +546,14 @@ export default function Index() {
     setTempTranscript('');
     tempTranscriptRef.current = '';
     
-    // Focus textarea after stopping to show the text
+    // Focus textarea and resize it to fit the content
     setTimeout(() => {
-      textareaRef.current?.focus();
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        // Trigger resize to show all text
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      }
     }, 150);
   };
   
