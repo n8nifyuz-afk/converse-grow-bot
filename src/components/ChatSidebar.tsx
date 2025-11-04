@@ -70,6 +70,8 @@ export default function ChatSidebar({
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editingProjectTitle, setEditingProjectTitle] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [pendingChatForProject, setPendingChatForProject] = useState<string | null>(null);
   const {
     user,
     signOut,
@@ -616,11 +618,70 @@ export default function ChatSidebar({
       </Sidebar>
 
       {/* Add to Project Modal */}
-      {addToProjectModalOpen && <AddToProjectModal isOpen={!!addToProjectModalOpen} onClose={() => setAddToProjectModalOpen(null)} chatId={addToProjectModalOpen} onChatAddedToProject={() => {
-      fetchChats();
-      fetchProjects();
-      setAddToProjectModalOpen(null);
-    }} />}
+      {addToProjectModalOpen && <AddToProjectModal 
+        isOpen={!!addToProjectModalOpen} 
+        onClose={() => setAddToProjectModalOpen(null)} 
+        chatId={addToProjectModalOpen} 
+        onChatAddedToProject={() => {
+          fetchChats();
+          fetchProjects();
+          setAddToProjectModalOpen(null);
+        }}
+        onNewProjectClick={() => {
+          setPendingChatForProject(addToProjectModalOpen);
+          setAddToProjectModalOpen(null);
+          setShowProjectModal(true);
+        }}
+      />}
+
+      {/* Project Modal for creating new projects */}
+      {showProjectModal && (
+        <ProjectModal 
+          onProjectCreated={async () => {
+            handleProjectCreated();
+            
+            // If there's a pending chat to add, add it to the new project
+            if (pendingChatForProject && user) {
+              try {
+                // Fetch the latest project to get its ID
+                const { data: latestProject, error: fetchError } = await supabase
+                  .from('projects')
+                  .select('id')
+                  .eq('user_id', user.id)
+                  .order('created_at', { ascending: false })
+                  .limit(1)
+                  .single();
+
+                if (fetchError || !latestProject) {
+                  console.error('Error fetching latest project:', fetchError);
+                  return;
+                }
+
+                // Add the pending chat to the new project
+                const { error: updateError } = await supabase
+                  .from('chats')
+                  .update({ project_id: latestProject.id })
+                  .eq('id', pendingChatForProject)
+                  .eq('user_id', user.id);
+
+                if (!updateError) {
+                  console.log('Chat successfully added to new project');
+                  fetchChats();
+                  fetchProjects();
+                }
+              } catch (error) {
+                console.error('Error adding chat to project:', error);
+              } finally {
+                setPendingChatForProject(null);
+              }
+            }
+            
+            setShowProjectModal(false);
+          }}
+        >
+          <div style={{ display: 'none' }} />
+        </ProjectModal>
+      )}
 
       {/* Settings Modal */}
       <SettingsModal open={showSettings} onOpenChange={setShowSettings} />
