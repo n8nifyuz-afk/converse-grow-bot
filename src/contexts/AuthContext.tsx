@@ -215,16 +215,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const webhookSentKey = `webhook_sent_${user.id}`;
       const webhookAlreadySent = localStorage.getItem(webhookSentKey);
       
-      // SIMPLIFIED: Check if this is a NEW signup by checking if tracking data is missing
-      // If database has NO tracking data (gclid, url_params, referer all empty), it's a new signup
-      const isNewSignup = !currentProfile?.gclid && 
-                          !currentProfile?.url_params && 
-                          !currentProfile?.initial_referer;
+      // IMPROVED: Check if this is a NEW signup by checking user creation time
+      // User created within last 10 seconds = new signup (works for ALL auth methods including phone)
+      const userCreatedAt = new Date(user.created_at).getTime();
+      const timeSinceCreation = Date.now() - userCreatedAt;
+      const isNewSignup = timeSinceCreation < 10000; // 10 seconds
       
       // Determine if we should send webhook (new signup AND webhook not sent yet)
       const shouldSendWebhook = isNewSignup && !webhookAlreadySent;
       
-      // CRITICAL: For new signups (missing tracking data), fetch IP and country
+      console.log(`[WEBHOOK-CHECK] User: ${user.id}, Created: ${new Date(user.created_at).toISOString()}, Age: ${timeSinceCreation}ms, IsNew: ${isNewSignup}, AlreadySent: ${!!webhookAlreadySent}, ShouldSend: ${shouldSendWebhook}`);
+      
+      // CRITICAL: For new signups, fetch IP and country if missing
       if (isNewSignup && (!currentProfile?.ip_address || !currentProfile?.country)) {
         try {
           const { ip, country } = await fetchIPAndCountry();
@@ -239,8 +241,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // CRITICAL: ONLY sync tracking data for NEW signups (preserves original attribution)
-      // On subsequent logins, we NEVER update GCLID/url_params/referer
+      // CRITICAL: For new signups, ensure tracking data is synced from localStorage to database
+      // On subsequent logins, preserve existing tracking data
       if (isNewSignup) {
         const gclid = localStorage.getItem('gclid');
         const storedUrlParams = localStorage.getItem('url_params');
