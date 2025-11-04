@@ -132,18 +132,20 @@ export default function PhoneAuthModal({
     try {
       console.log('[PHONE-AUTH] 🔐 Verifying OTP...');
       
+      // CRITICAL FIX: Set mode to complete-profile BEFORE verifyOtp
+      // This prevents the useEffect from closing the modal when user is authenticated
+      setMode('complete-profile');
+      
       const { error } = await verifyOtp(phone, otp);
       
       if (error) {
         console.error('[PHONE-AUTH] ❌ OTP verification failed:', error);
         setError("Invalid verification code. Please try again.");
+        setMode('verify'); // Reset mode on error
         return;
       }
 
       console.log('[PHONE-AUTH] ✅ OTP verified successfully');
-      
-      // CRITICAL: Set mode to complete-profile BEFORE checking profile
-      setMode('complete-profile');
       
       await refreshUserProfile();
       
