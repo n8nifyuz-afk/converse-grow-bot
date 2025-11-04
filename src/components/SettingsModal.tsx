@@ -1236,7 +1236,11 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => setUnlinkingIdentity(identity)}
+                                  onClick={() => {
+                                    console.log('🔘 [UNLINK BUTTON] Clicked for provider:', identity.provider);
+                                    setUnlinkingIdentity(identity);
+                                    console.log('🔘 [UNLINK BUTTON] Set unlinkingIdentity, dialog should open');
+                                  }}
                                   className="text-xs text-destructive hover:text-destructive"
                                 >
                                   Unlink
@@ -1612,19 +1616,34 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
       />
 
       {/* Unlink Confirmation Dialog */}
-      <AlertDialog open={!!unlinkingIdentity} onOpenChange={(open) => !open && setUnlinkingIdentity(null)}>
+      <AlertDialog 
+        open={!!unlinkingIdentity} 
+        onOpenChange={(open) => {
+          console.log('🔘 [UNLINK DIALOG] Dialog state changed:', open);
+          if (!open) {
+            console.log('🔘 [UNLINK DIALOG] Dialog closed, clearing unlinkingIdentity');
+            setUnlinkingIdentity(null);
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unlink Sign-In Method?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to unlink <strong>{unlinkingIdentity?.provider}</strong> from your account?
-              You will no longer be able to sign in using this method.
+              <br /><br />
+              <strong className="text-destructive">Warning:</strong> You will no longer be able to sign in using this method.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => {
+              console.log('🔘 [UNLINK DIALOG] Cancel clicked');
+            }}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
+                console.log('🔘 [UNLINK DIALOG] Confirm clicked - proceeding with unlink');
                 try {
                   const { error } = await unlinkAuthMethod(unlinkingIdentity.provider);
                   if (error) throw error;
