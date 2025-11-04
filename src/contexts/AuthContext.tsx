@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { trackPaymentComplete, trackRegistrationComplete } from '@/utils/gtmTracking';
+import { trackPaymentComplete, trackRegistrationComplete, clearTrackingData } from '@/utils/gtmTracking';
 import { fetchIPAndCountry } from '@/utils/webhookMetadata';
 import { logUserActivity, getFullTrackingData } from '@/utils/browserTracking';
 import { cleanIpAddress } from '@/utils/ipFormatter';
@@ -1669,6 +1669,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     setSubscriptionStatus(resetStatus);
     clearCachedSubscription();
+    
+    // Clear tracking data to prevent cross-user contamination
+    clearTrackingData();
     
     // Force page refresh after sign out
     window.location.href = '/';

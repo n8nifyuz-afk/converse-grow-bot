@@ -7,6 +7,57 @@ declare global {
   }
 }
 
+// GCLID expiration: 90 days (Google Ads standard)
+const GCLID_EXPIRY_DAYS = 90;
+const GCLID_EXPIRY_MS = GCLID_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+
+/**
+ * Check if stored GCLID has expired (90 days)
+ */
+const isGCLIDExpired = (): boolean => {
+  const timestamp = localStorage.getItem('gclid_timestamp');
+  if (!timestamp) return true;
+  
+  const age = Date.now() - parseInt(timestamp);
+  return age > GCLID_EXPIRY_MS;
+};
+
+/**
+ * Clear all tracking data (GCLID, URL params, timestamps)
+ * Call this on logout to prevent cross-user contamination
+ */
+export const clearTrackingData = () => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.removeItem('gclid');
+    localStorage.removeItem('gclid_timestamp');
+    localStorage.removeItem('url_params');
+    localStorage.removeItem('url_params_timestamp');
+    console.log('🧹 [GTM] Tracking data cleared');
+  } catch (error) {
+    console.error('❌ [GTM] Error clearing tracking data:', error);
+  }
+};
+
+/**
+ * Clear tracking data after successful conversion
+ * Call this after signup/payment is tracked
+ */
+export const clearTrackingDataAfterConversion = () => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.removeItem('gclid');
+    localStorage.removeItem('gclid_timestamp');
+    localStorage.removeItem('url_params');
+    localStorage.removeItem('url_params_timestamp');
+    console.log('✅ [GTM] Tracking data cleared after conversion');
+  } catch (error) {
+    console.error('❌ [GTM] Error clearing tracking data:', error);
+  }
+};
+
 /**
  * Initialize GTM with GCLID and URL parameters
  * This should be called on app initialization to ensure Google Ads can track conversions
@@ -21,12 +72,22 @@ export const initializeGTMWithGCLID = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const gclidFromUrl = urlParams.get('gclid');
     const gclidFromStorage = localStorage.getItem('gclid');
-    const gclid = gclidFromUrl || gclidFromStorage;
+    
+    // Check if stored GCLID has expired
+    const hasExpiredGCLID = gclidFromStorage && isGCLIDExpired();
+    if (hasExpiredGCLID) {
+      console.log('⏰ [GTM] GCLID expired (>90 days), clearing...');
+      clearTrackingData();
+    }
+    
+    const gclid = gclidFromUrl || (hasExpiredGCLID ? null : gclidFromStorage);
 
-    // CRITICAL: Store GCLID in localStorage if found in URL (for later use during signup)
-    // NEVER overwrite if one already exists (preserves original tracking data)
+    // CRITICAL: Store GCLID with timestamp if found in URL
+    // Only store if not already present (preserves original tracking)
     if (gclidFromUrl && !gclidFromStorage) {
       localStorage.setItem('gclid', gclidFromUrl);
+      localStorage.setItem('gclid_timestamp', Date.now().toString());
+      console.log('💾 [GTM] New GCLID stored with 90-day expiry');
     }
 
     // Collect all URL parameters for attribution
@@ -56,6 +117,7 @@ export const initializeGTMWithGCLID = () => {
     // Only save if we have tracking parameters (not just system parameters)
     if (Object.keys(mergedParams).length > 0) {
       localStorage.setItem('url_params', JSON.stringify(mergedParams));
+      localStorage.setItem('url_params_timestamp', Date.now().toString());
     }
 
     // If we have GCLID or URL params, push to dataLayer
@@ -112,6 +174,11 @@ export const trackRegistrationComplete = () => {
     
     window.dataLayer.push(eventData);
     localStorage.setItem(trackedKey, 'true');
+    
+    // Clear tracking data after successful conversion
+    setTimeout(() => {
+      clearTrackingDataAfterConversion();
+    }, 1000); // Small delay to ensure GTM processes the event
   }
 };
 
@@ -162,5 +229,10 @@ export const trackPaymentComplete = (
     }
     
     window.dataLayer.push(eventData);
+    
+    // Clear tracking data after successful payment conversion
+    setTimeout(() => {
+      clearTrackingDataAfterConversion();
+    }, 1000); // Small delay to ensure GTM processes the event
   }
 };
