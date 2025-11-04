@@ -231,6 +231,7 @@ export default function Admin() {
   const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null);
   const [userActivityLogs, setUserActivityLogs] = useState<any[]>([]);
   const [loadingUserInfo, setLoadingUserInfo] = useState(false);
+  const [syncingStripe, setSyncingStripe] = useState<{[userId: string]: boolean}>({});
   const [dateFilter, setDateFilter] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [timeFilter, setTimeFilter] = useState<{ fromTime: string; toTime: string }>({ fromTime: '00:00', toTime: '23:59' });
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -1568,6 +1569,32 @@ export default function Admin() {
     }
   };
 
+  // Sync Stripe subscription status
+  const syncUserStripeStatus = async (userId: string) => {
+    setSyncingStripe(prev => ({ ...prev, [userId]: true }));
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-stripe-status', {
+        body: { userId }
+      });
+
+      if (error) throw error;
+
+      if (data?.status === 'reverted_to_free') {
+        toast.success('✅ Subscription synced - user reverted to free plan');
+        await fetchTokenUsageData(true);
+      } else if (data?.status === 'synced') {
+        toast.success('✅ Subscription is already in sync');
+      } else if (data?.status === 'no_subscription') {
+        toast.info('ℹ️ No subscription found for this user');
+      }
+    } catch (error) {
+      console.error('Error syncing Stripe status:', error);
+      toast.error('Failed to sync Stripe status');
+    } finally {
+      setSyncingStripe(prev => ({ ...prev, [userId]: false }));
+    }
+  };
+
   // Get plan display info
   const getPlanBadge = (usage: UserTokenUsage) => {
     const plan = getUserPlan(usage);
@@ -2246,6 +2273,22 @@ export default function Admin() {
                                   <MessageSquare className="h-4 w-4 mr-2" />
                                   Chats
                                 </Button>
+                                {getUserPlan(usage) !== 'free' && (
+                                  <Button 
+                                    variant="secondary" 
+                                    size="sm"
+                                    className="flex-1 h-10"
+                                    onClick={async () => await syncUserStripeStatus(usage.user_id)}
+                                    disabled={syncingStripe[usage.user_id]}
+                                  >
+                                    {syncingStripe[usage.user_id] ? (
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                      <RefreshCw className="h-4 w-4 mr-2" />
+                                    )}
+                                    Sync
+                                  </Button>
+                                )}
                               </div>
                             </CardContent>
                           </Card>
@@ -2360,6 +2403,25 @@ export default function Admin() {
                                 >
                                   Chats
                                 </Button>
+                                {getUserPlan(usage) !== 'free' && (
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="h-8 px-3 text-xs"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      await syncUserStripeStatus(usage.user_id);
+                                    }}
+                                    disabled={syncingStripe[usage.user_id]}
+                                  >
+                                    {syncingStripe[usage.user_id] ? (
+                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    ) : (
+                                      <RefreshCw className="h-3 w-3 mr-1" />
+                                    )}
+                                    Sync
+                                  </Button>
+                                )}
                                 <Button
                                   variant="destructive"
                                   size="sm"

@@ -1267,29 +1267,74 @@ serve(async (req) => {
           totalAmount: charge.amount
         });
 
-        if (!charge.billing_details.email) {
-          logStep("No customer email for charge refund");
-          break;
+        let user;
+        let profile;
+
+        // STRATEGY 1: Try to get customer ID and match by user_id metadata
+        if (charge.customer) {
+          try {
+            const customer = await stripe.customers.retrieve(charge.customer as string) as Stripe.Customer;
+            if (customer.metadata?.user_id) {
+              logStep("Attempting to match refund by user_id metadata", { userId: customer.metadata.user_id });
+              const { data: userData } = await supabaseClient.auth.admin.getUserById(customer.metadata.user_id);
+              if (userData?.user) {
+                user = userData.user;
+                logStep("✅ User matched by user_id metadata for refund", { userId: user.id });
+              }
+            }
+          } catch (error) {
+            logStep("Failed to retrieve customer for refund", { error: error instanceof Error ? error.message : String(error) });
+          }
         }
 
-        // Lookup user via profiles
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('user_id')
-          .ilike('email', charge.billing_details.email)
-          .single();
-        
-        if (!profile) {
-          logStep("User not found for charge refund", { email: charge.billing_details.email });
-          break;
+        // STRATEGY 2: Fallback to email matching
+        if (!user && charge.billing_details.email) {
+          logStep("Falling back to email matching for refund", { email: charge.billing_details.email });
+          
+          const { data: profileData } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .ilike('email', charge.billing_details.email)
+            .maybeSingle();
+          
+          if (profileData) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profileData.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              profile = profileData;
+              logStep("✅ User matched by email for refund", { userId: user.id, email: charge.billing_details.email });
+            }
+          }
+        }
+
+        // STRATEGY 3: Try phone matching if charge has phone metadata
+        if (!user && charge.metadata?.phone) {
+          logStep("Attempting to match refund by phone", { phone: charge.metadata.phone });
+          
+          const { data: profileData } = await supabaseClient
+            .from('profiles')
+            .select('user_id')
+            .eq('phone_number', charge.metadata.phone)
+            .maybeSingle();
+          
+          if (profileData) {
+            const { data: userData } = await supabaseClient.auth.admin.getUserById(profileData.user_id);
+            if (userData?.user) {
+              user = userData.user;
+              profile = profileData;
+              logStep("✅ User matched by phone for refund", { userId: user.id });
+            }
+          }
         }
         
-        const { data: userData } = await supabaseClient.auth.admin.getUserById(profile.user_id);
-        if (!userData?.user) {
-          logStep("User not found in auth for charge refund", { userId: profile.user_id });
+        if (!user) {
+          logStep("❌ No user found for charge refund with any strategy", { 
+            email: charge.billing_details.email || 'none',
+            phone: charge.metadata?.phone || 'none',
+            customerId: charge.customer || 'none'
+          });
           break;
         }
-        const user = userData.user;
 
         // CRITICAL: Revert to free plan for ANY refund (partial or full)
         // Policy: Any refund removes subscription access
@@ -1313,9 +1358,13 @@ serve(async (req) => {
               logStep("Failed to cancel Stripe subscription (may already be cancelled)", { 
                 error: cancelError instanceof Error ? cancelError.message : String(cancelError)
               });
+              // Continue even if cancel fails - subscription might already be cancelled
             }
+          } else {
+            logStep("No active subscription found in database to cancel");
           }
           
+          // CRITICAL: Always clean up database records after refund
           await supabaseClient
             .from('user_subscriptions')
             .delete()
