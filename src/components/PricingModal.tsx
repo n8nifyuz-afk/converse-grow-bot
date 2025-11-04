@@ -29,55 +29,55 @@ interface Feature {
 const getFeatures = (t: (key: string) => string, plan: 'pro' | 'ultra'): Feature[] => {
   const baseFeatures: Feature[] = [
     { 
-      name: 'OpenAI – GPT-5 / GPT-4o', 
+      name: t('pricingModal.featureGPT'), 
       included: true, 
       description: t('pricingModal.gptDesc'),
       proOnly: false
     },
     { 
-      name: 'Google – Gemini', 
+      name: t('pricingModal.featureGemini'), 
       included: true, 
       description: t('pricingModal.geminiDesc'),
       proOnly: false
     },
     { 
-      name: 'Anthropic – Claude Haiku 4.5', 
+      name: t('pricingModal.featureClaude'), 
       included: plan === 'ultra', 
       description: plan === 'ultra' ? t('pricingModal.claudeDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
     },
     { 
-      name: 'DeepSeek V2', 
+      name: t('pricingModal.featureDeepSeek'), 
       included: plan === 'ultra', 
       description: plan === 'ultra' ? t('pricingModal.deepseekDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
     },
     { 
-      name: 'Grok (X AI – Live Web)', 
+      name: t('pricingModal.featureGrok'), 
       included: plan === 'ultra', 
       description: plan === 'ultra' ? t('pricingModal.grokDesc') : t('pricingModal.availableOnlyInUltra'),
       ultraOnly: true
     },
     { 
-      name: 'Ask PDF / Docs AI', 
+      name: t('pricingModal.featurePDF'), 
       included: true, 
       description: t('pricingModal.pdfDocsDesc'),
       proOnly: false
     },
     { 
-      name: 'Voice Mode', 
+      name: t('pricingModal.featureVoice'), 
       included: true, 
       description: t('pricingModal.voiceModeDesc'),
       proOnly: false
     },
     { 
-      name: 'Priority Support', 
+      name: t('pricingModal.featureSupport'), 
       included: true, 
       description: plan === 'ultra' ? t('pricingModal.prioritySupportDesc') : t('pricingModal.standardPrioritySupport'),
       proOnly: false
     },
     { 
-      name: 'Chat on WhatsApp', 
+      name: t('pricingModal.featureWhatsApp'), 
       included: false, 
       description: t('pricingModal.whatsappDesc'),
       proOnly: false
