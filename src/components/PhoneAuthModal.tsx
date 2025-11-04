@@ -32,6 +32,7 @@ export default function PhoneAuthModal({
   const [otpTimer, setOtpTimer] = useState<number>(0);
   const [error, setError] = useState<string>('');
   const [showPhoneValidation, setShowPhoneValidation] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false); // Prevent modal close during verification
 
   const {
     user,
@@ -42,21 +43,23 @@ export default function PhoneAuthModal({
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // Close modal when user is authenticated (except in complete-profile mode)
+  // Close modal when user is authenticated (except during OTP verification or profile completion)
   useEffect(() => {
     console.log('[PHONE-AUTH-EFFECT] State check:', { 
       hasUser: !!user, 
       isOpen, 
       mode,
-      shouldClose: user && isOpen && mode !== 'complete-profile'
+      isVerifyingOtp,
+      shouldClose: user && isOpen && mode !== 'complete-profile' && !isVerifyingOtp
     });
     
-    if (user && isOpen && mode !== 'complete-profile') {
+    // Don't close during OTP verification or profile completion
+    if (user && isOpen && mode !== 'complete-profile' && !isVerifyingOtp) {
       console.log('[PHONE-AUTH-EFFECT] 🚪 Closing modal - user authenticated and not in profile completion');
       onClose();
       onSuccess?.();
     }
-  }, [user, isOpen, mode, onClose, onSuccess]);
+  }, [user, isOpen, mode, isVerifyingOtp, onClose, onSuccess]);
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -81,6 +84,7 @@ export default function PhoneAuthModal({
       setOtpTimer(0);
       setError('');
       setShowPhoneValidation(false);
+      setIsVerifyingOtp(false); // Reset verification flag
     }
   }, [isOpen]);
 
@@ -128,12 +132,12 @@ export default function PhoneAuthModal({
     
     setLoading(true);
     setError('');
+    setIsVerifyingOtp(true); // CRITICAL: Prevent modal from closing during verification
     
     try {
       console.log('[PHONE-AUTH] 🔐 Verifying OTP...');
       
-      // CRITICAL: Set mode BEFORE verifyOtp to prevent modal from closing
-      // when user becomes authenticated
+      // Set mode to complete-profile before verification
       setMode('complete-profile');
       
       const { error } = await verifyOtp(phone, otp);
@@ -141,7 +145,8 @@ export default function PhoneAuthModal({
       if (error) {
         console.error('[PHONE-AUTH] ❌ OTP verification failed:', error);
         setError("Invalid verification code. Please try again.");
-        setMode('verify'); // Reset back to verify on error
+        setMode('verify');
+        setIsVerifyingOtp(false);
         return;
       }
 
@@ -163,18 +168,21 @@ export default function PhoneAuthModal({
       // If profile is already complete (returning user), close modal
       if (currentUser?.user_metadata?.first_name && currentUser?.user_metadata?.date_of_birth) {
         console.log('[PHONE-AUTH] ✅ Profile already complete - closing modal');
+        setIsVerifyingOtp(false);
         await refreshUserProfile();
         onClose();
         onSuccess?.();
       } else {
-        // New user - profile form will show because mode is already 'complete-profile'
+        // New user - show profile form
         console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
+        setIsVerifyingOtp(false); // Clear flag so modal can work normally
         setProfileStep(1);
       }
     } catch (error) {
       console.error('[PHONE-AUTH] ❌ Verification error:', error);
       setError("An error occurred during verification.");
       setMode('verify');
+      setIsVerifyingOtp(false);
     } finally {
       setLoading(false);
     }
