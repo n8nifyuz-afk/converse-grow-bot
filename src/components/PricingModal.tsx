@@ -427,7 +427,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                     }`}
                   >
                     <div className="flex justify-between items-center">
-                      <div className="font-semibold text-base sm:text-sm text-zinc-900">1 Month</div>
+                      <div className="font-semibold text-base sm:text-sm text-zinc-900">{t('pricingModal.oneMonth')}</div>
                       <div className="font-bold text-xl sm:text-xl text-zinc-900">
                         €{pricingOptions[selectedPlan].monthly.price.toFixed(2)}
                       </div>
