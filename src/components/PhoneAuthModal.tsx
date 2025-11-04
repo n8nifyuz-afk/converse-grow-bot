@@ -42,32 +42,19 @@ export default function PhoneAuthModal({
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // Close modal when user is authenticated - but NOT during verification or profile completion
+  // Close modal when user is authenticated (except in complete-profile mode)
   useEffect(() => {
     console.log('[PHONE-AUTH-EFFECT] State check:', { 
       hasUser: !!user, 
       isOpen, 
       mode,
-      shouldClose: user && isOpen && mode === 'phone'
+      shouldClose: user && isOpen && mode !== 'complete-profile'
     });
     
-    // CRITICAL: NEVER auto-close during 'verify' or 'complete-profile' modes
-    // Only consider closing if in 'phone' mode AND user is authenticated
-    if (user && isOpen && mode === 'phone') {
-      console.log('[PHONE-AUTH-EFFECT] 🚪 User authenticated in phone mode');
-      
-      // Check if profile needs completion before closing
-      supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
-        if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
-          console.log('[PHONE-AUTH-EFFECT] 📝 Profile incomplete - switching to complete-profile mode');
-          setMode('complete-profile');
-          setProfileStep(1);
-        } else {
-          console.log('[PHONE-AUTH-EFFECT] ✅ Profile complete - closing modal');
-          onClose();
-          onSuccess?.();
-        }
-      });
+    if (user && isOpen && mode !== 'complete-profile') {
+      console.log('[PHONE-AUTH-EFFECT] 🚪 Closing modal - user authenticated and not in profile completion');
+      onClose();
+      onSuccess?.();
     }
   }, [user, isOpen, mode, onClose, onSuccess]);
 
@@ -143,7 +130,7 @@ export default function PhoneAuthModal({
     setError('');
     
     try {
-      console.log('[PHONE-AUTH] 🔐 Verifying OTP...', { phone, otp: otp.substring(0, 2) + '****' });
+      console.log('[PHONE-AUTH] 🔐 Verifying OTP...');
       
       const { error } = await verifyOtp(phone, otp);
       
@@ -155,26 +142,25 @@ export default function PhoneAuthModal({
 
       console.log('[PHONE-AUTH] ✅ OTP verified successfully');
       
-      // Refresh user profile first
+      // CRITICAL: Set mode to complete-profile BEFORE checking profile
+      setMode('complete-profile');
+      
       await refreshUserProfile();
       
       // Check if profile is complete by checking user metadata
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       
-      console.log('[PHONE-AUTH] 📊 Checking profile completeness:', {
-        userId: currentUser?.id,
+      console.log('[PHONE-AUTH] 📊 Current user metadata:', {
         has_first_name: !!currentUser?.user_metadata?.first_name,
         has_last_name: !!currentUser?.user_metadata?.last_name,
         has_date_of_birth: !!currentUser?.user_metadata?.date_of_birth,
-        metadata_keys: currentUser?.user_metadata ? Object.keys(currentUser.user_metadata) : []
+        full_metadata: currentUser?.user_metadata
       });
       
       if (!currentUser?.user_metadata?.first_name || !currentUser?.user_metadata?.date_of_birth) {
-        console.log('[PHONE-AUTH] 📝 Profile incomplete - switching to complete-profile mode');
-        // CRITICAL: Set mode to complete-profile and it will stay there until form is submitted
-        setMode('complete-profile');
+        console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
         setProfileStep(1);
-        console.log('[PHONE-AUTH] 📝 Mode set to complete-profile, profile step set to 1');
+        // Keep mode as 'complete-profile' to show the form
       } else {
         console.log('[PHONE-AUTH] ✅ Profile already complete - closing modal');
         onClose();
@@ -258,8 +244,6 @@ export default function PhoneAuthModal({
       setError('');
       
       try {
-        console.log('[PHONE-AUTH] 💾 Saving profile:', { firstName, lastName, dateOfBirth });
-        
         // Update user metadata with profile information
         const { error: updateError } = await supabase.auth.updateUser({
           data: {
@@ -270,50 +254,13 @@ export default function PhoneAuthModal({
         });
         
         if (updateError) {
-          console.error('[PHONE-AUTH] ❌ Profile update error:', updateError);
           throw updateError;
         }
         
-        console.log('[PHONE-AUTH] ✅ Profile updated successfully');
         await refreshUserProfile();
-        
-        // Send webhook after profile completion for phone sign-ups
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        console.log('[PHONE-AUTH] 📤 Preparing to send webhook for user:', currentUser?.id);
-        
-        if (currentUser) {
-          try {
-            const webhookData = {
-              userId: currentUser.id,
-              email: currentUser.email,
-              username: `${firstName} ${lastName}`,
-              firstName: firstName,
-              lastName: lastName,
-              dateOfBirth: dateOfBirth,
-              signupMethod: 'phone',
-              phoneNumber: phone
-            };
-            
-            console.log('[PHONE-AUTH] 📤 Sending webhook with data:', webhookData);
-            
-            const webhookResponse = await fetch('https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(webhookData)
-            });
-            
-            const webhookResult = await webhookResponse.json();
-            console.log('[PHONE-AUTH] ✅ Webhook sent successfully:', webhookResult);
-          } catch (webhookError) {
-            console.error('[PHONE-AUTH] ❌ Webhook error:', webhookError);
-            // Don't block user flow if webhook fails
-          }
-        }
-        
         onClose();
         onSuccess?.();
       } catch (error) {
-        console.error('[PHONE-AUTH] ❌ Complete profile error:', error);
         setError('Failed to save profile. Please try again.');
       } finally {
         setLoading(false);

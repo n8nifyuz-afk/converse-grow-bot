@@ -843,11 +843,7 @@ export default function AuthModal({
                     type="text" 
                     placeholder="000000" 
                     value={otp} 
-                    onChange={e => {
-                      const cleaned = e.target.value.replace(/\D/g, '').slice(0, 6);
-                      console.log('[OTP-DEBUG] Input:', e.target.value, 'Cleaned:', cleaned, 'Length:', cleaned.length);
-                      setOtp(cleaned);
-                    }} 
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} 
                     required 
                     className="h-11 md:h-12 text-base text-center text-xl tracking-widest"
                     maxLength={6}
@@ -857,7 +853,7 @@ export default function AuthModal({
                   {error && <div className="text-base text-destructive bg-destructive/10 px-4 py-3 rounded-md">
                      {error}
                    </div>}
-                  <Button type="submit" disabled={loading || !otp || otp.length < 6} className="w-full h-11 md:h-12 text-base">
+                  <Button type="submit" disabled={loading || otp.length !== 6} className="w-full h-11 md:h-12 text-base">
                     {loading ? <>
                         <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
                         Verifying...
