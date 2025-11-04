@@ -260,6 +260,31 @@ export default function PhoneAuthModal({
         }
         
         await refreshUserProfile();
+        
+        // Send webhook after profile completion for phone sign-ups
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser) {
+          try {
+            await fetch('https://lciaiunzacgvvbvcshdh.supabase.co/functions/v1/send-subscriber-webhook', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: currentUser.id,
+                email: currentUser.email,
+                username: `${firstName} ${lastName}`,
+                firstName: firstName,
+                lastName: lastName,
+                dateOfBirth: dateOfBirth,
+                signupMethod: 'phone',
+                phoneNumber: phone
+              })
+            });
+          } catch (webhookError) {
+            console.error('[PHONE-AUTH] Webhook error:', webhookError);
+            // Don't block user flow if webhook fails
+          }
+        }
+        
         onClose();
         onSuccess?.();
       } catch (error) {
