@@ -188,6 +188,29 @@ export default function ChatSidebar({
       navigate('/');
       return;
     }
+
+    // Check if we're already on a chat page with an empty chat
+    const currentPath = window.location.pathname;
+    const chatIdMatch = currentPath.match(/\/chat\/([a-f0-9-]+)/);
+    
+    if (chatIdMatch) {
+      const currentChatId = chatIdMatch[1];
+      
+      // Check if this chat has any messages
+      const { data: messages, error: messagesError } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('chat_id', currentChatId)
+        .limit(1);
+      
+      // If chat exists and has no messages, just stay on it (do nothing)
+      if (!messagesError && messages && messages.length === 0) {
+        console.log('[NEW-CHAT] Current chat is empty, staying on it');
+        return;
+      }
+    }
+
+    // Otherwise, create a new chat
     try {
       const {
         data: newChat,
