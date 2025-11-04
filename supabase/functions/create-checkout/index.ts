@@ -273,8 +273,7 @@ serve(async (req) => {
         }
       };
       
-      // CRITICAL: Ensure payment method is saved for future billing
-      sessionConfig.payment_method_collection = 'always';
+      // For subscription mode, payment method is automatically saved for off-session charges
       sessionConfig.subscription_data.payment_behavior = 'allow_incomplete'; // Allow subscription to proceed even if initial payment pending
       
       // Add trial fee as a separate one-time line item charged immediately (EUR only)
