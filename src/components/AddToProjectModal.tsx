@@ -121,6 +121,8 @@ export function AddToProjectModal({
   };
 
   const handleNewProject = () => {
+    console.log('[AddToProjectModal] New project button clicked');
+    console.log('[AddToProjectModal] onNewProjectClick exists:', !!onNewProjectClick);
     onClose();
     onNewProjectClick?.();
   };
