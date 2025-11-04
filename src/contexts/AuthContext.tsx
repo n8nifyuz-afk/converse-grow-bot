@@ -5,6 +5,7 @@ import { trackPaymentComplete, trackRegistrationComplete, clearTrackingData } fr
 import { fetchIPAndCountry } from '@/utils/webhookMetadata';
 import { logUserActivity, getFullTrackingData } from '@/utils/browserTracking';
 import { cleanIpAddress } from '@/utils/ipFormatter';
+import { detectAndUpdateMissingCountry } from '@/utils/countryDetection';
 
 interface AuthContextType {
   user: User | null;
@@ -446,6 +447,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (existingProfile) {
         setUserProfile(existingProfile);
+        
+        // CRITICAL: Automatically detect and update missing country
+        if (!existingProfile.country) {
+          detectAndUpdateMissingCountry(userId).catch(console.error);
+        }
       }
     } catch (error) {
       // Silently fail

@@ -16,6 +16,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, isWithinInterval, startOfToday, endOfToday } from 'date-fns';
+import { getCountryNameFromCode } from '@/utils/countryDetection';
 interface ModelUsageDetail {
   model: string;
   input_tokens: number;
@@ -156,30 +157,6 @@ const MODEL_PRICING: Record<string, {
     input: 0,
     output: 0
   } // Image generation model (stored as price * 100)
-};
-// Country code to full name mapping
-const COUNTRY_NAMES: Record<string, string> = {
-  'US': 'United States', 'GB': 'United Kingdom', 'CA': 'Canada', 'AU': 'Australia',
-  'DE': 'Germany', 'FR': 'France', 'ES': 'Spain', 'IT': 'Italy', 'NL': 'Netherlands',
-  'BE': 'Belgium', 'CH': 'Switzerland', 'AT': 'Austria', 'SE': 'Sweden', 'NO': 'Norway',
-  'DK': 'Denmark', 'FI': 'Finland', 'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland',
-  'PT': 'Portugal', 'GR': 'Greece', 'RO': 'Romania', 'HU': 'Hungary', 'SK': 'Slovakia',
-  'BG': 'Bulgaria', 'HR': 'Croatia', 'SI': 'Slovenia', 'LT': 'Lithuania', 'LV': 'Latvia',
-  'EE': 'Estonia', 'LU': 'Luxembourg', 'MT': 'Malta', 'CY': 'Cyprus', 'IS': 'Iceland',
-  'JP': 'Japan', 'CN': 'China', 'IN': 'India', 'KR': 'South Korea', 'SG': 'Singapore',
-  'HK': 'Hong Kong', 'TW': 'Taiwan', 'TH': 'Thailand', 'MY': 'Malaysia', 'ID': 'Indonesia',
-  'PH': 'Philippines', 'VN': 'Vietnam', 'NZ': 'New Zealand', 'BR': 'Brazil', 'MX': 'Mexico',
-  'AR': 'Argentina', 'CL': 'Chile', 'CO': 'Colombia', 'PE': 'Peru', 'VE': 'Venezuela',
-  'ZA': 'South Africa', 'EG': 'Egypt', 'NG': 'Nigeria', 'KE': 'Kenya', 'MA': 'Morocco',
-  'RU': 'Russia', 'TR': 'Turkey', 'IL': 'Israel', 'SA': 'Saudi Arabia', 'AE': 'UAE',
-  'QA': 'Qatar', 'KW': 'Kuwait', 'BH': 'Bahrain', 'OM': 'Oman', 'JO': 'Jordan',
-  'LB': 'Lebanon', 'IQ': 'Iraq', 'PK': 'Pakistan', 'BD': 'Bangladesh', 'LK': 'Sri Lanka',
-  'UA': 'Ukraine', 'BY': 'Belarus', 'KZ': 'Kazakhstan', 'UZ': 'Uzbekistan',
-};
-
-const getCountryName = (code: string | null | undefined): string => {
-  if (!code) return 'N/A';
-  return COUNTRY_NAMES[code.toUpperCase()] || code;
 };
 
 const formatModelName = (model: string): string => {
@@ -1860,7 +1837,7 @@ export default function Admin() {
                         <option value="all">All Countries</option>
                         {uniqueCountries.map((country) => (
                           <option key={country} value={country}>
-                            {getCountryName(country)}
+                            {getCountryNameFromCode(country)}
                           </option>
                         ))}
                       </select>
@@ -2024,7 +2001,7 @@ export default function Admin() {
               )}
               {countryFilter !== 'all' && (
                 <Badge variant="secondary" className="gap-1 text-xs">
-                  Country: {getCountryName(countryFilter)}
+                  Country: {getCountryNameFromCode(countryFilter)}
                   <X 
                     className="h-3 w-3 cursor-pointer hover:text-foreground" 
                     onClick={() => removeFilter('country')}

@@ -21,6 +21,7 @@ import {
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { formatIpForDisplay } from '@/utils/ipFormatter';
+import { getCountryNameFromCode } from '@/utils/countryDetection';
 
 interface UserInformationModalProps {
   open: boolean;
@@ -28,48 +29,6 @@ interface UserInformationModalProps {
   userInfo: any;
   activityLogs: any[];
 }
-
-const COUNTRY_NAMES: Record<string, string> = {
-  'US': 'United States', 'GB': 'United Kingdom', 'CA': 'Canada', 'AU': 'Australia',
-  'DE': 'Germany', 'FR': 'France', 'ES': 'Spain', 'IT': 'Italy', 'NL': 'Netherlands',
-  'SE': 'Sweden', 'NO': 'Norway', 'DK': 'Denmark', 'FI': 'Finland', 'PL': 'Poland',
-  'BR': 'Brazil', 'MX': 'Mexico', 'AR': 'Argentina', 'CL': 'Chile', 'CO': 'Colombia',
-  'PE': 'Peru', 'VE': 'Venezuela', 'EC': 'Ecuador', 'BO': 'Bolivia', 'PY': 'Paraguay',
-  'UY': 'Uruguay', 'IN': 'India', 'CN': 'China', 'JP': 'Japan', 'KR': 'South Korea',
-  'SG': 'Singapore', 'MY': 'Malaysia', 'TH': 'Thailand', 'PH': 'Philippines',
-  'ID': 'Indonesia', 'VN': 'Vietnam', 'BD': 'Bangladesh', 'PK': 'Pakistan',
-  'NZ': 'New Zealand', 'ZA': 'South Africa', 'EG': 'Egypt', 'NG': 'Nigeria',
-  'KE': 'Kenya', 'GH': 'Ghana', 'ET': 'Ethiopia', 'TZ': 'Tanzania', 'UG': 'Uganda',
-  'RU': 'Russia', 'UA': 'Ukraine', 'TR': 'Turkey', 'SA': 'Saudi Arabia',
-  'AE': 'United Arab Emirates', 'IL': 'Israel', 'IQ': 'Iraq', 'IR': 'Iran',
-  'CH': 'Switzerland', 'AT': 'Austria', 'BE': 'Belgium', 'IE': 'Ireland',
-  'PT': 'Portugal', 'GR': 'Greece', 'CZ': 'Czech Republic', 'RO': 'Romania',
-  'HU': 'Hungary', 'BG': 'Bulgaria', 'HR': 'Croatia', 'RS': 'Serbia', 'SK': 'Slovakia',
-  'SI': 'Slovenia', 'LT': 'Lithuania', 'LV': 'Latvia', 'EE': 'Estonia',
-  'IS': 'Iceland', 'MT': 'Malta', 'CY': 'Cyprus', 'LU': 'Luxembourg',
-  'AL': 'Albania', 'MK': 'North Macedonia', 'BA': 'Bosnia and Herzegovina',
-  'ME': 'Montenegro', 'KZ': 'Kazakhstan', 'UZ': 'Uzbekistan', 'GE': 'Georgia',
-  'AM': 'Armenia', 'AZ': 'Azerbaijan', 'BY': 'Belarus', 'MD': 'Moldova',
-  'MA': 'Morocco', 'DZ': 'Algeria', 'TN': 'Tunisia', 'LY': 'Libya', 'SD': 'Sudan',
-  'JO': 'Jordan', 'LB': 'Lebanon', 'SY': 'Syria', 'YE': 'Yemen', 'OM': 'Oman',
-  'KW': 'Kuwait', 'QA': 'Qatar', 'BH': 'Bahrain', 'AF': 'Afghanistan',
-  'NP': 'Nepal', 'LK': 'Sri Lanka', 'MM': 'Myanmar', 'KH': 'Cambodia',
-  'LA': 'Laos', 'MN': 'Mongolia', 'TW': 'Taiwan', 'HK': 'Hong Kong', 'MO': 'Macau',
-  'BN': 'Brunei', 'TL': 'East Timor', 'PG': 'Papua New Guinea', 'FJ': 'Fiji',
-  'NC': 'New Caledonia', 'PF': 'French Polynesia', 'GU': 'Guam', 'PR': 'Puerto Rico',
-  'DO': 'Dominican Republic', 'CU': 'Cuba', 'JM': 'Jamaica', 'HT': 'Haiti',
-  'BS': 'Bahamas', 'BB': 'Barbados', 'TT': 'Trinidad and Tobago', 'BZ': 'Belize',
-  'GT': 'Guatemala', 'HN': 'Honduras', 'SV': 'El Salvador', 'NI': 'Nicaragua',
-  'CR': 'Costa Rica', 'PA': 'Panama', 'SN': 'Senegal', 'CI': 'Ivory Coast',
-  'CM': 'Cameroon', 'ZW': 'Zimbabwe', 'ZM': 'Zambia', 'MW': 'Malawi', 'MZ': 'Mozambique',
-  'AO': 'Angola', 'NA': 'Namibia', 'BW': 'Botswana', 'LS': 'Lesotho', 'SZ': 'Eswatini',
-  'MG': 'Madagascar', 'MU': 'Mauritius', 'RE': 'Réunion', 'SC': 'Seychelles'
-};
-
-const getCountryName = (code: string | null) => {
-  if (!code) return 'Unknown';
-  return COUNTRY_NAMES[code.toUpperCase()] || code;
-};
 
 const formatInCyprusTime = (date: string | Date, formatStr: string) => {
   const cyprusTimeZone = 'Europe/Nicosia';
@@ -229,7 +188,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                       <div className="flex items-center gap-2">
                         {userInfo.country ? (
                           <>
-                            <p className="text-xs sm:text-sm font-semibold truncate">{getCountryName(userInfo.country)}</p>
+                            <p className="text-xs sm:text-sm font-semibold truncate">{getCountryNameFromCode(userInfo.country)}</p>
                             <Badge variant="secondary" className="text-[10px] flex-shrink-0">{userInfo.country.toUpperCase()}</Badge>
                           </>
                         ) : (
@@ -434,7 +393,7 @@ export const UserInformationModal: React.FC<UserInformationModalProps> = ({
                             )}
                             {log.country && (
                               <div>
-                                <span className="font-medium">Country:</span> {getCountryName(log.country)}
+                                <span className="font-medium">Country:</span> {getCountryNameFromCode(log.country)}
                               </div>
                             )}
                             {log.browser && (
