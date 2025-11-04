@@ -137,6 +137,9 @@ export default function PhoneAuthModal({
     try {
       console.log('[PHONE-AUTH] 🔐 Verifying OTP...');
       
+      // Set mode to complete-profile before verification
+      setMode('complete-profile');
+      
       const { error } = await verifyOtp(phone, otp);
       
       if (error) {
@@ -149,9 +152,8 @@ export default function PhoneAuthModal({
 
       console.log('[PHONE-AUTH] ✅ OTP verified successfully');
       
-      // CRITICAL: Wait longer for auth state to stabilize and webhook to be sent
-      // The webhook is sent automatically by AuthContext.syncOAuthProfile
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Wait for auth state to stabilize
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Check if profile is complete
       const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -171,9 +173,8 @@ export default function PhoneAuthModal({
         onClose();
         onSuccess?.();
       } else {
-        // New user - show profile form AFTER webhook has been sent
+        // New user - show profile form
         console.log('[PHONE-AUTH] 📝 Profile incomplete - showing profile completion form');
-        setMode('complete-profile'); // NOW set mode after webhook delay
         setIsVerifyingOtp(false); // Clear flag so modal can work normally
         setProfileStep(1);
       }
