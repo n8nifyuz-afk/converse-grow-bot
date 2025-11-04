@@ -126,7 +126,14 @@
     "customizeExperience": "Personalize sua experiência e preferências",
     "light": "Claro",
     "dark": "Escuro",
-    "system": "Sistema"
+    "system": "Sistema",
+    "signInToManage": "Faça login para gerenciar suas informações de conta",
+    "signInToAccess": "Faça login para acessar as configurações de perfil",
+    "manageAccount": "Gerencie suas informações de conta",
+    "fullName": "Nome completo",
+    "yourDisplayName": "Seu nome de exibição",
+    "emailAddress": "Endereço de e-mail",
+    "yourAccountEmail": "Seu e-mail de conta"
   },
   "languages": {
     "en": "English",

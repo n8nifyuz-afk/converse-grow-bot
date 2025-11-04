@@ -126,7 +126,14 @@
     "customizeExperience": "自定义您的体验和偏好",
     "light": "浅色",
     "dark": "深色",
-    "system": "系统"
+    "system": "系统",
+    "signInToManage": "登录以管理您的账户信息",
+    "signInToAccess": "登录以访问个人资料设置",
+    "manageAccount": "管理您的账户信息",
+    "fullName": "全名",
+    "yourDisplayName": "您的显示名称",
+    "emailAddress": "电子邮件地址",
+    "yourAccountEmail": "您的账户电子邮件"
   },
   "languages": {
     "en": "English",

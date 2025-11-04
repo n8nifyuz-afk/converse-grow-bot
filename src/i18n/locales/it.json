@@ -126,7 +126,14 @@
     "customizeExperience": "Personalizza la tua esperienza e le preferenze",
     "light": "Chiaro",
     "dark": "Scuro",
-    "system": "Sistema"
+    "system": "Sistema",
+    "signInToManage": "Accedi per gestire le informazioni del tuo account",
+    "signInToAccess": "Accedi per accedere alle impostazioni del profilo",
+    "manageAccount": "Gestisci le informazioni del tuo account",
+    "fullName": "Nome completo",
+    "yourDisplayName": "Il tuo nome visualizzato",
+    "emailAddress": "Indirizzo email",
+    "yourAccountEmail": "La tua email dell'account"
   },
   "languages": {
     "en": "English",

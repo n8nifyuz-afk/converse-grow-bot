@@ -126,7 +126,14 @@
     "customizeExperience": "Passen Sie Ihre Erfahrung und Einstellungen an",
     "light": "Hell",
     "dark": "Dunkel",
-    "system": "System"
+    "system": "System",
+    "signInToManage": "Melden Sie sich an, um Ihre Kontoinformationen zu verwalten",
+    "signInToAccess": "Melden Sie sich an, um auf Profileinstellungen zuzugreifen",
+    "manageAccount": "Verwalten Sie Ihre Kontoinformationen",
+    "fullName": "Vollständiger Name",
+    "yourDisplayName": "Ihr Anzeigename",
+    "emailAddress": "E-Mail-Adresse",
+    "yourAccountEmail": "Ihre Konto-E-Mail"
   },
   "languages": {
     "en": "English",

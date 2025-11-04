@@ -129,6 +129,8 @@
     "signInToManage": "Inicia sesión para gestionar la información de tu cuenta",
     "signInToAccess": "Inicia sesión para acceder a la configuración del perfil",
     "manageAccount": "Gestiona la información de tu cuenta",
+    "fullName": "Nombre completo",
+    "yourDisplayName": "Tu nombre para mostrar",
     "emailAddress": "Dirección de Correo",
     "yourAccountEmail": "El correo de tu cuenta",
     "loginMethods": "Métodos de Inicio de Sesión",

@@ -126,7 +126,14 @@
     "customizeExperience": "エクスペリエンスと設定をカスタマイズ",
     "light": "ライト",
     "dark": "ダーク",
-    "system": "システム"
+    "system": "システム",
+    "signInToManage": "アカウント情報を管理するにはサインインしてください",
+    "signInToAccess": "プロフィール設定にアクセスするにはサインインしてください",
+    "manageAccount": "アカウント情報を管理",
+    "fullName": "氏名",
+    "yourDisplayName": "表示名",
+    "emailAddress": "メールアドレス",
+    "yourAccountEmail": "アカウントのメールアドレス"
   },
   "languages": {
     "en": "English",

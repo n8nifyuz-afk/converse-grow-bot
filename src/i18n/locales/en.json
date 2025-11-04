@@ -133,6 +133,8 @@
     "signInToManage": "Sign in to manage your account information",
     "signInToAccess": "Sign in to access profile settings",
     "manageAccount": "Manage your account information",
+    "fullName": "Full Name",
+    "yourDisplayName": "Your display name",
     "emailAddress": "Email Address",
     "yourAccountEmail": "Your account email",
     "loginMethods": "Login Methods",

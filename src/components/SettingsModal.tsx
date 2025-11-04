@@ -780,8 +780,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <User className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm">Full Name</p>
-                        <p className="text-xs text-muted-foreground">Your display name</p>
+                        <p className="font-semibold text-foreground text-sm">{t('settings.fullName')}</p>
+                        <p className="text-xs text-muted-foreground">{t('settings.yourDisplayName')}</p>
                       </div>
                     </div>
                     <div className="ml-0 md:ml-9 space-y-2">

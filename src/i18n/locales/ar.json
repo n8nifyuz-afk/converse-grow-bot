@@ -126,7 +126,14 @@
     "customizeExperience": "خصص تجربتك وتفضيلاتك",
     "light": "فاتح",
     "dark": "داكن",
-    "system": "النظام"
+    "system": "النظام",
+    "signInToManage": "سجل الدخول لإدارة معلومات حسابك",
+    "signInToAccess": "سجل الدخول للوصول إلى إعدادات الملف الشخصي",
+    "manageAccount": "إدارة معلومات حسابك",
+    "fullName": "الاسم الكامل",
+    "yourDisplayName": "اسم العرض الخاص بك",
+    "emailAddress": "عنوان البريد الإلكتروني",
+    "yourAccountEmail": "البريد الإلكتروني لحسابك"
   },
   "languages": {
     "en": "English",
