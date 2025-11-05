@@ -1508,8 +1508,8 @@ export default function AuthModal({
       <>
         <Drawer 
           open={isOpen} 
-          onOpenChange={onClose} 
-          dismissible={mode !== 'phone' && mode !== 'verify' && mode !== 'complete-profile'}
+          onOpenChange={() => {}}
+          dismissible={false}
           modal={true}
           noBodyStyles={true}
         >
@@ -1577,8 +1577,8 @@ export default function AuthModal({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]">
+    <Dialog open={isOpen} onOpenChange={() => {}}>
+      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]" hideCloseButton={true}>
         <DialogHeader className="sr-only">
           <DialogTitle>ChatLearn Authentication</DialogTitle>
           <DialogDescription>
