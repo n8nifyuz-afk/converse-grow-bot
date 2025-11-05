@@ -693,6 +693,19 @@ export default function ProjectPage() {
             // Get webhook metadata
             const metadata = await getWebhookMetadata();
             
+            // Fetch external_id from profiles
+            let externalId = null;
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('external_id')
+                .eq('user_id', user.id)
+                .single();
+              externalId = profile?.external_id || null;
+            } catch (error) {
+              console.error('[PROJECT-WEBHOOK] Error fetching external_id:', error);
+            }
+            
             await fetch(webhookUrl, {
               method: 'POST',
               headers: {
@@ -708,6 +721,7 @@ export default function ProjectPage() {
                 fileType: file.type.startsWith('image/') ? 'image/png' : file.type,
                 fileData: base64Data,
                 model: selectedModel,
+                externalId,
                 sessionId: metadata.sessionId,
                 userIP: metadata.userIP,
                 countryCode: metadata.countryCode,

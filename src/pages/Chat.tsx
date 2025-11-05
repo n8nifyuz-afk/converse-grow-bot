@@ -2468,17 +2468,19 @@ export default function Chat() {
             // Get webhook metadata
             const metadata = await getWebhookMetadata();
             
-            // Fetch user email from profiles
+            // Fetch user email and external_id from profiles
             let userEmail = user.email || null;
+            let externalId = null;
             try {
               const { data: profile } = await supabase
                 .from('profiles')
-                .select('email')
+                .select('email, external_id')
                 .eq('user_id', user.id)
                 .single();
               userEmail = profile?.email || user.email || null;
+              externalId = profile?.external_id || null;
             } catch (error) {
-              console.error('[WEBHOOK] Error fetching email:', error);
+              console.error('[WEBHOOK] Error fetching profile:', error);
             }
             
             // Build webhook body conditionally based on model with proper format
@@ -2492,6 +2494,7 @@ export default function Chat() {
               message: userMessage,
               model: selectedModel,
               userEmail,
+              externalId,
               sessionId: metadata.sessionId,
               userIP: metadata.userIP,
               countryCode: metadata.countryCode,
