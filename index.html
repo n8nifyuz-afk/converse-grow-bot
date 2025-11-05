@@ -23,11 +23,7 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Cookiebot Consent Management Platform -->
-    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
-
-    <!-- Google tag (gtag.js) - Google Ads -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
+    <!-- Initialize dataLayer first (synchronous, no external dependencies) -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -41,20 +37,47 @@
       });
 
       gtag('js', new Date());
-      gtag('config', 'AW-16917874636');
-      gtag('config', 'G-EDSR82W70J');
     </script>
+  </head>
 
-    <!-- Cookiebot Override Handler -->
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NMLGMTL5"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <div id="root"></div>
+    
+    <!-- Load React app first -->
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Load tracking scripts AFTER React (deferred, non-blocking) -->
     <script>
-      (function() {
+      // Wait for DOM to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadTrackingScripts);
+      } else {
+        loadTrackingScripts();
+      }
+      
+      function loadTrackingScripts() {
+        // Load Cookiebot
+        var cookiebot = document.createElement('script');
+        cookiebot.id = 'Cookiebot';
+        cookiebot.src = 'https://consent.cookiebot.com/uc.js';
+        cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
+        cookiebot.setAttribute('data-blockingmode', 'auto');
+        cookiebot.async = true;
+        cookiebot.onerror = function() { console.warn('Cookiebot failed to load'); };
+        document.head.appendChild(cookiebot);
+        
+        // Setup Cookiebot event handlers
         window.addEventListener('CookiebotOnAccept', function() {
           console.log('✅ Cookiebot: User accepted cookies');
         });
         
         window.addEventListener('CookiebotOnDecline', function() {
           console.log('🔒 Cookiebot: User declined, re-enabling Analytics & Conversions');
-          
           if (typeof window.gtag === 'function') {
             window.gtag('consent', 'update', {
               'analytics_storage': 'granted',
@@ -64,24 +87,32 @@
             });
           }
         });
-      })();
+        
+        // Load Google Tag Manager
+        (function(w,d,s,l,i){
+          w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+          var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+          j.async=true;
+          j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+          j.onerror = function() { console.warn('GTM failed to load'); };
+          f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-NMLGMTL5');
+        
+        // Load Google Analytics
+        var gtagScript = document.createElement('script');
+        gtagScript.async = true;
+        gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
+        gtagScript.onerror = function() { console.warn('Google Analytics failed to load'); };
+        document.head.appendChild(gtagScript);
+        
+        gtagScript.onload = function() {
+          if (typeof window.gtag === 'function') {
+            window.gtag('config', 'AW-16917874636');
+            window.gtag('config', 'G-EDSR82W70J');
+          }
+        };
+      }
     </script>
-
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-NMLGMTL5');</script>
-    <!-- End Google Tag Manager -->
-  </head>
-
-  <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NMLGMTL5"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
