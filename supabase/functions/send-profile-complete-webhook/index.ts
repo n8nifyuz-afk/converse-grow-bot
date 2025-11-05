@@ -79,10 +79,13 @@ Deno.serve(async (req) => {
     // Send webhook to external endpoint
     console.log('📡 [PROFILE-COMPLETE-WEBHOOK] Sending webhook to send-subscriber-webhook');
     
+    // For phone signups, use phone number in email field if email is empty
+    const emailValue = profile.email || profile.phone_number;
+    
     const { error: webhookError } = await supabase.functions.invoke('send-subscriber-webhook', {
       body: {
         userId: userId,
-        email: profile.email,
+        email: emailValue,
         username: profile.display_name,
         ipAddress: profile.ip_address,
         country: profile.country,
@@ -118,7 +121,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('❌ [PROFILE-COMPLETE-WEBHOOK] Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
