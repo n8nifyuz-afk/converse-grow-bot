@@ -51,12 +51,18 @@
       window.addEventListener('CookiebotOnDecline', function() {
         // User declined - but we NEED Analytics and conversion tracking
         console.log('🔒 Cookiebot: User declined, but re-enabling Analytics & Conversions');
-        gtag('consent', 'update', {
-          'analytics_storage': 'granted',      // ✅ Keep Analytics active
-          'ad_user_data': 'granted',           // ✅ Keep conversion tracking
-          'ad_storage': 'denied',              // 🚫 Keep remarketing blocked
-          'ad_personalization': 'denied'       // 🚫 Keep personalization blocked
-        });
+        
+        // Ensure gtag and dataLayer exist
+        if (typeof window.gtag === 'function') {
+          window.gtag('consent', 'update', {
+            'analytics_storage': 'granted',      // ✅ Keep Analytics active
+            'ad_user_data': 'granted',           // ✅ Keep conversion tracking
+            'ad_storage': 'denied',              // 🚫 Keep remarketing blocked
+            'ad_personalization': 'denied'       // 🚫 Keep personalization blocked
+          });
+        } else {
+          console.warn('⚠️ gtag not available yet, will apply on load');
+        }
       });
     </script>
 
