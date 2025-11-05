@@ -78,7 +78,33 @@ export const CookieBanner = () => {
   };
 
   const handleRejectAll = () => {
-    submitConsent(false, false, false);
+    // When rejecting, we still allow conversion tracking (GDPR compliant)
+    // Only block personalization/remarketing
+    const consentData = {
+      necessary: true,
+      statistics: true,  // Keep basic analytics
+      marketing: false,  // Block remarketing
+      preferences: false,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log('🍪 [Cookie Banner] Saving REJECT consent (conversion tracking still enabled):', consentData);
+    localStorage.setItem('cookieConsent', JSON.stringify(consentData));
+    trackConsent('consent_rejected', consentData);
+
+    // Update consent: Keep conversion tracking, block personalization
+    if (window.gtag) {
+      const consentUpdate = {
+        analytics_storage: 'granted',     // ✅ Keep analytics
+        ad_storage: 'denied',             // ❌ Block remarketing
+        ad_user_data: 'granted',          // ✅ Keep conversion tracking
+        ad_personalization: 'denied',     // ❌ Block personalization
+      };
+      
+      console.log('📊 [Cookie Banner] Updating consent after REJECT:', consentUpdate);
+      window.gtag('consent', 'update', consentUpdate);
+    }
+    
     setShowBanner(false);
   };
 
