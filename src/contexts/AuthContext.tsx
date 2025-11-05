@@ -1367,32 +1367,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               },
             });
             
-            // Track restored subscriptions in GTM/GA
+            // Track restored subscriptions in GTM/GA - BUT ONLY IF NOT ALREADY TRACKED
             if (restoreData?.restored && restoreData?.plan) {
-              console.log('🎯 Tracking restored subscription to Google Analytics...', restoreData);
+              console.log('🎯 Checking if restored subscription should be tracked...', restoreData);
               
-              // Map plan to planType
-              const planType = restoreData.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+              // Check if payment was already tracked in database
+              const { data: dbSub } = await supabase
+                .from('user_subscriptions')
+                .select('payment_tracked')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .single();
               
-              // Determine duration and price from plan_name
-              let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
-              let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default monthly prices
-              
-              const planNameLower = (restoreData.plan_name || '').toLowerCase();
-              
-              if (planNameLower.includes('trial') || planNameLower.includes('3 day')) {
-                planDuration = '3_months';
-                planPrice = 0.99; // 3-day trial price
-              } else if (planNameLower.includes('year') || planNameLower.includes('annual')) {
-                planDuration = 'yearly';
-                planPrice = planType === 'Ultra' ? 119.99 : 59.99;
-              } else if (planNameLower.includes('3 month') || planNameLower.includes('quarter')) {
-                planDuration = '3_months';
-                planPrice = planType === 'Ultra' ? 99.99 : 49.99;
+              if (dbSub && !dbSub.payment_tracked) {
+                console.log('✅ Payment not tracked yet - tracking now');
+                
+                // Map plan to planType
+                const planType = restoreData.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+                
+                // Determine duration and price from plan_name
+                let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
+                let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default monthly prices
+                
+                const planNameLower = (restoreData.plan_name || '').toLowerCase();
+                
+                if (planNameLower.includes('trial') || planNameLower.includes('3 day')) {
+                  planDuration = '3_months';
+                  planPrice = 0.99; // 3-day trial price
+                } else if (planNameLower.includes('year') || planNameLower.includes('annual')) {
+                  planDuration = 'yearly';
+                  planPrice = planType === 'Ultra' ? 119.99 : 59.99;
+                } else if (planNameLower.includes('3 month') || planNameLower.includes('quarter')) {
+                  planDuration = '3_months';
+                  planPrice = planType === 'Ultra' ? 99.99 : 49.99;
+                }
+                
+                console.log('📊 Restored subscription tracking data:', { planType, planDuration, planPrice, plan: restoreData.plan, plan_name: restoreData.plan_name });
+                trackPaymentComplete(planType, planDuration, planPrice);
+                
+                // Mark as tracked in database
+                await supabase
+                  .from('user_subscriptions')
+                  .update({ payment_tracked: true })
+                  .eq('user_id', user.id)
+                  .eq('status', 'active');
+                
+                console.log('✅ Payment tracking flag updated in database');
+              } else {
+                console.log('⏭️ Payment already tracked - skipping duplicate tracking');
               }
-              
-              console.log('📊 Restored subscription tracking data:', { planType, planDuration, planPrice, plan: restoreData.plan, plan_name: restoreData.plan_name });
-              trackPaymentComplete(planType, planDuration, planPrice);
             }
           }
         } catch (restoreError) {
