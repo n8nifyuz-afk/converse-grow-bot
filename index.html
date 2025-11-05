@@ -33,15 +33,17 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // Set default consent to 'denied' for all categories (required for GDPR compliance)
+      // CONVERSION TRACKING MODE: Allow conversion tracking immediately while blocking personalization
+      // This ensures Google Ads conversions are tracked even before cookie consent
+      // Personalization/remarketing only works after user accepts cookies (GDPR compliant)
       gtag('consent', 'default', {
-        'ad_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied',
-        'analytics_storage': 'denied',
-        'functionality_storage': 'denied',
-        'personalization_storage': 'denied',
-        'security_storage': 'granted' // Security storage is typically granted by default
+        'ad_storage': 'denied',              // Remarketing blocked until consent
+        'ad_user_data': 'granted',           // ✅ Allow conversion tracking
+        'ad_personalization': 'denied',      // Personalized ads blocked until consent
+        'analytics_storage': 'granted',      // ✅ Allow basic analytics
+        'functionality_storage': 'granted',  // ✅ Allow functionality cookies
+        'personalization_storage': 'denied', // Personalization blocked until consent
+        'security_storage': 'granted'        // Security always granted
       });
     </script>
 
