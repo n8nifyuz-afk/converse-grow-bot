@@ -718,6 +718,18 @@ export default function AuthModal({
           setError("Failed to save profile. Please try again.");
           setLoading(false);
         } else {
+          // Send webhook after profile completion (for phone signups)
+          try {
+            console.log('📤 Sending profile completion webhook for user:', user.id);
+            await supabase.functions.invoke('send-profile-complete-webhook', {
+              body: { userId: user.id }
+            });
+            console.log('✅ Profile completion webhook sent successfully');
+          } catch (webhookError) {
+            // Don't block user flow if webhook fails
+            console.error('❌ Failed to send profile completion webhook:', webhookError);
+          }
+          
           // Refresh user profile in context to update UI everywhere
           await refreshUserProfile();
           
