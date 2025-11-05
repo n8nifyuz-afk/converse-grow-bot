@@ -23,12 +23,12 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Initialize dataLayer first (synchronous, no external dependencies) -->
+    <!-- Initialize dataLayer and Google Consent Mode -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // Default consent settings
+      // Default consent - will be updated by React CookieBanner
       gtag('consent', 'default', {
         'analytics_storage': 'granted',
         'ad_user_data': 'granted',
@@ -38,6 +38,17 @@
 
       gtag('js', new Date());
     </script>
+
+    <!-- Google tag (gtag.js) - Load after consent is set -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-NMLGMTL5');</script>
+    <!-- End Google Tag Manager -->
   </head>
 
   <body>
@@ -48,71 +59,17 @@
     
     <div id="root"></div>
     
-    <!-- Load React app first -->
+    <!-- Load React app -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Load tracking scripts AFTER React (deferred, non-blocking) -->
+    <!-- Configure GA4 after scripts load -->
     <script>
-      // Wait for DOM to be ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadTrackingScripts);
-      } else {
-        loadTrackingScripts();
-      }
-      
-      function loadTrackingScripts() {
-        // Load Cookiebot
-        var cookiebot = document.createElement('script');
-        cookiebot.id = 'Cookiebot';
-        cookiebot.src = 'https://consent.cookiebot.com/uc.js';
-        cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
-        cookiebot.setAttribute('data-blockingmode', 'auto');
-        cookiebot.async = true;
-        cookiebot.onerror = function() { console.warn('Cookiebot failed to load'); };
-        document.head.appendChild(cookiebot);
-        
-        // Setup Cookiebot event handlers
-        window.addEventListener('CookiebotOnAccept', function() {
-          console.log('✅ Cookiebot: User accepted cookies');
-        });
-        
-        window.addEventListener('CookiebotOnDecline', function() {
-          console.log('🔒 Cookiebot: User declined, re-enabling Analytics & Conversions');
-          if (typeof window.gtag === 'function') {
-            window.gtag('consent', 'update', {
-              'analytics_storage': 'granted',
-              'ad_user_data': 'granted',
-              'ad_storage': 'denied',
-              'ad_personalization': 'denied'
-            });
-          }
-        });
-        
-        // Load Google Tag Manager
-        (function(w,d,s,l,i){
-          w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-          var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-          j.async=true;
-          j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-          j.onerror = function() { console.warn('GTM failed to load'); };
-          f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-NMLGMTL5');
-        
-        // Load Google Analytics
-        var gtagScript = document.createElement('script');
-        gtagScript.async = true;
-        gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
-        gtagScript.onerror = function() { console.warn('Google Analytics failed to load'); };
-        document.head.appendChild(gtagScript);
-        
-        gtagScript.onload = function() {
-          if (typeof window.gtag === 'function') {
-            window.gtag('config', 'AW-16917874636');
-            window.gtag('config', 'G-EDSR82W70J');
-          }
-        };
-      }
+      window.addEventListener('load', function() {
+        if (typeof window.gtag === 'function') {
+          window.gtag('config', 'AW-16917874636');
+          window.gtag('config', 'G-EDSR82W70J');
+        }
+      });
     </script>
   </body>
 </html>

@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { CookieBanner } from '@/components/CookieBanner';
 
 import MainLayout from '@/layouts/MainLayout';
 import PublicLayout from '@/layouts/PublicLayout';
@@ -143,6 +144,7 @@ function AppContent() {
         </Routes>
       </Router>
       
+      <CookieBanner />
       <Toaster />
       <Sonner />
     </>
