@@ -41,59 +41,57 @@
   </head>
 
   <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NMLGMTL5"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    
     <div id="root"></div>
     
     <!-- Load React app FIRST -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Load tracking scripts AFTER React (deferred, with error handling) -->
+    <!-- Load tracking scripts AFTER React (non-blocking) -->
     <script>
-      // Wait for React to mount
-      setTimeout(function() {
-        try {
-          // Load Cookiebot
-          var cookiebot = document.createElement('script');
-          cookiebot.id = 'Cookiebot';
-          cookiebot.src = 'https://consent.cookiebot.com/uc.js';
-          cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
-          cookiebot.setAttribute('data-blockingmode', 'auto');
-          cookiebot.async = true;
-          cookiebot.onerror = function() { console.warn('Cookiebot failed to load'); };
-          document.head.appendChild(cookiebot);
-          
-          // Load GTM
-          (function(w,d,s,l,i){
-            w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-            var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-            j.async=true;
-            j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-            j.onerror = function() { console.warn('GTM failed to load'); };
-            f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-NMLGMTL5');
-          
-          // Load GA4
-          var gtagScript = document.createElement('script');
-          gtagScript.async = true;
-          gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
-          gtagScript.onerror = function() { console.warn('GA4 failed to load'); };
-          document.head.appendChild(gtagScript);
-          
-          gtagScript.onload = function() {
-            if (typeof window.gtag === 'function') {
-              window.gtag('config', 'AW-16917874636');
-              window.gtag('config', 'G-EDSR82W70J');
-            }
-          };
-        } catch (e) {
-          console.error('Failed to load tracking scripts:', e);
+      (function() {
+        // Wait for DOM to be fully ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', loadTracking);
+        } else {
+          loadTracking();
         }
-      }, 100);
+        
+        function loadTracking() {
+          setTimeout(function() {
+            // Load Cookiebot
+            var cookiebot = document.createElement('script');
+            cookiebot.id = 'Cookiebot';
+            cookiebot.src = 'https://consent.cookiebot.com/uc.js';
+            cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
+            cookiebot.setAttribute('data-blockingmode', 'auto');
+            cookiebot.async = true;
+            document.head.appendChild(cookiebot);
+            
+            // Load GTM
+            (function(w,d,s,l,i){
+              w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+              var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+              j.async=true;
+              j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+              f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-NMLGMTL5');
+            
+            // Load GA4
+            var gtagScript = document.createElement('script');
+            gtagScript.async = true;
+            gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
+            document.head.appendChild(gtagScript);
+            
+            gtagScript.onload = function() {
+              if (typeof window.gtag === 'function') {
+                window.gtag('config', 'AW-16917874636');
+                window.gtag('config', 'G-EDSR82W70J');
+              }
+            };
+          }, 200);
+        }
+      })();
     </script>
   </body>
 </html>
