@@ -61,12 +61,18 @@ export const clearTrackingDataAfterConversion = () => {
  * This should be called on app initialization to ensure Google Ads can track conversions
  */
 export const initializeGTMWithGCLID = () => {
-  console.log('🔍 [GTM] Initializing GTM with GCLID tracking...');
+  console.log('═══════════════════════════════════════════════════');
+  console.log('🔍 [GTM-INIT] Initializing GTM with GCLID tracking...');
+  console.log('═══════════════════════════════════════════════════');
   
   if (typeof window === 'undefined' || !window.dataLayer) {
-    console.warn('⚠️ [GTM] Window or dataLayer not available');
+    console.error('❌ [GTM-INIT] Window or dataLayer not available!');
+    console.log('💡 Make sure GTM script is loaded in index.html');
     return;
   }
+  
+  console.log('✅ [GTM-INIT] Window and dataLayer available');
+  console.log('📊 [GTM-INIT] Current dataLayer length:', window.dataLayer.length);
 
   try {
     // Get GCLID from URL or localStorage
@@ -134,18 +140,27 @@ export const initializeGTMWithGCLID = () => {
 
       if (gclid) {
         eventData.gclid = gclid;
+        console.log('✅ [GTM-INIT] Adding GCLID to event:', gclid);
       }
 
       if (Object.keys(allUrlParams).length > 0) {
         eventData.url_params = allUrlParams;
+        console.log('✅ [GTM-INIT] Adding URL params:', allUrlParams);
       }
 
-      console.log('📤 [GTM] Pushing gtm_init event to dataLayer:', eventData);
+      console.log('═══════════════════════════════════════════════════');
+      console.log('📤 [GTM-INIT] Pushing gtm_init event to dataLayer:');
+      console.log(JSON.stringify(eventData, null, 2));
+      console.log('═══════════════════════════════════════════════════');
+      
       window.dataLayer.push(eventData);
-      console.log('✅ [GTM] Event pushed successfully');
-      console.log('📊 [GTM] Current dataLayer:', window.dataLayer);
+      
+      console.log('✅ [GTM-INIT] Event pushed successfully!');
+      console.log('📊 [GTM-INIT] Full dataLayer:', window.dataLayer);
+      console.log('═══════════════════════════════════════════════════');
     } else {
-      console.log('ℹ️ [GTM] No tracking data to push');
+      console.log('ℹ️ [GTM-INIT] No tracking data to push (no GCLID or URL params)');
+      console.log('═══════════════════════════════════════════════════');
     }
   } catch (error) {
     console.error('❌ [GTM] Error initializing:', error);
@@ -166,19 +181,34 @@ const getCurrentGCLID = (): string | null => {
 };
 
 export const trackRegistrationComplete = () => {
-  console.log('🎯 [GTM] Tracking registration_complete event');
+  console.log('═══════════════════════════════════════════════════');
+  console.log('🎯 [GTM-REGISTRATION] Tracking registration_complete event');
+  console.log('═══════════════════════════════════════════════════');
   
   if (typeof window !== 'undefined' && window.dataLayer) {
     const trackedKey = 'gtm_registration_tracked';
     const alreadyTracked = localStorage.getItem(trackedKey);
     
     if (alreadyTracked) {
-      console.log('⏭️ [GTM] Registration already tracked, skipping');
+      console.log('⏭️ [GTM-REGISTRATION] Registration already tracked, skipping');
+      console.log('═══════════════════════════════════════════════════');
       return;
     }
     
     const gclid = getCurrentGCLID();
-    console.log('📍 [GTM] Current GCLID:', gclid || 'None');
+    console.log('📍 [GTM-REGISTRATION] Current GCLID:', gclid || 'None');
+    
+    // Get URL params
+    const urlParamsStr = localStorage.getItem('url_params');
+    let urlParams = {};
+    if (urlParamsStr) {
+      try {
+        urlParams = JSON.parse(urlParamsStr);
+        console.log('📍 [GTM-REGISTRATION] Stored URL params:', urlParams);
+      } catch (e) {
+        console.error('❌ [GTM-REGISTRATION] Error parsing URL params');
+      }
+    }
     
     const eventData: Record<string, any> = {
       event: 'registration_complete'
@@ -186,37 +216,63 @@ export const trackRegistrationComplete = () => {
     
     if (gclid) {
       eventData.gclid = gclid;
+      console.log('✅ [GTM-REGISTRATION] Adding GCLID to event');
     }
     
-    console.log('📤 [GTM] Pushing event:', eventData);
+    console.log('═══════════════════════════════════════════════════');
+    console.log('📤 [GTM-REGISTRATION] Pushing event to dataLayer:');
+    console.log(JSON.stringify(eventData, null, 2));
+    console.log('═══════════════════════════════════════════════════');
+    
     window.dataLayer.push(eventData);
     localStorage.setItem(trackedKey, 'true');
-    console.log('✅ [GTM] Registration event tracked successfully');
+    
+    console.log('✅ [GTM-REGISTRATION] Event pushed successfully!');
+    console.log('📊 [GTM-REGISTRATION] Full dataLayer:', window.dataLayer);
+    console.log('═══════════════════════════════════════════════════');
     
     // Clear tracking data after successful conversion
     setTimeout(() => {
-      console.log('🧹 [GTM] Clearing tracking data after conversion');
+      console.log('🧹 [GTM-REGISTRATION] Clearing tracking data after conversion');
       clearTrackingDataAfterConversion();
     }, 1000); // Small delay to ensure GTM processes the event
   } else {
-    console.warn('⚠️ [GTM] Window or dataLayer not available');
+    console.error('❌ [GTM-REGISTRATION] Window or dataLayer not available!');
+    console.log('═══════════════════════════════════════════════════');
   }
 };
 
 export const trackChatStart = (chatId?: string) => {
-  console.log('🎯 [GTM] Tracking chat_start event, Chat ID:', chatId || 'None');
+  console.log('═══════════════════════════════════════════════════');
+  console.log('🎯 [GTM-CHAT] Tracking chat_start event');
+  console.log('💬 [GTM-CHAT] Chat ID:', chatId || 'None');
+  console.log('═══════════════════════════════════════════════════');
   
   if (typeof window !== 'undefined' && window.dataLayer) {
     const trackedKey = chatId ? `gtm_chat_start_${chatId}` : 'gtm_chat_start_temp';
     const trackedChats = sessionStorage.getItem('gtm_tracked_chats') || '';
     
     if (trackedChats.includes(trackedKey)) {
-      console.log('⏭️ [GTM] Chat start already tracked, skipping');
+      console.log('⏭️ [GTM-CHAT] Chat start already tracked, skipping');
+      console.log('📝 [GTM-CHAT] Tracked chats:', trackedChats);
+      console.log('═══════════════════════════════════════════════════');
       return;
     }
     
     const gclid = getCurrentGCLID();
-    console.log('📍 [GTM] Current GCLID:', gclid || 'None');
+    console.log('📍 [GTM-CHAT] Current GCLID:', gclid || 'None');
+    
+    // Get URL params
+    const urlParamsStr = localStorage.getItem('url_params');
+    let urlParams = {};
+    if (urlParamsStr) {
+      try {
+        urlParams = JSON.parse(urlParamsStr);
+        console.log('📍 [GTM-CHAT] Stored URL params:', urlParams);
+      } catch (e) {
+        console.error('❌ [GTM-CHAT] Error parsing URL params');
+      }
+    }
     
     const eventData: Record<string, any> = {
       event: 'chat_start'
@@ -224,16 +280,25 @@ export const trackChatStart = (chatId?: string) => {
     
     if (gclid) {
       eventData.gclid = gclid;
+      console.log('✅ [GTM-CHAT] Adding GCLID to event');
     }
     
-    console.log('📤 [GTM] Pushing event:', eventData);
+    console.log('═══════════════════════════════════════════════════');
+    console.log('📤 [GTM-CHAT] Pushing event to dataLayer:');
+    console.log(JSON.stringify(eventData, null, 2));
+    console.log('═══════════════════════════════════════════════════');
+    
     window.dataLayer.push(eventData);
     
     const newTrackedChats = trackedChats ? `${trackedChats},${trackedKey}` : trackedKey;
     sessionStorage.setItem('gtm_tracked_chats', newTrackedChats);
-    console.log('✅ [GTM] Chat start event tracked successfully');
+    
+    console.log('✅ [GTM-CHAT] Event pushed successfully!');
+    console.log('📊 [GTM-CHAT] Full dataLayer:', window.dataLayer);
+    console.log('═══════════════════════════════════════════════════');
   } else {
-    console.warn('⚠️ [GTM] Window or dataLayer not available');
+    console.error('❌ [GTM-CHAT] Window or dataLayer not available!');
+    console.log('═══════════════════════════════════════════════════');
   }
 };
 
