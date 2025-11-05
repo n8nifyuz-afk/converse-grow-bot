@@ -9,8 +9,14 @@ import { initializeGTMWithGCLID } from "./utils/gtmTracking";
 // Initialize language detection
 initLanguageDetection();
 
-// Initialize GTM with GCLID and URL parameters
-initializeGTMWithGCLID();
+// Initialize GTM with GCLID after React is ready
+setTimeout(() => {
+  try {
+    initializeGTMWithGCLID();
+  } catch (error) {
+    console.error('Failed to initialize GTM:', error);
+  }
+}, 0);
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
