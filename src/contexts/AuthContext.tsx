@@ -229,10 +229,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const webhookAlreadySent = localStorage.getItem(webhookSentKey);
       
       // IMPROVED: Check if this is a NEW signup by checking user creation time
-      // User created within last 10 seconds = new signup (works for ALL auth methods including phone)
+      // User created within last 5 minutes = new signup (works for ALL auth methods including phone)
+      // Extended to 5 minutes to account for phone OTP verification and profile completion flow
       const userCreatedAt = new Date(user.created_at).getTime();
       const timeSinceCreation = Date.now() - userCreatedAt;
-      const isNewSignup = timeSinceCreation < 10000; // 10 seconds
+      const isNewSignup = timeSinceCreation < 300000; // 5 minutes (300 seconds)
       
       // Determine if we should send webhook (new signup AND webhook not sent yet)
       const shouldSendWebhook = isNewSignup && !webhookAlreadySent;
