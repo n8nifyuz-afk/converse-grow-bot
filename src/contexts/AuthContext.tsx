@@ -991,6 +991,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log(JSON.stringify(signupData, null, 2));
     console.log('═══════════════════════════════════════════════════');
     
+    // Mark that user explicitly initiated signup
+    markAuthInitiated();
+    
     const { error, data} = await supabase.auth.signUp({
       email,
       password,
@@ -1076,6 +1079,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     console.log('🔐 [GOOGLE SIGNIN] Initiating Google sign-in...');
     
+    // Mark that user explicitly initiated OAuth
+    markAuthInitiated();
+    
     // CRITICAL: Store current URL params in localStorage BEFORE OAuth redirect
     const currentParams = new URLSearchParams(window.location.search);
     const gclid = currentParams.get('gclid');
@@ -1139,6 +1145,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithApple = async () => {
+    // Mark that user explicitly initiated OAuth
+    markAuthInitiated();
+    
     // CRITICAL: Store current URL params in localStorage BEFORE OAuth redirect
     const currentParams = new URLSearchParams(window.location.search);
     const gclid = currentParams.get('gclid');
@@ -1184,6 +1193,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithMicrosoft = async () => {
+    // Mark that user explicitly initiated OAuth
+    markAuthInitiated();
+    
     // CRITICAL: Store current URL params in localStorage BEFORE OAuth redirect
     const currentParams = new URLSearchParams(window.location.search);
     const gclid = currentParams.get('gclid');
