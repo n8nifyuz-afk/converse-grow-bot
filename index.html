@@ -67,6 +67,17 @@
             cookiebot.async = true;
             document.head.appendChild(cookiebot);
             
+            // Debug: Force show after load
+            window.addEventListener('CookiebotOnLoad', function() {
+              console.log('🍪 Cookiebot loaded, forcing show...');
+              if (window.Cookiebot && !window.Cookiebot.consented && !window.Cookiebot.declined) {
+                setTimeout(function() {
+                  console.log('Banner HTML exists:', !!document.getElementById('cookieBanner'));
+                  Cookiebot.show();
+                }, 500);
+              }
+            });
+            
             // Load GTM
             (function(w,d,s,l,i){
               w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
