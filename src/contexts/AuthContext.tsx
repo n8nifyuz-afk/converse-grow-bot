@@ -400,8 +400,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // CRITICAL: Send webhook for new OAuth signups (with proper deduplication)
-      if (shouldSendWebhook) {
+      // CRITICAL: Send webhook ONLY for OAuth signups (NOT phone)
+      // Phone webhooks are handled by send-profile-complete-webhook after profile completion
+      const isOAuthSignup = provider && ['google', 'apple', 'microsoft'].includes(provider);
+      
+      if (shouldSendWebhook && !isOAuthSignup) {
+        console.log(`⏭️ [WEBHOOK-SKIP] Skipping webhook for ${provider || 'unknown'} signup - not OAuth`);
+      }
+      
+      if (shouldSendWebhook && isOAuthSignup) {
         try {
           // Fetch the FINAL profile state with all tracking data
           const { data: finalProfile } = await supabase
