@@ -673,6 +673,7 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           id: string
+          payment_tracked: boolean | null
           plan: string | null
           plan_name: string | null
           product_id: string | null
@@ -686,6 +687,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          payment_tracked?: boolean | null
           plan?: string | null
           plan_name?: string | null
           product_id?: string | null
@@ -699,6 +701,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          payment_tracked?: boolean | null
           plan?: string | null
           plan_name?: string | null
           product_id?: string | null
