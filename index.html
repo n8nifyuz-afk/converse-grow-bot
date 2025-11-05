@@ -40,6 +40,25 @@
 
     <!-- Cookiebot Consent Management Platform -->
     <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
+    
+    <!-- Override Cookiebot to keep Analytics active even on rejection -->
+    <script>
+      window.addEventListener('CookiebotOnAccept', function() {
+        // User accepted - allow everything Cookiebot granted
+        console.log('✅ Cookiebot: User accepted cookies');
+      });
+      
+      window.addEventListener('CookiebotOnDecline', function() {
+        // User declined - but we NEED Analytics and conversion tracking
+        console.log('🔒 Cookiebot: User declined, but re-enabling Analytics & Conversions');
+        gtag('consent', 'update', {
+          'analytics_storage': 'granted',      // ✅ Keep Analytics active
+          'ad_user_data': 'granted',           // ✅ Keep conversion tracking
+          'ad_storage': 'denied',              // 🚫 Keep remarketing blocked
+          'ad_personalization': 'denied'       // 🚫 Keep personalization blocked
+        });
+      });
+    </script>
 
     <!-- Google tag (gtag.js) - Google Ads -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
