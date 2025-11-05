@@ -352,9 +352,10 @@ export default function PhoneAuthModal({
     <Drawer 
       open={isOpen} 
       onOpenChange={(open) => {
-        if (!open) onClose();
+        // Prevent closing during profile completion
+        if (!open && mode !== 'complete-profile') onClose();
       }}
-      dismissible={mode !== 'verify' && mode !== 'complete-profile'}
+      dismissible={mode !== 'complete-profile'}
       modal={true}
     >
       <DrawerContent className="h-auto p-0">
