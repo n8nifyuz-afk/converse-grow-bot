@@ -28,15 +28,12 @@
       window.dataLayer = window.dataLayer || [];
       window.gtag = function(){dataLayer.push(arguments);}
       
-      // Default consent: Deny all until user consents (GCM V2 compliant)
+      // Default consent: Allow analytics & conversions, block remarketing
       gtag('consent', 'default', {
+        'analytics_storage': 'granted',
+        'ad_user_data': 'granted',
         'ad_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied',
-        'analytics_storage': 'denied',
-        'functionality_storage': 'denied',
-        'personalization_storage': 'denied',
-        'security_storage': 'granted'  // Security can be granted by default
+        'ad_personalization': 'denied'
       });
       
       gtag('js', new Date());
