@@ -92,7 +92,7 @@ export default function PhoneAuthModal({
     e.preventDefault();
     setShowPhoneValidation(true);
     
-    if (!phone) return;
+    if (!phone || phoneLoading) return; // Prevent multiple submissions
     
     setPhoneLoading(true);
     setError('');
@@ -100,17 +100,7 @@ export default function PhoneAuthModal({
     try {
       console.log('[PHONE-AUTH-MODAL] Sending OTP to:', phone);
       
-      // Add 30 second timeout to detect slow backend responses
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
-      );
-      
-      const signInPromise = signInWithPhone(phone);
-      
-      const { error } = await Promise.race([
-        signInPromise,
-        timeoutPromise
-      ]) as { error: any };
+      const { error } = await signInWithPhone(phone);
       
       if (error) {
         console.error('[PHONE-AUTH-MODAL] OTP send failed:', error);
@@ -119,11 +109,13 @@ export default function PhoneAuthModal({
           description: error.message,
           variant: "destructive"
         });
+        setPhoneLoading(false);
       } else {
         console.log('[PHONE-AUTH-MODAL] OTP sent successfully');
         setMode('verify');
         setOtpTimer(60);
         setShowPhoneValidation(false);
+        setPhoneLoading(false);
         sonnerToast.success("Code sent!", {
           description: "Please check your phone for the verification code.",
           duration: 3000
@@ -131,19 +123,12 @@ export default function PhoneAuthModal({
       }
     } catch (error: any) {
       console.error('[PHONE-AUTH-MODAL] Exception during OTP send:', error);
-      const isTimeout = error?.message === 'Request timeout';
       toast({
-        title: isTimeout ? "Request taking longer than expected" : "An error occurred",
-        description: isTimeout 
-          ? "SMS sending is slow. Your code may arrive in a few minutes. Please wait or try again."
-          : "Please try again later.",
+        title: "An error occurred",
+        description: "Please try again later.",
         variant: "destructive"
       });
-      setError(isTimeout 
-        ? "Backend is slow. Code may still arrive - please wait."
-        : "An error occurred"
-      );
-    } finally {
+      setError("An error occurred");
       setPhoneLoading(false);
     }
   };
