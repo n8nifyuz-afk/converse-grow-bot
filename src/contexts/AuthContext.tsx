@@ -610,6 +610,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             logUserActivity(session.user.id, activityType).catch(() => {
               // Silent error
             });
+            
+            // CRITICAL: Track registration in GTM/GA for NEW SIGNUPS ONLY
+            // This works for ALL auth methods: Google, Apple, Microsoft, Phone, Email
+            if (isSignup) {
+              console.log('🎯 [GTM-REG] Tracking registration for new signup');
+              trackRegistrationComplete();
+            }
           } else {
             // Session restoration - skip logging
           }
@@ -632,9 +639,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Debounce other async operations to prevent rate limiting
           authStateDebounceTimer = setTimeout(async () => {
-            // Track registration completion for GTM/GA (with deduplication)
-            trackRegistrationComplete();
-            
             // Fetch profile and check subscription - DEBOUNCED
             await fetchUserProfile(session.user.id);
             await checkSubscription();
