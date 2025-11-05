@@ -311,31 +311,18 @@ export default function PhoneAuthModal({
         await refreshUserProfile();
         
         // Send webhook for phone signup after profile completion
+        // Call send-profile-complete-webhook which will handle the webhook with full profile data
         try {
-          // Fetch complete profile data for webhook
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', user?.id)
-            .single();
-          
-          await supabase.functions.invoke('send-subscriber-webhook', {
+          await supabase.functions.invoke('send-profile-complete-webhook', {
             body: {
-              userId: user?.id,
-              email: user?.email || phone,
-              username: fullName,
-              signupMethod: 'phone',
-              phoneNumber: phone,
-              country: profileData?.country || null,
-              ipAddress: profileData?.ip_address || null,
-              gclid: profileData?.gclid || null,
-              urlParams: profileData?.url_params || {},
-              initialReferer: profileData?.initial_referer || null
+              userId: user?.id
             }
           });
+          console.log('[PHONE-AUTH] ✅ Profile completion webhook triggered');
         } catch (webhookError) {
-          console.error('Webhook error (non-critical):', webhookError);
+          console.error('[PHONE-AUTH] ⚠️ Webhook error (non-critical):', webhookError);
         }
+
         
         setIsVerifyingOtp(false);
         onClose();
