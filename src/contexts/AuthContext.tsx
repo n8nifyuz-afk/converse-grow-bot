@@ -1517,146 +1517,156 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (shouldTrack) {
           // Use session_id for deduplication (unique per payment)
-          // This prevents double-tracking if page refreshes, but allows tracking renewals
+          // Only track payment if subscription was created recently (within last 5 minutes)
+          // This prevents tracking existing subscriptions on login
           const trackedKey = `payment_tracked_${sessionId}`;
           const alreadyTracked = localStorage.getItem(trackedKey);
           
           if (!alreadyTracked && dbSub) {
-            console.log('🎯 Tracking payment conversion to Google Analytics...');
+            // Check if subscription is new (created in the last 5 minutes)
+            const subCreatedAt = new Date(dbSub.created_at);
+            const now = new Date();
+            const minutesSinceCreation = (now.getTime() - subCreatedAt.getTime()) / (1000 * 60);
             
-            // Map plan to planType
-            const planType = dbSub.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
-            
-            // Map product_id to actual price and duration
-            let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
-            let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default monthly prices
-            
-            // Determine duration and price from product_id or plan_name
-            if (dbSub.product_id) {
-              const productId = dbSub.product_id;
-              const productIdLower = productId.toLowerCase();
-              const planNameLower = (dbSub.plan_name || '').toLowerCase();
+            if (minutesSinceCreation <= 5) {
+              console.log('🎯 Tracking payment conversion to Google Analytics...');
               
-              // Check for duration indicators (including 3-day trial)
-              if (productIdLower.includes('trial') || productIdLower.includes('3day') || planNameLower.includes('trial') || planNameLower.includes('3 day')) {
-                planDuration = '3_months'; // Use 3_months for trial tracking
-                planPrice = 0.99; // 3-day trial price
-              } else if (productIdLower.includes('year') || productIdLower.includes('annual') || planNameLower.includes('year') || planNameLower.includes('annual')) {
-                planDuration = 'yearly';
-                planPrice = planType === 'Ultra' ? 119.99 : 59.99;
-              } else if (productIdLower.includes('quarter') || productIdLower.includes('3month') || planNameLower.includes('3 month') || planNameLower.includes('quarter')) {
-                planDuration = '3_months';
-                planPrice = planType === 'Ultra' ? 99.99 : 49.99;
-              }
-              // Otherwise keep monthly defaults
-            }
-            
-            console.log('📊 Tracking data:', { planType, planDuration, planPrice, product_id: dbSub.product_id, plan_name: dbSub.plan_name, session_id: sessionId });
-            trackPaymentComplete(planType, planDuration, planPrice);
-            
-            // Mark this session as tracked
-            localStorage.setItem(trackedKey, 'true');
-            
-            // Send payment webhook to n8n with IPv4 address
-            (async () => {
-              try {
-                let ipAddress = 'Unknown';
-                let country = 'Unknown';
+              // Map plan to planType
+              const planType = dbSub.plan === 'ultra_pro' ? 'Ultra' : 'Pro';
+              
+              // Map product_id to actual price and duration
+              let planDuration: 'monthly' | '3_months' | 'yearly' = 'monthly';
+              let planPrice = planType === 'Ultra' ? 39.99 : 19.99; // Default monthly prices
+              
+              // Determine duration and price from product_id or plan_name
+              if (dbSub.product_id) {
+                const productId = dbSub.product_id;
+                const productIdLower = productId.toLowerCase();
+                const planNameLower = (dbSub.plan_name || '').toLowerCase();
                 
-                // Get IPv4 address using ipapi.co
-                try {
-                  const ipResponse = await fetch('https://ipapi.co/json/');
-                  if (ipResponse.ok) {
-                    const ipData = await ipResponse.json();
-                    ipAddress = ipData.ip || 'Unknown';
-                    country = ipData.country_code || ipData.country || 'Unknown';
-                  }
-                } catch (err) {
-                  console.warn('Failed to get IP for payment webhook:', err);
+                // Check for duration indicators (including 3-day trial)
+                if (productIdLower.includes('trial') || productIdLower.includes('3day') || planNameLower.includes('trial') || planNameLower.includes('3 day')) {
+                  planDuration = '3_months'; // Use 3_months for trial tracking
+                  planPrice = 0.99; // 3-day trial price
+                } else if (productIdLower.includes('year') || productIdLower.includes('annual') || planNameLower.includes('year') || planNameLower.includes('annual')) {
+                  planDuration = 'yearly';
+                  planPrice = planType === 'Ultra' ? 119.99 : 59.99;
+                } else if (productIdLower.includes('quarter') || productIdLower.includes('3month') || planNameLower.includes('3 month') || planNameLower.includes('quarter')) {
+                  planDuration = '3_months';
+                  planPrice = planType === 'Ultra' ? 99.99 : 49.99;
                 }
-                
-                // Capture URL parameters (GCLID, UTM params)
-                // CRITICAL: Fetch stored params from database first (user may buy subscription days after signup)
-                let gclid = null;
-                let urlParamsObj: Record<string, string> = {};
-                let referer = document.referrer || "null";
-                
+                // Otherwise keep monthly defaults
+              }
+              
+              console.log('📊 Tracking data:', { planType, planDuration, planPrice, product_id: dbSub.product_id, plan_name: dbSub.plan_name, session_id: sessionId, minutesSinceCreation });
+              trackPaymentComplete(planType, planDuration, planPrice);
+              
+              // Mark this session as tracked
+              localStorage.setItem(trackedKey, 'true');
+              
+              // Send payment webhook to n8n with IPv4 address
+              (async () => {
                 try {
-                  const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('gclid, url_params, initial_referer')
-                    .eq('user_id', user.id)
-                    .single();
+                  let ipAddress = 'Unknown';
+                  let country = 'Unknown';
                   
-                  if (profile) {
-                    gclid = profile.gclid;
-                    
-                    // Safely extract url_params from database
-                    if (profile.url_params && typeof profile.url_params === 'object' && !Array.isArray(profile.url_params)) {
-                      urlParamsObj = profile.url_params as Record<string, string>;
+                  // Get IPv4 address using ipapi.co
+                  try {
+                    const ipResponse = await fetch('https://ipapi.co/json/');
+                    if (ipResponse.ok) {
+                      const ipData = await ipResponse.json();
+                      ipAddress = ipData.ip || 'Unknown';
+                      country = ipData.country_code || ipData.country || 'Unknown';
                     }
-                    
-                    referer = profile.initial_referer || referer;
+                  } catch (err) {
+                    console.warn('Failed to get IP for payment webhook:', err);
                   }
-                } catch (error) {
-                  console.warn('[PAYMENT-WEBHOOK] Failed to fetch stored params from database:', error);
-                }
-                
-                // Fallback to current URL if database fetch failed
-                if (!gclid || Object.keys(urlParamsObj).length === 0) {
-                  const currentUrlParams = new URLSearchParams(window.location.search);
-                  gclid = gclid || currentUrlParams.get('gclid') || localStorage.getItem('gclid') || null;
                   
-                  if (Object.keys(urlParamsObj).length === 0) {
-                    currentUrlParams.forEach((value, key) => {
-                      urlParamsObj[key] = value;
-                    });
+                  // Capture URL parameters (GCLID, UTM params)
+                  // CRITICAL: Fetch stored params from database first (user may buy subscription days after signup)
+                  let gclid = null;
+                  let urlParamsObj: Record<string, string> = {};
+                  let referer = document.referrer || "null";
+                  
+                  try {
+                    const { data: profile } = await supabase
+                      .from('profiles')
+                      .select('gclid, url_params, initial_referer')
+                      .eq('user_id', user.id)
+                      .single();
+                    
+                    if (profile) {
+                      gclid = profile.gclid;
+                      
+                      // Safely extract url_params from database
+                      if (profile.url_params && typeof profile.url_params === 'object' && !Array.isArray(profile.url_params)) {
+                        urlParamsObj = profile.url_params as Record<string, string>;
+                      }
+                      
+                      referer = profile.initial_referer || referer;
+                    }
+                  } catch (error) {
+                    console.warn('[PAYMENT-WEBHOOK] Failed to fetch stored params from database:', error);
                   }
+                  
+                  // Fallback to current URL if database fetch failed
+                  if (!gclid || Object.keys(urlParamsObj).length === 0) {
+                    const currentUrlParams = new URLSearchParams(window.location.search);
+                    gclid = gclid || currentUrlParams.get('gclid') || localStorage.getItem('gclid') || null;
+                    
+                    if (Object.keys(urlParamsObj).length === 0) {
+                      currentUrlParams.forEach((value, key) => {
+                        urlParamsObj[key] = value;
+                      });
+                    }
+                  }
+                  
+                  // Send payment webhook with proper format
+                  const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/payment', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      email: user.email || userProfile?.phone_number || '',
+                      username: userProfile?.display_name || user.email?.split('@')[0] || 'User',
+                      country: country,
+                      ip_address: ipAddress,
+                      user_id: user.id,
+                      plan_type: planType,
+                      plan_duration: planDuration,
+                      plan_price: planPrice,
+                      product_id: dbSub.product_id,
+                      plan_name: dbSub.plan_name,
+                      gclid: gclid,
+                      urlParams: JSON.stringify(urlParamsObj), // Stringified JSON from database
+                      referer: referer ? String(referer) : "null", // Use fetched referer from database
+                      timestamp: new Date().toISOString(),
+                      hasDocument: "false"
+                    }),
+                  });
+                  
+                  if (webhookResponse.ok) {
+                    console.log('✅ Payment webhook sent successfully');
+                  } else {
+                    console.warn('⚠️ Payment webhook failed:', webhookResponse.status);
+                  }
+                } catch (webhookError) {
+                  console.error('❌ Failed to send payment webhook:', webhookError);
                 }
-                
-                // Send payment webhook with proper format
-                const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/payment', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    email: user.email || userProfile?.phone_number || '',
-                    username: userProfile?.display_name || user.email?.split('@')[0] || 'User',
-                    country: country,
-                    ip_address: ipAddress,
-                    user_id: user.id,
-                    plan_type: planType,
-                    plan_duration: planDuration,
-                    plan_price: planPrice,
-                    product_id: dbSub.product_id,
-                    plan_name: dbSub.plan_name,
-                    gclid: gclid,
-                    urlParams: JSON.stringify(urlParamsObj), // Stringified JSON from database
-                    referer: referer ? String(referer) : "null", // Use fetched referer from database
-                    timestamp: new Date().toISOString(),
-                    hasDocument: "false"
-                  }),
-                });
-                
-                if (webhookResponse.ok) {
-                  console.log('✅ Payment webhook sent successfully');
-                } else {
-                  console.warn('⚠️ Payment webhook failed:', webhookResponse.status);
-                }
-              } catch (webhookError) {
-                console.error('❌ Failed to send payment webhook:', webhookError);
+              })();
+              
+              console.log('✅ Payment conversion tracked successfully');
+              
+              // Clean up URL params after tracking
+              if (hasSessionId) {
+                window.history.replaceState({}, '', window.location.pathname);
               }
-            })();
-            
-            // Mark as tracked in localStorage to prevent duplicates
-            localStorage.setItem(trackedKey, 'true');
-            console.log('✅ Payment conversion tracked successfully');
-            
-            // Clean up URL params after tracking
-            if (hasSessionId) {
-              window.history.replaceState({}, '', window.location.pathname);
+            } else {
+              console.log('⏭️ Skipping payment tracking - subscription is not new (created', minutesSinceCreation.toFixed(1), 'minutes ago)');
             }
+          } else {
+            console.log('⏭️ Skipping payment tracking - already tracked in this session');
           }
         }
         
