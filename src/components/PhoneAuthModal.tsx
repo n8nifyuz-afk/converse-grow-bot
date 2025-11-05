@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
 import { CountryPhoneInput } from '@/components/CountryPhoneInput';
+import { trackRegistrationComplete } from '@/utils/gtmTracking';
 
 interface PhoneAuthModalProps {
   isOpen: boolean;
@@ -323,6 +324,9 @@ export default function PhoneAuthModal({
           console.error('[PHONE-AUTH] ⚠️ Webhook error (non-critical):', webhookError);
         }
 
+        // Track phone registration completion in GTM
+        console.log('[PHONE-AUTH] 📊 Tracking registration_complete event');
+        trackRegistrationComplete();
         
         setIsVerifyingOtp(false);
         onClose();
