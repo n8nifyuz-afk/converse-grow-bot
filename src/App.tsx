@@ -152,13 +152,13 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <TooltipProvider>
             <AppContent />
-          </ThemeProvider>
-        </AuthProvider>
-      </TooltipProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
