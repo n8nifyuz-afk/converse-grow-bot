@@ -642,6 +642,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Fetch profile and check subscription - DEBOUNCED
             await fetchUserProfile(session.user.id);
             await checkSubscription();
+            
+            // CRITICAL: Restore GCLID from database to localStorage on login
+            // This ensures GCLID persists across devices/sessions for attribution
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('gclid, url_params, initial_referer')
+                .eq('user_id', session.user.id)
+                .single();
+              
+              if (profile?.gclid && !localStorage.getItem('gclid')) {
+                console.log('✅ [GCLID-RESTORE] Restoring GCLID from database:', profile.gclid);
+                localStorage.setItem('gclid', profile.gclid);
+                localStorage.setItem('gclid_timestamp', Date.now().toString());
+              }
+              
+              if (profile?.url_params && !localStorage.getItem('url_params')) {
+                console.log('✅ [GCLID-RESTORE] Restoring URL params from database');
+                localStorage.setItem('url_params', JSON.stringify(profile.url_params));
+                localStorage.setItem('url_params_timestamp', Date.now().toString());
+              }
+              
+              if (profile?.initial_referer && !sessionStorage.getItem('initial_referer')) {
+                console.log('✅ [GCLID-RESTORE] Restoring initial referer from database');
+                sessionStorage.setItem('initial_referer', profile.initial_referer);
+              }
+            } catch (error) {
+              console.error('❌ [GCLID-RESTORE] Error restoring tracking data:', error);
+            }
           }, 500); // 500ms debounce to prevent rapid-fire API calls
         } else if (event === 'SIGNED_OUT') {
           // Clear debounce timer on sign out
