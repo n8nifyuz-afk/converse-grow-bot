@@ -637,21 +637,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
           }
           
-          // Debounce other async operations to prevent rate limiting
-          authStateDebounceTimer = setTimeout(async () => {
-            // Fetch profile and check subscription - DEBOUNCED
-            await fetchUserProfile(session.user.id);
-            await checkSubscription();
-            
-            // CRITICAL: Restore GCLID from database to localStorage on login
-            // This ensures GCLID persists across devices/sessions for attribution
-            // ALWAYS restore from database to ensure we have the most accurate data
+          // CRITICAL: Restore GCLID from database IMMEDIATELY (not debounced!)
+          // This ensures GCLID is available for tracking events that fire on page load
+          // Must happen synchronously before any tracking events fire
+          (async () => {
             try {
               const { data: profile } = await supabase
                 .from('profiles')
                 .select('gclid, url_params, initial_referer')
                 .eq('user_id', session.user.id)
-                .single();
+                .maybeSingle();
               
               if (profile?.gclid) {
                 console.log('✅ [GCLID-RESTORE] Restoring GCLID from database:', profile.gclid);
@@ -674,6 +669,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } catch (error) {
               console.error('❌ [GCLID-RESTORE] Error restoring tracking data:', error);
             }
+          })();
+          
+          // Debounce other async operations to prevent rate limiting
+          authStateDebounceTimer = setTimeout(async () => {
+            // Fetch profile and check subscription - DEBOUNCED
+            await fetchUserProfile(session.user.id);
+            await checkSubscription();
           }, 500); // 500ms debounce to prevent rapid-fire API calls
         } else if (event === 'SIGNED_OUT') {
           // Clear debounce timer on sign out
