@@ -26,26 +26,20 @@
     <!-- Initialize Data Layer -->
     <script>
       window.dataLayer = window.dataLayer || [];
-    </script>
-
-    <!-- Google Consent Mode V2 - Set default consent states BEFORE any Google tags load -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      window.gtag = function(){dataLayer.push(arguments);}
       
-      // CONVERSION TRACKING MODE: Allow conversion tracking immediately while blocking personalization
-      // This ensures Google Ads conversions are tracked even before cookie consent
-      // Personalization/remarketing only works after user accepts cookies (GDPR compliant)
+      // Default consent settings before Cookiebot loads
+      // This allows conversion tracking even before user interacts with cookie banner
       gtag('consent', 'default', {
-        'ad_storage': 'denied',              // Remarketing blocked until consent
-        'ad_user_data': 'granted',           // ✅ Allow conversion tracking
-        'ad_personalization': 'denied',      // Personalized ads blocked until consent
-        'analytics_storage': 'granted',      // ✅ Allow basic analytics
-        'functionality_storage': 'granted',  // ✅ Allow functionality cookies
-        'personalization_storage': 'denied', // Personalization blocked until consent
-        'security_storage': 'granted'        // Security always granted
+        'analytics_storage': 'granted',      // ✅ Allow GA4 basic analytics
+        'ad_user_data': 'granted',           // ✅ Allow Google Ads conversions
+        'ad_storage': 'denied',              // 🚫 Block remarketing cookies
+        'ad_personalization': 'denied'       // 🚫 Block personalized ads
       });
     </script>
+
+    <!-- Cookiebot Consent Management Platform -->
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
 
     <!-- Google tag (gtag.js) - Google Ads -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
