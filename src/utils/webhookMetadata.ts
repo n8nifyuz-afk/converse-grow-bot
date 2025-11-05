@@ -77,8 +77,15 @@ export async function fetchIPAndCountry(): Promise<{ ip: string | null; country:
 
 // Main function to gather all metadata
 export async function getWebhookMetadata(): Promise<WebhookMetadata> {
+  console.log('═══════════════════════════════════════════════════');
+  console.log('📡 [CAMPAIGN-TRACKING] Gathering webhook metadata...');
+  console.log('═══════════════════════════════════════════════════');
+  
   const currentUrlParams = getUrlParams();
+  console.log('🔍 [CAMPAIGN-TRACKING] Current URL params:', currentUrlParams);
+  
   const { ip, country } = await getIPMetadata();
+  console.log('🌍 [CAMPAIGN-TRACKING] IP:', ip, 'Country:', country);
   
   // CRITICAL: For logged-in users, fetch stored params from database
   // This ensures we send the ORIGINAL signup params, not just current URL
@@ -86,10 +93,17 @@ export async function getWebhookMetadata(): Promise<WebhookMetadata> {
   let finalGclid = currentUrlParams['gclid'] || null;
   let finalReferer = document.referrer || null;
   
+  console.log('📍 [CAMPAIGN-TRACKING] Initial values:');
+  console.log('  - GCLID from URL:', finalGclid);
+  console.log('  - Referer:', finalReferer);
+  
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
+      console.log('👤 [CAMPAIGN-TRACKING] User logged in:', user.id);
+      console.log('🔍 [CAMPAIGN-TRACKING] Fetching stored campaign data from database...');
+      
       // User is logged in - fetch stored params from database
       const { data: profile, error } = await supabase
         .from('profiles')
@@ -98,30 +112,48 @@ export async function getWebhookMetadata(): Promise<WebhookMetadata> {
         .single();
       
       if (!error && profile) {
+        console.log('✅ [CAMPAIGN-TRACKING] Database profile found!');
+        console.log('📊 [CAMPAIGN-TRACKING] Stored campaign data:', {
+          gclid: profile.gclid,
+          url_params: profile.url_params,
+          initial_referer: profile.initial_referer
+        });
+        
         // Use stored params from database (fallback to current URL if not stored)
         finalGclid = profile.gclid || finalGclid;
+        console.log('🎯 [CAMPAIGN-TRACKING] Final GCLID:', finalGclid, profile.gclid ? '(from DB)' : '(from URL/localStorage)');
         
         // Safely cast url_params from Json to Record<string, string>
         if (profile.url_params && typeof profile.url_params === 'object' && !Array.isArray(profile.url_params)) {
           const storedParams = profile.url_params as Record<string, string>;
           if (Object.keys(storedParams).length > 0) {
             finalUrlParams = storedParams;
+            console.log('✅ [CAMPAIGN-TRACKING] Using stored URL params from DB:', storedParams);
           }
         }
         
         finalReferer = profile.initial_referer || finalReferer;
+        console.log('🔗 [CAMPAIGN-TRACKING] Final referer:', finalReferer, profile.initial_referer ? '(from DB)' : '(from current)');
+      } else {
+        console.warn('⚠️ [CAMPAIGN-TRACKING] No profile found in database or error:', error);
       }
+    } else {
+      console.log('👥 [CAMPAIGN-TRACKING] User not logged in, using current URL data');
     }
   } catch (error) {
-    // Silently fail - use fallback values
+    console.error('❌ [CAMPAIGN-TRACKING] Error fetching profile:', error);
   }
   
   // Fallback to localStorage for gclid if not in database or URL
   if (!finalGclid && typeof window !== 'undefined') {
-    finalGclid = localStorage.getItem('gclid') || null;
+    const storedGclid = localStorage.getItem('gclid');
+    if (storedGclid) {
+      finalGclid = storedGclid;
+      console.log('💾 [CAMPAIGN-TRACKING] Using GCLID from localStorage:', storedGclid);
+    }
   }
-
-  return {
+  
+  const metadata = {
     sessionId: getSessionId(),
     userIP: ip,
     countryCode: country,
@@ -130,4 +162,11 @@ export async function getWebhookMetadata(): Promise<WebhookMetadata> {
     urlParams: finalUrlParams,
     gclid: finalGclid,
   };
+  
+  console.log('═══════════════════════════════════════════════════');
+  console.log('📤 [CAMPAIGN-TRACKING] Final webhook metadata:');
+  console.log(JSON.stringify(metadata, null, 2));
+  console.log('═══════════════════════════════════════════════════');
+
+  return metadata;
 }

@@ -261,17 +261,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedUrlParams = localStorage.getItem('url_params');
         const storedReferer = localStorage.getItem('initial_referer');
         
+        console.log('═══════════════════════════════════════════════════');
+        console.log('🆕 [NEW-SIGNUP] Syncing campaign tracking data...');
+        console.log('📍 [NEW-SIGNUP] GCLID from localStorage:', gclid);
+        console.log('📍 [NEW-SIGNUP] URL params from localStorage:', storedUrlParams);
+        console.log('📍 [NEW-SIGNUP] Referer from localStorage:', storedReferer);
+        console.log('📊 [NEW-SIGNUP] Current profile data:', {
+          gclid: currentProfile?.gclid,
+          url_params: currentProfile?.url_params,
+          initial_referer: currentProfile?.initial_referer
+        });
+        
         // Save GCLID from localStorage if database doesn't have it
         if (gclid && !currentProfile?.gclid) {
           updateData.gclid = gclid;
+          console.log('✅ [NEW-SIGNUP] Adding GCLID to profile:', gclid);
         }
         
         // Save url_params from localStorage if database doesn't have it
         if (storedUrlParams && !currentProfile?.url_params) {
           try {
             updateData.url_params = JSON.parse(storedUrlParams);
+            console.log('✅ [NEW-SIGNUP] Adding URL params to profile:', updateData.url_params);
           } catch (e) {
-            // Silent error
+            console.error('❌ [NEW-SIGNUP] Failed to parse url_params:', e);
           }
         }
         
@@ -279,17 +292,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const referer = storedReferer || document.referrer || 'Direct';
         if (referer && referer !== 'Direct' && !currentProfile?.initial_referer) {
           updateData.initial_referer = referer;
+          console.log('✅ [NEW-SIGNUP] Adding referer to profile:', referer);
         }
+        
+        console.log('═══════════════════════════════════════════════════');
       } else {
         // On subsequent logins, ALWAYS preserve existing tracking data (never update)
+        console.log('🔄 [EXISTING-USER] Preserving campaign tracking data...');
+        
         if (currentProfile?.gclid) {
           updateData.gclid = currentProfile.gclid;
+          console.log('🔒 [EXISTING-USER] Preserving GCLID:', currentProfile.gclid);
         }
         if (currentProfile?.url_params) {
           updateData.url_params = currentProfile.url_params;
+          console.log('🔒 [EXISTING-USER] Preserving URL params');
         }
         if (currentProfile?.initial_referer) {
           updateData.initial_referer = currentProfile.initial_referer;
+          console.log('🔒 [EXISTING-USER] Preserving referer:', currentProfile.initial_referer);
         }
       }
 
@@ -895,22 +916,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const gclid = localStorage.getItem('gclid');
     if (gclid) {
       signupData.gclid = gclid;
+      console.log('✅ [EMAIL-SIGNUP] GCLID found:', gclid);
+    } else {
+      console.log('⚠️ [EMAIL-SIGNUP] No GCLID in localStorage');
     }
     
     const urlParamsStr = localStorage.getItem('url_params');
     if (urlParamsStr) {
       try {
         signupData.url_params = JSON.parse(urlParamsStr);
+        console.log('✅ [EMAIL-SIGNUP] URL params found:', signupData.url_params);
       } catch (e) {
-        // Silent error
+        console.error('❌ [EMAIL-SIGNUP] Failed to parse url_params:', e);
       }
+    } else {
+      console.log('⚠️ [EMAIL-SIGNUP] No url_params in localStorage');
     }
     
     // Capture referer for attribution
     const referer = document.referrer || 'Direct';
     if (referer && referer !== 'Direct') {
       signupData.referer = referer;
+      console.log('✅ [EMAIL-SIGNUP] Referer:', referer);
     }
+    
+    console.log('═══════════════════════════════════════════════════');
+    console.log('📧 [EMAIL-SIGNUP] Complete signup data:');
+    console.log(JSON.stringify(signupData, null, 2));
+    console.log('═══════════════════════════════════════════════════');
     
     const { error, data} = await supabase.auth.signUp({
       email,
