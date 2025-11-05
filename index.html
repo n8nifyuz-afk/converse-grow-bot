@@ -23,32 +23,39 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Initialize dataLayer and Google Consent Mode -->
+    <!-- Step 1: Default consent settings (BEFORE Cookiebot & GTM) -->
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      window.gtag = function(){dataLayer.push(arguments);}
       
-      // Default consent - will be updated by React CookieBanner
+      // Default consent: Allow analytics & conversions, block remarketing
       gtag('consent', 'default', {
-        'analytics_storage': 'granted',
-        'ad_user_data': 'granted',
-        'ad_storage': 'denied',
-        'ad_personalization': 'denied'
+        'analytics_storage': 'granted',      // ✅ Allow GA4 basic analytics
+        'ad_user_data': 'granted',           // ✅ Allow Google Ads conversions
+        'ad_storage': 'denied',              // 🚫 Block remarketing cookies
+        'ad_personalization': 'denied'       // 🚫 Block personalized ads
       });
-
-      gtag('js', new Date());
     </script>
 
-    <!-- Google tag (gtag.js) - Load after consent is set -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
-    
-    <!-- Google Tag Manager -->
+    <!-- Step 2: Cookiebot Consent Management Platform -->
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
+
+    <!-- Step 3: Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-NMLGMTL5');</script>
     <!-- End Google Tag Manager -->
+
+    <!-- Step 4: Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
+    <script>
+      window.gtag = window.gtag || function(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-16917874636');
+      gtag('config', 'G-EDSR82W70J');
+    </script>
   </head>
 
   <body>
@@ -58,18 +65,6 @@
     <!-- End Google Tag Manager (noscript) -->
     
     <div id="root"></div>
-    
-    <!-- Load React app -->
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Configure GA4 after scripts load -->
-    <script>
-      window.addEventListener('load', function() {
-        if (typeof window.gtag === 'function') {
-          window.gtag('config', 'AW-16917874636');
-          window.gtag('config', 'G-EDSR82W70J');
-        }
-      });
-    </script>
   </body>
 </html>
