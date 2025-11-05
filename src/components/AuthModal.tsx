@@ -1589,8 +1589,16 @@ export default function AuthModal({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]" hideCloseButton={true}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      // Only allow closing if NOT in profile completion mode
+      if (!open && mode !== 'complete-profile') {
+        onClose();
+      }
+    }}>
+      <DialogContent 
+        className="max-w-[90vw] sm:max-w-md md:max-w-xl w-full p-0 bg-background border border-border shadow-2xl rounded-3xl overflow-hidden mx-auto my-auto max-h-[85vh]" 
+        hideCloseButton={mode === 'complete-profile'}
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>ChatLearn Authentication</DialogTitle>
           <DialogDescription>
