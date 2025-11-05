@@ -1520,8 +1520,13 @@ export default function AuthModal({
       <>
         <Drawer 
           open={isOpen} 
-          onOpenChange={() => {}}
-          dismissible={false}
+          onOpenChange={(open) => {
+            // Only allow closing if NOT in profile completion mode
+            if (!open && mode !== 'complete-profile') {
+              onClose();
+            }
+          }}
+          dismissible={mode !== 'complete-profile'}
           modal={true}
           noBodyStyles={true}
         >
