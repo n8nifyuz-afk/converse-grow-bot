@@ -1553,20 +1553,8 @@ export default function AuthModal({
         {/* Separate Email/Password Modal */}
         <Drawer 
           open={showEmailPasswordModal} 
-          onOpenChange={(open) => {
-            setShowEmailPasswordModal(open);
-            if (!open) {
-              // Reset all states when closing modal
-              setEmail('');
-              setPassword('');
-              setError('');
-              setMode('signin');
-              setShowVerificationInModal(false);
-              setVerificationCode('');
-              setPendingEmail('');
-            }
-          }}
-          dismissible={true}
+          onOpenChange={() => {}}
+          dismissible={false}
           modal={true}
         >
           <DrawerContent className="h-auto p-0">
