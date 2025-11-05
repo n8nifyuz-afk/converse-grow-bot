@@ -182,18 +182,11 @@ const getCurrentGCLID = (): string | null => {
 
 export const trackRegistrationComplete = () => {
   console.log('═══════════════════════════════════════════════════');
-  console.log('🎯 [GTM-REGISTRATION] Tracking registration_complete event');
+  console.log('🎯 [GTM-REGISTRATION] trackRegistrationComplete() called');
   console.log('═══════════════════════════════════════════════════');
   
   if (typeof window !== 'undefined' && window.dataLayer) {
-    const trackedKey = 'gtm_registration_tracked';
-    const alreadyTracked = localStorage.getItem(trackedKey);
-    
-    if (alreadyTracked) {
-      console.log('⏭️ [GTM-REGISTRATION] Registration already tracked, skipping');
-      console.log('═══════════════════════════════════════════════════');
-      return;
-    }
+    console.log('✅ [GTM-REGISTRATION] dataLayer is available');
     
     const gclid = getCurrentGCLID();
     console.log('📍 [GTM-REGISTRATION] Current GCLID:', gclid || 'None');
@@ -225,17 +218,10 @@ export const trackRegistrationComplete = () => {
     console.log('═══════════════════════════════════════════════════');
     
     window.dataLayer.push(eventData);
-    localStorage.setItem(trackedKey, 'true');
     
     console.log('✅ [GTM-REGISTRATION] Event pushed successfully!');
     console.log('📊 [GTM-REGISTRATION] Full dataLayer:', window.dataLayer);
     console.log('═══════════════════════════════════════════════════');
-    
-    // Clear tracking data after successful conversion
-    setTimeout(() => {
-      console.log('🧹 [GTM-REGISTRATION] Clearing tracking data after conversion');
-      clearTrackingDataAfterConversion();
-    }, 1000); // Small delay to ensure GTM processes the event
   } else {
     console.error('❌ [GTM-REGISTRATION] Window or dataLayer not available!');
     console.log('═══════════════════════════════════════════════════');
