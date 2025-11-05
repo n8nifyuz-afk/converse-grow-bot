@@ -23,16 +23,11 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Cookiebot Consent Management Platform -->
-    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
-
-    <!-- Google tag (gtag.js) - Google Ads -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
+    <!-- Initialize dataLayer FIRST -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // Default consent settings
       gtag('consent', 'default', {
         'analytics_storage': 'granted',
         'ad_user_data': 'granted',
@@ -41,30 +36,31 @@
       });
 
       gtag('js', new Date());
-      gtag('config', 'AW-16917874636');
-      gtag('config', 'G-EDSR82W70J');
     </script>
 
-    <!-- Cookiebot Override Handler -->
+    <!-- Cookiebot Consent Management Platform -->
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
+
+    <!-- Cookiebot consent override -->
     <script>
-      (function() {
-        window.addEventListener('CookiebotOnAccept', function() {
-          console.log('✅ Cookiebot: User accepted cookies');
-        });
-        
-        window.addEventListener('CookiebotOnDecline', function() {
-          console.log('🔒 Cookiebot: User declined, re-enabling Analytics & Conversions');
-          
-          if (typeof window.gtag === 'function') {
-            window.gtag('consent', 'update', {
-              'analytics_storage': 'granted',
-              'ad_user_data': 'granted',
-              'ad_storage': 'denied',
-              'ad_personalization': 'denied'
-            });
-          }
-        });
-      })();
+      window.addEventListener('CookiebotOnDecline', function() {
+        console.log('🔒 Cookiebot declined - re-enabling analytics');
+        if (window.gtag) {
+          gtag('consent', 'update', {
+            'analytics_storage': 'granted',
+            'ad_user_data': 'granted',
+            'ad_storage': 'denied',
+            'ad_personalization': 'denied'
+          });
+        }
+      });
+    </script>
+
+    <!-- Load Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"></script>
+    <script>
+      gtag('config', 'AW-16917874636');
+      gtag('config', 'G-EDSR82W70J');
     </script>
 
     <!-- Google Tag Manager -->
