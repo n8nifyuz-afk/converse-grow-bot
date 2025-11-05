@@ -645,6 +645,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             // CRITICAL: Restore GCLID from database to localStorage on login
             // This ensures GCLID persists across devices/sessions for attribution
+            // ALWAYS restore from database to ensure we have the most accurate data
             try {
               const { data: profile } = await supabase
                 .from('profiles')
@@ -652,19 +653,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .eq('user_id', session.user.id)
                 .single();
               
-              if (profile?.gclid && !localStorage.getItem('gclid')) {
+              if (profile?.gclid) {
                 console.log('✅ [GCLID-RESTORE] Restoring GCLID from database:', profile.gclid);
                 localStorage.setItem('gclid', profile.gclid);
                 localStorage.setItem('gclid_timestamp', Date.now().toString());
+              } else {
+                console.log('⚠️ [GCLID-RESTORE] No GCLID found in database for user');
               }
               
-              if (profile?.url_params && !localStorage.getItem('url_params')) {
+              if (profile?.url_params) {
                 console.log('✅ [GCLID-RESTORE] Restoring URL params from database');
                 localStorage.setItem('url_params', JSON.stringify(profile.url_params));
                 localStorage.setItem('url_params_timestamp', Date.now().toString());
               }
               
-              if (profile?.initial_referer && !sessionStorage.getItem('initial_referer')) {
+              if (profile?.initial_referer) {
                 console.log('✅ [GCLID-RESTORE] Restoring initial referer from database');
                 sessionStorage.setItem('initial_referer', profile.initial_referer);
               }
