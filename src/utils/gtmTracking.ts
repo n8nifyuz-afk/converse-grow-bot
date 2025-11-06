@@ -256,10 +256,7 @@ export const trackRegistrationComplete = async () => {
       }
       
       const eventData: Record<string, any> = {
-        event: 'registration_complete',
-        // Consent Mode v2: Enable cookieless conversion tracking
-        send_to: 'AW-16917874636',  // Google Ads conversion ID
-        enhanced_conversions: true   // Enable enhanced conversions
+        event: 'registration_complete'
       };
       
       if (gclid) {
@@ -319,10 +316,7 @@ export const trackChatStart = (chatId?: string) => {
     }
     
     const eventData: Record<string, any> = {
-      event: 'chat_start',
-      // Consent Mode v2: Enable cookieless conversion tracking
-      send_to: 'AW-16917874636',  // Google Ads conversion ID
-      enhanced_conversions: true   // Enable enhanced conversions
+      event: 'chat_start'
     };
     
     if (gclid) {
@@ -371,9 +365,6 @@ export const trackPaymentComplete = async (
       
       const eventData: Record<string, any> = {
         event: 'payment_complete',
-        // Consent Mode v2: Enable cookieless conversion tracking
-        send_to: 'AW-16917874636',  // Google Ads conversion ID
-        enhanced_conversions: true,   // Enable enhanced conversions
         plan_type: planType,
         plan_duration: planDuration,
         plan_price: planPrice,
