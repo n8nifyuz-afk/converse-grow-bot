@@ -849,6 +849,30 @@ export default function ProjectPage() {
     if (files && files.length > 0) {
       const filesArray = Array.from(files);
       
+      // Validate file types - only allow specific document types and images (no videos)
+      const allowedExtensions = ['.json', '.pdf', '.csv', '.txt', '.html', '.xml'];
+      const invalidFiles = filesArray.filter(file => {
+        const fileName = file.name.toLowerCase();
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+        
+        // Reject videos explicitly
+        if (isVideo) return true;
+        
+        // Accept images and allowed document types
+        return !isImage && !hasAllowedExtension;
+      });
+      
+      if (invalidFiles.length > 0) {
+        const fileNames = invalidFiles.map(f => f.name).join(', ');
+        toast.error('Invalid file type', {
+          description: `Only JSON, PDF, CSV, TXT, HTML, XML and image files are allowed. Rejected: ${fileNames}`
+        });
+        event.target.value = '';
+        return;
+      }
+      
       // Validate each file's size before adding
       for (const file of filesArray) {
         const maxSize = getMaxFileSize(file.type);
@@ -1319,6 +1343,30 @@ export default function ProjectPage() {
             }
             
             const files = Array.from(e.dataTransfer.files);
+            
+            // Validate file types - only allow specific document types and images (no videos)
+            const allowedExtensions = ['.json', '.pdf', '.csv', '.txt', '.html', '.xml'];
+            const invalidFiles = files.filter(file => {
+              const fileName = file.name.toLowerCase();
+              const isImage = file.type.startsWith('image/');
+              const isVideo = file.type.startsWith('video/');
+              const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+              
+              // Reject videos explicitly
+              if (isVideo) return true;
+              
+              // Accept images and allowed document types
+              return !isImage && !hasAllowedExtension;
+            });
+            
+            if (invalidFiles.length > 0) {
+              const fileNames = invalidFiles.map(f => f.name).join(', ');
+              toast.error('Invalid file type', {
+                description: `Only JSON, PDF, CSV, TXT, HTML, XML and image files are allowed. Rejected: ${fileNames}`
+              });
+              return;
+            }
+            
             if (files.length > 0) {
               setSelectedFiles(prev => [...prev, ...files]);
             }
@@ -1669,7 +1717,7 @@ export default function ProjectPage() {
         </div>
 
         {/* Hidden file input */}
-        <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />
+        <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.json,.pdf,.csv,.txt,.html,.xml" />
       </div>
 
       {/* Edit Project Modal */}

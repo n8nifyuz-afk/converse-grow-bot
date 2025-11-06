@@ -383,6 +383,30 @@ export default function Index() {
       return;
     }
     const files = Array.from(e.dataTransfer.files);
+    
+    // Validate file types - only allow specific document types and images (no videos)
+    const allowedExtensions = ['.json', '.pdf', '.csv', '.txt', '.html', '.xml'];
+    const invalidFiles = files.filter(file => {
+      const fileName = file.name.toLowerCase();
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+      
+      // Reject videos explicitly
+      if (isVideo) return true;
+      
+      // Accept images and allowed document types
+      return !isImage && !hasAllowedExtension;
+    });
+    
+    if (invalidFiles.length > 0) {
+      const fileNames = invalidFiles.map(f => f.name).join(', ');
+      toast.error('Invalid file type', {
+        description: `Only JSON, PDF, CSV, TXT, HTML, XML and image files are allowed. Rejected: ${fileNames}`
+      });
+      return;
+    }
+    
     if (files.length > 0) {
       setSelectedFiles(prev => [...prev, ...files]);
     }
@@ -1022,6 +1046,30 @@ export default function Index() {
         return;
       }
       const files = Array.from(e.dataTransfer.files);
+      
+      // Validate file types - only allow specific document types and images (no videos)
+      const allowedExtensions = ['.json', '.pdf', '.csv', '.txt', '.html', '.xml'];
+      const invalidFiles = files.filter(file => {
+        const fileName = file.name.toLowerCase();
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+        
+        // Reject videos explicitly
+        if (isVideo) return true;
+        
+        // Accept images and allowed document types
+        return !isImage && !hasAllowedExtension;
+      });
+      
+      if (invalidFiles.length > 0) {
+        const fileNames = invalidFiles.map(f => f.name).join(', ');
+        toast.error('Invalid file type', {
+          description: `Only JSON, PDF, CSV, TXT, HTML, XML and image files are allowed. Rejected: ${fileNames}`
+        });
+        return;
+      }
+      
       if (files.length > 0) {
         setSelectedFiles(prev => [...prev, ...files]);
       }
@@ -1443,8 +1491,32 @@ export default function Index() {
 
       
 
-      <input ref={fileInputRef} type="file" multiple className="sr-only" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" aria-label="File upload input" onChange={e => {
+      <input ref={fileInputRef} type="file" multiple className="sr-only" accept="image/*,.json,.pdf,.csv,.txt,.html,.xml" aria-label="File upload input" onChange={e => {
         const files = Array.from(e.target.files || []);
+        
+        // Validate file types - only allow specific document types and images (no videos)
+        const allowedExtensions = ['.json', '.pdf', '.csv', '.txt', '.html', '.xml'];
+        const invalidFiles = files.filter(file => {
+          const fileName = file.name.toLowerCase();
+          const isImage = file.type.startsWith('image/');
+          const isVideo = file.type.startsWith('video/');
+          const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+          
+          // Reject videos explicitly
+          if (isVideo) return true;
+          
+          // Accept images and allowed document types
+          return !isImage && !hasAllowedExtension;
+        });
+        
+        if (invalidFiles.length > 0) {
+          const fileNames = invalidFiles.map(f => f.name).join(', ');
+          toast.error('Invalid file type', {
+            description: `Only JSON, PDF, CSV, TXT, HTML, XML and image files are allowed. Rejected: ${fileNames}`
+          });
+          e.target.value = '';
+          return;
+        }
         
         // Helper functions for file validation
         const getMaxFileSize = (type: string) => {

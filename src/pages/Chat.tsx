@@ -3157,6 +3157,31 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
     const files = event.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
+      
+      // Validate file types - only allow specific document types and images (no videos)
+      const allowedExtensions = ['.json', '.pdf', '.csv', '.txt', '.html', '.xml'];
+      const invalidFiles = newFiles.filter(file => {
+        const fileName = file.name.toLowerCase();
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+        
+        // Reject videos explicitly
+        if (isVideo) return true;
+        
+        // Accept images and allowed document types
+        return !isImage && !hasAllowedExtension;
+      });
+      
+      if (invalidFiles.length > 0) {
+        const fileNames = invalidFiles.map(f => f.name).join(', ');
+        toast.error('Invalid file type', {
+          description: `Only JSON, PDF, CSV, TXT, HTML, XML and image files are allowed. Rejected: ${fileNames}`
+        });
+        event.target.value = '';
+        return;
+      }
+      
       const combinedFiles = [...selectedFiles, ...newFiles];
       
       // Check individual file size limits FIRST
@@ -4214,6 +4239,30 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
               }
               
               const newFiles = Array.from(e.dataTransfer.files);
+              
+              // Validate file types - only allow specific document types and images (no videos)
+              const allowedExtensions = ['.json', '.pdf', '.csv', '.txt', '.html', '.xml'];
+              const invalidFiles = newFiles.filter(file => {
+                const fileName = file.name.toLowerCase();
+                const isImage = file.type.startsWith('image/');
+                const isVideo = file.type.startsWith('video/');
+                const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+                
+                // Reject videos explicitly
+                if (isVideo) return true;
+                
+                // Accept images and allowed document types
+                return !isImage && !hasAllowedExtension;
+              });
+              
+              if (invalidFiles.length > 0) {
+                const fileNames = invalidFiles.map(f => f.name).join(', ');
+                toast.error('Invalid file type', {
+                  description: `Only JSON, PDF, CSV, TXT, HTML, XML and image files are allowed. Rejected: ${fileNames}`
+                });
+                return;
+              }
+              
               if (newFiles.length > 0) {
                 const combinedFiles = [...selectedFiles, ...newFiles];
                 
@@ -4603,7 +4652,7 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       </div>
 
       {/* Hidden file input */}
-      <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.py,.js,.html,.css,.md" />
+      <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*,.json,.pdf,.csv,.txt,.html,.xml" />
 
       {/* Image popup modal */}
       {selectedImage && <ImagePopupModal isOpen={!!selectedImage} onClose={() => setSelectedImage(null)} imageUrl={selectedImage.url} prompt={selectedImage.name} />}
