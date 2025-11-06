@@ -645,6 +645,37 @@ export default function Index() {
       setShowLimitWarning(true);
       return;
     }
+    
+    // Check if user is trying to use a model they don't have access to
+    const selectedModelData = models.find(m => m.id === selectedModel);
+    
+    if (!subscriptionStatus.subscribed && selectedModel !== 'gpt-4o-mini') {
+      // Free users can only use gpt-4o-mini
+      if (selectedModelData?.type === 'pro' || selectedModelData?.type === 'ultra') {
+        toast.error("This model requires a subscription", {
+          description: `${selectedModelData?.name} is available with Pro or Ultra Pro plans`,
+          action: {
+            label: "Upgrade",
+            onClick: () => navigate('/pricing')
+          }
+        });
+        return;
+      }
+    } else if (subscriptionStatus.subscribed && selectedModelData?.type === 'ultra') {
+      // Check if Pro users are trying to use Ultra models
+      const isPro = subscriptionStatus.plan === 'Pro';
+      if (isPro) {
+        toast.error("This model requires an Ultra Pro subscription", {
+          description: `${selectedModelData?.name} is only available with the Ultra Pro plan`,
+          action: {
+            label: "Upgrade to Ultra Pro",
+            onClick: () => navigate('/pricing')
+          }
+        });
+        return;
+      }
+    }
+    
     console.log('[INDEX] All validations passed, creating chat...');
     setLoading(true);
     try {
