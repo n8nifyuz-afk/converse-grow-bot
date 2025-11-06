@@ -28,14 +28,14 @@
       window.dataLayer = window.dataLayer || [];
       window.gtag = function(){dataLayer.push(arguments);}
       
-      // GDPR-compliant: Deny all non-essential tracking until user consent
+      // Client requirement: Track analytics & conversions immediately
       gtag('consent', 'default', {
-        'analytics_storage': 'denied',        // ❌ Require consent
-        'ad_user_data': 'denied',             // ❌ Require consent
-        'ad_storage': 'denied',               // ❌ Require consent
-        'ad_personalization': 'denied',       // ❌ Require consent
-        'functionality_storage': 'denied',    // ❌ Require consent
-        'personalization_storage': 'denied',  // ❌ Require consent
+        'analytics_storage': 'granted',       // ✅ Track analytics immediately
+        'ad_user_data': 'granted',            // ✅ Track conversions immediately
+        'ad_storage': 'denied',               // ❌ No remarketing until consent
+        'ad_personalization': 'denied',       // ❌ No personalized ads until consent
+        'functionality_storage': 'granted',   // ✅ Allow functional cookies
+        'personalization_storage': 'denied',  // ❌ No personalization until consent
         'security_storage': 'granted',        // ✅ Essential (always allowed)
         'wait_for_update': 500
       });
