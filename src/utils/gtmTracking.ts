@@ -181,50 +181,54 @@ const getCurrentGCLID = (): string | null => {
 };
 
 export const trackRegistrationComplete = () => {
-  console.log('═══════════════════════════════════════════════════');
-  console.log('🎯 [GTM-REGISTRATION] trackRegistrationComplete() called');
-  console.log('═══════════════════════════════════════════════════');
-  
-  if (typeof window !== 'undefined' && window.dataLayer) {
-    console.log('✅ [GTM-REGISTRATION] dataLayer is available');
+  try {
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🎯 [GTM-REGISTRATION] trackRegistrationComplete() called');
+    console.log('═══════════════════════════════════════════════════');
     
-    const gclid = getCurrentGCLID();
-    console.log('📍 [GTM-REGISTRATION] Current GCLID:', gclid || 'None');
-    
-    // Get URL params
-    const urlParamsStr = localStorage.getItem('url_params');
-    let urlParams = {};
-    if (urlParamsStr) {
-      try {
-        urlParams = JSON.parse(urlParamsStr);
-        console.log('📍 [GTM-REGISTRATION] Stored URL params:', urlParams);
-      } catch (e) {
-        console.error('❌ [GTM-REGISTRATION] Error parsing URL params');
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      console.log('✅ [GTM-REGISTRATION] dataLayer is available');
+      
+      const gclid = getCurrentGCLID();
+      console.log('📍 [GTM-REGISTRATION] Current GCLID:', gclid || 'None');
+      
+      // Get URL params
+      const urlParamsStr = localStorage.getItem('url_params');
+      let urlParams = {};
+      if (urlParamsStr) {
+        try {
+          urlParams = JSON.parse(urlParamsStr);
+          console.log('📍 [GTM-REGISTRATION] Stored URL params:', urlParams);
+        } catch (e) {
+          console.error('❌ [GTM-REGISTRATION] Error parsing URL params');
+        }
       }
+      
+      const eventData: Record<string, any> = {
+        event: 'registration_complete'
+      };
+      
+      if (gclid) {
+        eventData.gclid = gclid;
+        console.log('✅ [GTM-REGISTRATION] Adding GCLID to event');
+      }
+      
+      console.log('═══════════════════════════════════════════════════');
+      console.log('📤 [GTM-REGISTRATION] Pushing event to dataLayer:');
+      console.log(JSON.stringify(eventData, null, 2));
+      console.log('═══════════════════════════════════════════════════');
+      
+      window.dataLayer.push(eventData);
+      
+      console.log('✅ [GTM-REGISTRATION] Event pushed successfully!');
+      console.log('📊 [GTM-REGISTRATION] Full dataLayer:', window.dataLayer);
+      console.log('═══════════════════════════════════════════════════');
+    } else {
+      console.error('❌ [GTM-REGISTRATION] Window or dataLayer not available!');
+      console.log('═══════════════════════════════════════════════════');
     }
-    
-    const eventData: Record<string, any> = {
-      event: 'registration_complete'
-    };
-    
-    if (gclid) {
-      eventData.gclid = gclid;
-      console.log('✅ [GTM-REGISTRATION] Adding GCLID to event');
-    }
-    
-    console.log('═══════════════════════════════════════════════════');
-    console.log('📤 [GTM-REGISTRATION] Pushing event to dataLayer:');
-    console.log(JSON.stringify(eventData, null, 2));
-    console.log('═══════════════════════════════════════════════════');
-    
-    window.dataLayer.push(eventData);
-    
-    console.log('✅ [GTM-REGISTRATION] Event pushed successfully!');
-    console.log('📊 [GTM-REGISTRATION] Full dataLayer:', window.dataLayer);
-    console.log('═══════════════════════════════════════════════════');
-  } else {
-    console.error('❌ [GTM-REGISTRATION] Window or dataLayer not available!');
-    console.log('═══════════════════════════════════════════════════');
+  } catch (error) {
+    console.error('❌ [GTM-REGISTRATION] Fatal error in trackRegistrationComplete:', error);
   }
 };
 

@@ -81,34 +81,55 @@ const clearCachedSubscription = () => {
 // These are exported so components like GoogleOneTab can use them
 // This persists across OAuth redirects and page reloads
 export const markAuthInitiated = () => {
-  sessionStorage.setItem('auth_initiated', 'true');
-  sessionStorage.setItem('auth_initiated_time', Date.now().toString());
+  try {
+    sessionStorage.setItem('auth_initiated', 'true');
+    sessionStorage.setItem('auth_initiated_time', Date.now().toString());
+  } catch (error) {
+    console.error('Failed to mark auth initiated:', error);
+  }
 };
 
 // Helper to check if auth was recently initiated (within last 30 seconds)
 export const wasAuthRecentlyInitiated = () => {
-  const initiated = sessionStorage.getItem('auth_initiated') === 'true';
-  const timeStr = sessionStorage.getItem('auth_initiated_time');
-  
-  if (!initiated || !timeStr) return false;
-  
-  const timestamp = parseInt(timeStr);
-  const timeSinceInitiation = Date.now() - timestamp;
-  const isRecent = timeSinceInitiation < 30000; // 30 seconds
-  
-  if (!isRecent) {
-    // Clear if too old
+  try {
+    const initiated = sessionStorage.getItem('auth_initiated') === 'true';
+    const timeStr = sessionStorage.getItem('auth_initiated_time');
+    
+    if (!initiated || !timeStr) return false;
+    
+    const timestamp = parseInt(timeStr);
+    
+    // Check if timestamp is valid (not NaN)
+    if (isNaN(timestamp)) {
+      clearAuthInitiated();
+      return false;
+    }
+    
+    const timeSinceInitiation = Date.now() - timestamp;
+    const isRecent = timeSinceInitiation < 30000; // 30 seconds
+    
+    if (!isRecent) {
+      // Clear if too old
+      clearAuthInitiated();
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error checking auth initiation:', error);
     clearAuthInitiated();
     return false;
   }
-  
-  return true;
 };
 
 // Helper to clear auth initiated flag
 export const clearAuthInitiated = () => {
-  sessionStorage.removeItem('auth_initiated');
-  sessionStorage.removeItem('auth_initiated_time');
+  try {
+    sessionStorage.removeItem('auth_initiated');
+    sessionStorage.removeItem('auth_initiated_time');
+  } catch (error) {
+    console.error('Failed to clear auth initiated:', error);
+  }
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
