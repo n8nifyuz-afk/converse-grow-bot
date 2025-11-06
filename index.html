@@ -28,13 +28,13 @@
       window.dataLayer = window.dataLayer || [];
       window.gtag = function(){dataLayer.push(arguments);}
       
-      // Default consent: Deny all until Cookiebot updates (Advanced Consent Mode)
+      // Default consent: Allow analytics & conversions immediately (Client requirement)
       gtag('consent', 'default', {
-        'ad_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied',
-        'analytics_storage': 'denied',
-        'functionality_storage': 'denied',
+        'analytics_storage': 'granted',       // ✅ Track analytics immediately
+        'ad_user_data': 'granted',            // ✅ Track conversions immediately
+        'ad_storage': 'denied',               // ❌ No remarketing until consent
+        'ad_personalization': 'denied',       // ❌ No personalized ads until consent
+        'functionality_storage': 'granted',
         'personalization_storage': 'denied',
         'security_storage': 'granted',
         'wait_for_update': 500
