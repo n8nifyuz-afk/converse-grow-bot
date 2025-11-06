@@ -373,43 +373,13 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">OpenAI GPT-5 / GPT-4o</span>
+                  <span className="text-foreground text-sm">Translate Voice Mode</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">Google Gemini</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <X className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-                  </div>
-                  <span className="text-muted-foreground text-sm">Anthropic Claude (Ultra only)</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
-                  </div>
-                  <span className="text-foreground text-sm">Voice Mode</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
-                  </div>
-                  <span className="text-foreground text-sm">Ask PDF / Docs AI</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
-                  </div>
-                  <span className="text-foreground text-sm">{t('pricing.chatWithFiles')}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
-                  </div>
-                  <span className="text-foreground text-sm">{t('pricingPage.whatsappComingSoon')}</span>
+                  <span className="text-foreground text-sm">Ask PDF</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -421,7 +391,19 @@ const Home = () => {
                   <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
                   </div>
-                  <span className="text-foreground text-sm">WhatsApp Chat (Coming soon)</span>
+                  <span className="text-foreground text-sm">WhatsApp Chat</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-foreground text-sm">High Priority</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="h-3 w-3 text-primary-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-foreground text-sm">Live Web</span>
                 </div>
               </div>
               
