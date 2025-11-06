@@ -218,7 +218,7 @@ export default function Cookies() {
                 {t('cookiePolicy.thirdPartyDesc3')}
               </p>
               <div className="p-4 bg-muted/50 rounded-lg border mt-4">
-                <p className="font-semibold mb-3">Privacy Policies:</p>
+                <p className="font-semibold mb-3">{t('cookiePolicy.privacyPoliciesLabel')}</p>
                 <div className="space-y-2">
                   <a 
                     href="https://policies.google.com/privacy" 

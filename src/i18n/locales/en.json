@@ -1369,6 +1369,7 @@
     "thirdPartyMeta": "Meta Pixel (if enabled) – for advertising analytics and conversion tracking.",
     "thirdPartyDesc2": "These providers may collect information like your IP address, browser type, or session details.",
     "thirdPartyDesc3": "Cookie consent and logging are managed by Cookiebot (Usercentrics A/S, Denmark) to record and store your consent securely as required by EU law.",
+    "privacyPoliciesLabel": "Privacy Policies:",
     "updatesTitle": "Updates to This Policy",
     "updatesDesc1": "We may update this Cookie Policy from time to time to reflect new technologies, features, or legal requirements. The \"Last Updated\" date at the top of this page indicates the latest revision.",
     "updatesDesc2": "We recommend checking this page occasionally to stay informed about how we use cookies.",

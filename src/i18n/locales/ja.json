@@ -1393,6 +1393,7 @@
     "thirdPartyMeta": "Meta Pixel（有効な場合）- 広告分析とコンバージョン追跡のため。",
     "thirdPartyDesc2": "これらのプロバイダーは、IPアドレス、ブラウザの種類、セッションの詳細などの情報を収集する場合があります。",
     "thirdPartyDesc3": "Cookieの同意と記録は、EU法で要求されるとおり、安全に同意を記録および保存するためにCookiebot（Usercentrics A/S、デンマーク）によって管理されます。",
+    "privacyPoliciesLabel": "プライバシーポリシー：",
     "updatesTitle": "このポリシーの更新",
     "updatesDesc1": "新しい技術、機能、または法的要件を反映するために、このCookieポリシーを随時更新する場合があります。このページの上部にある「最終更新日」は、最新の改訂を示しています。",
     "updatesDesc2": "Cookieの使用方法について常に最新情報を把握するために、このページを時々確認することをお勧めします。",
