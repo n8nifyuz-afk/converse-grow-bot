@@ -608,17 +608,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Check if user explicitly initiated auth (via any method)
           const wasInitiated = wasAuthRecentlyInitiated();
           
-          // Only log if user explicitly initiated auth AND this is a new session
+          console.log(`🔍 [AUTH-DEBUG] wasInitiated: ${wasInitiated}, isNewSession: ${isNewSession}`);
+          
+          // Detect if this is a SIGNUP (within last 60 seconds)
+          const userCreatedAt = new Date(session.user.created_at).getTime();
+          const timeSinceCreation = now - userCreatedAt;
+          const isSignup = timeSinceCreation < 60000;
+          
+          console.log(`🔍 [AUTH-DEBUG] isSignup: ${isSignup}, timeSinceCreation: ${timeSinceCreation}ms, userCreatedAt: ${new Date(userCreatedAt).toISOString()}`);
+          
+          // Only log activity if user explicitly initiated auth AND this is a new session
           const shouldLogActivity = wasInitiated && isNewSession;
+          
+          // CRITICAL FIX: For new signups, ALWAYS track registration even if wasInitiated is false
+          // This handles cases where sessionStorage is cleared (e.g., Apple OAuth with declined cookies)
+          const shouldTrackRegistration = isSignup && isNewSession;
+          
+          console.log(`🔍 [AUTH-DEBUG] shouldLogActivity: ${shouldLogActivity}, shouldTrackRegistration: ${shouldTrackRegistration}`);
           
           if (shouldLogActivity) {
             // Clear the auth initiated flag after using it
             clearAuthInitiated();
             
-            // Detect if this is a SIGNUP or LOGIN
-            const userCreatedAt = new Date(session.user.created_at).getTime();
-            const timeSinceCreation = now - userCreatedAt;
-            const isSignup = timeSinceCreation < 60000; // User created within last 60 seconds = signup
             const activityType = isSignup ? 'signup' : 'login';
             
             // Update last activity log tracking
@@ -663,8 +674,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
               }, 500);
             }
+          } else if (shouldTrackRegistration) {
+            // CRITICAL: New signup detected but wasInitiated is false
+            // This happens with Apple OAuth + declined cookies where sessionStorage doesn't persist
+            console.log('⚠️ [GTM-REG] New signup detected but auth was not marked as initiated');
+            console.log('🔧 [GTM-REG] Tracking registration anyway (fallback for sessionStorage issues)');
+            
+            // Detect if this is a phone signup
+            const isPhoneSignup = session.user.phone && (!session.user.email || session.user.email.match(/^\+?[0-9]+$/));
+            
+            if (isPhoneSignup) {
+              console.log('📱 [GTM-REG] Phone signup detected - will track after profile completion');
+            } else {
+              console.log('🎯 [GTM-REG] Tracking registration for new signup (fallback path)');
+              trackRegistrationComplete().catch((error) => {
+                console.error('❌ [GTM-REG] Error tracking registration:', error);
+              });
+              
+              // Log full dataLayer for debugging
+              setTimeout(() => {
+                if (typeof window !== 'undefined' && window.dataLayer) {
+                  console.log('[AUTH-CONTEXT] 📊 Full dataLayer after registration (fallback):', JSON.stringify(window.dataLayer, null, 2));
+                }
+              }, 500);
+            }
           } else {
             // Session restoration - skip logging
+            console.log('🔄 [AUTH-DEBUG] Session restoration or existing user - skipping tracking');
           }
           
           // CRITICAL: Sync OAuth profile immediately but prevent rapid-fire calls
