@@ -636,7 +636,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // This works for ALL auth methods: Google, Apple, Microsoft, Phone, Email
             if (isSignup) {
               console.log('🎯 [GTM-REG] Tracking registration for new signup');
-              trackRegistrationComplete();
+              trackRegistrationComplete().catch((error) => {
+                console.error('❌ [GTM-REG] Error tracking registration:', error);
+              });
             }
           } else {
             // Session restoration - skip logging

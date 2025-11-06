@@ -180,7 +180,55 @@ const getCurrentGCLID = (): string | null => {
   return gclidFromUrl || gclidFromStorage;
 };
 
-export const trackRegistrationComplete = () => {
+/**
+ * Wait for GTM to be ready before firing events
+ */
+const waitForGTM = (): Promise<void> => {
+  return new Promise((resolve) => {
+    // Check if GTM is already loaded
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      const gtmLoaded = window.dataLayer.some((item: any) => 
+        item.event === 'gtm.js' || item.event === 'gtm.load'
+      );
+      
+      if (gtmLoaded) {
+        console.log('✅ [GTM-READY] GTM already loaded');
+        resolve();
+        return;
+      }
+    }
+    
+    // Wait for GTM to load (max 3 seconds)
+    console.log('⏳ [GTM-READY] Waiting for GTM to load...');
+    const maxWait = 3000;
+    const checkInterval = 100;
+    let elapsed = 0;
+    
+    const interval = setInterval(() => {
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        const gtmLoaded = window.dataLayer.some((item: any) => 
+          item.event === 'gtm.js' || item.event === 'gtm.load'
+        );
+        
+        if (gtmLoaded) {
+          console.log('✅ [GTM-READY] GTM loaded after', elapsed, 'ms');
+          clearInterval(interval);
+          resolve();
+          return;
+        }
+      }
+      
+      elapsed += checkInterval;
+      if (elapsed >= maxWait) {
+        console.warn('⚠️ [GTM-READY] GTM not loaded after', maxWait, 'ms, proceeding anyway');
+        clearInterval(interval);
+        resolve();
+      }
+    }, checkInterval);
+  });
+};
+
+export const trackRegistrationComplete = async () => {
   try {
     console.log('═══════════════════════════════════════════════════');
     console.log('🎯 [GTM-REGISTRATION] trackRegistrationComplete() called');
@@ -188,6 +236,9 @@ export const trackRegistrationComplete = () => {
     
     if (typeof window !== 'undefined' && window.dataLayer) {
       console.log('✅ [GTM-REGISTRATION] dataLayer is available');
+      
+      // Wait for GTM to be ready
+      await waitForGTM();
       
       const gclid = getCurrentGCLID();
       console.log('📍 [GTM-REGISTRATION] Current GCLID:', gclid || 'None');
