@@ -328,6 +328,13 @@ export default function PhoneAuthModal({
         console.log('[PHONE-AUTH] 📊 Tracking registration_complete event');
         trackRegistrationComplete();
         
+        // Log full dataLayer for mobile debugging
+        setTimeout(() => {
+          if (typeof window !== 'undefined' && window.dataLayer) {
+            console.log('[PHONE-AUTH] 📊 Full dataLayer after registration:', JSON.stringify(window.dataLayer, null, 2));
+          }
+        }, 500);
+        
         setIsVerifyingOtp(false);
         onClose();
         onSuccess?.();
