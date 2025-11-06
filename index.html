@@ -81,7 +81,13 @@
           setTimeout(function() {
             // Load GTM
             (function(w,d,s,l,i){
-              w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+              w[l]=w[l]||[];
+              w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+              
+              // Push GA4 config to dataLayer immediately (GTM tags will handle it)
+              w[l].push(['config', 'AW-16917874636']);
+              w[l].push(['config', 'G-EDSR82W70J']);
+              
               var f=d.getElementsByTagName(s)[0],
               j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
               j.async=true;
@@ -89,18 +95,11 @@
               f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-NMLGMTL5');
             
-            // Load GA4
+            // Load GA4 gtag.js script (for direct gtag API support)
             var gtagScript = document.createElement('script');
             gtagScript.async = true;
             gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
             document.head.appendChild(gtagScript);
-            
-            gtagScript.onload = function() {
-              if (typeof window.gtag === 'function') {
-                window.gtag('config', 'AW-16917874636');
-                window.gtag('config', 'G-EDSR82W70J');
-              }
-            };
           }, 500);
         }
       })();
