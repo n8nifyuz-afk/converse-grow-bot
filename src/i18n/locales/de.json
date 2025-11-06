@@ -560,6 +560,70 @@
     "quickResponse": "Schnellantwortzusage",
     "quickResponseDesc": "Wir antworten normalerweise innerhalb von 24 Stunden auf alle Anfragen. Bei dringenden Angelegenheiten nutzen Sie bitte unsere Live-Chat-Funktion für sofortige Hilfe."
   },
+  "about": {
+    "title": "Über Uns - ChatLearn",
+    "seoDescription": "Erfahren Sie mehr über ChatLearns Mission, den Zugang zu KI zu demokratisieren. Entdecken Sie, wie wir die führenden KI-Modelle der Welt auf einer innovativen Plattform zusammenbringen.",
+    "badge": "Über ChatLearn",
+    "heading": "Über Uns",
+    "subtitle": "Die führenden KI-Modelle der Welt auf einer innovativen Plattform zusammenbringen",
+    "whoWeAre": {
+      "title": "Wer Wir Sind",
+      "p1": "ChatLearn ist eine innovative KI-Plattform, die entwickelt wurde, um die führenden Modelle der künstlichen Intelligenz der Welt an einem Ort zusammenzubringen.",
+      "p2": "Unsere Mission ist es, fortschrittliche KI-Technologie für alle zugänglich, intuitiv und nützlich zu machen - ob Sie ein individueller Schöpfer, ein Geschäftsprofi oder ein neugieriger Lernender sind, der die Zukunft der KI erkundet.",
+      "belief": "Wir glauben, dass die wahre Kraft der KI in der Einfachheit liegt.",
+      "reason": "Deshalb haben wir ChatLearn entwickelt: eine einzige, elegante Plattform, auf der Benutzer nahtlos mit mehreren KI-Modellen interagieren können - alles über ein sicheres Konto."
+    },
+    "mission": {
+      "title": "Unsere Mission",
+      "p1": "Wir wollen den Zugang zu künstlicher Intelligenz demokratisieren.",
+      "p2": "KI sollte nicht kompliziert oder auf Experten beschränkt sein. ChatLearn überbrückt die Lücke zwischen Spitzenforschung und alltäglicher Nutzbarkeit und gibt Menschen und Teams die Werkzeuge, die sie brauchen, um mit KI zu schaffen, zu lernen und zu wachsen.",
+      "p3": "Von der Erstellung von Inhalten und Datenanalyse bis zum Aufbau von Ideen und der Automatisierung von Workflows - ChatLearn ermöglicht Benutzern, mehr und schneller zu tun."
+    },
+    "technology": {
+      "title": "Unsere Technologie",
+      "integration": {
+        "title": "KI-Modell-Integration",
+        "desc": "ChatLearn integriert die leistungsstärksten KI-Modelle der Welt, einschließlich OpenAIs GPT-4o, Googles Gemini und andere große Sprach- und Bildgenerierungsmodelle. Alle werden über sichere, offizielle APIs abgerufen, die Stabilität, Compliance und Leistung gewährleisten."
+      },
+      "security": {
+        "title": "Sicherheit und Datenschutz",
+        "desc": "Unsere Infrastruktur ist auf Geschwindigkeit, Datenschutz und Skalierbarkeit ausgelegt. Jede Interaktion wird sicher verarbeitet, und Benutzer haben volle Kontrolle über ihre Erfahrung und Datenpräferenzen."
+      }
+    },
+    "why": {
+      "title": "Warum ChatLearn",
+      "allInOne": {
+        "title": "All-in-One-Plattform",
+        "desc": "Greifen Sie mit einem einzigen Login auf mehrere KI-Modelle zu."
+      },
+      "efficiency": {
+        "title": "Effizienz und Genauigkeit",
+        "desc": "Erhalten Sie sofortige Antworten, die von erstklassigen Sprachmodellen unterstützt werden."
+      },
+      "creative": {
+        "title": "Kreativ und Analytisch",
+        "desc": "Kombinieren Sie Schreiben, Recherche, Codierung und Bilderstellung an einem Ort."
+      },
+      "security": {
+        "title": "Transparenz und Sicherheit",
+        "desc": "Wir schätzen Ihr Vertrauen; Ihre Daten werden immer verantwortungsvoll behandelt."
+      },
+      "innovation": {
+        "title": "Ständige Innovation",
+        "desc": "Wir aktualisieren kontinuierlich unsere Modelle und Funktionen, um den technologischen Trends voraus zu sein."
+      }
+    },
+    "commitment": {
+      "title": "Unser Engagement",
+      "p1": "Wir sind mehr als nur eine KI-Plattform; wir sind ein Team von Innovatoren, Entwicklern und Visionären, die leidenschaftlich daran arbeiten, die Zusammenarbeit zwischen Mensch und KI neu zu definieren.",
+      "p2": "Unser Ziel ist es, KI für jeden, überall einfach, zuverlässig und ermächtigend zu machen."
+    },
+    "cta": {
+      "title": "Treten Sie der Zukunft der KI bei",
+      "desc": "Erleben Sie die nächste Generation intelligenter Tools. Erkunden Sie mehrere KI-Modelle, entfesseln Sie kreatives Potenzial und beginnen Sie noch heute, Ihre Zukunft mit ChatLearn aufzubauen.",
+      "button": "Probieren Sie ChatLearn Jetzt"
+    }
+  },
   "pricingPage": {
     "flexiblePricing": "Flexible Preise",
     "chooseYourJourney": "Wählen Sie Ihre KI-Reise",

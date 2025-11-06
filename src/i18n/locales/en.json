@@ -916,6 +916,70 @@
     "quickResponse": "Quick Response Promise",
     "quickResponseDesc": "We typically respond to all inquiries within 24 hours. For urgent matters, please use our live chat feature for immediate assistance."
   },
+  "about": {
+    "title": "About Us - ChatLearn",
+    "seoDescription": "Learn about ChatLearn's mission to democratize AI access. Discover how we bring the world's leading AI models together in one innovative platform.",
+    "badge": "About ChatLearn",
+    "heading": "About Us",
+    "subtitle": "Bringing the world's leading AI models together in one innovative platform",
+    "whoWeAre": {
+      "title": "Who We Are",
+      "p1": "ChatLearn is an innovative AI platform designed to bring the world's leading artificial intelligence models together in one place.",
+      "p2": "Our mission is to make advanced AI technology accessible, intuitive, and useful for everyone — whether you're an individual creator, a business professional, or a curious learner exploring the future of AI.",
+      "belief": "We believe that the true power of AI lies in simplicity.",
+      "reason": "That's why we built ChatLearn: a single, elegant platform where users can interact with multiple AI models seamlessly — all through one secure account."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "p1": "We aim to democratize access to artificial intelligence.",
+      "p2": "AI shouldn't be complicated or limited to experts. ChatLearn bridges the gap between cutting-edge research and everyday usability, giving people and teams the tools they need to create, learn, and grow with AI.",
+      "p3": "From generating content and analyzing data to building ideas and automating workflows — ChatLearn empowers users to do more, faster."
+    },
+    "technology": {
+      "title": "Our Technology",
+      "integration": {
+        "title": "AI Model Integration",
+        "desc": "ChatLearn integrates the world's most powerful AI models, including OpenAI's GPT-4o, Google's Gemini, and other large language and image-generation models. All are accessed through secure, official APIs ensuring stability, compliance, and performance."
+      },
+      "security": {
+        "title": "Security & Privacy",
+        "desc": "Our infrastructure is built for speed, privacy, and scalability. Every interaction is processed securely, and users have full control over their experience and data preferences."
+      }
+    },
+    "why": {
+      "title": "Why ChatLearn",
+      "allInOne": {
+        "title": "All-in-One Platform",
+        "desc": "Access multiple AI models with a single login."
+      },
+      "efficiency": {
+        "title": "Efficiency & Accuracy",
+        "desc": "Get instant responses powered by top-tier language models."
+      },
+      "creative": {
+        "title": "Creative & Analytical",
+        "desc": "Combine writing, research, coding, and image creation in one place."
+      },
+      "security": {
+        "title": "Transparency & Security",
+        "desc": "We value your trust; your data is always handled responsibly."
+      },
+      "innovation": {
+        "title": "Constant Innovation",
+        "desc": "We continuously update our models and features to stay ahead of technology trends."
+      }
+    },
+    "commitment": {
+      "title": "Our Commitment",
+      "p1": "We are more than just an AI platform; we are a team of innovators, developers, and visionaries passionate about redefining human-AI collaboration.",
+      "p2": "Our goal is to make AI simple, reliable, and empowering for everyone, everywhere."
+    },
+    "cta": {
+      "title": "Join the Future of AI",
+      "desc": "Experience the next generation of intelligent tools. Explore multiple AI models, unlock creative potential, and start building your future with ChatLearn today.",
+      "button": "Try ChatLearn Now"
+    }
+  },
   "pricingPage": {
     "flexiblePricing": "Flexible Pricing",
     "chooseYourJourney": "Choose Your AI Journey",

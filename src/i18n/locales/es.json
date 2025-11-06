@@ -585,6 +585,70 @@
     "quickResponse": "Promesa de Respuesta Rápida",
     "quickResponseDesc": "Normalmente respondemos a todas las consultas dentro de 24 horas. Para asuntos urgentes, utiliza nuestra función de chat en vivo para asistencia inmediata."
   },
+  "about": {
+    "title": "Acerca de Nosotros - ChatLearn",
+    "seoDescription": "Conoce la misión de ChatLearn de democratizar el acceso a la IA. Descubre cómo reunimos los modelos de IA líderes del mundo en una plataforma innovadora.",
+    "badge": "Acerca de ChatLearn",
+    "heading": "Acerca de Nosotros",
+    "subtitle": "Reuniendo los modelos de IA líderes del mundo en una plataforma innovadora",
+    "whoWeAre": {
+      "title": "Quiénes Somos",
+      "p1": "ChatLearn es una plataforma de IA innovadora diseñada para reunir los modelos de inteligencia artificial líderes del mundo en un solo lugar.",
+      "p2": "Nuestra misión es hacer que la tecnología de IA avanzada sea accesible, intuitiva y útil para todos, ya seas un creador individual, un profesional de negocios o un aprendiz curioso explorando el futuro de la IA.",
+      "belief": "Creemos que el verdadero poder de la IA reside en la simplicidad.",
+      "reason": "Por eso construimos ChatLearn: una plataforma única y elegante donde los usuarios pueden interactuar con múltiples modelos de IA sin problemas, todo a través de una cuenta segura."
+    },
+    "mission": {
+      "title": "Nuestra Misión",
+      "p1": "Nuestro objetivo es democratizar el acceso a la inteligencia artificial.",
+      "p2": "La IA no debería ser complicada ni limitada a expertos. ChatLearn cierra la brecha entre la investigación de vanguardia y la usabilidad cotidiana, brindando a las personas y equipos las herramientas que necesitan para crear, aprender y crecer con la IA.",
+      "p3": "Desde generar contenido y analizar datos hasta construir ideas y automatizar flujos de trabajo: ChatLearn empodera a los usuarios para hacer más, más rápido."
+    },
+    "technology": {
+      "title": "Nuestra Tecnología",
+      "integration": {
+        "title": "Integración de Modelos de IA",
+        "desc": "ChatLearn integra los modelos de IA más potentes del mundo, incluidos GPT-4o de OpenAI, Gemini de Google y otros grandes modelos de lenguaje y generación de imágenes. Todos se acceden a través de APIs oficiales seguras que garantizan estabilidad, cumplimiento y rendimiento."
+      },
+      "security": {
+        "title": "Seguridad y Privacidad",
+        "desc": "Nuestra infraestructura está construida para velocidad, privacidad y escalabilidad. Cada interacción se procesa de manera segura, y los usuarios tienen control total sobre su experiencia y preferencias de datos."
+      }
+    },
+    "why": {
+      "title": "Por Qué ChatLearn",
+      "allInOne": {
+        "title": "Plataforma Todo-en-Uno",
+        "desc": "Accede a múltiples modelos de IA con un solo inicio de sesión."
+      },
+      "efficiency": {
+        "title": "Eficiencia y Precisión",
+        "desc": "Obtén respuestas instantáneas impulsadas por modelos de lenguaje de primer nivel."
+      },
+      "creative": {
+        "title": "Creativo y Analítico",
+        "desc": "Combina escritura, investigación, codificación y creación de imágenes en un solo lugar."
+      },
+      "security": {
+        "title": "Transparencia y Seguridad",
+        "desc": "Valoramos tu confianza; tus datos siempre se manejan de manera responsable."
+      },
+      "innovation": {
+        "title": "Innovación Constante",
+        "desc": "Actualizamos continuamente nuestros modelos y funciones para mantenernos a la vanguardia de las tendencias tecnológicas."
+      }
+    },
+    "commitment": {
+      "title": "Nuestro Compromiso",
+      "p1": "Somos más que solo una plataforma de IA; somos un equipo de innovadores, desarrolladores y visionarios apasionados por redefinir la colaboración entre humanos e IA.",
+      "p2": "Nuestro objetivo es hacer que la IA sea simple, confiable y empoderadora para todos, en todas partes."
+    },
+    "cta": {
+      "title": "Únete al Futuro de la IA",
+      "desc": "Experimenta la próxima generación de herramientas inteligentes. Explora múltiples modelos de IA, desbloquea el potencial creativo y comienza a construir tu futuro con ChatLearn hoy.",
+      "button": "Prueba ChatLearn Ahora"
+    }
+  },
   "pricingPage": {
     "flexiblePricing": "Precios Flexibles",
     "chooseYourJourney": "Elige Tu Viaje de IA",
