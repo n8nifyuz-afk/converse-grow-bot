@@ -46,26 +46,34 @@ export default function GoogleOneTab({ onSuccess }: GoogleOneTabProps) {
         // Use environment variable for client ID (stored in Supabase secrets)
         const clientId = "217944304340-s9hdphrnpakgegrk3e64pujvu0g7rp99.apps.googleusercontent.com";
 
-        // CRITICAL: Do NOT provide nonce - let Google generate token without nonce field
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          context: 'signin',
-          ux_mode: 'popup',
-          // Only request basic scopes for smooth sign-in (no consent screens)
-          scope: 'email profile openid',
-        });
+        // CRITICAL: Wrap in try-catch to prevent origin errors from blocking the app
+        try {
+          // CRITICAL: Do NOT provide nonce - let Google generate token without nonce field
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+            context: 'signin',
+            ux_mode: 'popup',
+            // Only request basic scopes for smooth sign-in (no consent screens)
+            scope: 'email profile openid',
+          });
 
-        // Display the One Tap prompt
-        window.google.accounts.id.prompt((notification: any) => {
-          // Silent - no logging needed
-        });
+          // Display the One Tap prompt
+          window.google.accounts.id.prompt((notification: any) => {
+            // Silent - no logging needed
+          });
 
-        isInitialized.current = true;
+          isInitialized.current = true;
+        } catch (originError) {
+          // Silently handle origin/cross-origin errors (common in preview environments)
+          // This prevents the blank screen issue
+          isInitialized.current = true; // Mark as initialized to prevent retry loops
+        }
       } catch (error) {
         logError('Failed to initialize Google One Tap');
+        isInitialized.current = true; // Mark as initialized to prevent retry loops
       }
     };
 
