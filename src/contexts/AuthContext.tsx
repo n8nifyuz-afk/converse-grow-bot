@@ -85,7 +85,7 @@ export const markAuthInitiated = () => {
   sessionStorage.setItem('auth_initiated_time', Date.now().toString());
 };
 
-// Helper to check if auth was recently initiated (within last 30 seconds)
+// Helper to check if auth was recently initiated (within last 5 minutes)
 export const wasAuthRecentlyInitiated = () => {
   const initiated = sessionStorage.getItem('auth_initiated') === 'true';
   const timeStr = sessionStorage.getItem('auth_initiated_time');
@@ -94,7 +94,7 @@ export const wasAuthRecentlyInitiated = () => {
   
   const timestamp = parseInt(timeStr);
   const timeSinceInitiation = Date.now() - timestamp;
-  const isRecent = timeSinceInitiation < 30000; // 30 seconds
+  const isRecent = timeSinceInitiation < 300000; // 5 minutes (matches signup detection window)
   
   if (!isRecent) {
     // Clear if too old
