@@ -858,6 +858,7 @@ export default function Index() {
   };
   const handleCreateImageClick = () => {
     setIsImageMode(true);
+    setSelectedStyle(null); // Reset selected style to show the 2 buttons
     setMessage('');
     setTimeout(() => {
       textareaRef.current?.focus();
