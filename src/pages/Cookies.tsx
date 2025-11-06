@@ -157,38 +157,37 @@ export default function Cookies() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5 text-primary" />
-                Managing Cookies
+                {t('cookiePolicy.managingCookies')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                When you first visit our Site, you may see a banner asking for your consent to use cookies.
+                {t('cookiePolicy.managingDesc1')}
               </p>
               <p className="text-muted-foreground">
-                Our website uses Cookiebot by Usercentrics to manage cookie consent in compliance with the EU GDPR and ePrivacy Directive.
+                {t('cookiePolicy.managingDesc2')}
               </p>
               <p className="text-muted-foreground">
-                When you visit the Site, a consent banner powered by Cookiebot will appear, allowing you to accept, reject, or customize your cookie preferences at any time.
+                {t('cookiePolicy.managingDesc3')}
               </p>
               <p className="text-muted-foreground">
-                You can also change or withdraw your consent later by clicking the cookie icon at the bottom of the page.
+                {t('cookiePolicy.managingDesc4')}
               </p>
               <div className="p-4 bg-muted/50 rounded-lg border">
-                <h3 className="font-semibold mb-3">Your Options:</h3>
+                <h3 className="font-semibold mb-3">{t('cookiePolicy.yourOptions')}</h3>
                 <ul className="list-disc pl-6 space-y-2 text-sm text-muted-foreground">
-                  <li>Accept all cookies</li>
-                  <li>Reject non-essential ones</li>
-                  <li>Manage your preferences manually</li>
+                  <li>{t('cookiePolicy.option1')}</li>
+                  <li>{t('cookiePolicy.option2')}</li>
+                  <li>{t('cookiePolicy.option3')}</li>
                 </ul>
               </div>
               <p className="text-muted-foreground">
-                You can also adjust your preferences anytime through your browser's cookie settings. Most browsers allow you to 
-                delete existing cookies or block new ones.
+                {t('cookiePolicy.managingDesc5')}
               </p>
               <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                <p className="text-sm font-semibold mb-2 text-amber-700 dark:text-amber-400">Important Note</p>
+                <p className="text-sm font-semibold mb-2 text-amber-700 dark:text-amber-400">{t('cookiePolicy.importantNote')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Please note that disabling cookies may affect certain site features or reduce performance.
+                  {t('cookiePolicy.importantNoteDesc')}
                 </p>
               </div>
             </CardContent>
@@ -199,24 +198,24 @@ export default function Cookies() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ExternalLink className="h-5 w-5 text-primary" />
-                Third-Party Cookies
+                {t('cookiePolicy.thirdPartyCookies')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Some cookies are set by trusted third parties who help us analyze traffic and improve functionality.
+                {t('cookiePolicy.thirdPartyDesc1')}
               </p>
-              <p className="font-semibold">These may include:</p>
+              <p className="font-semibold">{t('cookiePolicy.thirdPartyInclude')}</p>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li><strong>Google Analytics (GA4)</strong> – for tracking and measuring website usage.</li>
-                <li><strong>Google Tag Manager</strong> – for managing and deploying analytics scripts.</li>
-                <li><strong>Meta Pixel (if enabled)</strong> – for advertising analytics and conversion tracking.</li>
+                <li>{t('cookiePolicy.thirdPartyGA')}</li>
+                <li>{t('cookiePolicy.thirdPartyGTM')}</li>
+                <li>{t('cookiePolicy.thirdPartyMeta')}</li>
               </ul>
               <p className="text-sm text-muted-foreground">
-                These providers may collect information like your IP address, browser type, or session details.
+                {t('cookiePolicy.thirdPartyDesc2')}
               </p>
               <p className="text-sm text-muted-foreground">
-                Cookie consent and logging are managed by Cookiebot (Usercentrics A/S, Denmark) to record and store your consent securely as required by EU law.
+                {t('cookiePolicy.thirdPartyDesc3')}
               </p>
               <div className="p-4 bg-muted/50 rounded-lg border mt-4">
                 <p className="font-semibold mb-3">Privacy Policies:</p>
@@ -249,16 +248,15 @@ export default function Cookies() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-primary" />
-                Updates to This Policy
+                {t('cookiePolicy.updatesTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                We may update this Cookie Policy from time to time to reflect new technologies, features, or legal requirements. 
-                The "Last Updated" date at the top of this page indicates the latest revision.
+                {t('cookiePolicy.updatesDesc1')}
               </p>
               <p className="text-sm text-muted-foreground mt-3">
-                We recommend checking this page occasionally to stay informed about how we use cookies.
+                {t('cookiePolicy.updatesDesc2')}
               </p>
             </CardContent>
           </Card>
@@ -268,23 +266,23 @@ export default function Cookies() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary" />
-                Contact Us
+                {t('cookiePolicy.contactTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-muted-foreground mb-4">
-                If you have any questions or concerns about this Cookie Policy or how we handle your data, please contact us:
+                {t('cookiePolicy.contactDesc')}
               </p>
               <div>
-                <p className="font-semibold">Email:</p>
+                <p className="font-semibold">{t('cookiePolicy.email')}</p>
                 <a href="mailto:support@chatl.ai" className="text-primary hover:underline">support@chatl.ai</a>
               </div>
               <div>
-                <p className="font-semibold">Website:</p>
+                <p className="font-semibold">{t('cookiePolicy.website')}</p>
                 <a href="https://chatl.ai" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">https://chatl.ai</a>
               </div>
               <div>
-                <p className="font-semibold">Mailing Address:</p>
+                <p className="font-semibold">{t('cookiePolicy.mailingAddress')}</p>
                 <address className="text-muted-foreground not-italic text-sm">
                   TASOLAR LTD<br />
                   Dimostheni Severi & Katsoni 2<br />

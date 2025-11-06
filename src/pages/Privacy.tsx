@@ -141,11 +141,11 @@ export default function Privacy() {
                 {t('privacy.aiIntegrationsDesc')}
               </p>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                <li>OpenAI (GPT-5, GPT-4o, GPT-4o mini, DALL·E 3)</li>
-                <li>Anthropic (Claude Haiku 4.5)</li>
-                <li>Google DeepMind (Gemini 2.5 Flash)</li>
-                <li>xAI (Grok 4)</li>
-                <li>DeepSeek V2</li>
+                <li>{t('privacy.aiProvider1')}</li>
+                <li>{t('privacy.aiProvider2')}</li>
+                <li>{t('privacy.aiProvider3')}</li>
+                <li>{t('privacy.aiProvider4')}</li>
+                <li>{t('privacy.aiProvider5')}</li>
               </ul>
               <div className="p-4 bg-muted/50 rounded-lg border">
                 <p className="text-sm font-semibold mb-2">{t('privacy.aiDisclaimer')}</p>
@@ -279,7 +279,7 @@ export default function Privacy() {
                 <li>{t('privacy.useItem6')}</li>
                 <li>{t('privacy.useItem7')}</li>
                 <li>{t('privacy.useItem8')}</li>
-                <li>Process billing, subscriptions, and renewals (including trial conversions).</li>
+                <li>{t('privacy.useItem9')}</li>
               </ul>
             </CardContent>
           </Card>
@@ -347,7 +347,7 @@ export default function Privacy() {
                 {t('privacy.retentionNote')}
               </p>
               <p className="text-sm text-muted-foreground">
-                Billing and subscription records (including trial start, renewal, and payment data) are retained securely as required for tax, compliance, and dispute resolution purposes.
+                {t('privacy.retentionBillingNote')}
               </p>
             </CardContent>
           </Card>

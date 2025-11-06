@@ -231,14 +231,14 @@ export default function Terms() {
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>{t('terms.subscriptionP1')}</p>
               <p>{t('terms.subscriptionP2')}</p>
-              <p className="font-medium text-foreground">Payments and renewals are non-refundable once processed, except where required by law or in cases of verified technical issues preventing access to the service.</p>
+              <p className="font-medium text-foreground">{t('terms.subscriptionP3')}</p>
             </div>
           </Card>
 
           <Card className="p-8 mb-6 bg-card/50 backdrop-blur">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Trial Period and Auto-Renewal</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{t('terms.trialAutoRenewalTitle')}</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>ChatLearn offers a 3-day full-access trial for €0.99. After the 3-day trial period, your plan will automatically renew to a monthly Pro subscription (€19.99/month) unless canceled before the renewal date. You can cancel anytime from your account settings or by contacting our support team at support@chatl.ai. The €0.99 trial fee is non-refundable once access to the trial begins. By starting a trial, you agree that automatic renewal will occur at the end of the trial unless you cancel before it ends.</p>
+              <p>{t('terms.trialAutoRenewalDesc')}</p>
             </div>
           </Card>
 
@@ -289,7 +289,7 @@ export default function Terms() {
 
           <Card className="p-8 mb-6 bg-muted/20 border">
             <p className="text-sm text-muted-foreground text-center leading-relaxed">
-              By starting a trial or subscription, you authorize ChatLearn to automatically charge your selected payment method after the trial ends unless canceled. VAT included where applicable.
+              {t('terms.authorizationNotice')}
             </p>
           </Card>
         </div>
