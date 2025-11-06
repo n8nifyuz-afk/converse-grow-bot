@@ -942,7 +942,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           }
                         }}
                         placeholder="Enter your full name"
-                        maxLength={100}
+                        maxLength={50}
                         className="w-full px-2.5 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                       <Button 
