@@ -105,6 +105,13 @@ export function EmailVerificationLinking() {
         if (data.newUser) {
           console.log('[EMAIL-VERIFICATION] 📊 Tracking registration_complete event for new user');
           trackRegistrationComplete();
+          
+          // Log full dataLayer for debugging
+          setTimeout(() => {
+            if (typeof window !== 'undefined' && window.dataLayer) {
+              console.log('[EMAIL-VERIFICATION] 📊 Full dataLayer after registration:', JSON.stringify(window.dataLayer, null, 2));
+            }
+          }, 500);
         }
         
         setTimeout(() => {

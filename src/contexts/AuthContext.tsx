@@ -639,6 +639,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               trackRegistrationComplete().catch((error) => {
                 console.error('❌ [GTM-REG] Error tracking registration:', error);
               });
+              
+              // Log full dataLayer for debugging
+              setTimeout(() => {
+                if (typeof window !== 'undefined' && window.dataLayer) {
+                  console.log('[AUTH-CONTEXT] 📊 Full dataLayer after registration:', JSON.stringify(window.dataLayer, null, 2));
+                }
+              }, 500);
+            } else {
+              console.log('🔑 [AUTH] User logged in (not a new signup)');
+              // Log dataLayer for signin too
+              setTimeout(() => {
+                if (typeof window !== 'undefined' && window.dataLayer) {
+                  console.log('[AUTH-CONTEXT] 📊 Full dataLayer after signin:', JSON.stringify(window.dataLayer, null, 2));
+                }
+              }, 500);
             }
           } else {
             // Session restoration - skip logging
