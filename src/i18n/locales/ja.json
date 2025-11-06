@@ -811,6 +811,10 @@
     "subscriptionSuccess": "サブスクリプションが正常にアクティブ化されました！",
     "popular": "人気"
   },
+  "notFound": {
+    "message": "おっと！ページが見つかりません",
+    "returnHome": "ホームに戻る"
+  },
   "privacy": {
     "title": "プライバシーポリシー",
     "seoDesc": "ChatLearnが個人データをどのように収集、使用、保護するかをご覧ください。GDPR準拠のプライバシーポリシー。",
@@ -910,6 +914,11 @@
     "defUserDesc": "サービスにアクセスまたは使用する個人。",
     "aiIntegrationsTitle": "当社のAI統合について（透明性）",
     "aiIntegrationsDesc": "ChatLearnは複数のAIモデルへの統一インターフェースを提供します。現在の統合には以下が含まれる場合があります（変更される可能性があります）：",
+    "aiProvider1": "OpenAI (GPT-5, GPT-4o, GPT-4o mini, DALL·E 3)",
+    "aiProvider2": "Anthropic (Claude Haiku 4.5)",
+    "aiProvider3": "Google DeepMind (Gemini 2.5 Flash)",
+    "aiProvider4": "xAI (Grok 4)",
+    "aiProvider5": "DeepSeek V2",
     "aiDisclaimer": "免責事項",
     "aiDisclaimerText": "ChatLearnはこれらのプロバイダーと提携、スポンサー、または承認されていません。当社は合法的な契約の下で公式APIを介してのみそれらの技術にアクセスします。お客様が送信するプロンプトと入力は、本ポリシーに従って、出力を生成するために必要な場合にのみこれらのプロバイダーに送信される場合があります。",
     "dataCategoriesTitle": "個人データのカテゴリーと処理",
@@ -954,6 +963,7 @@
     "useItem6": "詐欺の防止とセキュリティの確保",
     "useItem7": "法的義務の遵守",
     "useItem8": "更新とサポートに関するコミュニケーション",
+    "useItem9": "請求、サブスクリプション、更新の処理（トライアル転換を含む）",
     "howWeDiscloseTitle": "情報の開示方法",
     "howWeDiscloseDesc": "当社はサービスの運営または法律の遵守に必要な場合にのみデータを共有します：",
     "discloseAI": "AIモデルプロバイダー：",
@@ -982,6 +992,7 @@
     "retentionBilling": "請求：",
     "retentionBillingDesc": "税法に従って保持されます。",
     "retentionNote": "アカウントを削除すると、法律で義務付けられている場合を除き、関連データは合理的な期間内に削除または匿名化されます。",
+    "retentionBillingNote": "請求およびサブスクリプション記録（トライアル開始、更新、および支払いデータを含む）は、税務、コンプライアンス、および紛争解決の目的で必要に応じて安全に保持されます。",
     "securityTitle": "セキュリティ対策",
     "securityDesc": "当社は暗号化（TLS）、アクセス制御、ネットワーク監視、バックアップを使用してお客様のデータを保護します。100%安全なシステムはありませんが、当社はリスクを軽減するために保護措置を継続的に改善しています。",
     "cookiesTitle": "Cookieと同意管理",

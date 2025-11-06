@@ -811,6 +811,10 @@
     "subscriptionSuccess": "订阅成功激活！",
     "popular": "热门"
   },
+  "notFound": {
+    "message": "哎呀！页面未找到",
+    "returnHome": "返回首页"
+  },
   "privacy": {
     "title": "隐私政策",
     "seoDesc": "了解ChatLearn如何收集、使用和保护您的个人数据。符合GDPR的隐私政策。",
@@ -910,6 +914,11 @@
     "defUserDesc": "访问或使用服务的个人。",
     "aiIntegrationsTitle": "关于我们的AI集成（透明度）",
     "aiIntegrationsDesc": "ChatLearn为多个AI模型提供统一界面。当前集成可能包括（可能会更改）：",
+    "aiProvider1": "OpenAI (GPT-5, GPT-4o, GPT-4o mini, DALL·E 3)",
+    "aiProvider2": "Anthropic (Claude Haiku 4.5)",
+    "aiProvider3": "Google DeepMind (Gemini 2.5 Flash)",
+    "aiProvider4": "xAI (Grok 4)",
+    "aiProvider5": "DeepSeek V2",
     "aiDisclaimer": "免责声明",
     "aiDisclaimerText": "ChatLearn不隶属于、不受赞助或不受这些提供商的认可。我们仅通过合法协议下的官方API访问他们的技术。您提交的提示和输入可能仅在需要时发送给这些提供商以生成输出，遵循本政策。",
     "dataCategoriesTitle": "个人数据类别和处理",
@@ -954,6 +963,7 @@
     "useItem6": "防止欺诈并确保安全",
     "useItem7": "遵守法律义务",
     "useItem8": "与您沟通更新和支持",
+    "useItem9": "处理账单、订阅和续订（包括试用转换）",
     "howWeDiscloseTitle": "我们如何披露您的信息",
     "howWeDiscloseDesc": "我们仅在需要运营服务或遵守法律时共享数据：",
     "discloseAI": "AI模型提供商：",
@@ -982,6 +992,7 @@
     "retentionBilling": "计费：",
     "retentionBillingDesc": "根据税法保留。",
     "retentionNote": "当您删除账户时，相关数据将在合理时间内删除或匿名化，除非法律要求保留。",
+    "retentionBillingNote": "账单和订阅记录（包括试用开始、续订和支付数据）根据税务、合规和争议解决所需安全保留。",
     "securityTitle": "安全措施",
     "securityDesc": "我们使用加密（TLS）、访问控制、网络监控和备份来保护您的数据。虽然没有系统是100%安全的，但我们不断改进我们的保障措施以降低风险。",
     "cookiesTitle": "Cookie和同意管理",
