@@ -488,6 +488,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (webhookResponse.ok) {
             // Mark webhook as sent (deduplication)
             localStorage.setItem(webhookSentKey, new Date().toISOString());
+            
+            // Track OAuth registration in GTM/Google Ads
+            console.log(`✅ [GTM-REG] Tracking OAuth registration for ${provider} signup`);
+            trackRegistrationComplete().catch((error) => {
+              console.error('❌ [GTM-REG] Error tracking OAuth registration:', error);
+            });
+            
+            // Log full dataLayer for debugging
+            setTimeout(() => {
+              if (typeof window !== 'undefined' && window.dataLayer) {
+                console.log('[OAUTH-REG] 📊 Full dataLayer after OAuth registration:', JSON.stringify(window.dataLayer, null, 2));
+              }
+            }, 500);
           } else {
             const errorText = await webhookResponse.text();
             console.error('❌ [OAuth Profile Sync] Webhook failed:', errorText);
