@@ -4077,13 +4077,13 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                        ul: ({
                           children,
                           ...props
-                        }) => <ul {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-disc list-inside">
+                        }) => <ul {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-disc pl-5 space-y-1">
                                         {children}
                                       </ul>,
-                       ol: ({
+                        ol: ({
                           children,
                           ...props
-                        }) => <ol {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-decimal list-inside">
+                        }) => <ol {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-decimal pl-5 space-y-1">
                                         {children}
                                       </ol>,
                         li: ({
