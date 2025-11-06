@@ -488,19 +488,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (webhookResponse.ok) {
             // Mark webhook as sent (deduplication)
             localStorage.setItem(webhookSentKey, new Date().toISOString());
-            
-            // Track OAuth registration in GTM/Google Ads
-            console.log(`✅ [GTM-REG] Tracking OAuth registration for ${provider} signup`);
-            trackRegistrationComplete().catch((error) => {
-              console.error('❌ [GTM-REG] Error tracking OAuth registration:', error);
-            });
-            
-            // Log full dataLayer for debugging
-            setTimeout(() => {
-              if (typeof window !== 'undefined' && window.dataLayer) {
-                console.log('[OAUTH-REG] 📊 Full dataLayer after OAuth registration:', JSON.stringify(window.dataLayer, null, 2));
-              }
-            }, 500);
           } else {
             const errorText = await webhookResponse.text();
             console.error('❌ [OAuth Profile Sync] Webhook failed:', errorText);
@@ -647,18 +634,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             // CRITICAL: Track registration in GTM/GA for NEW SIGNUPS ONLY
             // This works for ALL auth methods: Google, Apple, Microsoft, Phone, Email
+            // EXCEPTION: Phone signups track AFTER profile completion (not here)
             if (isSignup) {
-              console.log('🎯 [GTM-REG] Tracking registration for new signup');
-              trackRegistrationComplete().catch((error) => {
-                console.error('❌ [GTM-REG] Error tracking registration:', error);
-              });
+              // Detect if this is a phone signup
+              const isPhoneSignup = session.user.phone && (!session.user.email || session.user.email.match(/^\+?[0-9]+$/));
               
-              // Log full dataLayer for debugging
-              setTimeout(() => {
-                if (typeof window !== 'undefined' && window.dataLayer) {
-                  console.log('[AUTH-CONTEXT] 📊 Full dataLayer after registration:', JSON.stringify(window.dataLayer, null, 2));
-                }
-              }, 500);
+              if (isPhoneSignup) {
+                console.log('📱 [GTM-REG] Phone signup detected - will track after profile completion');
+              } else {
+                console.log('🎯 [GTM-REG] Tracking registration for new signup');
+                trackRegistrationComplete().catch((error) => {
+                  console.error('❌ [GTM-REG] Error tracking registration:', error);
+                });
+                
+                // Log full dataLayer for debugging
+                setTimeout(() => {
+                  if (typeof window !== 'undefined' && window.dataLayer) {
+                    console.log('[AUTH-CONTEXT] 📊 Full dataLayer after registration:', JSON.stringify(window.dataLayer, null, 2));
+                  }
+                }, 500);
+              }
             } else {
               console.log('🔑 [AUTH] User logged in (not a new signup)');
               // Log dataLayer for signin too
