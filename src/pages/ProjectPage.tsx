@@ -946,9 +946,18 @@ export default function ProjectPage() {
     setSelectedStyle(style.name);
     setIsStylesOpen(false);
 
-    // Focus the textarea after setting the style
+    // Focus the textarea and trigger auto-resize after setting the style
     setTimeout(() => {
-      textareaRef.current?.focus();
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        
+        // Trigger auto-resize for the new content
+        textareaRef.current.style.height = 'auto';
+        const scrollHeight = textareaRef.current.scrollHeight;
+        const maxHeight = 200; // Match max-h-[120px] from className
+        
+        textareaRef.current.style.height = Math.min(scrollHeight, maxHeight) + 'px';
+      }
     }, 0);
   };
   const handleCreateImageClick = () => {
@@ -1113,9 +1122,18 @@ export default function ProjectPage() {
     setInput(tempTranscript);
     setTempTranscript('');
     
-    // Focus textarea after stopping to show the text
+    // Focus textarea and trigger auto-resize to show all dictated text
     setTimeout(() => {
-      textareaRef.current?.focus();
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        
+        // Trigger auto-resize for the dictated content
+        textareaRef.current.style.height = 'auto';
+        const scrollHeight = textareaRef.current.scrollHeight;
+        const maxHeight = 200; // Match max-h-[120px] from className
+        
+        textareaRef.current.style.height = Math.min(scrollHeight, maxHeight) + 'px';
+      }
     }, 150);
   };
   
