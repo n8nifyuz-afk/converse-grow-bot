@@ -491,27 +491,63 @@ serve(async (req) => {
               });
             }
           } else {
-            // Existing limits found - only update limit and period_end, NEVER touch usage or period_start
-            logStep("Existing limits found, updating only limit and period_end", { userId: user.id });
+            // Existing limits found - check if billing period has changed
+            const existingPeriodEnd = new Date(existingLimits.period_end);
+            const newPeriodEnd = new Date(periodEndDate.toISOString());
+            const periodHasChanged = existingPeriodEnd.getTime() !== newPeriodEnd.getTime();
             
-            const { error: updateError } = await supabaseClient
-              .from('usage_limits')
-              .update({
-                image_generations_limit: imageLimit,
-                period_end: periodEndDate.toISOString(),
-                updated_at: new Date().toISOString()
-              })
-              .eq('user_id', user.id);
-            
-            if (updateError) {
-              logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
-            } else {
-              logStep("✅ Updated usage_limits", { 
-                userId: user.id, 
-                limit: imageLimit,
-                preservedUsage: existingLimits.image_generations_used,
-                preservedPeriodStart: existingLimits.period_start
+            if (periodHasChanged) {
+              // NEW BILLING PERIOD - Reset usage to 0 immediately
+              logStep("🔄 New billing period detected, resetting usage to 0", { 
+                userId: user.id,
+                oldPeriodEnd: existingPeriodEnd.toISOString(),
+                newPeriodEnd: newPeriodEnd.toISOString()
               });
+              
+              const { error: resetError } = await supabaseClient
+                .from('usage_limits')
+                .update({
+                  image_generations_used: 0,
+                  image_generations_limit: imageLimit,
+                  period_start: new Date().toISOString(),
+                  period_end: periodEndDate.toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', user.id);
+              
+              if (resetError) {
+                logStep("ERROR: Failed to reset usage_limits", { error: resetError.message });
+              } else {
+                logStep("✅ Usage limits reset for new billing period", { 
+                  userId: user.id, 
+                  limit: imageLimit,
+                  resetUsage: 0,
+                  newPeriodStart: new Date().toISOString()
+                });
+              }
+            } else {
+              // SAME PERIOD - Only update limit, preserve usage and period_start
+              logStep("Same billing period, updating only limit", { userId: user.id });
+              
+              const { error: updateError } = await supabaseClient
+                .from('usage_limits')
+                .update({
+                  image_generations_limit: imageLimit,
+                  period_end: periodEndDate.toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', user.id);
+              
+              if (updateError) {
+                logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
+              } else {
+                logStep("✅ Updated usage_limits", { 
+                  userId: user.id, 
+                  limit: imageLimit,
+                  preservedUsage: existingLimits.image_generations_used,
+                  preservedPeriodStart: existingLimits.period_start
+                });
+              }
             }
           }
         }
