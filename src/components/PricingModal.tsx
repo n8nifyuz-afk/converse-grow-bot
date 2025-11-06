@@ -550,7 +550,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ open, onOpenChange }
                   {t('pricingModal.byContinuing')}{' '}
                   <a href="https://www.chatl.ai/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.termsConditions')}</a>,{' '}
                   <a href="https://www.chatl.ai/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.privacyPolicy')}</a>,{' '}
-                  <a href="https://www.chatl.ai/cookies" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.cookiePolicy')}</a>,{' '}
+                  <a href="https://www.chatl.ai/cookie-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.cookiePolicy')}</a>,{' '}
                   {t('pricingModal.and')}{' '}
                   <a href="https://www.chatl.ai/refund-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-600 transition-colors">{t('pricingModal.refundCancellationPolicy')}</a>.
                 </p>
