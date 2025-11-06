@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Mail, Lock, Key, Loader2 } from 'lucide-react';
+import { trackRegistrationComplete } from '@/utils/gtmTracking';
 
 export function EmailVerificationLinking() {
   const { user } = useAuth();
@@ -99,6 +100,13 @@ export function EmailVerificationLinking() {
 
       if (data?.success) {
         toast.success('Email linked successfully!');
+        
+        // Track registration completion in GTM if this was a new user
+        if (data.newUser) {
+          console.log('[EMAIL-VERIFICATION] 📊 Tracking registration_complete event for new user');
+          trackRegistrationComplete();
+        }
+        
         setTimeout(() => {
           window.location.reload();
         }, 1500);
