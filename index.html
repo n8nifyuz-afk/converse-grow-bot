@@ -28,7 +28,8 @@
       window.dataLayer = window.dataLayer || [];
       window.gtag = function(){dataLayer.push(arguments);}
       
-      // Client requirement: Track analytics & conversions immediately
+      // Google Consent Mode v2 - Enables cookieless conversion tracking
+      // Even when users deny cookies, conversion pings will still be sent
       gtag('consent', 'default', {
         'analytics_storage': 'granted',       // ✅ Track analytics immediately
         'ad_user_data': 'granted',            // ✅ Track conversions immediately
@@ -39,8 +40,11 @@
         'security_storage': 'granted',        // ✅ Essential (always allowed)
         'wait_for_update': 500
       });
-      gtag('set', 'ads_data_redaction', true);
-      gtag('set', 'url_passthrough', false);
+      
+      // Enable Consent Mode v2 features for cookieless tracking
+      gtag('set', 'ads_data_redaction', true);        // Redact ad click identifiers when denied
+      gtag('set', 'url_passthrough', true);           // Pass GCLID through navigation
+      gtag('set', 'allow_ad_personalization_signals', false);  // Prevent personalization
       
       gtag('js', new Date());
     </script>

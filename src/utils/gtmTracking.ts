@@ -256,7 +256,10 @@ export const trackRegistrationComplete = async () => {
       }
       
       const eventData: Record<string, any> = {
-        event: 'registration_complete'
+        event: 'registration_complete',
+        // Consent Mode v2: Enable cookieless conversion tracking
+        send_to: 'AW-16917874636',  // Google Ads conversion ID
+        enhanced_conversions: true   // Enable enhanced conversions
       };
       
       if (gclid) {
@@ -316,7 +319,10 @@ export const trackChatStart = (chatId?: string) => {
     }
     
     const eventData: Record<string, any> = {
-      event: 'chat_start'
+      event: 'chat_start',
+      // Consent Mode v2: Enable cookieless conversion tracking
+      send_to: 'AW-16917874636',  // Google Ads conversion ID
+      enhanced_conversions: true   // Enable enhanced conversions
     };
     
     if (gclid) {
@@ -343,41 +349,65 @@ export const trackChatStart = (chatId?: string) => {
   }
 };
 
-export const trackPaymentComplete = (
+export const trackPaymentComplete = async (
   planType: 'Pro' | 'Ultra',
   planDuration: 'monthly' | '3_months' | 'yearly',
   planPrice: number
 ) => {
-  console.log('🎯 [GTM] Tracking payment_complete event');
-  console.log('💰 [GTM] Plan details:', { planType, planDuration, planPrice });
-  
-  if (typeof window !== 'undefined' && window.dataLayer) {
-    const gclid = getCurrentGCLID();
-    console.log('📍 [GTM] Current GCLID:', gclid || 'None');
+  try {
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🎯 [GTM-PAYMENT] Tracking payment_complete event');
+    console.log('💰 [GTM-PAYMENT] Plan:', planType, planDuration, '$' + planPrice);
+    console.log('═══════════════════════════════════════════════════');
     
-    const eventData: Record<string, any> = {
-      event: 'payment_complete',
-      plan_type: planType,
-      plan_duration: planDuration,
-      plan_price: planPrice,
-      currency: 'USD',
-      value: planPrice
-    };
-    
-    if (gclid) {
-      eventData.gclid = gclid;
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      console.log('✅ [GTM-PAYMENT] dataLayer is available');
+      
+      // Wait for GTM to be ready
+      await waitForGTM();
+      
+      const gclid = getCurrentGCLID();
+      console.log('📍 [GTM-PAYMENT] Current GCLID:', gclid || 'None');
+      
+      const eventData: Record<string, any> = {
+        event: 'payment_complete',
+        // Consent Mode v2: Enable cookieless conversion tracking
+        send_to: 'AW-16917874636',  // Google Ads conversion ID
+        enhanced_conversions: true,   // Enable enhanced conversions
+        plan_type: planType,
+        plan_duration: planDuration,
+        plan_price: planPrice,
+        currency: 'USD',
+        value: planPrice,
+        transaction_id: `payment_${Date.now()}`
+      };
+      
+      if (gclid) {
+        eventData.gclid = gclid;
+        console.log('✅ [GTM-PAYMENT] Adding GCLID to event');
+      }
+      
+      console.log('═══════════════════════════════════════════════════');
+      console.log('📤 [GTM-PAYMENT] Pushing event to dataLayer:');
+      console.log(JSON.stringify(eventData, null, 2));
+      console.log('═══════════════════════════════════════════════════');
+      
+      window.dataLayer.push(eventData);
+      
+      console.log('✅ [GTM-PAYMENT] Event pushed successfully!');
+      console.log('📊 [GTM-PAYMENT] Full dataLayer:', window.dataLayer);
+      console.log('═══════════════════════════════════════════════════');
+      
+      // Clear tracking data after successful payment conversion
+      setTimeout(() => {
+        console.log('🧹 [GTM-PAYMENT] Clearing tracking data after conversion');
+        clearTrackingDataAfterConversion();
+      }, 2000); // Delay to ensure GTM processes the event
+    } else {
+      console.error('❌ [GTM-PAYMENT] Window or dataLayer not available!');
+      console.log('═══════════════════════════════════════════════════');
     }
-    
-    console.log('📤 [GTM] Pushing event:', eventData);
-    window.dataLayer.push(eventData);
-    console.log('✅ [GTM] Payment event tracked successfully');
-    
-    // Clear tracking data after successful payment conversion
-    setTimeout(() => {
-      console.log('🧹 [GTM] Clearing tracking data after conversion');
-      clearTrackingDataAfterConversion();
-    }, 1000); // Small delay to ensure GTM processes the event
-  } else {
-    console.warn('⚠️ [GTM] Window or dataLayer not available');
+  } catch (error) {
+    console.error('❌ [GTM-PAYMENT] Fatal error in trackPaymentComplete:', error);
   }
 };

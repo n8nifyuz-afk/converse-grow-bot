@@ -1472,7 +1472,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
                 
                 console.log('📊 Restored subscription tracking data:', { planType, planDuration, planPrice, plan: restoreData.plan, plan_name: restoreData.plan_name });
-                trackPaymentComplete(planType, planDuration, planPrice);
+                await trackPaymentComplete(planType, planDuration, planPrice);
                 
                 // Mark as tracked in database
                 await supabase
@@ -1640,7 +1640,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             
             console.log('📊 Tracking data:', { planType, planDuration, planPrice, product_id: dbSub.product_id, plan_name: dbSub.plan_name });
-            trackPaymentComplete(planType, planDuration, planPrice);
+            await trackPaymentComplete(planType, planDuration, planPrice);
             
             // Mark as tracked in database (single source of truth across all devices)
             await supabase
