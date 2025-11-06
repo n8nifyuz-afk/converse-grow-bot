@@ -105,7 +105,26 @@
     "extendedLimits": "拡張ファイルとメッセージ制限",
     "imageGeneration2000": "画像生成（2,000回 / 月）",
     "teamCollaboration": "チームコラボレーション機能",
-    "earlyAccess": "新モデルへの早期アクセス"
+    "earlyAccess": "新モデルへの早期アクセス",
+    "proFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude（Ultraのみ）",
+      "voiceMode": "ボイスモード",
+      "askPdf": "PDF / ドキュメント AI に質問",
+      "prioritySupport": "優先サポート"
+    },
+    "ultraFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude Haiku 4.5",
+      "deepseek": "DeepSeek V3",
+      "grok": "Grok（X AI - ライブウェブ）",
+      "voiceMode": "ボイスモード",
+      "askPdf": "PDF / ドキュメント AI に質問",
+      "highPrioritySupport": "高優先度サポート",
+      "whatsapp": "WhatsApp チャット（近日公開）"
+    }
   },
   "settings": {
     "title": "設定",

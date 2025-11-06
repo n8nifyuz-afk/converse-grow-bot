@@ -105,7 +105,26 @@
     "extendedLimits": "扩展文件和消息限制",
     "imageGeneration2000": "图像生成（2,000 次 / 月）",
     "teamCollaboration": "团队协作功能",
-    "earlyAccess": "抢先体验新模型"
+    "earlyAccess": "抢先体验新模型",
+    "proFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude（仅限 Ultra）",
+      "voiceMode": "语音模式",
+      "askPdf": "询问 PDF / 文档 AI",
+      "prioritySupport": "优先支持"
+    },
+    "ultraFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude Haiku 4.5",
+      "deepseek": "DeepSeek V3",
+      "grok": "Grok（X AI - 实时网络）",
+      "voiceMode": "语音模式",
+      "askPdf": "询问 PDF / 文档 AI",
+      "highPrioritySupport": "高优先级支持",
+      "whatsapp": "WhatsApp 聊天（即将推出）"
+    }
   },
   "settings": {
     "title": "设置",

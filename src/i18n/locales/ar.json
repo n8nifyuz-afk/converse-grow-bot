@@ -105,7 +105,26 @@
     "extendedLimits": "حدود موسعة للملفات والرسائل",
     "imageGeneration2000": "توليد الصور (2,000 / شهر)",
     "teamCollaboration": "ميزات التعاون الجماعي",
-    "earlyAccess": "الوصول المبكر إلى النماذج الجديدة"
+    "earlyAccess": "الوصول المبكر إلى النماذج الجديدة",
+    "proFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude (Ultra فقط)",
+      "voiceMode": "الوضع الصوتي",
+      "askPdf": "اسأل PDF / مستندات AI",
+      "prioritySupport": "دعم ذو أولوية"
+    },
+    "ultraFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude Haiku 4.5",
+      "deepseek": "DeepSeek V3",
+      "grok": "Grok (X AI - الويب المباشر)",
+      "voiceMode": "الوضع الصوتي",
+      "askPdf": "اسأل PDF / مستندات AI",
+      "highPrioritySupport": "دعم عالي الأولوية",
+      "whatsapp": "دردشة WhatsApp (قريبًا)"
+    }
   },
   "settings": {
     "title": "الإعدادات",

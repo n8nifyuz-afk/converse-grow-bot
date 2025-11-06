@@ -105,7 +105,26 @@
     "extendedLimits": "Расширенные лимиты файлов и сообщений",
     "imageGeneration2000": "Генерация изображений (2 000 / месяц)",
     "teamCollaboration": "Функции командной работы",
-    "earlyAccess": "Ранний доступ к новым моделям"
+    "earlyAccess": "Ранний доступ к новым моделям",
+    "proFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude (только Ultra)",
+      "voiceMode": "Голосовой Режим",
+      "askPdf": "Спросить PDF / Docs AI",
+      "prioritySupport": "Приоритетная Поддержка"
+    },
+    "ultraFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude Haiku 4.5",
+      "deepseek": "DeepSeek V3",
+      "grok": "Grok (X AI - Живой Веб)",
+      "voiceMode": "Голосовой Режим",
+      "askPdf": "Спросить PDF / Docs AI",
+      "highPrioritySupport": "Поддержка с Высоким Приоритетом",
+      "whatsapp": "WhatsApp Чат (Скоро)"
+    }
   },
   "settings": {
     "title": "Настройки",

@@ -105,7 +105,26 @@
     "extendedLimits": "Limiti estesi file e messaggi",
     "imageGeneration2000": "Generazione immagini (2.000 / mese)",
     "teamCollaboration": "Funzionalità collaborazione team",
-    "earlyAccess": "Accesso anticipato ai nuovi modelli"
+    "earlyAccess": "Accesso anticipato ai nuovi modelli",
+    "proFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude (solo Ultra)",
+      "voiceMode": "Modalità Vocale",
+      "askPdf": "Chiedi a PDF / Docs AI",
+      "prioritySupport": "Supporto Prioritario"
+    },
+    "ultraFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude Haiku 4.5",
+      "deepseek": "DeepSeek V3",
+      "grok": "Grok (X AI - Web dal Vivo)",
+      "voiceMode": "Modalità Vocale",
+      "askPdf": "Chiedi a PDF / Docs AI",
+      "highPrioritySupport": "Supporto ad Alta Priorità",
+      "whatsapp": "Chat WhatsApp (Prossimamente)"
+    }
   },
   "settings": {
     "title": "Impostazioni",

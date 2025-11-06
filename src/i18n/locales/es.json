@@ -105,7 +105,26 @@
     "advancedSearch": "Búsqueda avanzada",
     "premiumFeatures": "Funciones premium",
     "prioritySupport": "Soporte prioritario",
-    "earlyAccess": "Acceso anticipado a nuevas funciones"
+    "earlyAccess": "Acceso anticipado a nuevas funciones",
+    "proFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude (solo Ultra)",
+      "voiceMode": "Modo de Voz",
+      "askPdf": "Preguntar a PDF / Docs AI",
+      "prioritySupport": "Soporte Prioritario"
+    },
+    "ultraFeatures": {
+      "gpt": "OpenAI GPT-5 / GPT-4o",
+      "gemini": "Google Gemini",
+      "claude": "Anthropic Claude Haiku 4.5",
+      "deepseek": "DeepSeek V3",
+      "grok": "Grok (X AI - Web en Vivo)",
+      "voiceMode": "Modo de Voz",
+      "askPdf": "Preguntar a PDF / Docs AI",
+      "highPrioritySupport": "Soporte de Alta Prioridad",
+      "whatsapp": "Chat de WhatsApp (Próximamente)"
+    }
   },
   "settings": {
     "title": "Configuración",
