@@ -881,6 +881,14 @@ export default function Index() {
     }, 0);
   };
   const handleCreateImageClick = () => {
+    // Check if user has Pro or Ultra Pro subscription
+    if (!subscriptionStatus.subscribed) {
+      setShowPricingModal(true);
+      return;
+    }
+    
+    // Change model to generate-image
+    setSelectedModel('generate-image');
     setIsImageMode(true);
     setSelectedStyle(null); // Reset selected style to show the 2 buttons
     setMessage('');
