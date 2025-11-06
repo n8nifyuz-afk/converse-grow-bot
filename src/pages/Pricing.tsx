@@ -62,16 +62,16 @@ const Pricing = () => {
       text: t('pricingPage.accessToMiniOnly'),
       included: true
     }, {
-      text: 'Advanced models not included',
+      text: t('pricingPage.advancedModelsNotIncluded'),
       included: false
     }, {
-      text: 'Claude not included',
+      text: t('pricingPage.claudeNotIncluded'),
       included: false
     }, {
-      text: 'Voice mode not included',
+      text: t('pricingPage.voiceModeNotIncluded'),
       included: false
     }, {
-      text: 'File uploads not included',
+      text: t('pricingPage.fileUploadsNotIncluded'),
       included: false
     }],
     buttonText: t('pricingPage.getStarted'),
@@ -84,31 +84,31 @@ const Pricing = () => {
     description: t('pricingPage.proDesc'),
     popular: true,
     features: [{
-      text: 'OpenAI GPT-5 / GPT-4o',
+      text: t('pricing.proFeatures.gpt'),
       included: true
     }, {
-      text: 'Google Gemini',
+      text: t('pricing.proFeatures.gemini'),
       included: true
     }, {
-      text: 'Claude (Ultra only)',
+      text: t('pricingPage.claudeUltraOnly'),
       included: false
     }, {
-      text: 'DeepSeek V3 (Ultra only)',
+      text: t('pricingPage.deepseekUltraOnly'),
       included: false
     }, {
-      text: 'Grok (Ultra only)',
+      text: t('pricingPage.grokUltraOnly'),
       included: false
     }, {
-      text: 'Voice Mode',
+      text: t('pricing.proFeatures.voiceMode'),
       included: true
     }, {
-      text: 'Ask PDF / Docs AI',
+      text: t('pricing.proFeatures.askPdf'),
       included: true
     }, {
-      text: 'Priority Support',
+      text: t('pricing.proFeatures.prioritySupport'),
       included: true
     }, {
-      text: 'WhatsApp Chat (Coming soon)',
+      text: t('pricingPage.whatsappComingSoon'),
       included: true
     }],
     buttonText: t('pricingPage.subscribeNow'),
@@ -121,31 +121,31 @@ const Pricing = () => {
     description: t('pricingPage.ultraProDesc'),
     popular: false,
     features: [{
-      text: 'OpenAI GPT-5 / GPT-4o',
+      text: t('pricing.ultraFeatures.gpt'),
       included: true
     }, {
-      text: 'Google Gemini',
+      text: t('pricing.ultraFeatures.gemini'),
       included: true
     }, {
-      text: 'Anthropic Claude Haiku 4.5',
+      text: t('pricing.ultraFeatures.claude'),
       included: true
     }, {
-      text: 'DeepSeek V3',
+      text: t('pricing.ultraFeatures.deepseek'),
       included: true
     }, {
-      text: 'Grok (X AI - Live Web)',
+      text: t('pricing.ultraFeatures.grok'),
       included: true
     }, {
-      text: 'Voice Mode',
+      text: t('pricing.ultraFeatures.voiceMode'),
       included: true
     }, {
-      text: 'Ask PDF / Docs AI',
+      text: t('pricing.ultraFeatures.askPdf'),
       included: true
     }, {
-      text: 'High-priority Support',
+      text: t('pricing.ultraFeatures.highPrioritySupport'),
       included: true
     }, {
-      text: 'WhatsApp Chat (Coming soon)',
+      text: t('pricing.ultraFeatures.whatsapp'),
       included: false
     }],
     buttonText: t('pricingPage.subscribeNow'),
