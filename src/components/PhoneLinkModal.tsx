@@ -172,7 +172,7 @@ export default function PhoneLinkModal({ open, onOpenChange }: PhoneLinkModalPro
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                 placeholder="000000"
-                className="text-center text-2xl tracking-widest border-2"
+                className="text-center text-2xl tracking-widest border-2 ring-2 ring-ring ring-offset-2"
               />
               <p className="text-xs text-muted-foreground text-center">
                 Code sent to {phone}
