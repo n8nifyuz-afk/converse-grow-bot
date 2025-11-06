@@ -967,8 +967,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         <User className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm">Birth Date</p>
-                        <p className="text-xs text-muted-foreground">Your date of birth (DD/MM/YYYY)</p>
+                        <p className="font-semibold text-foreground text-sm">{t('settings.birthDate')}</p>
+                        <p className="text-xs text-muted-foreground">{t('settings.yourBirthDate')}</p>
                       </div>
                     </div>
                     <div className="ml-0 md:ml-9 space-y-2">
@@ -993,7 +993,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         size="sm"
                         className="w-full sm:w-auto h-8 text-xs"
                       >
-                        {isUpdatingBirthDate ? 'Updating...' : 'Update Birth Date'}
+                        {isUpdatingBirthDate ? 'Updating...' : t('settings.updateBirthDate')}
                       </Button>
                     </div>
                   </div>
