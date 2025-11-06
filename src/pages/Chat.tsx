@@ -1688,6 +1688,7 @@ export default function Chat() {
   const handleCreateImageClick = () => {
     setIsImageMode(true);
     setIsPopoverOpen(false);
+    setSelectedStyle(null); // Reset selected style to show the 2 buttons
     setInput('');
     setTimeout(() => {
       textareaRef.current?.focus();
