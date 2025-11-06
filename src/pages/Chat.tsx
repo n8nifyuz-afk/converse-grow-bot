@@ -386,7 +386,21 @@ export default function Chat() {
                 regenerateTimeoutRef.current = null;
               }
               
-              // Remove the old hidden message from state (it was deleted from DB but kept for animation)
+              // Delete the old message from the database
+              console.log('[REGENERATE] Deleting old message from database:', currentRegeneratingId);
+              supabase
+                .from('messages')
+                .delete()
+                .eq('id', currentRegeneratingId)
+                .then(({ error }) => {
+                  if (error) {
+                    console.error('[REGENERATE] Error deleting old message:', error);
+                  } else {
+                    console.log('[REGENERATE] Old message deleted from database');
+                  }
+                });
+              
+              // Remove the old message from state
               setMessages(prev => {
                 const filtered = prev.filter(msg => msg.id !== currentRegeneratingId);
                 return filtered;
