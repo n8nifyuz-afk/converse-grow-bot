@@ -81,34 +81,52 @@ const clearCachedSubscription = () => {
 // These are exported so components like GoogleOneTab can use them
 // This persists across OAuth redirects and page reloads
 export const markAuthInitiated = () => {
-  sessionStorage.setItem('auth_initiated', 'true');
-  sessionStorage.setItem('auth_initiated_time', Date.now().toString());
+  try {
+    sessionStorage.setItem('auth_initiated', 'true');
+    sessionStorage.setItem('auth_initiated_time', Date.now().toString());
+  } catch (error) {
+    // Silent error - storage might not be available
+  }
 };
 
 // Helper to check if auth was recently initiated (within last 5 minutes)
 export const wasAuthRecentlyInitiated = () => {
-  const initiated = sessionStorage.getItem('auth_initiated') === 'true';
-  const timeStr = sessionStorage.getItem('auth_initiated_time');
-  
-  if (!initiated || !timeStr) return false;
-  
-  const timestamp = parseInt(timeStr);
-  const timeSinceInitiation = Date.now() - timestamp;
-  const isRecent = timeSinceInitiation < 300000; // 5 minutes (matches signup detection window)
-  
-  if (!isRecent) {
-    // Clear if too old
-    clearAuthInitiated();
+  try {
+    const initiated = sessionStorage.getItem('auth_initiated') === 'true';
+    const timeStr = sessionStorage.getItem('auth_initiated_time');
+    
+    if (!initiated || !timeStr) return false;
+    
+    const timestamp = parseInt(timeStr);
+    if (isNaN(timestamp)) {
+      clearAuthInitiated();
+      return false;
+    }
+    
+    const timeSinceInitiation = Date.now() - timestamp;
+    const isRecent = timeSinceInitiation < 300000; // 5 minutes (matches signup detection window)
+    
+    if (!isRecent) {
+      // Clear if too old
+      clearAuthInitiated();
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('[Auth] Error checking auth initiation:', error);
     return false;
   }
-  
-  return true;
 };
 
 // Helper to clear auth initiated flag
 export const clearAuthInitiated = () => {
-  sessionStorage.removeItem('auth_initiated');
-  sessionStorage.removeItem('auth_initiated_time');
+  try {
+    sessionStorage.removeItem('auth_initiated');
+    sessionStorage.removeItem('auth_initiated_time');
+  } catch (error) {
+    // Silent error - storage might not be available
+  }
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -614,8 +632,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // CRITICAL: Track registration in GTM/GA for NEW SIGNUPS ONLY
             // This works for ALL auth methods: Google, Apple, Microsoft, Phone, Email
             if (isSignup) {
-              console.log('🎯 [GTM-REG] Tracking registration for new signup');
-              trackRegistrationComplete();
+              try {
+                console.log('🎯 [GTM-REG] Tracking registration for new signup');
+                trackRegistrationComplete();
+              } catch (error) {
+                console.error('❌ [GTM-REG] Failed to track registration:', error);
+              }
             }
           } else {
             // Session restoration - skip logging
