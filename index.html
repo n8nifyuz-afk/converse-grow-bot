@@ -46,7 +46,10 @@
     <!-- Load React app FIRST -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Load tracking scripts AFTER React (non-blocking) -->
+    <!-- Load Cookiebot FIRST (synchronously in head for proper consent management) -->
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4" data-blockingmode="auto" type="text/javascript"></script>
+    
+    <!-- Load GTM and GA4 AFTER Cookiebot (non-blocking) -->
     <script>
       (function() {
         // Wait for DOM to be fully ready
@@ -57,16 +60,8 @@
         }
         
         function loadTracking() {
+          // Small delay to ensure Cookiebot is initialized
           setTimeout(function() {
-            // Load Cookiebot
-            var cookiebot = document.createElement('script');
-            cookiebot.id = 'Cookiebot';
-            cookiebot.src = 'https://consent.cookiebot.com/uc.js';
-            cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
-            cookiebot.setAttribute('data-blockingmode', 'auto');
-            cookiebot.async = true;
-            document.head.appendChild(cookiebot);
-            
             // Load GTM
             (function(w,d,s,l,i){
               w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
@@ -89,7 +84,7 @@
                 window.gtag('config', 'G-EDSR82W70J');
               }
             };
-          }, 200);
+          }, 300);
         }
       })();
     </script>
