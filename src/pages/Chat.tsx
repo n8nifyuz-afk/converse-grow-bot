@@ -1012,11 +1012,11 @@ export default function Chat() {
       // Get webhook metadata
       const metadata = await getWebhookMetadata();
       
-      // Check if this is the user's first message
+      // Check if this is the user's first message (by checking if they have any chats)
       let isFirstMessage = false;
       try {
         const response = await fetch(
-          `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/messages?user_id=eq.${user.id}&select=id&limit=1`,
+          `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/chats?user_id=eq.${user.id}&select=id&limit=1`,
           {
             headers: {
               'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjaWFpdW56YWNndnZidmNzaGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Nzc3NjQsImV4cCI6MjA3MzI1Mzc2NH0.zpQgi6gkTSfP-znoV6u_YiyzKRp8fklxrz_xszGtPLI',
@@ -1024,8 +1024,14 @@ export default function Chat() {
             }
           }
         );
-        const existingMessages = await response.json();
-        isFirstMessage = !existingMessages || existingMessages.length === 0;
+        
+        if (response.ok) {
+          const existingChats = await response.json();
+          isFirstMessage = !existingChats || existingChats.length === 0;
+        } else {
+          console.warn('[REGENERATE] Failed to check first message, status:', response.status);
+          isFirstMessage = false; // Default to false on error
+        }
       } catch (error) {
         console.error('[REGENERATE] Error checking first message:', error);
       }
@@ -1252,12 +1258,12 @@ export default function Chat() {
       // Get webhook metadata
       const metadata = await getWebhookMetadata();
       
-      // Check if this is the user's first message
+      // Check if this is the user's first message (by checking if they have any chats)
       let isFirstMessage = false;
       try {
         // Use direct REST API call to avoid TS type inference issues
         const response = await fetch(
-          `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/messages?user_id=eq.${user.id}&select=id&limit=1`,
+          `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/chats?user_id=eq.${user.id}&select=id&limit=1`,
           {
             headers: {
               'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjaWFpdW56YWNndnZidmNzaGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Nzc3NjQsImV4cCI6MjA3MzI1Mzc2NH0.zpQgi6gkTSfP-znoV6u_YiyzKRp8fklxrz_xszGtPLI',
@@ -1265,9 +1271,15 @@ export default function Chat() {
             }
           }
         );
-        const existingMessages = await response.json();
-        isFirstMessage = !existingMessages || existingMessages.length === 0;
-        console.log('[AI-RESPONSE] First time user:', isFirstMessage);
+        
+        if (response.ok) {
+          const existingChats = await response.json();
+          isFirstMessage = !existingChats || existingChats.length === 0;
+          console.log('[AI-RESPONSE] First time user:', isFirstMessage);
+        } else {
+          console.warn('[AI-RESPONSE] Failed to check first message, status:', response.status);
+          isFirstMessage = false; // Default to false on error
+        }
       } catch (error) {
         console.error('[AI-RESPONSE] Error checking first message:', error);
       }
@@ -2044,11 +2056,11 @@ export default function Chat() {
         // Get webhook metadata
         const metadata = await getWebhookMetadata();
         
-        // Check if this is the user's first message
+        // Check if this is the user's first message (by checking if they have any chats)
         let isFirstMessage = false;
         try {
           const response = await fetch(
-            `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/messages?user_id=eq.${user.id}&select=id&limit=1`,
+            `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/chats?user_id=eq.${user.id}&select=id&limit=1`,
             {
               headers: {
                 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjaWFpdW56YWNndnZidmNzaGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Nzc3NjQsImV4cCI6MjA3MzI1Mzc2NH0.zpQgi6gkTSfP-znoV6u_YiyzKRp8fklxrz_xszGtPLI',
@@ -2056,8 +2068,14 @@ export default function Chat() {
               }
             }
           );
-          const existingMessages = await response.json();
-          isFirstMessage = !existingMessages || existingMessages.length === 0;
+          
+          if (response.ok) {
+            const existingChats = await response.json();
+            isFirstMessage = !existingChats || existingChats.length === 0;
+          } else {
+            console.warn('[IMAGE-GEN] Failed to check first message, status:', response.status);
+            isFirstMessage = false; // Default to false on error
+          }
         } catch (error) {
           console.error('[IMAGE-GEN] Error checking first message:', error);
         }
