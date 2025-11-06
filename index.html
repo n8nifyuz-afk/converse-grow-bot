@@ -28,13 +28,19 @@
       window.dataLayer = window.dataLayer || [];
       window.gtag = function(){dataLayer.push(arguments);}
       
-      // Default consent: Allow analytics & conversions, block remarketing
+      // Default consent: Deny all until Cookiebot updates (Advanced Consent Mode)
       gtag('consent', 'default', {
-        'analytics_storage': 'granted',
-        'ad_user_data': 'granted',
         'ad_storage': 'denied',
-        'ad_personalization': 'denied'
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied',
+        'functionality_storage': 'denied',
+        'personalization_storage': 'denied',
+        'security_storage': 'granted',
+        'wait_for_update': 500
       });
+      gtag('set', 'ads_data_redaction', true);
+      gtag('set', 'url_passthrough', false);
       
       gtag('js', new Date());
     </script>
