@@ -77,18 +77,18 @@ const clearCachedSubscription = () => {
   }
 };
 
-// CRITICAL: Universal auth initiation tracking using sessionStorage
+// CRITICAL: Universal auth initiation tracking using localStorage (not sessionStorage)
 // These are exported so components like GoogleOneTab can use them
-// This persists across OAuth redirects and page reloads
+// localStorage persists across tabs - essential for email verification links that open in new tabs
 export const markAuthInitiated = () => {
-  sessionStorage.setItem('auth_initiated', 'true');
-  sessionStorage.setItem('auth_initiated_time', Date.now().toString());
+  localStorage.setItem('auth_initiated', 'true');
+  localStorage.setItem('auth_initiated_time', Date.now().toString());
 };
 
 // Helper to check if auth was recently initiated (within last 5 minutes)
 export const wasAuthRecentlyInitiated = () => {
-  const initiated = sessionStorage.getItem('auth_initiated') === 'true';
-  const timeStr = sessionStorage.getItem('auth_initiated_time');
+  const initiated = localStorage.getItem('auth_initiated') === 'true';
+  const timeStr = localStorage.getItem('auth_initiated_time');
   
   if (!initiated || !timeStr) return false;
   
@@ -107,8 +107,8 @@ export const wasAuthRecentlyInitiated = () => {
 
 // Helper to clear auth initiated flag
 export const clearAuthInitiated = () => {
-  sessionStorage.removeItem('auth_initiated');
-  sessionStorage.removeItem('auth_initiated_time');
+  localStorage.removeItem('auth_initiated');
+  localStorage.removeItem('auth_initiated_time');
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
