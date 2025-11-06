@@ -28,15 +28,15 @@
       window.dataLayer = window.dataLayer || [];
       window.gtag = function(){dataLayer.push(arguments);}
       
-      // Google Consent Mode v2 - Enables cookieless conversion tracking
-      // Even when users deny cookies, conversion pings will still be sent
+      // Google Consent Mode v2 - Privacy-friendly conversion tracking
+      // Tracks conversions but blocks remarketing cookies by default
       gtag('consent', 'default', {
         'analytics_storage': 'granted',       // ✅ Track analytics immediately
         'ad_user_data': 'granted',            // ✅ Track conversions immediately
-        'ad_storage': 'granted',              // ✅ Allow conversion tracking (GDPR compliant)
-        'ad_personalization': 'denied',       // ❌ No personalized ads/remarketing
+        'ad_storage': 'denied',               // 🚫 Block remarketing cookies by default
+        'ad_personalization': 'denied',       // 🚫 Block personalized ads by default
         'functionality_storage': 'granted',   // ✅ Allow functional cookies
-        'personalization_storage': 'denied',  // ❌ No personalization until consent
+        'personalization_storage': 'denied',  // 🚫 No personalization until consent
         'security_storage': 'granted',        // ✅ Essential (always allowed)
         'wait_for_update': 500
       });
