@@ -3896,8 +3896,8 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                   hyphens: 'auto'
                 }}>
                         
-           {/* File attachments - hide while regenerating */}
-           {message.file_attachments && message.file_attachments.length > 0 && regeneratingMessageId !== message.id && <div className="mb-3 space-y-3">
+           {/* File attachments - hide while regenerating OR if message is in hiddenMessageIds */}
+           {message.file_attachments && message.file_attachments.length > 0 && regeneratingMessageId !== message.id && !hiddenMessageIds.has(message.id) && <div className="mb-3 space-y-3">
                {message.file_attachments.map((file, index) => {
                   return <div key={index}>
                      {isImageFile(file.type) && file.url ? <div className="space-y-2">
