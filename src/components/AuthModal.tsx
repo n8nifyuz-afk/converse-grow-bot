@@ -730,20 +730,6 @@ export default function AuthModal({
             console.error('❌ Failed to send profile completion webhook:', webhookError);
           }
           
-          // Track phone registration completion in GTM
-          const { trackRegistrationComplete } = await import('@/utils/gtmTracking');
-          console.log('📊 [AUTH-MODAL] Tracking registration_complete event after profile completion');
-          trackRegistrationComplete().catch((error) => {
-            console.error('❌ [AUTH-MODAL] Error tracking registration:', error);
-          });
-          
-          // Log full dataLayer for debugging
-          setTimeout(() => {
-            if (typeof window !== 'undefined' && window.dataLayer) {
-              console.log('[AUTH-MODAL] 📊 Full dataLayer after registration:', JSON.stringify(window.dataLayer, null, 2));
-            }
-          }, 500);
-          
           // Refresh user profile in context to update UI everywhere
           await refreshUserProfile();
           
