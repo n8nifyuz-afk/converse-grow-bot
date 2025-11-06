@@ -597,7 +597,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Detect if this is a SIGNUP or LOGIN
             const userCreatedAt = new Date(session.user.created_at).getTime();
             const timeSinceCreation = now - userCreatedAt;
-            const isSignup = timeSinceCreation < 10000; // User created within last 10 seconds = signup
+            const isSignup = timeSinceCreation < 60000; // User created within last 60 seconds = signup
             const activityType = isSignup ? 'signup' : 'login';
             
             // Update last activity log tracking
