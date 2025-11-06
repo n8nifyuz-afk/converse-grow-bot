@@ -57,12 +57,13 @@
         }
         
         function loadTracking() {
-          // Load Cookiebot FIRST (immediately)
+          // Load Cookiebot FIRST (immediately) - without auto-blocking
           var cookiebot = document.createElement('script');
           cookiebot.id = 'Cookiebot';
           cookiebot.src = 'https://consent.cookiebot.com/uc.js';
           cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
-          cookiebot.setAttribute('data-blockingmode', 'auto');
+          cookiebot.setAttribute('data-blockingmode', 'manual');
+          cookiebot.setAttribute('data-gcm-enabled', 'true');
           cookiebot.type = 'text/javascript';
           document.head.appendChild(cookiebot);
           
