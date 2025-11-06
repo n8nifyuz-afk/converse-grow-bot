@@ -1905,6 +1905,8 @@ export default function Chat() {
         })
       };
       console.log('[SEND] Temp message:', { id: tempUserMessage.id, attachments: tempUserMessage.file_attachments?.length });
+      
+      // Only add message to state for manual sends (auto-send already added it)
       setMessages(prev => [...prev, tempUserMessage]);
       scrollToBottom();
     }
