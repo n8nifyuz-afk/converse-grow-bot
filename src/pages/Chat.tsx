@@ -4075,23 +4075,23 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                                       {children}
                                     </h4>,
                        ul: ({
-                         children,
-                         ...props
-                       }) => <ul {...props} className="!my-0 !leading-tight [&>li]:!my-0">
-                                       {children}
-                                     </ul>,
+                          children,
+                          ...props
+                        }) => <ul {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-disc list-inside">
+                                        {children}
+                                      </ul>,
                        ol: ({
-                         children,
-                         ...props
-                       }) => <ol {...props} className="!my-0 !leading-tight [&>li]:!my-0">
+                          children,
+                          ...props
+                        }) => <ol {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-decimal list-inside">
+                                        {children}
+                                      </ol>,
+                        li: ({
+                          children,
+                          ...props
+                        }) => <li {...props} className="!my-0">
                                        {children}
-                                     </ol>,
-                       li: ({
-                         children,
-                         ...props
-                       }) => <li {...props} className="!my-0">
-                                      {children}
-                                    </li>,
+                                     </li>,
                        blockquote: ({
                          children,
                          ...props
