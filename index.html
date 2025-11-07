@@ -74,11 +74,7 @@
           cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
           cookiebot.setAttribute('data-blockingmode', 'auto');
           cookiebot.setAttribute('data-gcm-enabled', 'true');
-          cookiebot.setAttribute('crossorigin', 'anonymous'); // Better error reporting
           cookiebot.type = 'text/javascript';
-          cookiebot.onerror = function() {
-            console.warn('[COOKIEBOT] Script failed to load - continuing without cookie consent');
-          };
           document.head.appendChild(cookiebot);
           
           // Load GTM after delay (gives Cookiebot time to initialize)

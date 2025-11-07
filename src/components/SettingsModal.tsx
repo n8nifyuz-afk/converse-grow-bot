@@ -1399,6 +1399,18 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground mb-2">{t('settings.addMoreSignInMethods')}</p>
                       
+                      {/* Add Phone (for email/OAuth users) */}
+                      {!linkedIdentities.some(id => id.provider === 'phone') && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowPhoneLinkModal(true)}
+                          className="w-full justify-start gap-2 h-10"
+                        >
+                          <Mail className="h-4 w-4" />
+                          <span>{t('settings.linkPhoneNumber')}</span>
+                        </Button>
+                      )}
 
                       
                       {/* Add Social Accounts */}

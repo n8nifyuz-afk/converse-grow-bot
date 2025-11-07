@@ -723,23 +723,3 @@ All colors MUST be HSL.
     }
   }
 }
-
-/* Hide Cookiebot's default banner - we use custom React component */
-#CybotCookiebotDialog,
-#CybotCookiebotDialogBody,
-#CookiebotWidget,
-.CybotCookiebotDialog,
-.CybotCookiebotDialogActive {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Keep Cookiebot declaration button visible (optional - can be removed if not needed) */
-#CybotCookiebotDialogBodyLevelButtonLevelOptinDeclineAll,
-#CybotCookiebotDialogBodyLevelButtonAccept,
-a[href*="cookiebot"] {
-  display: none !important;
-}
-

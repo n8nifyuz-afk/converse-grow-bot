@@ -1398,14 +1398,5 @@
     "policyUpdates": "Policy Updates",
     "governingLaw": "Governing Law",
     "contact": "Contact Us"
-  },
-  "cookieBanner": {
-    "title": "Cookie Preferences",
-    "subtitle": "Manage your privacy settings",
-    "description": "We use cookies to enhance your experience, analyze traffic, and serve personalized content.",
-    "learnMore": "Learn more",
-    "acceptAll": "Accept All",
-    "rejectAll": "Reject",
-    "customize": "Settings"
   }
 }

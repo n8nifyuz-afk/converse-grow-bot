@@ -491,63 +491,27 @@ serve(async (req) => {
               });
             }
           } else {
-            // Existing limits found - check if billing period has changed
-            const existingPeriodEnd = new Date(existingLimits.period_end);
-            const newPeriodEnd = new Date(periodEndDate.toISOString());
-            const periodHasChanged = existingPeriodEnd.getTime() !== newPeriodEnd.getTime();
+            // Existing limits found - only update limit and period_end, NEVER touch usage or period_start
+            logStep("Existing limits found, updating only limit and period_end", { userId: user.id });
             
-            if (periodHasChanged) {
-              // NEW BILLING PERIOD - Reset usage to 0 immediately
-              logStep("🔄 New billing period detected, resetting usage to 0", { 
-                userId: user.id,
-                oldPeriodEnd: existingPeriodEnd.toISOString(),
-                newPeriodEnd: newPeriodEnd.toISOString()
-              });
-              
-              const { error: resetError } = await supabaseClient
-                .from('usage_limits')
-                .update({
-                  image_generations_used: 0,
-                  image_generations_limit: imageLimit,
-                  period_start: new Date().toISOString(),
-                  period_end: periodEndDate.toISOString(),
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', user.id);
-              
-              if (resetError) {
-                logStep("ERROR: Failed to reset usage_limits", { error: resetError.message });
-              } else {
-                logStep("✅ Usage limits reset for new billing period", { 
-                  userId: user.id, 
-                  limit: imageLimit,
-                  resetUsage: 0,
-                  newPeriodStart: new Date().toISOString()
-                });
-              }
+            const { error: updateError } = await supabaseClient
+              .from('usage_limits')
+              .update({
+                image_generations_limit: imageLimit,
+                period_end: periodEndDate.toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id);
+            
+            if (updateError) {
+              logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
             } else {
-              // SAME PERIOD - Only update limit, preserve usage and period_start
-              logStep("Same billing period, updating only limit", { userId: user.id });
-              
-              const { error: updateError } = await supabaseClient
-                .from('usage_limits')
-                .update({
-                  image_generations_limit: imageLimit,
-                  period_end: periodEndDate.toISOString(),
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', user.id);
-              
-              if (updateError) {
-                logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
-              } else {
-                logStep("✅ Updated usage_limits", { 
-                  userId: user.id, 
-                  limit: imageLimit,
-                  preservedUsage: existingLimits.image_generations_used,
-                  preservedPeriodStart: existingLimits.period_start
-                });
-              }
+              logStep("✅ Updated usage_limits", { 
+                userId: user.id, 
+                limit: imageLimit,
+                preservedUsage: existingLimits.image_generations_used,
+                preservedPeriodStart: existingLimits.period_start
+              });
             }
           }
         }
@@ -1425,8 +1389,7 @@ serve(async (req) => {
           sessionId: session.id,
           paymentStatus: session.payment_status,
           status: session.status,
-          mode: session.mode,
-          subscriptionId: session.subscription
+          mode: session.mode
         });
 
         // If payment failed or session expired, user should remain on free plan
@@ -1437,6 +1400,7 @@ serve(async (req) => {
           });
           
           if (session.customer_email) {
+            // Use profile lookup for efficiency
             const { data: profile } = await supabaseClient
               .from('profiles')
               .select('user_id')
@@ -1448,6 +1412,7 @@ serve(async (req) => {
               const user = userData?.user;
               
               if (user) {
+                // Ensure user stays on free plan and clean up limits
                 await supabaseClient
                   .from('user_subscriptions')
                   .delete()
@@ -1462,106 +1427,11 @@ serve(async (req) => {
               }
             }
           }
-          break;
         }
         
-        // CRITICAL FIX: Save subscription immediately on successful checkout
-        // Per requirements: "checkout.session.completed should persist stripe_subscription_id"
-        if (session.payment_status === 'paid' && session.subscription) {
-          logStep("Successful checkout - saving subscription immediately", {
-            subscriptionId: session.subscription
-          });
-          
-          // Get customer info
-          const customer = await stripe.customers.retrieve(session.customer as string) as Stripe.Customer;
-          const customerUserId = customer.metadata?.user_id;
-          
-          let user;
-          
-          // Match by user_id metadata (most reliable)
-          if (customerUserId) {
-            const { data: userData } = await supabaseClient.auth.admin.getUserById(customerUserId);
-            user = userData?.user;
-            logStep("✅ User matched by metadata", { userId: user?.id });
-          }
-          
-          // Fallback to email matching
-          if (!user && customer.email) {
-            const { data: profileData } = await supabaseClient
-              .from('profiles')
-              .select('user_id')
-              .ilike('email', customer.email)
-              .single();
-            
-            if (profileData) {
-              const { data: userData } = await supabaseClient.auth.admin.getUserById(profileData.user_id);
-              user = userData?.user;
-              logStep("✅ User matched by email", { userId: user?.id });
-            }
-          }
-          
-          if (user) {
-            // Retrieve full subscription details
-            const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-            const productId = subscription.items.data[0].price.product as string;
-            const planMapping = productToPlanMap[productId];
-            
-            if (planMapping) {
-              // Determine period end (trial_end or current_period_end)
-              const periodEndTimestamp = subscription.trial_end || subscription.current_period_end;
-              const periodEndDate = new Date(periodEndTimestamp * 1000);
-              
-              // Save subscription to database
-              const { error: upsertError } = await supabaseClient
-                .from('user_subscriptions')
-                .upsert({
-                  user_id: user.id,
-                  stripe_customer_id: customer.id,
-                  stripe_subscription_id: subscription.id,
-                  product_id: productId,
-                  plan: planMapping.tier,
-                  plan_name: planMapping.name,
-                  status: 'active',
-                  current_period_end: periodEndDate.toISOString(),
-                  updated_at: new Date().toISOString()
-                }, {
-                  onConflict: 'user_id'
-                });
-              
-              if (upsertError) {
-                logStep("❌ Error saving subscription", { error: upsertError.message });
-              } else {
-                logStep("✅ Subscription saved successfully on checkout completion", { 
-                  userId: user.id, 
-                  plan: planMapping.tier,
-                  trialActive: subscription.trial_end ? true : false
-                });
-                
-                // Initialize usage limits
-                const imageLimit = planMapping.tier === 'ultra_pro' ? 2000 : planMapping.tier === 'pro' ? 500 : 0;
-                if (imageLimit > 0) {
-                  await supabaseClient
-                    .from('usage_limits')
-                    .upsert({
-                      user_id: user.id,
-                      period_start: new Date(subscription.created * 1000).toISOString(),
-                      period_end: periodEndDate.toISOString(),
-                      image_generations_used: 0,
-                      image_generations_limit: imageLimit
-                    }, {
-                      onConflict: 'user_id'
-                    });
-                  
-                  logStep("✅ Usage limits initialized", { userId: user.id, limit: imageLimit });
-                }
-              }
-            }
-          } else {
-            logStep("⚠️ Could not find user for checkout session", { customerId: customer.id });
-          }
-        }
-        
-        logStep("Checkout processing complete");
+        // For successful checkouts, subscription.created webhook handles activation
+        // Trial subscriptions are automatically managed by Stripe's trial_period_days
+        logStep("Checkout completed, waiting for subscription.created webhook");
         break;
       }
 

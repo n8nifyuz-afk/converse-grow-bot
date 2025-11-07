@@ -235,10 +235,9 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          request_three_d_secure: 'any', // Force 3DS on first payment to authenticate card
+          request_three_d_secure: 'any', // Always request 3DS for trial signup, then MIT exemption for recurring charges
         },
       },
-      payment_method_collection: 'always',
       automatic_tax: {
         enabled: true,
       },
@@ -247,7 +246,7 @@ serve(async (req) => {
           plan: targetPlan,
           user_id: user.id,
           phone: user.phone || '',
-        },
+        }
       }
     };
     
@@ -260,23 +259,22 @@ serve(async (req) => {
       };
     }
     
-    // For trials: add trial period + €0.99 upfront charge
+    // For trials: add 3-day trial period + €0.99 upfront charge
     if (isTrial) {
-      // PRODUCTION: 2-day trial (Stripe requires minimum 48 hours + buffer)
-      const trialHours = 49; // 2 days + 1 hour buffer to satisfy "at least 2 days"
-      const trialEnd = Math.floor(Date.now() / 1000) + (trialHours * 60 * 60);
-      
-      // Calculate renewal date for display
-      const renewalDate = new Date(trialEnd * 1000);
+      // Calculate renewal date (3 days from now)
+      const renewalDate = new Date();
+      renewalDate.setDate(renewalDate.getDate() + 3);
       const renewalDateStr = renewalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       
-      // Use trial_end instead of trial_period_days for precise control
-      sessionConfig.subscription_data.trial_end = trialEnd;
+      sessionConfig.subscription_data.trial_period_days = 3;
       sessionConfig.subscription_data.trial_settings = {
         end_behavior: {
-          missing_payment_method: 'cancel', // Cancel if no payment method (shouldn't happen with setup_future_usage)
+          missing_payment_method: 'create_invoice', // Create invoice and attempt payment when trial ends
         }
       };
+      
+      // For subscription mode, payment method is automatically saved for off-session charges
+      sessionConfig.subscription_data.payment_behavior = 'allow_incomplete'; // Allow subscription to proceed even if initial payment pending
       
       // Add trial fee as a separate one-time line item charged immediately (EUR only)
       const trialAmount = 99; // €0.99 in cents
@@ -285,7 +283,7 @@ serve(async (req) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: '2-Day Trial Access',
+            name: '3-Day Trial Access',
             description: `Trial access to ${targetPlan === 'pro' ? 'Pro' : 'Ultra Pro'} plan`
           },
           unit_amount: trialAmount,
@@ -304,7 +302,7 @@ serve(async (req) => {
       sessionConfig.subscription_data.metadata.trial_product_id = trialProductId;
       sessionConfig.subscription_data.metadata.trial_end_date = renewalDateStr;
       
-      logStep("Creating subscription with 2-day trial", { 
+      logStep("Creating subscription with 3-day trial", { 
         targetPlan, 
         trialCharge: '€0.99',
         monthlyPrice: priceId,
