@@ -1399,7 +1399,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground mb-2">{t('settings.addMoreSignInMethods')}</p>
                       
-                      {/* Add Phone (for email/OAuth users) */}
+                      {/* Add Phone (for email/OAuth users) - temporarily hidden
                       {!linkedIdentities.some(id => id.provider === 'phone') && (
                         <Button
                           variant="outline"
@@ -1411,6 +1411,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           <span>{t('settings.linkPhoneNumber')}</span>
                         </Button>
                       )}
+                      */}
 
                       
                       {/* Add Social Accounts */}

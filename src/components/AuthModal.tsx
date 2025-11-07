@@ -1161,6 +1161,7 @@ export default function AuthModal({
                           </>}
                       </Button>
 
+                      {/* Phone auth temporarily hidden
                       <Button 
                         onClick={() => {
                           if (isMobile) {
@@ -1178,6 +1179,7 @@ export default function AuthModal({
                         </svg>
                         {t('authModal.continueWithPhone')}
                       </Button>
+                      */}
 
                       <div className="relative my-4">
                         <div className="absolute inset-0 flex items-center">
