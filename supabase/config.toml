@@ -88,4 +88,8 @@ verify_jwt = false
 [functions.fix-subscription-periods]
 verify_jwt = false
 
+# Manual subscription sync for users (requires authentication)
+[functions.manual-sync-subscription]
+verify_jwt = true
+
 
