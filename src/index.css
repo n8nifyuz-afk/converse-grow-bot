@@ -321,6 +321,19 @@
   }
 }
 
+/* Hide Cookiebot's default banner - we use a custom React component */
+#CybotCookiebotDialog,
+#CybotCookiebotDialogBodyUnderlay,
+#CookiebotWidget,
+.CookiebotWidget,
+[id^="Cookiebot"],
+[class^="Cookiebot"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

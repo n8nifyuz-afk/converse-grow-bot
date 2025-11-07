@@ -31,6 +31,7 @@ import Admin from '@/pages/Admin';
 import Features from '@/pages/Features';
 import AITools from '@/pages/AITools';
 import { SubscriptionCheckingOverlay } from '@/components/SubscriptionCheckingOverlay';
+import { CookieBanner } from '@/components/CookieBanner';
 
 const queryClient = new QueryClient();
 
@@ -144,6 +145,7 @@ function AppContent() {
         </Routes>
       </Router>
       
+      <CookieBanner />
       <Toaster />
       <Sonner />
     </>
