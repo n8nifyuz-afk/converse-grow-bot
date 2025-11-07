@@ -243,15 +243,14 @@ serve(async (req) => {
       automatic_tax: {
         enabled: true,
       },
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+      },
       subscription_data: {
         metadata: {
           plan: targetPlan,
           user_id: user.id,
           phone: user.phone || '',
-        },
-        payment_settings: {
-          save_default_payment_method: 'on_subscription',
-          payment_method_types: ['card'],
         },
       }
     };
