@@ -242,11 +242,6 @@ serve(async (req) => {
         enabled: true,
       },
       subscription_data: {
-        // Explicit off-session payment settings for SCA compliance
-        payment_settings: {
-          payment_method_types: ['card'],
-          save_default_payment_method: 'on_subscription', // Explicitly save for off-session use
-        },
         metadata: {
           plan: targetPlan,
           user_id: user.id,
