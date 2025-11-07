@@ -235,7 +235,7 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          request_three_d_secure: 'any', // Request 3DS for initial payment to authenticate the payment method
+          setup_future_usage: 'off_session', // Save payment method for future charges (MIT exemption)
         },
       },
       payment_method_collection: 'always',
@@ -276,7 +276,7 @@ serve(async (req) => {
       sessionConfig.subscription_data.trial_end = trialEnd;
       sessionConfig.subscription_data.trial_settings = {
         end_behavior: {
-          missing_payment_method: 'create_invoice', // Create invoice and attempt payment when trial ends
+          missing_payment_method: 'cancel', // Cancel if no payment method (shouldn't happen with setup_future_usage)
         }
       };
       
