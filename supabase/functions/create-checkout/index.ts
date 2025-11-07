@@ -262,8 +262,8 @@ serve(async (req) => {
     
     // For trials: add trial period + €0.99 upfront charge
     if (isTrial) {
-      // PRODUCTION: 3-day trial (Stripe requires minimum 48 hours)
-      const trialHours = 72; // 3 days * 24 hours
+      // PRODUCTION: 2-day trial (Stripe requires minimum 48 hours)
+      const trialHours = 48; // 2 days * 24 hours
       const trialEnd = Math.floor(Date.now() / 1000) + (trialHours * 60 * 60);
       
       // Calculate renewal date for display
@@ -285,7 +285,7 @@ serve(async (req) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: '3-Day Trial Access',
+            name: '2-Day Trial Access',
             description: `Trial access to ${targetPlan === 'pro' ? 'Pro' : 'Ultra Pro'} plan`
           },
           unit_amount: trialAmount,
@@ -304,7 +304,7 @@ serve(async (req) => {
       sessionConfig.subscription_data.metadata.trial_product_id = trialProductId;
       sessionConfig.subscription_data.metadata.trial_end_date = renewalDateStr;
       
-      logStep("Creating subscription with 3-day trial", { 
+      logStep("Creating subscription with 2-day trial", { 
         targetPlan, 
         trialCharge: '€0.99',
         monthlyPrice: priceId,
