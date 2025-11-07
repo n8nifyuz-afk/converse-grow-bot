@@ -97,7 +97,6 @@ export default function CookieBanner() {
         className={`fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[9998] transition-opacity duration-300 ${
           isAnimating ? 'opacity-100' : 'opacity-0'
         }`}
-        onClick={closeBanner}
       />
 
       {/* Cookie Banner - Full Width Bottom */}
@@ -142,7 +141,7 @@ export default function CookieBanner() {
                 )}
                 {' '}
                 <a 
-                  href="/cookies" 
+                  href="https://www.chatl.ai/cookie-policy" 
                   className="text-primary hover:underline font-medium inline-flex items-center gap-1"
                   target="_blank"
                   rel="noopener noreferrer"
