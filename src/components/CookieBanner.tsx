@@ -31,6 +31,12 @@ export const CookieBanner = () => {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
+    // Check if user has already dismissed the banner
+    const bannerDismissed = localStorage.getItem('cookie_banner_dismissed');
+    if (bannerDismissed === 'true') {
+      return;
+    }
+
     // Wait for Cookiebot to load
     const checkCookiebot = setInterval(() => {
       if (window.Cookiebot) {
@@ -52,11 +58,12 @@ export const CookieBanner = () => {
       console.log('✅ [COOKIE-BANNER] Cookiebot found, submitting consent');
       // Accept all cookies: necessary, preferences, statistics, marketing
       window.Cookiebot.submitCustomConsent(true, true, true, true);
-      setShowBanner(false);
-      console.log('✅ [COOKIE-BANNER] Banner hidden');
     } else {
       console.error('❌ [COOKIE-BANNER] Cookiebot not found');
     }
+    localStorage.setItem('cookie_banner_dismissed', 'true');
+    setShowBanner(false);
+    console.log('✅ [COOKIE-BANNER] Banner hidden');
   };
 
   const handleDeny = () => {
@@ -65,11 +72,12 @@ export const CookieBanner = () => {
       console.log('✅ [COOKIE-BANNER] Cookiebot found, denying non-essential');
       // Only accept necessary cookies, deny all others
       window.Cookiebot.submitCustomConsent(true, false, false, false);
-      setShowBanner(false);
-      console.log('✅ [COOKIE-BANNER] Banner hidden');
     } else {
       console.error('❌ [COOKIE-BANNER] Cookiebot not found');
     }
+    localStorage.setItem('cookie_banner_dismissed', 'true');
+    setShowBanner(false);
+    console.log('✅ [COOKIE-BANNER] Banner hidden');
   };
 
   if (!showBanner) return null;
