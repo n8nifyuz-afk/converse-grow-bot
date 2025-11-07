@@ -264,14 +264,19 @@ serve(async (req) => {
       };
     }
     
-    // For trials: add 3-day trial period + €0.99 upfront charge
+    // For trials: add trial period + €0.99 upfront charge
     if (isTrial) {
-      // Calculate renewal date (3 days from now)
-      const renewalDate = new Date();
-      renewalDate.setDate(renewalDate.getDate() + 3);
+      // TESTING: Use 1 hour trial for faster testing
+      // PRODUCTION: Change back to 3 days
+      const trialHours = 1; // Change to 72 (3 days * 24) for production
+      const trialEnd = Math.floor(Date.now() / 1000) + (trialHours * 60 * 60);
+      
+      // Calculate renewal date for display
+      const renewalDate = new Date(trialEnd * 1000);
       const renewalDateStr = renewalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       
-      sessionConfig.subscription_data.trial_period_days = 3;
+      // Use trial_end instead of trial_period_days for precise control
+      sessionConfig.subscription_data.trial_end = trialEnd;
       sessionConfig.subscription_data.trial_settings = {
         end_behavior: {
           missing_payment_method: 'create_invoice', // Create invoice and attempt payment when trial ends
