@@ -102,12 +102,13 @@ export default function CookieBanner() {
   const handleCustomize = () => {
     try {
       if (window.Cookiebot && typeof window.Cookiebot.renew === 'function') {
+        // Hide our banner so Cookiebot's dialog is visible
+        closeBanner();
+        // Open Cookiebot's native settings dialog
         window.Cookiebot.renew();
-        // Don't close banner - let user complete their choice in Cookiebot dialog
       }
     } catch (error) {
       console.error('[COOKIE-BANNER] Error opening settings:', error);
-      // If Cookiebot settings fail, just close the banner
       closeBanner();
     }
   };
