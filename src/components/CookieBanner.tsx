@@ -44,42 +44,71 @@ export default function CookieBanner() {
   const brandLogo = actualTheme === 'dark' ? logoDark : logoLight;
 
   useEffect(() => {
-    // Wait for Cookiebot to load
+    // Wait for Cookiebot to fully load
     const checkCookiebot = setInterval(() => {
-      if (window.Cookiebot) {
-        clearInterval(checkCookiebot);
-        
-        // Show banner if user hasn't consented yet
-        if (!window.Cookiebot.consented && !window.Cookiebot.declined) {
-          setTimeout(() => {
-            setIsVisible(true);
-            setTimeout(() => setIsAnimating(true), 50);
-          }, 1000); // Small delay for better UX
+      try {
+        if (window.Cookiebot && typeof window.Cookiebot.consented !== 'undefined') {
+          clearInterval(checkCookiebot);
+          
+          // Show banner if user hasn't consented yet
+          if (!window.Cookiebot.consented && !window.Cookiebot.declined) {
+            setTimeout(() => {
+              setIsVisible(true);
+              setTimeout(() => setIsAnimating(true), 50);
+            }, 1000); // Small delay for better UX
+          }
         }
+      } catch (error) {
+        console.error('[COOKIE-BANNER] Error checking Cookiebot:', error);
+        clearInterval(checkCookiebot);
       }
     }, 100);
 
-    return () => clearInterval(checkCookiebot);
+    // Cleanup after 10 seconds if Cookiebot never loads
+    const timeout = setTimeout(() => {
+      clearInterval(checkCookiebot);
+    }, 10000);
+
+    return () => {
+      clearInterval(checkCookiebot);
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleAcceptAll = () => {
-    if (window.Cookiebot) {
-      window.Cookiebot.submitCustomConsent(true, true, true, true);
+    try {
+      if (window.Cookiebot && typeof window.Cookiebot.submitCustomConsent === 'function') {
+        window.Cookiebot.submitCustomConsent(true, true, true, true);
+        closeBanner();
+      }
+    } catch (error) {
+      console.error('[COOKIE-BANNER] Error accepting cookies:', error);
       closeBanner();
     }
   };
 
   const handleRejectAll = () => {
-    if (window.Cookiebot) {
-      window.Cookiebot.submitCustomConsent(true, false, false, false);
+    try {
+      if (window.Cookiebot && typeof window.Cookiebot.submitCustomConsent === 'function') {
+        window.Cookiebot.submitCustomConsent(true, false, false, false);
+        closeBanner();
+      }
+    } catch (error) {
+      console.error('[COOKIE-BANNER] Error rejecting cookies:', error);
       closeBanner();
     }
   };
 
   const handleCustomize = () => {
-    if (window.Cookiebot) {
-      window.Cookiebot.renew();
-      // Don't close banner - let user complete their choice in Cookiebot dialog
+    try {
+      if (window.Cookiebot && typeof window.Cookiebot.renew === 'function') {
+        window.Cookiebot.renew();
+        // Don't close banner - let user complete their choice in Cookiebot dialog
+      }
+    } catch (error) {
+      console.error('[COOKIE-BANNER] Error opening settings:', error);
+      // If Cookiebot settings fail, just close the banner
+      closeBanner();
     }
   };
 
