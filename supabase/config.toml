@@ -84,4 +84,8 @@ verify_jwt = false
 [functions.update-external-id]
 verify_jwt = false
 
+# One-time fix for incorrect subscription periods
+[functions.fix-subscription-periods]
+verify_jwt = false
+
 
