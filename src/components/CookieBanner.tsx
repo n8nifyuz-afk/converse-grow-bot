@@ -100,15 +100,16 @@ export default function CookieBanner() {
         onClick={closeBanner}
       />
 
-      {/* Cookie Banner - Modern Card Design */}
+      {/* Cookie Banner - Full Width Bottom */}
       <div
-        className={`fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-md z-[9999] transition-all duration-500 ease-out ${
-          isAnimating ? 'translate-x-0 opacity-100 scale-100' : '-translate-x-full opacity-0 scale-95'
+        className={`fixed bottom-0 left-0 right-0 z-[9999] transition-all duration-500 ease-out ${
+          isAnimating ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
         }`}
       >
-        <div className="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl overflow-hidden">
+        <div className="bg-card/95 backdrop-blur-xl border-t border-border shadow-2xl overflow-hidden max-w-7xl mx-auto">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header with Logo */}
-          <div className="flex items-start justify-between p-5 pb-4 border-b border-border/50">
+          <div className="flex items-center justify-between py-4 sm:py-5 border-b border-border/50">
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
                 <img src={brandLogo} alt="ChatLearn" className="h-8 w-8 object-contain" />
@@ -133,39 +134,39 @@ export default function CookieBanner() {
           </div>
 
           {/* Content */}
-          <div className="p-5 pt-4">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {t('cookieBanner.description', 
-                'We use cookies to enhance your experience, analyze traffic, and serve personalized content.'
-              )}
-              {' '}
-              <a 
-                href="/cookies" 
-                className="text-primary hover:underline font-medium inline-flex items-center gap-1"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t('cookieBanner.learnMore', 'Learn more')}
-              </a>
-            </p>
+          <div className="py-4 sm:py-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                {t('cookieBanner.description', 
+                  'We use cookies to enhance your experience, analyze traffic, and serve personalized content.'
+                )}
+                {' '}
+                <a 
+                  href="/cookies" 
+                  className="text-primary hover:underline font-medium inline-flex items-center gap-1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t('cookieBanner.learnMore', 'Learn more')}
+                </a>
+              </p>
 
-            {/* Action Buttons - Vertical Stack */}
-            <div className="flex flex-col gap-2 mt-4">
-              <Button
-                onClick={handleAcceptAll}
-                size="sm"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-sm transition-all hover:shadow-md"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                {t('cookieBanner.acceptAll', 'Accept All')}
-              </Button>
-              
-              <div className="grid grid-cols-2 gap-2">
+              {/* Action Buttons - Horizontal on desktop, vertical on mobile */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:flex-shrink-0">
+                <Button
+                  onClick={handleAcceptAll}
+                  size="sm"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-sm transition-all hover:shadow-md"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  {t('cookieBanner.acceptAll', 'Accept All')}
+                </Button>
+                
                 <Button
                   onClick={handleCustomize}
                   size="sm"
                   variant="outline"
-                  className="font-medium border-border/60 hover:border-border hover:bg-muted/50"
+                  className="w-full sm:w-auto font-medium border-border/60 hover:border-border hover:bg-muted/50"
                 >
                   <Settings className="h-3.5 w-3.5 mr-1.5" />
                   {t('cookieBanner.customize', 'Settings')}
@@ -175,12 +176,13 @@ export default function CookieBanner() {
                   onClick={handleRejectAll}
                   size="sm"
                   variant="ghost"
-                  className="font-medium hover:bg-muted/50"
+                  className="w-full sm:w-auto font-medium hover:bg-muted/50"
                 >
                   {t('cookieBanner.rejectAll', 'Reject')}
                 </Button>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
