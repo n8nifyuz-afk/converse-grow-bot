@@ -247,6 +247,7 @@ serve(async (req) => {
           user_id: user.id,
           phone: user.phone || '',
         },
+        payment_behavior: 'default_incomplete', // CRITICAL: Use default_incomplete for proper MIT exemption on recurring charges
         payment_settings: {
           save_default_payment_method: 'on_subscription', // Save payment method to subscription for off-session use
           payment_method_options: {
@@ -280,9 +281,6 @@ serve(async (req) => {
           missing_payment_method: 'create_invoice', // Create invoice and attempt payment when trial ends
         }
       };
-      
-      // For subscription mode, payment method is automatically saved for off-session charges
-      sessionConfig.subscription_data.payment_behavior = 'allow_incomplete'; // Allow subscription to proceed even if initial payment pending
       
       // Add trial fee as a separate one-time line item charged immediately (EUR only)
       const trialAmount = 99; // €0.99 in cents
