@@ -1400,12 +1400,12 @@
     "contact": "Contact Us"
   },
   "cookieBanner": {
-    "title": "We Value Your Privacy",
-    "description": "We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking \"Accept All\", you consent to our use of cookies.",
+    "title": "Cookie Preferences",
+    "subtitle": "Manage your privacy settings",
+    "description": "We use cookies to enhance your experience, analyze traffic, and serve personalized content.",
     "learnMore": "Learn more",
     "acceptAll": "Accept All",
-    "rejectAll": "Reject All",
-    "customize": "Customize",
-    "footerNote": "You can change your preferences at any time in your browser settings."
+    "rejectAll": "Reject",
+    "customize": "Settings"
   }
 }

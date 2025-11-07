@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Cookie, X, Settings } from 'lucide-react';
+import { X, Settings, Shield, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/contexts/ThemeContext';
+import logoLight from '@/assets/chatl-logo-black.png';
+import logoDark from '@/assets/chatl-logo-white.png';
 
 // Declare Cookiebot global
 declare global {
@@ -30,8 +33,15 @@ declare global {
 
 export default function CookieBanner() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Choose logo based on theme
+  const actualTheme = theme === 'system' 
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : theme;
+  const brandLogo = actualTheme === 'dark' ? logoDark : logoLight;
 
   useEffect(() => {
     // Wait for Cookiebot to load
@@ -82,94 +92,94 @@ export default function CookieBanner() {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop - subtle overlay */}
       <div 
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[9998] transition-opacity duration-300 ${
           isAnimating ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={closeBanner}
       />
 
-      {/* Cookie Banner */}
+      {/* Cookie Banner - Modern Card Design */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-[9999] transition-all duration-300 ease-out ${
-          isAnimating ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+        className={`fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-md z-[9999] transition-all duration-500 ease-out ${
+          isAnimating ? 'translate-x-0 opacity-100 scale-100' : '-translate-x-full opacity-0 scale-95'
         }`}
       >
-        <div className="container max-w-6xl mx-auto p-4 pb-6 sm:pb-8">
-          <div className="bg-background border-2 border-primary/20 rounded-2xl shadow-2xl overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background px-6 py-4 border-b border-primary/10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 p-2 rounded-lg">
-                    <Cookie className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {t('cookieBanner.title', 'We Value Your Privacy')}
-                  </h3>
-                </div>
-                <button
-                  onClick={closeBanner}
-                  className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-muted"
-                  aria-label="Close"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+        <div className="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl overflow-hidden">
+          {/* Header with Logo */}
+          <div className="flex items-start justify-between p-5 pb-4 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <img src={brandLogo} alt="ChatLearn" className="h-8 w-8 object-contain" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  {t('cookieBanner.title', 'Cookie Preferences')}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {t('cookieBanner.subtitle', 'Manage your privacy settings')}
+                </p>
               </div>
             </div>
+            <button
+              onClick={closeBanner}
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/50 flex-shrink-0"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
-            {/* Content */}
-            <div className="px-6 py-5">
-              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6">
-                {t('cookieBanner.description', 
-                  'We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies.'
-                )}
-                {' '}
-                <a 
-                  href="/cookies" 
-                  className="text-primary hover:underline font-medium"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t('cookieBanner.learnMore', 'Learn more')}
-                </a>
-              </p>
+          {/* Content */}
+          <div className="p-5 pt-4">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {t('cookieBanner.description', 
+                'We use cookies to enhance your experience, analyze traffic, and serve personalized content.'
+              )}
+              {' '}
+              <a 
+                href="/cookies" 
+                className="text-primary hover:underline font-medium inline-flex items-center gap-1"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('cookieBanner.learnMore', 'Learn more')}
+              </a>
+            </p>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  onClick={handleAcceptAll}
-                  size="lg"
-                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all"
-                >
-                  {t('cookieBanner.acceptAll', 'Accept All')}
-                </Button>
-                
+            {/* Action Buttons - Vertical Stack */}
+            <div className="flex flex-col gap-2 mt-4">
+              <Button
+                onClick={handleAcceptAll}
+                size="sm"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-sm transition-all hover:shadow-md"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                {t('cookieBanner.acceptAll', 'Accept All')}
+              </Button>
+              
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   onClick={handleCustomize}
-                  size="lg"
+                  size="sm"
                   variant="outline"
-                  className="flex-1 border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 font-semibold"
+                  className="font-medium border-border/60 hover:border-border hover:bg-muted/50"
                 >
-                  <Settings className="h-4 w-4 mr-2" />
-                  {t('cookieBanner.customize', 'Customize')}
+                  <Settings className="h-3.5 w-3.5 mr-1.5" />
+                  {t('cookieBanner.customize', 'Settings')}
                 </Button>
                 
                 <Button
                   onClick={handleRejectAll}
-                  size="lg"
+                  size="sm"
                   variant="ghost"
-                  className="flex-1 hover:bg-muted font-semibold"
+                  className="font-medium hover:bg-muted/50"
                 >
-                  {t('cookieBanner.rejectAll', 'Reject All')}
+                  {t('cookieBanner.rejectAll', 'Reject')}
                 </Button>
               </div>
-
-              {/* Footer Note */}
-              <p className="text-xs text-muted-foreground mt-4 text-center">
-                {t('cookieBanner.footerNote', 'You can change your preferences at any time in your browser settings.')}
-              </p>
             </div>
           </div>
         </div>
