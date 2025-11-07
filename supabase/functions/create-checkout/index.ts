@@ -235,7 +235,8 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          request_three_d_secure: 'any', // Force 3DS on first payment (€0.99) to authenticate card
+          request_three_d_secure: 'any', // Force 3DS on first payment to authenticate card
+          setup_future_usage: 'off_session', // Save card for future charges without re-authentication
         },
       },
       payment_method_collection: 'always',
