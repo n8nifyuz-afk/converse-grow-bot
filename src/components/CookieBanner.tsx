@@ -84,17 +84,19 @@ export const CookieBanner = () => {
               Advertising and personalization cookies remain disabled unless you accept them.
             </p>
           </div>
-          <div className="flex gap-3 shrink-0">
+          <div className="flex gap-3 shrink-0 pointer-events-auto">
             <Button
               variant="outline"
               onClick={handleDeny}
-              className="whitespace-nowrap"
+              className="whitespace-nowrap pointer-events-auto cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
             >
               Deny
             </Button>
             <Button
               onClick={handleAcceptAll}
-              className="whitespace-nowrap"
+              className="whitespace-nowrap pointer-events-auto cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
             >
               Accept All
             </Button>
