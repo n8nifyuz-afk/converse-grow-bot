@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import logoLight from '@/assets/chatl-logo-black.png';
+import logoDark from '@/assets/chatl-logo-white.png';
 
 declare global {
   interface Window {
@@ -66,10 +68,22 @@ export const CookieBanner = () => {
     <div className="fixed bottom-0 left-0 right-0 z-[99999] border-t border-border bg-background/95 backdrop-blur-sm shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-foreground text-center sm:text-left flex-1">
-            We use cookies to analyze site usage and measure conversions.
-            Advertising and personalization cookies remain disabled unless you accept them.
-          </p>
+          <div className="flex items-center gap-4 flex-1">
+            <img 
+              src={logoLight} 
+              alt="ChatLearn" 
+              className="h-6 w-auto hidden dark:hidden sm:block"
+            />
+            <img 
+              src={logoDark} 
+              alt="ChatLearn" 
+              className="h-6 w-auto hidden dark:block"
+            />
+            <p className="text-sm text-foreground text-center sm:text-left">
+              We use cookies to analyze site usage and measure conversions.
+              Advertising and personalization cookies remain disabled unless you accept them.
+            </p>
+          </div>
           <div className="flex gap-3 shrink-0">
             <Button
               variant="outline"
