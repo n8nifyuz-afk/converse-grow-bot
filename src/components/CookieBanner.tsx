@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Shield, Check } from 'lucide-react';
+import { Shield, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -153,13 +153,6 @@ export default function CookieBanner() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={closeBanner}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/50 flex-shrink-0"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
 
           {/* Content */}
@@ -167,7 +160,7 @@ export default function CookieBanner() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <p className="text-sm text-muted-foreground leading-relaxed flex-1">
                 {t('cookieBanner.description', 
-                  'We use cookies to enhance your experience, analyze traffic, and serve personalized content.'
+                  'We use cookies to analyze site usage and measure conversions. Advertising and personalization cookies remain disabled unless you accept them.'
                 )}
                 {' '}
                 <a 
