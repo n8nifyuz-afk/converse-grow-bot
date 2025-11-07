@@ -284,13 +284,36 @@ serve(async (req) => {
         let periodEndTimestamp = highestTierSub.current_period_end;
         
         // Check if this is a trial subscription
-        const isTrial = highestTierSub.trial_end !== null;
+        const isTrial = highestTierSub.status === 'trialing' || (highestTierSub.trial_end !== null && highestTierSub.trial_end > Math.floor(Date.now() / 1000));
         
         if (isTrial && highestTierSub.trial_end) {
-          // For trial subscriptions, use trial_end
+          // For active trial subscriptions, use trial_end
           periodEndTimestamp = highestTierSub.trial_end;
-          logStep("Trial subscription detected", { 
+          logStep("Active trial subscription detected", { 
             trialEnd: new Date(periodEndTimestamp * 1000).toISOString() 
+          });
+        } else if (!isTrial && highestTierSub.trial_end && highestTierSub.trial_end < Math.floor(Date.now() / 1000)) {
+          // Trial just ended, converting to paid - recalculate period_end from NOW
+          logStep("Trial converted to paid subscription, recalculating period_end from now");
+          
+          const interval = highestTierSub.items.data[0]?.price?.recurring?.interval || 'month';
+          const intervalCount = highestTierSub.items.data[0]?.price?.recurring?.interval_count || 1;
+          const now = new Date();
+          const newPeriodEnd = new Date(now);
+          
+          if (interval === 'year') {
+            newPeriodEnd.setFullYear(newPeriodEnd.getFullYear() + intervalCount);
+          } else if (interval === 'month') {
+            newPeriodEnd.setMonth(newPeriodEnd.getMonth() + intervalCount);
+          } else if (interval === 'day') {
+            newPeriodEnd.setDate(newPeriodEnd.getDate() + intervalCount);
+          }
+          
+          periodEndTimestamp = Math.floor(newPeriodEnd.getTime() / 1000);
+          logStep("Calculated new period_end for converted subscription", { 
+            periodEnd: newPeriodEnd.toISOString(),
+            interval,
+            intervalCount
           });
         } else if (!periodEndTimestamp || typeof periodEndTimestamp !== 'number') {
           logStep("Missing current_period_end, fetching full subscription", { 
