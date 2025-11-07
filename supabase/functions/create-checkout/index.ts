@@ -249,8 +249,7 @@ serve(async (req) => {
           user_id: user.id,
           phone: user.phone || '',
         }
-      },
-      expand: ['pending_setup_intent', 'latest_invoice.payment_intent'], // CRITICAL: Get 3DS and payment details
+      }
     };
     
     // CRITICAL: Always add customer_update for existing customers
