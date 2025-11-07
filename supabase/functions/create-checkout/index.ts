@@ -261,15 +261,17 @@ serve(async (req) => {
     
     // For trials: add 3-day trial period + €0.99 upfront charge
     if (isTrial) {
-      // Calculate renewal date (3 days from now)
-      const renewalDate = new Date();
-      renewalDate.setDate(renewalDate.getDate() + 3);
-      const renewalDateStr = renewalDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      // Calculate trial end timestamp (3 days from now)
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 3);
+      const trialEndTimestamp = Math.floor(trialEndDate.getTime() / 1000); // Unix timestamp
+      const renewalDateStr = trialEndDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       
-      sessionConfig.subscription_data.trial_period_days = 3;
+      // CRITICAL: Use trial_end instead of trial_period_days to ensure immediate billing after trial
+      sessionConfig.subscription_data.trial_end = trialEndTimestamp;
       sessionConfig.subscription_data.trial_settings = {
         end_behavior: {
-          missing_payment_method: 'create_invoice', // Create invoice and attempt payment when trial ends
+          missing_payment_method: 'cancel', // Cancel subscription if payment fails
         }
       };
       
