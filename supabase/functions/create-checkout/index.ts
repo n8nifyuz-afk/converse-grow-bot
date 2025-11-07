@@ -235,7 +235,8 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          setup_future_usage: 'off_session', // Save payment method for future charges (MIT exemption)
+          setup_future_usage: 'off_session', // Save payment method for MIT exemption on future charges
+          request_three_d_secure: 'any', // Force 3DS on first payment (€0.99) to authenticate card
         },
       },
       payment_method_collection: 'always',
