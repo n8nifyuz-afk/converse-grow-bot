@@ -238,6 +238,7 @@ serve(async (req) => {
           request_three_d_secure: 'any', // Request 3DS for initial payment to authenticate the payment method
         },
       },
+      payment_method_collection: 'always',
       automatic_tax: {
         enabled: true,
       },
@@ -247,11 +248,8 @@ serve(async (req) => {
           user_id: user.id,
           phone: user.phone || '',
         },
-        // CRITICAL: Do NOT set payment_behavior - Stripe Checkout handles PM setup automatically for subscriptions
-        // This ensures proper MIT (Merchant Initiated Transaction) exemption for future off-session charges
-        payment_settings: {
-          save_default_payment_method: 'on_subscription', // Saves PM to customer with off_session mandate
-        }
+        // CRITICAL: Stripe Checkout automatically saves PM for subscriptions with off_session mandate
+        // No additional configuration needed - MIT exemption happens automatically
       }
     };
     
