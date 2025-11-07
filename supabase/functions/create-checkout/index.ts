@@ -248,9 +248,6 @@ serve(async (req) => {
           user_id: user.id,
           phone: user.phone || '',
         },
-        payment_settings: {
-          save_default_payment_method: 'on_subscription', // Save payment method for MIT exemption
-        },
       }
     };
     
