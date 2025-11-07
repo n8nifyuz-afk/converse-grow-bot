@@ -264,9 +264,8 @@ serve(async (req) => {
     
     // For trials: add trial period + €0.99 upfront charge
     if (isTrial) {
-      // TESTING: Use 1 hour trial for faster testing
-      // PRODUCTION: Change back to 3 days
-      const trialHours = 1; // Change to 72 (3 days * 24) for production
+      // PRODUCTION: 3-day trial (Stripe requires minimum 48 hours)
+      const trialHours = 72; // 3 days * 24 hours
       const trialEnd = Math.floor(Date.now() / 1000) + (trialHours * 60 * 60);
       
       // Calculate renewal date for display
