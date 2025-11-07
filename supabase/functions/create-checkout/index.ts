@@ -235,7 +235,7 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          request_three_d_secure: 'any', // Always request 3DS for initial payment
+          request_three_d_secure: 'automatic', // Only request 3DS when required by issuer/regulation
         },
       },
       automatic_tax: {
