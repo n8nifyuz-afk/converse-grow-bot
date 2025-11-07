@@ -9,7 +9,7 @@ import logoDark from '@/assets/chatl-logo-white.png';
 // Declare Cookiebot global
 declare global {
   interface Window {
-    CookieConsent?: {
+    Cookiebot?: {
       consent: {
         necessary: boolean;
         preferences: boolean;
@@ -21,10 +21,6 @@ declare global {
       show: () => void;
       hide: () => void;
       renew: () => void;
-      submitConsent: (
-        stamp?: string,
-        bulk?: boolean
-      ) => void;
     };
   }
 }
@@ -42,14 +38,14 @@ export default function CookieBanner() {
   const brandLogo = actualTheme === 'dark' ? logoDark : logoLight;
 
   useEffect(() => {
-    // Wait for CookieConsent to fully load
-    const checkCookieConsent = setInterval(() => {
+    // Wait for Cookiebot to fully load
+    const checkCookiebot = setInterval(() => {
       try {
-        if (window.CookieConsent && typeof window.CookieConsent.consented !== 'undefined') {
-          clearInterval(checkCookieConsent);
+        if (window.Cookiebot && typeof window.Cookiebot.consented !== 'undefined') {
+          clearInterval(checkCookiebot);
           
           // Show banner if user hasn't consented yet
-          if (!window.CookieConsent.consented && !window.CookieConsent.declined) {
+          if (!window.Cookiebot.consented && !window.Cookiebot.declined) {
             setTimeout(() => {
               setIsVisible(true);
               setTimeout(() => setIsAnimating(true), 50);
@@ -57,31 +53,29 @@ export default function CookieBanner() {
           }
         }
       } catch (error) {
-        console.error('[COOKIE-BANNER] Error checking CookieConsent:', error);
-        clearInterval(checkCookieConsent);
+        console.error('[COOKIE-BANNER] Error checking Cookiebot:', error);
+        clearInterval(checkCookiebot);
       }
     }, 100);
 
-    // Cleanup after 10 seconds if CookieConsent never loads
+    // Cleanup after 10 seconds if Cookiebot never loads
     const timeout = setTimeout(() => {
-      clearInterval(checkCookieConsent);
+      clearInterval(checkCookiebot);
     }, 10000);
 
     return () => {
-      clearInterval(checkCookieConsent);
+      clearInterval(checkCookiebot);
       clearTimeout(timeout);
     };
   }, []);
 
   const handleAcceptAll = () => {
     try {
-      if (window.CookieConsent) {
-        // Accept all cookies by updating consent
-        window.CookieConsent.consent.preferences = true;
-        window.CookieConsent.consent.statistics = true;
-        window.CookieConsent.consent.marketing = true;
-        window.CookieConsent.submitConsent();
+      if (window.Cookiebot && window.Cookiebot.renew) {
+        // Hide our banner
         closeBanner();
+        // Let Cookiebot handle the consent (opens their dialog)
+        window.Cookiebot.renew();
       }
     } catch (error) {
       console.error('[COOKIE-BANNER] Error accepting cookies:', error);
@@ -91,13 +85,11 @@ export default function CookieBanner() {
 
   const handleRejectAll = () => {
     try {
-      if (window.CookieConsent) {
-        // Keep only necessary cookies
-        window.CookieConsent.consent.preferences = false;
-        window.CookieConsent.consent.statistics = false;
-        window.CookieConsent.consent.marketing = false;
-        window.CookieConsent.submitConsent();
+      if (window.Cookiebot && window.Cookiebot.renew) {
+        // Hide our banner
         closeBanner();
+        // Let Cookiebot handle the consent (opens their dialog)
+        window.Cookiebot.renew();
       }
     } catch (error) {
       console.error('[COOKIE-BANNER] Error rejecting cookies:', error);
