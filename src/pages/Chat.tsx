@@ -4074,24 +4074,24 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
                        }) => <h4 {...props} className="!my-0.5 !mb-0.5">
                                       {children}
                                     </h4>,
-                       ul: ({
-                          children,
-                          ...props
-                        }) => <ul {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-disc pl-5 space-y-1">
+                        ul: ({
+                           children,
+                           ...props
+                         }) => <ul {...props} className="!my-1 !leading-relaxed list-disc pl-6 space-y-0.5" style={{ listStyleType: 'disc', listStylePosition: 'outside' }}>
+                                         {children}
+                                       </ul>,
+                         ol: ({
+                           children,
+                           ...props
+                         }) => <ol {...props} className="!my-1 !leading-relaxed list-decimal pl-6 space-y-0.5" style={{ listStyleType: 'decimal', listStylePosition: 'outside' }}>
+                                         {children}
+                                       </ol>,
+                         li: ({
+                           children,
+                           ...props
+                         }) => <li {...props} className="!my-0.5" style={{ display: 'list-item' }}>
                                         {children}
-                                      </ul>,
-                        ol: ({
-                          children,
-                          ...props
-                        }) => <ol {...props} className="!my-0 !leading-tight [&>li]:!my-0 list-decimal pl-5 space-y-1">
-                                        {children}
-                                      </ol>,
-                        li: ({
-                          children,
-                          ...props
-                        }) => <li {...props} className="!my-0">
-                                       {children}
-                                     </li>,
+                                      </li>,
                        blockquote: ({
                          children,
                          ...props
