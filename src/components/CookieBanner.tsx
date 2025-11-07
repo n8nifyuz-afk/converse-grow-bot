@@ -47,18 +47,28 @@ export const CookieBanner = () => {
   }, []);
 
   const handleAcceptAll = () => {
+    console.log('🟢 [COOKIE-BANNER] Accept All clicked');
     if (window.Cookiebot) {
+      console.log('✅ [COOKIE-BANNER] Cookiebot found, submitting consent');
       // Accept all cookies: necessary, preferences, statistics, marketing
       window.Cookiebot.submitCustomConsent(true, true, true, true);
       setShowBanner(false);
+      console.log('✅ [COOKIE-BANNER] Banner hidden');
+    } else {
+      console.error('❌ [COOKIE-BANNER] Cookiebot not found');
     }
   };
 
   const handleDeny = () => {
+    console.log('🔴 [COOKIE-BANNER] Deny clicked');
     if (window.Cookiebot) {
+      console.log('✅ [COOKIE-BANNER] Cookiebot found, denying non-essential');
       // Only accept necessary cookies, deny all others
       window.Cookiebot.submitCustomConsent(true, false, false, false);
       setShowBanner(false);
+      console.log('✅ [COOKIE-BANNER] Banner hidden');
+    } else {
+      console.error('❌ [COOKIE-BANNER] Cookiebot not found');
     }
   };
 
@@ -66,12 +76,11 @@ export const CookieBanner = () => {
 
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm shadow-lg pointer-events-auto" 
-      style={{ zIndex: 2147483647, pointerEvents: 'auto' }}
+      className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm shadow-lg z-[9999]"
     >
-      <div className="container mx-auto px-4 py-4 pointer-events-auto">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-auto">
-          <div className="flex items-center gap-4 flex-1 pointer-events-none">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1">
             <img 
               src={logoLight} 
               alt="ChatLearn" 
@@ -87,19 +96,17 @@ export const CookieBanner = () => {
               Advertising and personalization cookies remain disabled unless you accept them.
             </p>
           </div>
-          <div className="flex gap-3 shrink-0 pointer-events-auto" style={{ pointerEvents: 'auto' }}>
+          <div className="flex gap-3 shrink-0">
             <Button
               variant="outline"
               onClick={handleDeny}
-              className="whitespace-nowrap pointer-events-auto cursor-pointer relative"
-              style={{ pointerEvents: 'auto', zIndex: 2147483647 }}
+              className="whitespace-nowrap"
             >
               Deny
             </Button>
             <Button
               onClick={handleAcceptAll}
-              className="whitespace-nowrap pointer-events-auto cursor-pointer relative"
-              style={{ pointerEvents: 'auto', zIndex: 2147483647 }}
+              className="whitespace-nowrap"
             >
               Accept All
             </Button>
