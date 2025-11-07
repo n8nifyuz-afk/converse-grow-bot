@@ -243,7 +243,6 @@ serve(async (req) => {
         enabled: true,
       },
       subscription_data: {
-        payment_behavior: 'allow_incomplete', // CRITICAL: Allows subscription creation even if payment pending (required for subscription mode)
         metadata: {
           plan: targetPlan,
           user_id: user.id,
