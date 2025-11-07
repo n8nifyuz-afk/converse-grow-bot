@@ -20,6 +20,7 @@ import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
 import { PricingModal } from '@/components/PricingModal';
 import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
+import { ActiveSubscriptionDialog } from '@/components/ActiveSubscriptionDialog';
 import { toast } from 'sonner';
 import chatgptLogo from '@/assets/chatgpt-logo.png';
 import chatgptLogoLight from '@/assets/chatgpt-logo-light.png';
@@ -261,6 +262,8 @@ export default function Index() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showActiveSubscriptionDialog, setShowActiveSubscriptionDialog] = useState(false);
+  const [selectedUltraModel, setSelectedUltraModel] = useState('');
   const [pendingMessage, setPendingMessage] = useState('');
   const [selectedModel, setSelectedModel] = useState(() => {
     // Use model from navigation state if available, otherwise default to gpt-4o-mini
@@ -665,13 +668,8 @@ export default function Index() {
       // Check if Pro users are trying to use Ultra models
       const isPro = subscriptionStatus.plan === 'Pro';
       if (isPro) {
-        toast.error("This model requires an Ultra Pro subscription", {
-          description: `${selectedModelData?.name} is only available with the Ultra Pro plan`,
-          action: {
-            label: "Upgrade to Ultra Pro",
-            onClick: () => navigate('/pricing')
-          }
-        });
+        setSelectedUltraModel(selectedModelData?.name || '');
+        setShowActiveSubscriptionDialog(true);
         return;
       }
     }
@@ -839,13 +837,14 @@ export default function Index() {
       return;
     }
     
-    // If Pro user tries to select Ultra model, show upgrade dialog
+    // If Pro user tries to select Ultra model, show active subscription dialog
     if (subscriptionStatus.subscribed && selectedModelInfo?.type === 'ultra') {
       const hasUltra = subscriptionStatus.plan === 'ultra_pro';
       
       if (!hasUltra) {
         // User has Pro subscription, trying to use Ultra model
-        setShowUpgradeDialog(true);
+        setSelectedUltraModel(selectedModelInfo?.name || '');
+        setShowActiveSubscriptionDialog(true);
         return;
       }
     }
@@ -1641,6 +1640,13 @@ export default function Index() {
         isOpen={showUpgradeDialog}
         onClose={() => setShowUpgradeDialog(false)}
         currentPlan="Pro"
+      />
+      
+      {/* Active Subscription Dialog */}
+      <ActiveSubscriptionDialog
+        isOpen={showActiveSubscriptionDialog}
+        onClose={() => setShowActiveSubscriptionDialog(false)}
+        modelName={selectedUltraModel}
       />
       </div>
     </div>;

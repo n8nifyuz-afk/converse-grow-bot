@@ -19,6 +19,7 @@ import ProjectEditModal from '@/components/ProjectEditModal';
 import AuthModal from '@/components/AuthModal';
 import { PricingModal } from '@/components/PricingModal';
 import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
+import { ActiveSubscriptionDialog } from '@/components/ActiveSubscriptionDialog';
 import { MessageLimitWarning } from '@/components/MessageLimitWarning';
 
 import { toast } from 'sonner';
@@ -287,6 +288,8 @@ export default function ProjectPage() {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showActiveSubscriptionDialog, setShowActiveSubscriptionDialog] = useState(false);
+  const [selectedUltraModel, setSelectedUltraModel] = useState('');
   const [showLimitWarning, setShowLimitWarning] = useState(false);
   
   // Show all models - access control happens on selection
@@ -411,13 +414,14 @@ export default function ProjectPage() {
       return;
     }
     
-    // If Pro user tries to select Ultra model, show upgrade dialog
+    // If Pro user tries to select Ultra model, show active subscription dialog
     if (subscriptionStatus.subscribed && selectedModelInfo?.type === 'ultra') {
       const hasUltra = subscriptionStatus.plan === 'ultra_pro';
       
       if (!hasUltra) {
         // User has Pro subscription, trying to use Ultra model
-        setShowUpgradeDialog(true);
+        setSelectedUltraModel(selectedModelInfo?.name || '');
+        setShowActiveSubscriptionDialog(true);
         return;
       }
     }
@@ -477,13 +481,8 @@ export default function ProjectPage() {
       // Check if Pro users are trying to use Ultra models
       const isPro = subscriptionStatus.plan === 'Pro';
       if (isPro) {
-        toast.error("This model requires an Ultra Pro subscription", {
-          description: `${selectedModelData?.name} is only available with the Ultra Pro plan`,
-          action: {
-            label: "Upgrade to Ultra Pro",
-            onClick: () => navigate('/pricing')
-          }
-        });
+        setSelectedUltraModel(selectedModelData?.name || '');
+        setShowActiveSubscriptionDialog(true);
         return;
       }
     }
@@ -1786,7 +1785,14 @@ export default function ProjectPage() {
         currentPlan="Pro"
       />
       
-      <AuthModal 
+      {/* Active Subscription Dialog */}
+      <ActiveSubscriptionDialog
+        isOpen={showActiveSubscriptionDialog}
+        onClose={() => setShowActiveSubscriptionDialog(false)}
+        modelName={selectedUltraModel}
+      />
+      
+      <AuthModal
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
       />

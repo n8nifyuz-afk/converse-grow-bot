@@ -28,6 +28,7 @@ import AuthModal from '@/components/AuthModal';
 import { GoProButton } from '@/components/GoProButton';
 import { PricingModal } from '@/components/PricingModal';
 import { UpgradeBlockedDialog } from '@/components/UpgradeBlockedDialog';
+import { ActiveSubscriptionDialog } from '@/components/ActiveSubscriptionDialog';
 import chatgptLogo from '@/assets/chatgpt-logo.png';
 import chatgptLogoLight from '@/assets/chatgpt-logo-light.png';
 import claudeLogo from '@/assets/claude-logo.png';
@@ -259,6 +260,8 @@ export default function Chat() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showActiveSubscriptionDialog, setShowActiveSubscriptionDialog] = useState(false);
+  const [selectedUltraModel, setSelectedUltraModel] = useState('');
   const [messageRatings, setMessageRatings] = useState<{[key: string]: 'like' | 'dislike'}>({});
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -1778,20 +1781,15 @@ export default function Chat() {
       return;
     }
     
-    // If Pro user tries to select Ultra model, show upgrade dialog
+    // If Pro user tries to select Ultra model, show active subscription dialog
     if (subscriptionStatus.subscribed && selectedModelInfo?.type === 'ultra') {
       const hasUltra = subscriptionStatus.plan === 'ultra_pro' || subscriptionStatus.plan === 'Ultra Pro';
       const isPro = subscriptionStatus.plan === 'Pro' || userProfile?.plan === 'Pro';
       
       if (!hasUltra && (isPro || subscriptionStatus.plan === 'pro')) {
         // User has Pro subscription, trying to use Ultra model
-        toast.error("This model requires an Ultra Pro subscription", {
-          description: `${selectedModelInfo?.name} is only available with the Ultra Pro plan`,
-          action: {
-            label: "Upgrade to Ultra Pro",
-            onClick: () => window.location.href = '/pricing'
-          }
-        });
+        setSelectedUltraModel(selectedModelInfo?.name || '');
+        setShowActiveSubscriptionDialog(true);
         return;
       }
     }
@@ -1852,13 +1850,8 @@ export default function Chat() {
       // Check if Pro users are trying to use Ultra models
       const isPro = subscriptionStatus.plan === 'Pro' || userProfile?.plan === 'Pro';
       if (isPro) {
-        toast.error("This model requires an Ultra Pro subscription", {
-          description: `${selectedModelData?.name} is only available with the Ultra Pro plan`,
-          action: {
-            label: "Upgrade to Ultra Pro",
-            onClick: () => window.location.href = '/pricing'
-          }
-        });
+        setSelectedUltraModel(selectedModelData?.name || '');
+        setShowActiveSubscriptionDialog(true);
         return;
       }
     }
@@ -4771,6 +4764,13 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
         isOpen={showUpgradeDialog}
         onClose={() => setShowUpgradeDialog(false)}
         currentPlan="Pro"
+      />
+      
+      {/* Active Subscription Dialog */}
+      <ActiveSubscriptionDialog
+        isOpen={showActiveSubscriptionDialog}
+        onClose={() => setShowActiveSubscriptionDialog(false)}
+        modelName={selectedUltraModel}
       />
     </div>
   );
