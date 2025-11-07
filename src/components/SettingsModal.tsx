@@ -29,8 +29,7 @@ import {
   Crown,
   ImageIcon,
   Languages,
-  UserPlus,
-  RefreshCw
+  UserPlus
 } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -1202,62 +1201,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                             <p className="text-xs text-muted-foreground">{t('subscription.remaining')}</p>
                           </div>
                         </div>
-                        
-                        {/* Refresh Limits Button */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={async () => {
-                            try {
-                              const { data: { session } } = await supabase.auth.getSession();
-                              if (!session) {
-                                toast({
-                                  title: "Error",
-                                  description: "Please log in first",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-                              
-                              toast({
-                                title: "Syncing...",
-                                description: "Syncing subscription limits..."
-                              });
-                              
-                              const response = await supabase.functions.invoke('manual-sync-subscription', {
-                                headers: {
-                                  Authorization: `Bearer ${session.access_token}`
-                                }
-                              });
-                              
-                              if (response.error) {
-                                throw response.error;
-                              }
-                              
-                              toast({
-                                title: "Success",
-                                description: "Subscription synced successfully!"
-                              });
-                              
-                              // Refresh limits
-                              checkLimits();
-                              
-                              // Refresh the page to update subscription status
-                              setTimeout(() => window.location.reload(), 1000);
-                            } catch (error) {
-                              console.error('Sync error:', error);
-                              toast({
-                                title: "Error",
-                                description: "Failed to sync subscription",
-                                variant: "destructive"
-                              });
-                            }
-                          }}
-                        >
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Refresh Limits
-                        </Button>
                         
                         {/* Upgrade suggestion for Pro users */}
                         {['prod_TGsOnuDkIh9hVG', 'prod_TGqo8h59qNKZ4m', 'prod_TGqqoPGWQJ0T4a', 'prod_TIHYThP5XmWyWy'].includes(subscriptionStatus.product_id || '') && usageLimits.remaining < 100 && (

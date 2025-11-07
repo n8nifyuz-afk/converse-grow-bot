@@ -1036,26 +1036,57 @@ serve(async (req) => {
           }
         }
         
-        // CRITICAL FIX: Check updated_at to prevent double reset
-        // Use .maybeSingle() instead of .single() to avoid errors when no records exist
-        const { data: existingLimits } = await supabaseClient
-          .from('usage_limits')
-          .select('updated_at')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // CRITICAL FIX: Create/update usage_limits when payment succeeds
+        logStep("Creating/updating usage limits after successful payment", { userId: user.id });
         
-        // Don't delete usage_limits - let natural expiry handle it
-        // This prevents race conditions with subscription.updated and cron jobs
-        if (existingLimits) {
-          const timeSinceUpdate = Date.now() - new Date(existingLimits.updated_at).getTime();
-          logStep("Subscription activated, usage limits exist", { 
-            userId: user.id,
-            timeSinceUpdate: Math.floor(timeSinceUpdate / 1000) + " seconds"
-          });
-        } else {
-          logStep("Subscription activated, no usage limits yet (will be created on first use)", { 
-            userId: user.id 
-          });
+        // Get subscription details to determine correct period and limits
+        if (invoice.subscription) {
+          const stripeSubscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+          const { data: dbSubscription } = await supabaseClient
+            .from('user_subscriptions')
+            .select('plan, created_at, current_period_end')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (dbSubscription) {
+            // Determine image limit based on plan
+            const imageLimit = dbSubscription.plan === 'ultra_pro' ? 2000 : dbSubscription.plan === 'pro' ? 500 : 0;
+            
+            // Calculate correct period_end from subscription
+            const periodStart = new Date(dbSubscription.created_at);
+            const periodEnd = new Date(stripeSubscription.current_period_end * 1000);
+            
+            logStep("Setting usage limits", { 
+              plan: dbSubscription.plan,
+              imageLimit,
+              periodStart: periodStart.toISOString(),
+              periodEnd: periodEnd.toISOString()
+            });
+            
+            // Create or update usage_limits with correct period and reset usage count
+            const { error: limitsError } = await supabaseClient
+              .from('usage_limits')
+              .upsert({
+                user_id: user.id,
+                period_start: periodStart.toISOString(),
+                period_end: periodEnd.toISOString(),
+                image_generations_limit: imageLimit,
+                image_generations_used: 0, // Reset on new payment
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'user_id'
+              });
+            
+            if (limitsError) {
+              logStep("ERROR: Failed to update usage limits", { error: limitsError.message });
+            } else {
+              logStep("✅ Usage limits created/updated successfully", { 
+                userId: user.id,
+                limit: imageLimit,
+                remaining: imageLimit
+              });
+            }
+          }
         }
         break;
       }
