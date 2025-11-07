@@ -243,7 +243,7 @@ serve(async (req) => {
         enabled: true,
       },
       subscription_data: {
-        payment_behavior: 'default_incomplete', // CRITICAL: Allows 3DS flow and proper authentication handling
+        payment_behavior: 'allow_incomplete', // CRITICAL: Allows subscription creation even if payment pending (required for subscription mode)
         metadata: {
           plan: targetPlan,
           user_id: user.id,
