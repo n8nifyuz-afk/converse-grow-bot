@@ -79,7 +79,7 @@ export default function CookieBanner() {
   const handleCustomize = () => {
     if (window.Cookiebot) {
       window.Cookiebot.renew();
-      closeBanner();
+      // Don't close banner - let user complete their choice in Cookiebot dialog
     }
   };
 
