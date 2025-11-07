@@ -65,10 +65,13 @@ export const CookieBanner = () => {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[999999] border-t border-border bg-background/95 backdrop-blur-sm shadow-lg">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1">
+    <div 
+      className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm shadow-lg pointer-events-auto" 
+      style={{ zIndex: 2147483647, pointerEvents: 'auto' }}
+    >
+      <div className="container mx-auto px-4 py-4 pointer-events-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-auto">
+          <div className="flex items-center gap-4 flex-1 pointer-events-none">
             <img 
               src={logoLight} 
               alt="ChatLearn" 
@@ -84,19 +87,19 @@ export const CookieBanner = () => {
               Advertising and personalization cookies remain disabled unless you accept them.
             </p>
           </div>
-          <div className="flex gap-3 shrink-0 pointer-events-auto">
+          <div className="flex gap-3 shrink-0 pointer-events-auto" style={{ pointerEvents: 'auto' }}>
             <Button
               variant="outline"
               onClick={handleDeny}
-              className="whitespace-nowrap pointer-events-auto cursor-pointer"
-              style={{ pointerEvents: 'auto' }}
+              className="whitespace-nowrap pointer-events-auto cursor-pointer relative"
+              style={{ pointerEvents: 'auto', zIndex: 2147483647 }}
             >
               Deny
             </Button>
             <Button
               onClick={handleAcceptAll}
-              className="whitespace-nowrap pointer-events-auto cursor-pointer"
-              style={{ pointerEvents: 'auto' }}
+              className="whitespace-nowrap pointer-events-auto cursor-pointer relative"
+              style={{ pointerEvents: 'auto', zIndex: 2147483647 }}
             >
               Accept All
             </Button>
