@@ -11,22 +11,56 @@ initLanguageDetection();
 
 // Add global error handlers to prevent blank screens
 if (typeof window !== 'undefined') {
+  // List of known third-party domains that can cause harmless errors
+  const thirdPartyDomains = [
+    'googletagmanager.com',
+    'google-analytics.com',
+    'cookiebot.com',
+    'consent.cookiebot.com',
+    'gstatic.com',
+    'doubleclick.net'
+  ];
+  
   window.addEventListener('error', (event) => {
     // Prevent blank screen from external script errors
-    if (event.message === 'Script error.' || !event.filename) {
+    const isThirdPartyError = event.message === 'Script error.' || 
+                             !event.filename || 
+                             event.lineno === 0 ||
+                             thirdPartyDomains.some(domain => event.filename?.includes(domain));
+    
+    if (isThirdPartyError) {
       event.preventDefault();
       if (import.meta.env.DEV) {
-        console.warn('External script error prevented:', event);
+        console.warn('External script error prevented (non-critical):', {
+          message: event.message,
+          filename: event.filename || 'Unknown',
+          source: 'likely third-party tracking'
+        });
       }
+      return;
     }
+    
+    // Log critical errors
+    console.error('Critical error:', event);
   });
   
   window.addEventListener('unhandledrejection', (event) => {
-    // Log unhandled promise rejections but don't crash
+    // Log unhandled promise rejections but don't crash for non-critical ones
+    const isThirdPartyRejection = event.reason?.message?.includes('cookiebot') ||
+                                  event.reason?.message?.includes('gtm') ||
+                                  event.reason?.message?.includes('analytics');
+    
+    if (isThirdPartyRejection) {
+      event.preventDefault();
+      if (import.meta.env.DEV) {
+        console.warn('Third-party promise rejection prevented:', event.reason);
+      }
+      return;
+    }
+    
     if (import.meta.env.DEV) {
       console.error('Unhandled promise rejection:', event.reason);
     }
-    event.preventDefault();
   });
 }
 

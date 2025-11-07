@@ -74,33 +74,54 @@
           cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
           cookiebot.setAttribute('data-blockingmode', 'auto');
           cookiebot.setAttribute('data-gcm-enabled', 'true');
+          cookiebot.setAttribute('crossorigin', 'anonymous');
           cookiebot.type = 'text/javascript';
+          // Silently catch Cookiebot errors
+          cookiebot.onerror = function() {
+            console.warn('Cookiebot failed to load - non-critical');
+          };
           document.head.appendChild(cookiebot);
           
-          // Load GTM after delay (gives Cookiebot time to initialize)
+            // Load GTM after delay (gives Cookiebot time to initialize)
           setTimeout(function() {
-            // Load GTM
+            // Load GTM with error handling
             (function(w,d,s,l,i){
-              w[l]=w[l]||[];
-              w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-              var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-              j.async=true;
-              j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-              f.parentNode.insertBefore(j,f);
+              try {
+                w[l]=w[l]||[];
+                w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+                var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+                j.async=true;
+                j.crossOrigin='anonymous';
+                j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+                j.onerror = function() {
+                  console.warn('GTM failed to load - non-critical');
+                };
+                f.parentNode.insertBefore(j,f);
+              } catch(e) {
+                console.warn('GTM initialization error - non-critical', e);
+              }
             })(window,document,'script','dataLayer','GTM-NMLGMTL5');
             
             // Load GA4 gtag.js and configure
             var gtagScript = document.createElement('script');
             gtagScript.async = true;
+            gtagScript.crossOrigin = 'anonymous';
             gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
+            gtagScript.onerror = function() {
+              console.warn('Google Analytics failed to load - non-critical');
+            };
             gtagScript.onload = function() {
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              window.gtag = gtag;
-              gtag('js', new Date());
-              gtag('config', 'AW-16917874636');
-              gtag('config', 'G-EDSR82W70J');
+              try {
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                window.gtag = gtag;
+                gtag('js', new Date());
+                gtag('config', 'AW-16917874636');
+                gtag('config', 'G-EDSR82W70J');
+              } catch(e) {
+                console.warn('Google Analytics config error - non-critical', e);
+              }
             };
             document.head.appendChild(gtagScript);
           }, 500);
