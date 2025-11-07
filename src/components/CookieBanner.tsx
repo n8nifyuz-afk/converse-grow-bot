@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Settings, Shield, Check } from 'lucide-react';
+import { X, Shield, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -189,16 +189,6 @@ export default function CookieBanner() {
                 >
                   <Check className="h-4 w-4 mr-2" />
                   {t('cookieBanner.acceptAll', 'Accept All')}
-                </Button>
-                
-                <Button
-                  onClick={handleCustomize}
-                  size="sm"
-                  variant="outline"
-                  className="w-full sm:w-auto font-medium border-border/60 hover:border-border hover:bg-muted/50"
-                >
-                  <Settings className="h-3.5 w-3.5 mr-1.5" />
-                  {t('cookieBanner.customize', 'Settings')}
                 </Button>
                 
                 <Button
