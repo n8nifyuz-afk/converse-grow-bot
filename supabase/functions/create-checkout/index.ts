@@ -243,9 +243,6 @@ serve(async (req) => {
       automatic_tax: {
         enabled: true,
       },
-      payment_settings: {
-        save_default_payment_method: 'on_subscription',
-      },
       subscription_data: {
         metadata: {
           plan: targetPlan,
