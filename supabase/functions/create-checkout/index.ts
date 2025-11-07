@@ -235,19 +235,22 @@ serve(async (req) => {
       payment_method_types: ['card'],
       payment_method_options: {
         card: {
-          request_three_d_secure: 'any', // Always request 3DS for trial signup, then MIT exemption for recurring charges
+          request_three_d_secure: 'any', // Always request 3DS for initial payment
+          setup_future_usage: 'off_session', // CRITICAL: Saves card for future MIT (Merchant Initiated Transactions)
         },
       },
       automatic_tax: {
         enabled: true,
       },
       subscription_data: {
+        payment_behavior: 'default_incomplete', // CRITICAL: Allows 3DS flow and proper authentication handling
         metadata: {
           plan: targetPlan,
           user_id: user.id,
           phone: user.phone || '',
         }
-      }
+      },
+      expand: ['pending_setup_intent', 'latest_invoice.payment_intent'], // CRITICAL: Get 3DS and payment details
     };
     
     // CRITICAL: Always add customer_update for existing customers
@@ -272,9 +275,6 @@ serve(async (req) => {
           missing_payment_method: 'create_invoice', // Create invoice and attempt payment when trial ends
         }
       };
-      
-      // For subscription mode, payment method is automatically saved for off-session charges
-      sessionConfig.subscription_data.payment_behavior = 'allow_incomplete'; // Allow subscription to proceed even if initial payment pending
       
       // Add trial fee as a separate one-time line item charged immediately (EUR only)
       const trialAmount = 99; // €0.99 in cents
