@@ -247,14 +247,10 @@ serve(async (req) => {
           user_id: user.id,
           phone: user.phone || '',
         },
-        payment_behavior: 'default_incomplete', // CRITICAL: Use default_incomplete for proper MIT exemption on recurring charges
+        // CRITICAL: Do NOT set payment_behavior - Stripe Checkout handles PM setup automatically for subscriptions
+        // This ensures proper MIT (Merchant Initiated Transaction) exemption for future off-session charges
         payment_settings: {
-          save_default_payment_method: 'on_subscription', // Save payment method to subscription for off-session use
-          payment_method_options: {
-            card: {
-              request_three_d_secure: 'automatic', // Use automatic 3DS for recurring charges (MIT exemption)
-            },
-          },
+          save_default_payment_method: 'on_subscription', // Saves PM to customer with off_session mandate
         }
       }
     };
