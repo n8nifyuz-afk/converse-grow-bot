@@ -236,7 +236,6 @@ serve(async (req) => {
       payment_method_options: {
         card: {
           request_three_d_secure: 'any', // Always request 3DS for initial payment
-          setup_future_usage: 'off_session', // CRITICAL: Saves card for future MIT (Merchant Initiated Transactions)
         },
       },
       automatic_tax: {
