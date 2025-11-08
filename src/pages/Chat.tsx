@@ -333,6 +333,12 @@ export default function Chat() {
       setPendingImageGenerations(new Set());
       setLoading(false);
       
+      // Auto-focus textarea when switching to a new/different chat
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+      
       // Only fetch messages if we're NOT about to auto-send
       // Auto-send will show temp message and handle everything via realtime
       if (!shouldAutoSend.current) {
