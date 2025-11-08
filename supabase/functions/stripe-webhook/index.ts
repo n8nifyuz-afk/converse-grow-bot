@@ -514,27 +514,63 @@ serve(async (req) => {
               });
             }
           } else {
-            // Existing limits found - only update limit and period_end, NEVER touch usage or period_start
-            logStep("Existing limits found, updating only limit and period_end", { userId: user.id });
+            // Check if this is a trial conversion (trial → paid subscription)
+            const isTrialConversion = highestTierSub.metadata?.is_trial === 'true' && 
+                                     highestTierSub.trial_end && 
+                                     (highestTierSub.trial_end * 1000) < Date.now();
             
-            const { error: updateError } = await supabaseClient
-              .from('usage_limits')
-              .update({
-                image_generations_limit: imageLimit,
-                period_end: periodEndDate.toISOString(),
-                updated_at: new Date().toISOString()
-              })
-              .eq('user_id', user.id);
-            
-            if (updateError) {
-              logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
-            } else {
-              logStep("✅ Updated usage_limits", { 
-                userId: user.id, 
-                limit: imageLimit,
-                preservedUsage: existingLimits.image_generations_used,
-                preservedPeriodStart: existingLimits.period_start
+            if (isTrialConversion) {
+              // TRIAL CONVERSION: Reset usage to 0 for the new paid period
+              logStep("Trial conversion detected - resetting usage limits", { 
+                userId: user.id,
+                previousUsage: existingLimits.image_generations_used
               });
+              
+              const { error: resetError } = await supabaseClient
+                .from('usage_limits')
+                .update({
+                  image_generations_limit: imageLimit,
+                  image_generations_used: 0, // Reset to 0 for paid subscription
+                  period_start: new Date().toISOString(), // New period starts now
+                  period_end: periodEndDate.toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', user.id);
+              
+              if (resetError) {
+                logStep("ERROR: Failed to reset usage_limits for trial conversion", { error: resetError.message });
+              } else {
+                logStep("✅ Usage limits reset for trial conversion", { 
+                  userId: user.id, 
+                  limit: imageLimit,
+                  previousUsage: existingLimits.image_generations_used,
+                  newUsage: 0,
+                  display: `0/${imageLimit}`
+                });
+              }
+            } else {
+              // REGULAR UPDATE: Preserve usage and period_start for existing paid subscriptions
+              logStep("Existing limits found, updating only limit and period_end", { userId: user.id });
+              
+              const { error: updateError } = await supabaseClient
+                .from('usage_limits')
+                .update({
+                  image_generations_limit: imageLimit,
+                  period_end: periodEndDate.toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', user.id);
+              
+              if (updateError) {
+                logStep("ERROR: Failed to update usage_limits", { error: updateError.message });
+              } else {
+                logStep("✅ Updated usage_limits", { 
+                  userId: user.id, 
+                  limit: imageLimit,
+                  preservedUsage: existingLimits.image_generations_used,
+                  preservedPeriodStart: existingLimits.period_start
+                });
+              }
             }
           }
         }
