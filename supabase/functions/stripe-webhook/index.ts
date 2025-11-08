@@ -283,18 +283,30 @@ serve(async (req) => {
         // CRITICAL FIX: Handle trial subscriptions and calculate correct period_end
         let periodEndTimestamp = highestTierSub.current_period_end;
         
-        // Check if this is a trial subscription
+        // Check if this is a trial subscription OR trial conversion
         const isTrial = highestTierSub.status === 'trialing' || (highestTierSub.trial_end !== null && highestTierSub.trial_end > Math.floor(Date.now() / 1000));
+        const hasTrialMetadata = highestTierSub.metadata?.is_trial === 'true';
+        const trialEnded = highestTierSub.trial_end && highestTierSub.trial_end < Math.floor(Date.now() / 1000);
         
-        if (isTrial && highestTierSub.trial_end) {
-          // For active trial subscriptions, use trial_end
+        // CRITICAL: If trial conversion detected OR has trial metadata with active status, 
+        // ALWAYS recalculate period from now (don't trust Stripe's current_period_end)
+        const isTrialConversion = hasTrialMetadata && (trialEnded || highestTierSub.status === 'active');
+        
+        if (isTrial && highestTierSub.trial_end && !isTrialConversion) {
+          // For active trial subscriptions (not yet converted), use trial_end
           periodEndTimestamp = highestTierSub.trial_end;
           logStep("Active trial subscription detected", { 
             trialEnd: new Date(periodEndTimestamp * 1000).toISOString() 
           });
-        } else if (!isTrial && highestTierSub.trial_end && highestTierSub.trial_end < Math.floor(Date.now() / 1000)) {
-          // Trial just ended, converting to paid - recalculate period_end from NOW
-          logStep("Trial converted to paid subscription, recalculating period_end from now");
+        } else if (isTrialConversion) {
+          // Trial conversion detected - ALWAYS recalculate from NOW
+          // Don't trust Stripe's current_period_end as it may still be the trial end date
+          logStep("Trial conversion detected, recalculating period_end from now", {
+            hasTrialMetadata,
+            trialEnded,
+            status: highestTierSub.status,
+            stripeCurrentPeriodEnd: highestTierSub.current_period_end ? new Date(highestTierSub.current_period_end * 1000).toISOString() : null
+          });
           
           const interval = highestTierSub.items.data[0]?.price?.recurring?.interval || 'month';
           const intervalCount = highestTierSub.items.data[0]?.price?.recurring?.interval_count || 1;
