@@ -1,16 +1,68 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Mail, MessageSquare, Phone, Sparkles, Shield, Users } from 'lucide-react';
+import { Mail, MessageSquare, Phone, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import SEO from '@/components/SEO';
+
+const contactFormSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
+  email: z.string().trim().email('Invalid email address').max(255, 'Email must be less than 255 characters'),
+  subject: z.string().trim().min(1, 'Subject is required').max(200, 'Subject must be less than 200 characters'),
+  message: z.string().trim().min(10, 'Message must be at least 10 characters').max(2000, 'Message must be less than 2000 characters'),
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
 
 const Contact = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+  });
+
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true);
+    try {
+      const { data: response, error } = await supabase.functions.invoke('send-contact-email', {
+        body: data,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent!",
+        description: "We've received your message and will get back to you soon.",
+      });
+      
+      reset(); // Clear form
+    } catch (error: any) {
+      console.error('Error sending contact form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again or email us directly at support@chatl.ai",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -43,7 +95,7 @@ const Contact = () => {
                   {t('contactPage.sendMessage')}
                 </h2>
                 
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="name" className="text-foreground font-medium">{t('contactPage.name')}</Label>
@@ -52,7 +104,12 @@ const Contact = () => {
                         type="text" 
                         placeholder={t('contactPage.namePlaceholder')}
                         className="mt-2 border-muted-foreground/20 focus:border-primary"
+                        {...register('name')}
+                        disabled={isSubmitting}
                       />
+                      {errors.name && (
+                        <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="email" className="text-foreground font-medium">{t('contactPage.email')}</Label>
@@ -61,7 +118,12 @@ const Contact = () => {
                         type="email" 
                         placeholder={t('contactPage.emailPlaceholder')}
                         className="mt-2 border-muted-foreground/20 focus:border-primary"
+                        {...register('email')}
+                        disabled={isSubmitting}
                       />
+                      {errors.email && (
+                        <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
+                      )}
                     </div>
                   </div>
                   
@@ -72,7 +134,12 @@ const Contact = () => {
                       type="text" 
                       placeholder={t('contactPage.subjectPlaceholder')}
                       className="mt-2 border-muted-foreground/20 focus:border-primary"
+                      {...register('subject')}
+                      disabled={isSubmitting}
                     />
+                    {errors.subject && (
+                      <p className="text-sm text-destructive mt-1">{errors.subject.message}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -82,11 +149,28 @@ const Contact = () => {
                       rows={6} 
                       placeholder={t('contactPage.messagePlaceholder')}
                       className="mt-2 border-muted-foreground/20 focus:border-primary resize-none"
+                      {...register('message')}
+                      disabled={isSubmitting}
                     />
+                    {errors.message && (
+                      <p className="text-sm text-destructive mt-1">{errors.message.message}</p>
+                    )}
                   </div>
                   
-                  <Button type="submit" size="lg" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                    {t('contactPage.sendMessageButton')}
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      t('contactPage.sendMessageButton')
+                    )}
                   </Button>
                 </form>
               </div>
