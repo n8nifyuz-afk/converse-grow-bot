@@ -713,11 +713,75 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_attempts: {
+        Row: {
+          attempt_number: number
+          created_at: string
+          customer_email: string | null
+          error_code: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          last_retry_at: string | null
+          max_retries: number
+          next_retry_at: string | null
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+          stripe_event_id: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          attempt_number?: number
+          created_at?: string
+          customer_email?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          last_retry_at?: string | null
+          max_retries?: number
+          next_retry_at?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status: string
+          stripe_event_id: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attempt_number?: number
+          created_at?: string
+          customer_email?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          last_retry_at?: string | null
+          max_retries?: number
+          next_retry_at?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          stripe_event_id?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_next_retry: {
+        Args: { p_attempt_number: number }
+        Returns: string
+      }
       check_and_reset_usage_limits: {
         Args: { p_user_id: string }
         Returns: {
