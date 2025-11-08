@@ -515,16 +515,40 @@ serve(async (req) => {
             }
           } else {
             // Check if this is a trial conversion (trial → paid subscription)
-            const isTrialConversion = highestTierSub.metadata?.is_trial === 'true' && 
-                                     highestTierSub.trial_end && 
-                                     (highestTierSub.trial_end * 1000) < Date.now();
+            // Detect trial conversion by checking:
+            // 1. Has is_trial metadata AND trial_end has passed
+            // 2. OR status changed from 'trialing' to 'active'
+            // 3. OR has is_trial metadata and current status is 'active' (manual trial end)
+            const hasTrialMetadata = highestTierSub.metadata?.is_trial === 'true';
+            const trialEnded = highestTierSub.trial_end && (highestTierSub.trial_end * 1000) < Date.now();
+            const statusIsActive = highestTierSub.status === 'active';
+            
+            const isTrialConversion = hasTrialMetadata && (trialEnded || statusIsActive);
             
             if (isTrialConversion) {
               // TRIAL CONVERSION: Reset usage to 0 for the new paid period
               logStep("Trial conversion detected - resetting usage limits", { 
                 userId: user.id,
-                previousUsage: existingLimits.image_generations_used
+                previousUsage: existingLimits.image_generations_used,
+                hasTrialMetadata,
+                trialEnded,
+                statusIsActive,
+                subscriptionStatus: highestTierSub.status
               });
+              
+              // Update Stripe subscription to clear trial metadata
+              try {
+                await stripe.subscriptions.update(highestTierSub.id, {
+                  metadata: {
+                    ...highestTierSub.metadata,
+                    is_trial: 'false', // Mark as no longer trial
+                    converted_at: new Date().toISOString()
+                  }
+                });
+                logStep("✅ Cleared trial metadata in Stripe", { subscriptionId: highestTierSub.id });
+              } catch (metadataError: any) {
+                logStep("WARNING: Could not update Stripe metadata", { error: metadataError.message });
+              }
               
               const { error: resetError } = await supabaseClient
                 .from('usage_limits')
