@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to support team
     const supportEmailResponse = await resend.emails.send({
-      from: "ChatL Contact Form <onboarding@resend.dev>",
+      from: "ChatL Contact Form <no-reply@chatl.ai>",
       reply_to: email, // Allow direct reply to the user
       to: ["support@chatl.ai"],
       subject: `Contact Form: ${subject}`,
@@ -60,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to user
     const userConfirmationResponse = await resend.emails.send({
-      from: "ChatL Support <onboarding@resend.dev>",
+      from: "ChatL Support <no-reply@chatl.ai>",
       to: [email],
       subject: "We received your message!",
       html: `
