@@ -25,6 +25,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Track webhook attempt ID at function level for access in catch block
+  let webhookAttemptId: string | null = null;
+
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -78,6 +81,31 @@ serve(async (req) => {
     // Idempotency handled by Stripe's webhook retry logic and event IDs
 
     logStep("Event type", { type: event.type, eventId: event.id });
+
+    // Track webhook attempt - create initial record
+    const isRetryAttempt = req.headers.get("X-Retry-Attempt") === "true";
+    
+    if (!isRetryAttempt) {
+      const { data: attemptData, error: attemptError } = await supabaseClient
+        .from('webhook_attempts')
+        .insert({
+          stripe_event_id: event.id,
+          event_type: event.type,
+          attempt_number: 1,
+          status: 'processing',
+          request_payload: event,
+          subscription_id: (event.data.object as any).id || null
+        })
+        .select('id')
+        .single();
+      
+      if (!attemptError && attemptData) {
+        webhookAttemptId = attemptData.id;
+        logStep("Webhook attempt tracked", { attemptId: webhookAttemptId });
+      } else {
+        logStep("WARNING: Failed to track webhook attempt", { error: attemptError?.message });
+      }
+    }
 
     // Load product mapping from database
     const { data: productMappings, error: mappingError } = await supabaseClient
@@ -1678,13 +1706,90 @@ serve(async (req) => {
         logStep("Unhandled event type", { type: event.type });
     }
 
+    // Mark webhook attempt as successful (background task)
+    if (webhookAttemptId) {
+      // Use background task to not block response
+      const updateSuccess = async () => {
+        try {
+          await supabaseClient
+            .from('webhook_attempts')
+            .update({
+              status: 'success',
+              response_payload: { received: true },
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', webhookAttemptId);
+          logStep("Webhook attempt marked as success", { attemptId: webhookAttemptId });
+        } catch (err) {
+          logStep("WARNING: Failed to update webhook success status", { 
+            attemptId: webhookAttemptId,
+            error: err instanceof Error ? err.message : String(err)
+          });
+        }
+      };
+      
+      // Start background task
+      try {
+        // @ts-ignore - EdgeRuntime is available in Deno Deploy
+        EdgeRuntime.waitUntil(updateSuccess());
+      } catch {
+        // Fallback: run immediately if waitUntil not available
+        await updateSuccess();
+      }
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorCode = (error as any)?.code || 'UNKNOWN_ERROR';
     logStep("ERROR", { message: errorMessage, stack: error instanceof Error ? error.stack : undefined });
+
+    // Mark webhook attempt as failed with retry scheduling (background task)
+    if (webhookAttemptId) {
+      const updateFailure = async () => {
+        try {
+          // Calculate next retry time using exponential backoff
+          const { data: nextRetryTime } = await supabaseClient.rpc('calculate_next_retry', {
+            p_attempt_number: 1
+          });
+
+          await supabaseClient
+            .from('webhook_attempts')
+            .update({
+              status: 'failed',
+              error_message: errorMessage,
+              error_code: errorCode,
+              next_retry_at: nextRetryTime || new Date(Date.now() + 5 * 60 * 1000).toISOString(), // Fallback: 5 min
+              response_payload: { error: errorMessage },
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', webhookAttemptId);
+          
+          logStep("Webhook attempt marked as failed with retry scheduled", { 
+            attemptId: webhookAttemptId,
+            nextRetry: nextRetryTime 
+          });
+        } catch (err) {
+          logStep("WARNING: Failed to update webhook failure status", { 
+            attemptId: webhookAttemptId,
+            error: err instanceof Error ? err.message : String(err)
+          });
+        }
+      };
+
+      // Start background task
+      try {
+        // @ts-ignore - EdgeRuntime is available in Deno Deploy
+        EdgeRuntime.waitUntil(updateFailure());
+      } catch {
+        // Fallback: run immediately if waitUntil not available
+        await updateFailure();
+      }
+    }
+
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

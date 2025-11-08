@@ -92,4 +92,8 @@ verify_jwt = false
 [functions.manual-sync-subscription]
 verify_jwt = true
 
+# Retry failed webhooks (scheduled by cron)
+[functions.retry-failed-webhooks]
+verify_jwt = false
+
 
