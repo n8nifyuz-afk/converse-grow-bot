@@ -2168,6 +2168,10 @@ export default function Chat() {
         // So we need to poll for the result
         console.log('[IMAGE-GEN] Image generation started, polling for result...');
         
+        // Store the user message ID to track which response belongs to this request
+        const userMessageId = insertedMessage.id;
+        const startTime = Date.now();
+        
         // Poll for up to 60 seconds
         let pollAttempts = 0;
         const maxAttempts = 30; // 30 attempts * 2 seconds = 60 seconds
@@ -2184,12 +2188,14 @@ export default function Chat() {
             return;
           }
           
-          // Fetch latest assistant message for this chat
+          // Fetch assistant messages created AFTER this user message
+          // This ensures we only get the response for THIS request, not old ones
           const { data: latestMessages } = await supabase
             .from('messages')
             .select('*')
             .eq('chat_id', chatId)
             .eq('role', 'assistant')
+            .gte('created_at', insertedMessage.created_at) // Only messages after user request
             .order('created_at', { ascending: false })
             .limit(1);
           
@@ -2201,7 +2207,11 @@ export default function Chat() {
               latestMsg.file_attachments.length > 0;
             
             if (hasImage) {
-              console.log('[IMAGE-GEN-POLL] ✅ Found generated image!');
+              console.log('[IMAGE-GEN-POLL] ✅ Found generated image!', {
+                userMessageId,
+                assistantMessageId: latestMsg.id,
+                timeTaken: `${((Date.now() - startTime) / 1000).toFixed(1)}s`
+              });
               clearInterval(pollInterval);
               await fetchMessages();
               setLoading(false);
