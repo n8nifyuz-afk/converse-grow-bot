@@ -1052,18 +1052,19 @@ serve(async (req) => {
             // Determine image limit based on plan
             const imageLimit = dbSubscription.plan === 'ultra_pro' ? 2000 : dbSubscription.plan === 'pro' ? 500 : 0;
             
-            // Calculate correct period_end from subscription
-            const periodStart = new Date(dbSubscription.created_at);
+            // CRITICAL: Use CURRENT period start from Stripe for renewals, not subscription creation date
+            // This ensures limits reset correctly for each billing period
+            const periodStart = new Date(stripeSubscription.current_period_start * 1000);
             const periodEnd = new Date(stripeSubscription.current_period_end * 1000);
             
-            logStep("Setting usage limits", { 
+            logStep("Setting usage limits for billing period", { 
               plan: dbSubscription.plan,
               imageLimit,
               periodStart: periodStart.toISOString(),
               periodEnd: periodEnd.toISOString()
             });
             
-            // Create or update usage_limits with correct period and reset usage count
+            // Create or update usage_limits - reset usage to 0 and set full limit
             const { error: limitsError } = await supabaseClient
               .from('usage_limits')
               .upsert({
@@ -1071,7 +1072,7 @@ serve(async (req) => {
                 period_start: periodStart.toISOString(),
                 period_end: periodEnd.toISOString(),
                 image_generations_limit: imageLimit,
-                image_generations_used: 0, // Reset on new payment
+                image_generations_used: 0, // Reset to 0 on each payment (shows as 0/500 or 0/2000)
                 updated_at: new Date().toISOString()
               }, {
                 onConflict: 'user_id'
@@ -1080,10 +1081,11 @@ serve(async (req) => {
             if (limitsError) {
               logStep("ERROR: Failed to update usage limits", { error: limitsError.message });
             } else {
-              logStep("✅ Usage limits created/updated successfully", { 
+              logStep("✅ Usage limits reset successfully", { 
                 userId: user.id,
                 limit: imageLimit,
-                remaining: imageLimit
+                used: 0,
+                display: `0/${imageLimit}`
               });
             }
           }
