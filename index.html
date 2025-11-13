@@ -79,21 +79,6 @@
         }
 
         function loadTracking() {
-          // Load Cookiebot FIRST (immediately) - with auto-blocking
-          var cookiebot = document.createElement('script');
-          cookiebot.id = 'Cookiebot';
-          cookiebot.src = 'https://consent.cookiebot.com/uc.js';
-          cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
-          cookiebot.setAttribute('data-blockingmode', 'auto');
-          cookiebot.setAttribute('data-gcm-enabled', 'true');
-          // cookiebot.setAttribute('crossorigin', 'anonymous');
-          cookiebot.type = 'text/javascript';
-          // Silently catch Cookiebot errors
-          cookiebot.onerror = function() {
-            console.warn('Cookiebot failed to load - non-critical');
-          };
-          document.head.appendChild(cookiebot);
-
             // Load GTM after delay (gives Cookiebot time to initialize)
           setTimeout(function() {
             // Load GTM with error handling
