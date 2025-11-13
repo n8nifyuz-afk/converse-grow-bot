@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://accounts.youtube.com https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com https://www.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' blob: data: https://*.supabase.co https://accounts.google.com https://www.google.com https://*.google.com https://speech.googleapis.com https://www.gstatic.com https://*.n8n.cloud wss://*.supabase.co; frame-src 'self' https://accounts.google.com https://www.google.com; worker-src 'self' blob:;"> -->
     <title>ChatLearn - AI Chat Platform</title>
     <meta name="description" content="ChatLearn - Your intelligent AI chat platform for seamless conversations" />
@@ -27,7 +30,7 @@
     <script>
       window.dataLayer = window.dataLayer || [];
       window.gtag = function(){dataLayer.push(arguments);}
-      
+
       // Google Consent Mode v2 - Privacy-friendly conversion tracking
       // Tracks conversions but blocks remarketing cookies by default
       gtag('consent', 'default', {
@@ -40,22 +43,22 @@
         'security_storage': 'granted',        // ✅ Essential (always allowed)
         'wait_for_update': 500
       });
-      
+
       // Enable Consent Mode v2 features for cookieless tracking
       gtag('set', 'ads_data_redaction', true);        // Redact ad click identifiers when denied
       gtag('set', 'url_passthrough', true);           // Pass GCLID through navigation
       gtag('set', 'allow_ad_personalization_signals', false);  // Prevent personalization
-      
+
       gtag('js', new Date());
     </script>
   </head>
 
   <body>
     <div id="root"></div>
-    
+
     <!-- Load React app FIRST -->
     <script type="module" src="/src/main.tsx"></script>
-    
+
     <!-- Load tracking scripts AFTER React (non-blocking) -->
     <script>
       (function() {
@@ -65,7 +68,7 @@
         } else {
           loadTracking();
         }
-        
+
         function loadTracking() {
           // Load Cookiebot FIRST (immediately) - with auto-blocking
           var cookiebot = document.createElement('script');
@@ -74,14 +77,14 @@
           cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
           cookiebot.setAttribute('data-blockingmode', 'auto');
           cookiebot.setAttribute('data-gcm-enabled', 'true');
-          cookiebot.setAttribute('crossorigin', 'anonymous');
+          // cookiebot.setAttribute('crossorigin', 'anonymous');
           cookiebot.type = 'text/javascript';
           // Silently catch Cookiebot errors
           cookiebot.onerror = function() {
             console.warn('Cookiebot failed to load - non-critical');
           };
           document.head.appendChild(cookiebot);
-          
+
             // Load GTM after delay (gives Cookiebot time to initialize)
           setTimeout(function() {
             // Load GTM with error handling
@@ -92,7 +95,7 @@
                 var f=d.getElementsByTagName(s)[0],
                 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
                 j.async=true;
-                j.crossOrigin='anonymous';
+                // j.crossOrigin='anonymous';
                 j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
                 j.onerror = function() {
                   console.warn('GTM failed to load - non-critical');
@@ -102,11 +105,11 @@
                 console.warn('GTM initialization error - non-critical', e);
               }
             })(window,document,'script','dataLayer','GTM-NMLGMTL5');
-            
+
             // Load GA4 gtag.js and configure
             var gtagScript = document.createElement('script');
             gtagScript.async = true;
-            gtagScript.crossOrigin = 'anonymous';
+            // gtagScript.crossOrigin = 'anonymous';
             gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
             gtagScript.onerror = function() {
               console.warn('Google Analytics failed to load - non-critical');
