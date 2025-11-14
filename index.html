@@ -6,7 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
     />
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://accounts.youtube.com https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com https://www.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' blob: data: https://*.supabase.co https://accounts.google.com https://www.google.com https://*.google.com https://speech.googleapis.com https://www.gstatic.com https://*.n8n.cloud wss://*.supabase.co; frame-src 'self' https://accounts.google.com https://www.google.com; worker-src 'self' blob:;"> -->
     <title>ChatLearn - AI Chat Platform</title>
     <meta name="description" content="ChatLearn - Your intelligent AI chat platform for seamless conversations" />
     <meta name="author" content="ChatLearn" />
@@ -26,110 +25,114 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Initialize dataLayer and consent FIRST (no external dependencies) -->
+    <!-- Cookiebot Script - BIRINCHI YUKLANISHI KERAK -->
+    <script
+      id="Cookiebot"
+      src="https://consent.cookiebot.com/uc.js"
+      data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4"
+      data-blockingmode="auto"
+      type="text/javascript"
+    ></script>
+
+    <!-- Initialize dataLayer BEFORE any tracking -->
     <script>
       window.dataLayer = window.dataLayer || [];
-      window.gtag = function(){dataLayer.push(arguments);}
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
 
-      // Google Consent Mode v2 - Privacy-friendly conversion tracking
-      // Tracks conversions but blocks remarketing cookies by default
+      // Google Consent Mode v2 - Default DENIED holatda
       gtag('consent', 'default', {
-        'analytics_storage': 'granted',       // ✅ Track analytics immediately
-        'ad_user_data': 'granted',            // ✅ Track conversions immediately
-        'ad_storage': 'denied',               // 🚫 Block remarketing cookies by default
-        'ad_personalization': 'denied',       // 🚫 Block personalized ads by default
-        'functionality_storage': 'granted',   // ✅ Allow functional cookies
-        'personalization_storage': 'denied',  // 🚫 No personalization until consent
-        'security_storage': 'granted',        // ✅ Essential (always allowed)
+        'analytics_storage': 'denied',
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'functionality_storage': 'denied',
+        'personalization_storage': 'denied',
+        'security_storage': 'granted',
         'wait_for_update': 500
       });
 
-      // Enable Consent Mode v2 features for cookieless tracking
-      gtag('set', 'ads_data_redaction', true);        // Redact ad click identifiers when denied
-      gtag('set', 'url_passthrough', true);           // Pass GCLID through navigation
-      gtag('set', 'allow_ad_personalization_signals', false);  // Prevent personalization
+      gtag('set', 'ads_data_redaction', true);
+      gtag('set', 'url_passthrough', true);
+      gtag('set', 'allow_ad_personalization_signals', false);
+    </script>
 
+    <!-- Google Tag Manager -->
+    <script data-cookieconsent="statistics" type="text/plain">
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-NMLGMTL5');
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google Analytics gtag.js -->
+    <script
+      async
+      data-cookieconsent="statistics"
+      type="text/plain"
+      src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"
+    ></script>
+    <script data-cookieconsent="statistics" type="text/plain">
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
+      gtag('config', 'AW-16917874636');
+      gtag('config', 'G-EDSR82W70J');
+    </script>
+
+    <!-- Cookiebot Consent Event Listener -->
+    <script>
+      window.addEventListener('CookiebotOnAccept', function (e) {
+        // Cookiebot consent berilganda, Consent Mode ni yangilash
+        if (Cookiebot.consent.statistics) {
+          gtag('consent', 'update', {
+            'analytics_storage': 'granted'
+          });
+        }
+        if (Cookiebot.consent.marketing) {
+          gtag('consent', 'update', {
+            'ad_storage': 'granted',
+            'ad_user_data': 'granted',
+            'ad_personalization': 'granted'
+          });
+        }
+        if (Cookiebot.consent.preferences) {
+          gtag('consent', 'update', {
+            'functionality_storage': 'granted',
+            'personalization_storage': 'granted'
+          });
+        }
+      }, false);
+
+      window.addEventListener('CookiebotOnDecline', function (e) {
+        // Foydalanuvchi rad etganda
+        gtag('consent', 'update', {
+          'analytics_storage': 'denied',
+          'ad_storage': 'denied',
+          'ad_user_data': 'denied',
+          'ad_personalization': 'denied'
+        });
+      }, false);
     </script>
   </head>
 
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-NMLGMTL5"
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <div id="root"></div>
 
-    <!-- Load React app FIRST -->
+    <!-- Load React app -->
     <script type="module" src="/src/main.tsx"></script>
-
-    <!-- Load tracking scripts AFTER React (non-blocking) -->
-    <script>
-      (function() {
-        // Wait for DOM to be fully ready
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', loadTracking);
-        } else {
-          loadTracking();
-        }
-
-        function loadTracking() {
-          // Load Cookiebot FIRST (immediately) - with auto-blocking
-          var cookiebot = document.createElement('script');
-          cookiebot.id = 'Cookiebot';
-          cookiebot.src = 'https://consent.cookiebot.com/uc.js';
-          cookiebot.setAttribute('data-cbid', 'cc9cba1a-5783-4a8d-ba42-f4f1961b15a4');
-          cookiebot.setAttribute('data-blockingmode', 'auto');
-          cookiebot.setAttribute('data-gcm-enabled', 'true');
-          // cookiebot.setAttribute('crossorigin', 'anonymous');
-          cookiebot.type = 'text/javascript';
-          // Silently catch Cookiebot errors
-          cookiebot.onerror = function() {
-            console.warn('Cookiebot failed to load - non-critical');
-          };
-          document.head.appendChild(cookiebot);
-
-            // Load GTM after delay (gives Cookiebot time to initialize)
-          setTimeout(function() {
-            // Load GTM with error handling
-            (function(w,d,s,l,i){
-              try {
-                w[l]=w[l]||[];
-                w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-                var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-                j.async=true;
-                // j.crossOrigin='anonymous';
-                j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-                j.onerror = function() {
-                  console.warn('GTM failed to load - non-critical');
-                };
-                f.parentNode.insertBefore(j,f);
-              } catch(e) {
-                console.warn('GTM initialization error - non-critical', e);
-              }
-            })(window,document,'script','dataLayer','GTM-NMLGMTL5');
-
-            // Load GA4 gtag.js and configure
-            var gtagScript = document.createElement('script');
-            gtagScript.async = true;
-            // gtagScript.crossOrigin = 'anonymous';
-            gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
-            gtagScript.onerror = function() {
-              console.warn('Google Analytics failed to load - non-critical');
-            };
-            gtagScript.onload = function() {
-              try {
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                window.gtag = gtag;
-                gtag('js', new Date());
-                gtag('config', 'AW-16917874636');
-                gtag('config', 'G-EDSR82W70J');
-              } catch(e) {
-                console.warn('Google Analytics config error - non-critical', e);
-              }
-            };
-            document.head.appendChild(gtagScript);
-          }, 500);
-        }
-      })();
-    </script>
   </body>
 </html>
