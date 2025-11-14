@@ -25,22 +25,22 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Cookiebot Script - BIRINCHI YUKLANISHI KERAK -->
+    <!-- Cookiebot Script - MANUAL MODE -->
     <script
       id="Cookiebot"
       src="https://consent.cookiebot.com/uc.js"
       data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4"
-      data-blockingmode="auto"
+      data-blockingmode="manual"
       type="text/javascript"
     ></script>
 
-    <!-- Initialize dataLayer BEFORE any tracking -->
+    <!-- Initialize dataLayer -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       window.gtag = gtag;
 
-      // Google Consent Mode v2 - Default DENIED holatda
+      // Default consent - hamma denied
       gtag('consent', 'default', {
         'analytics_storage': 'denied',
         'ad_storage': 'denied',
@@ -54,20 +54,18 @@
 
       gtag('set', 'ads_data_redaction', true);
       gtag('set', 'url_passthrough', true);
-      gtag('set', 'allow_ad_personalization_signals', false);
     </script>
 
-    <!-- Google Tag Manager -->
+    <!-- Google Tag Manager - Cookiebot bilan bloklangan -->
     <script data-cookieconsent="statistics" type="text/plain">
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-NMLGMTL5');
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-NMLGMTL5');
     </script>
-    <!-- End Google Tag Manager -->
 
-    <!-- Google Analytics gtag.js -->
+    <!-- Google Analytics - Cookiebot bilan bloklangan -->
     <script
       async
       data-cookieconsent="statistics"
@@ -75,17 +73,14 @@
       src="https://www.googletagmanager.com/gtag/js?id=AW-16917874636"
     ></script>
     <script data-cookieconsent="statistics" type="text/plain">
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'AW-16917874636');
       gtag('config', 'G-EDSR82W70J');
     </script>
 
-    <!-- Cookiebot Consent Event Listener -->
+    <!-- Cookiebot Consent Update -->
     <script>
-      window.addEventListener('CookiebotOnAccept', function (e) {
-        // Cookiebot consent berilganda, Consent Mode ni yangilash
+      window.addEventListener('CookiebotOnConsentReady', function () {
         if (Cookiebot.consent.statistics) {
           gtag('consent', 'update', {
             'analytics_storage': 'granted'
@@ -104,22 +99,12 @@
             'personalization_storage': 'granted'
           });
         }
-      }, false);
-
-      window.addEventListener('CookiebotOnDecline', function (e) {
-        // Foydalanuvchi rad etganda
-        gtag('consent', 'update', {
-          'analytics_storage': 'denied',
-          'ad_storage': 'denied',
-          'ad_user_data': 'denied',
-          'ad_personalization': 'denied'
-        });
-      }, false);
+      });
     </script>
   </head>
 
   <body>
-    <!-- Google Tag Manager (noscript) -->
+    <!-- GTM noscript -->
     <noscript
       ><iframe
         src="https://www.googletagmanager.com/ns.html?id=GTM-NMLGMTL5"
@@ -128,11 +113,8 @@
         style="display:none;visibility:hidden"
       ></iframe
     ></noscript>
-    <!-- End Google Tag Manager (noscript) -->
 
     <div id="root"></div>
-
-    <!-- Load React app -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
