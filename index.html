@@ -35,6 +35,20 @@
       type="text/javascript"
     ></script>
 
+    <!-- GTM (blocked by Cookiebot) -->
+    <script
+      type="text/plain"
+      data-cookieconsent="statistics"
+      data-src="https://www.googletagmanager.com/gtm.js?id=GTM-NMLGMTL5"
+    ></script>
+
+    <!-- GA4 (blocked by Cookiebot) -->
+    <script
+      type="text/plain"
+      data-cookieconsent="statistics"
+      data-src="https://www.googletagmanager.com/gtag/js?id=G-EDSR82W70J"
+    ></script>
+
     <!-- Initialize dataLayer and consent FIRST (no external dependencies) -->
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -67,63 +81,5 @@
 
     <!-- Load React app FIRST -->
     <script type="module" src="/src/main.tsx"></script>
-
-    <!-- Load tracking scripts AFTER React (non-blocking) -->
-    <script>
-      (function() {
-        // Wait for DOM to be fully ready
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', loadTracking);
-        } else {
-          loadTracking();
-        }
-
-        function loadTracking() {
-            // Load GTM after delay (gives Cookiebot time to initialize)
-          setTimeout(function() {
-            // Load GTM with error handling
-            (function(w,d,s,l,i){
-              try {
-                w[l]=w[l]||[];
-                w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-                var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-                j.async=true;
-                // j.crossOrigin='anonymous';
-                j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-                j.onerror = function() {
-                  console.warn('GTM failed to load - non-critical');
-                };
-                f.parentNode.insertBefore(j,f);
-              } catch(e) {
-                console.warn('GTM initialization error - non-critical', e);
-              }
-            })(window,document,'script','dataLayer','GTM-NMLGMTL5');
-
-            // Load GA4 gtag.js and configure
-            var gtagScript = document.createElement('script');
-            gtagScript.async = true;
-            // gtagScript.crossOrigin = 'anonymous';
-            gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
-            gtagScript.onerror = function() {
-              console.warn('Google Analytics failed to load - non-critical');
-            };
-            gtagScript.onload = function() {
-              try {
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                window.gtag = gtag;
-                gtag('js', new Date());
-                gtag('config', 'AW-16917874636');
-                gtag('config', 'G-EDSR82W70J');
-              } catch(e) {
-                console.warn('Google Analytics config error - non-critical', e);
-              }
-            };
-            document.head.appendChild(gtagScript);
-          }, 500);
-        }
-      })();
-    </script>
   </body>
 </html>
