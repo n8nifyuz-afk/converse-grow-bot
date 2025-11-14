@@ -25,12 +25,13 @@
     <meta name="twitter:description" content="Your intelligent AI chat platform for seamless conversations" />
     <meta name="twitter:image" content="https://www.chatl.ai/og-image.png" />
 
-    <!-- Cookiebot Script -->
+    <!-- Cookiebot Script with culture attribute -->
     <script
       id="Cookiebot"
       src="https://consent.cookiebot.com/uc.js"
       data-cbid="cc9cba1a-5783-4a8d-ba42-f4f1961b15a4"
       data-blockingmode="manual"
+      data-culture="EN"
       type="text/javascript"
     ></script>
 
@@ -56,66 +57,22 @@
       gtag('set', 'url_passthrough', true);
     </script>
 
-    <!-- Cookiebot Consent Handling -->
+    <!-- Cookiebot event handlers -->
     <script>
-      // Cookiebot yuklangandan keyin banner ko'rsatish
-      window.addEventListener('CookiebotOnLoad', function () {
-        // Agar consent olinmagan bo'lsa, banner ko'rsatish
-        if (!Cookiebot.consented) {
-          Cookiebot.show();
-        }
-      });
+      // Flag to track if scripts are loaded
+      window.trackingScriptsLoaded = false;
 
-      // Consent yangilanganda
-      window.addEventListener('CookiebotOnAccept', function () {
-        console.log('Cookiebot consent accepted');
-
-        // Statistics (Analytics) consent
-        if (Cookiebot.consent.statistics) {
-          gtag('consent', 'update', {
-            'analytics_storage': 'granted'
-          });
-
-          // GTM ni yuklash
-          loadGTM();
-          // GA4 ni yuklash
-          loadGA4();
+      // Function to load tracking scripts
+      function loadTrackingScripts() {
+        if (window.trackingScriptsLoaded) {
+          console.log('📊 Tracking scripts already loaded');
+          return;
         }
 
-        // Marketing consent
-        if (Cookiebot.consent.marketing) {
-          gtag('consent', 'update', {
-            'ad_storage': 'granted',
-            'ad_user_data': 'granted',
-            'ad_personalization': 'granted'
-          });
-        }
+        console.log('🚀 Loading tracking scripts...');
+        window.trackingScriptsLoaded = true;
 
-        // Preferences consent
-        if (Cookiebot.consent.preferences) {
-          gtag('consent', 'update', {
-            'functionality_storage': 'granted',
-            'personalization_storage': 'granted'
-          });
-        }
-      });
-
-      // Consent rad etilganda
-      window.addEventListener('CookiebotOnDecline', function () {
-        console.log('Cookiebot consent declined');
-        gtag('consent', 'update', {
-          'analytics_storage': 'denied',
-          'ad_storage': 'denied',
-          'ad_user_data': 'denied',
-          'ad_personalization': 'denied'
-        });
-      });
-
-      // GTM yuklash funksiyasi
-      function loadGTM() {
-        if (window.gtmLoaded) return;
-        window.gtmLoaded = true;
-
+        // Load GTM
         (function(w,d,s,l,i){
           w[l]=w[l]||[];
           w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
@@ -124,14 +81,10 @@
           j.async=true;
           j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
           f.parentNode.insertBefore(j,f);
+          console.log('✅ GTM loaded');
         })(window,document,'script','dataLayer','GTM-NMLGMTL5');
-      }
 
-      // GA4 yuklash funksiyasi
-      function loadGA4() {
-        if (window.ga4Loaded) return;
-        window.ga4Loaded = true;
-
+        // Load GA4
         var gtagScript = document.createElement('script');
         gtagScript.async = true;
         gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16917874636';
@@ -139,9 +92,79 @@
           gtag('js', new Date());
           gtag('config', 'AW-16917874636');
           gtag('config', 'G-EDSR82W70J');
+          console.log('✅ GA4 loaded');
         };
         document.head.appendChild(gtagScript);
       }
+
+      // Consent granted event
+      window.addEventListener('CookiebotOnAccept', function () {
+        console.log('✅ Cookiebot consent accepted');
+        console.log('📊 Statistics:', Cookiebot.consent.statistics);
+        console.log('📢 Marketing:', Cookiebot.consent.marketing);
+        console.log('⚙️ Preferences:', Cookiebot.consent.preferences);
+
+        // Update consent mode
+        if (Cookiebot.consent.statistics) {
+          gtag('consent', 'update', {
+            'analytics_storage': 'granted'
+          });
+          loadTrackingScripts();
+        }
+
+        if (Cookiebot.consent.marketing) {
+          gtag('consent', 'update', {
+            'ad_storage': 'granted',
+            'ad_user_data': 'granted',
+            'ad_personalization': 'granted'
+          });
+        }
+
+        if (Cookiebot.consent.preferences) {
+          gtag('consent', 'update', {
+            'functionality_storage': 'granted',
+            'personalization_storage': 'granted'
+          });
+        }
+      });
+
+      // Consent declined event
+      window.addEventListener('CookiebotOnDecline', function () {
+        console.log('❌ Cookiebot consent declined');
+        gtag('consent', 'update', {
+          'analytics_storage': 'denied',
+          'ad_storage': 'denied',
+          'ad_user_data': 'denied',
+          'ad_personalization': 'denied'
+        });
+      });
+
+      // Force show banner after page load
+      window.addEventListener('load', function() {
+        // Wait a bit for Cookiebot to initialize
+        setTimeout(function() {
+          if (typeof Cookiebot !== 'undefined') {
+            console.log('🍪 Cookiebot loaded:', {
+              consented: Cookiebot.consented,
+              consent: Cookiebot.consent
+            });
+
+            // If not consented, show banner
+            if (!Cookiebot.consented) {
+              console.log('📢 Showing Cookiebot banner...');
+              Cookiebot.show();
+            } else {
+              console.log('✅ User has already consented');
+              // If already consented with statistics, load scripts
+              if (Cookiebot.consent.statistics) {
+                loadTrackingScripts();
+              }
+            }
+          } else {
+            console.error('❌ Cookiebot not loaded');
+          }
+        }, 500);
+      });
     </script>
   </head>
 
