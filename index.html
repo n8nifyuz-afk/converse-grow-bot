@@ -55,18 +55,13 @@
 
       // Wait for Cookiebot API, then load GA and set consent according to Cookiebot
       (function waitForCookiebot(){
-        if (!window.Cookiebot) { return setTimeout(waitForCookiebot, 200); }
+        if (!window.Cookiebot) return setTimeout(waitForCookiebot, 200);
 
-        if (window.Cookiebot.forceShow) { window.Cookiebot.forceShow(); }
-        else if (window.Cookiebot.show) { window.Cookiebot.show(true); }
-
-        // Load gtag script element from data-src (so Cookiebot doesn't auto-load it)
-        const gtagScript = document.querySelector('script[data-src*="gtag/js?id"]');
-        if (gtagScript && !gtagScript.src) {
-          gtagScript.src = gtagScript.getAttribute('data-src');
-          document.head.appendChild(gtagScript);
-          // After script loads, call gtag init and sync consent from Cookiebot
-          gtagScript.onload = function(){
+        const s = document.querySelector('script[data-src*="gtag/js?id"]');
+        if (s && !s.src) {
+          s.src = s.getAttribute('data-src');
+          document.head.appendChild(s);
+          s.onload = function(){
             const analyticsAllowed = !!(window.Cookiebot && window.Cookiebot.consent && window.Cookiebot.consent.statistics);
             gtag('consent', 'default', {
               'analytics_storage': analyticsAllowed ? 'granted' : 'denied',
@@ -81,9 +76,17 @@
 
     <!-- CSS: faqat Cookiebot dialog elementiga ta'sir qilsin (skript taglar emas) -->
     <style>
-      #CybotCookiebotDialog, .CybotCookiebotDialog {
+      /* put this into your global CSS or inside <head> */
+      #CybotCookiebotDialog,
+      .CybotCookiebotDialog {
         position: fixed !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
         z-index: 2147483647 !important;
+        top: 12px !important;
+        left: 12px !important;
       }
     </style>
   </head>
