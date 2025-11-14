@@ -166,6 +166,35 @@
         }, 500);
       });
     </script>
+    <!-- Force Cookiebot banner visibility and positioning -->
+    <style>
+      /* Cookiebot banner visibility and layout fix */
+      #CybotCookiebotDialog {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+      }
+
+      #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll,
+      #CybotCookiebotDialogBodyLevelButtonLevelOptinDeclineAll,
+      #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+      }
+
+      /* Ensure banner is on top of everything */
+      .CybotCookiebotDialog {
+        z-index: 999999 !important;
+      }
+    </style>
   </head>
 
   <body>
