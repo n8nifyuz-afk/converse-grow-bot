@@ -30,8 +30,6 @@ if (typeof window !== 'undefined') {
     
     if (isThirdPartyError) {
       event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
       if (import.meta.env.DEV) {
         console.warn('External script error prevented (non-critical):', {
           message: event.message,
@@ -39,15 +37,12 @@ if (typeof window !== 'undefined') {
           source: 'likely third-party tracking'
         });
       }
-      // Return false to prevent default error handling
-      return false;
+      return;
     }
     
-    // Log critical errors but don't let them crash the app
-    if (import.meta.env.DEV) {
-      console.error('Critical error:', event);
-    }
-  }, true); // Use capture phase to catch errors earlier
+    // Log critical errors
+    console.error('Critical error:', event);
+  });
   
   window.addEventListener('unhandledrejection', (event) => {
     // Log unhandled promise rejections but don't crash for non-critical ones
