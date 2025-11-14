@@ -16,6 +16,19 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
+    // Check if this is a third-party script error that we can safely ignore
+    const errorMessage = error?.message || '';
+    const isThirdPartyError = errorMessage.includes('Script error') || 
+                             errorMessage.includes('gtm') || 
+                             errorMessage.includes('cookiebot') ||
+                             errorMessage.includes('analytics');
+    
+    if (isThirdPartyError) {
+      // Don't show error UI for third-party script failures
+      console.warn('Third-party script error caught and ignored:', errorMessage);
+      return { hasError: false };
+    }
+    
     // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }
@@ -24,6 +37,15 @@ class ErrorBoundary extends Component<Props, State> {
     // Log error to console in development
     if (import.meta.env.DEV) {
       console.error('Error caught by boundary:', error, errorInfo);
+    }
+    
+    // Attempt automatic recovery for certain error types
+    const errorMessage = error?.message || '';
+    if (errorMessage.includes('Loading chunk') || errorMessage.includes('Failed to fetch')) {
+      // Network/chunk loading errors - reload might fix it
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
   }
 
