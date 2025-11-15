@@ -178,6 +178,7 @@ createRoot(document.getElementById("root")!).render(
   const MAX_TRIES = 40,
     TRY_INTERVAL = 300;
   let tries = 0;
+
   function findIframe() {
     return document.querySelector('iframe[src*="consent.cookiebot.com"], iframe[id*="CybotCookiebot"]');
   }

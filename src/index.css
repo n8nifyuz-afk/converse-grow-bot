@@ -779,3 +779,88 @@ iframe[id*="CybotCookiebot"] {
 body.cookiebot-visible {
   padding-bottom: 140px !important;
 } /* banner balandligiga moslang */
+
+/* Cookiebot responsive overrides — add at end of index.css */
+
+/* Ensure dialog is centered on desktop but full-width on small screens */
+#CybotCookiebotDialog,
+.CybotCookiebotDialog {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: 10px !important;
+  max-width: 980px !important; /* desktop width */
+  width: auto !important;
+  visibility: visible !important;
+}
+
+/* Desktop: keep buttons on right or centered as Cookiebot prefers */
+@media (min-width: 1024px) {
+  #CybotCookiebotDialog .CybotCookiebotBody {
+    padding-bottom: 20px;
+  }
+}
+
+/* Mobile: make Cookiebot full width bottom sheet, big buttons */
+@media (max-width: 767px) {
+  #CybotCookiebotDialog,
+  .CybotCookiebotDialog,
+  #CybotCookiebotDialog[data-template="bottom"],
+  .CybotCookiebotDialog[data-template="bottom"] {
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    bottom: 0 !important;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 0.5rem 0.75rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Make main content readable and buttons tall & full width */
+  #CybotCookiebotDialog .CybotCookiebotBody,
+  .CybotCookiebotDialog .CybotCookiebotBody {
+    padding: 0.75rem 1rem 1.25rem !important;
+  }
+
+  /* Buttons: stack vertical and full-width */
+  #CybotCookiebotDialog .CybotCookiebotButtonContainer,
+  .CybotCookiebotDialog .CybotCookiebotButtonContainer {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    align-items: stretch !important;
+    margin: 0.5rem 0 0 !important;
+  }
+
+  #CybotCookiebotDialog button,
+  .CybotCookiebotDialog button {
+    min-height: 48px !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+  }
+
+  /* Ensure "Show details" is visible (not tiny) */
+  #CybotCookiebotDialog .CybotCookiebotDetailsToggler,
+  .CybotCookiebotDialog .CybotCookiebotDetailsToggler {
+    font-size: 15px !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  /* Reserve space so page content not hidden */
+  body.cookiebot-visible {
+    padding-bottom: 220px !important; /* oshiring/kemiting banner balandligiga qarab */
+  }
+}
+
+/* Safety: allow iframe visible but let Cookiebot handle size */
+iframe[src*="consent.cookiebot.com"],
+iframe[id*="CybotCookiebot"] {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  /* do not force width/transform here — overrides above handle layout */
+}
