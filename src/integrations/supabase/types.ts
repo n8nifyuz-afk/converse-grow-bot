@@ -282,6 +282,7 @@ export type Database = {
           id: string
           initial_referer: string | null
           ip_address: string | null
+          is_test_user: boolean | null
           language: string | null
           last_login_at: string | null
           locale: string | null
@@ -311,6 +312,7 @@ export type Database = {
           id?: string
           initial_referer?: string | null
           ip_address?: string | null
+          is_test_user?: boolean | null
           language?: string | null
           last_login_at?: string | null
           locale?: string | null
@@ -340,6 +342,7 @@ export type Database = {
           id?: string
           initial_referer?: string | null
           ip_address?: string | null
+          is_test_user?: boolean | null
           language?: string | null
           last_login_at?: string | null
           locale?: string | null
