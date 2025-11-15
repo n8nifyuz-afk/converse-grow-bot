@@ -175,101 +175,105 @@ createRoot(document.getElementById("root")!).render(
 
 // --- Robust Cookiebot keep-visible helper (paste into src/main.tsx after mount) ---
 if (typeof window !== "undefined") {
-  (function keepCookiebotVisible() {
-    const MAX_TRIES = 20;
-    const TRY_INTERVAL = 300; // ms
+  (function smartCookiebotPortal() {
+    const MAX_TRIES = 12;
+    const TRY_INTERVAL = 300;
     let tries = 0;
 
-    function applyStyles(el: HTMLElement) {
+    function findDialog(): HTMLElement | null {
+      return (document.getElementById("CybotCookiebotDialog") ||
+        document.querySelector('[id^="CybotCookiebot"]') ||
+        document.querySelector(".CybotCookiebotDialog")) as HTMLElement | null;
+    }
+
+    function applyBarStyle(el: HTMLElement) {
+      // keep Cookiebot's own look but force full-width bottom bar
+      el.style.setProperty("position", "fixed", "important");
+      el.style.setProperty("left", "0", "important");
+      el.style.setProperty("right", "0", "important");
+      el.style.setProperty("bottom", "0", "important");
+      el.style.setProperty("width", "100%", "important");
+      el.style.setProperty("max-width", "none", "important");
+      el.style.setProperty("margin", "0", "important");
+      el.style.setProperty("border-radius", "0", "important");
+      el.style.setProperty("z-index", "2147483647", "important");
       el.style.setProperty("display", "block", "important");
       el.style.setProperty("visibility", "visible", "important");
       el.style.setProperty("opacity", "1", "important");
+      el.style.setProperty("pointer-events", "auto", "important");
+
+      // ensure inner content stretches
+      try {
+        const inner = el.querySelector(
+          ".CybotCookiebotDialogContentWrapper, .CybotCookiebotScrollContainer, .CybotCookiebotDialogBodyContent",
+        );
+        if (inner && inner instanceof HTMLElement) {
+          inner.style.setProperty("width", "100%", "important");
+        }
+      } catch (e) {}
+    }
+
+    function applyDialogStyle(el: HTMLElement) {
+      // keep as dialog but ensure visible and centered
       el.style.setProperty("position", "fixed", "important");
+      el.style.setProperty("left", "50%", "important");
+      el.style.setProperty("transform", "translateX(-50%)", "important");
       el.style.setProperty("bottom", "10px", "important");
-      el.style.setProperty("right", "10px", "important");
+      el.style.setProperty("right", "auto", "important");
+      el.style.setProperty("width", "auto", "important");
+      el.style.setProperty("max-width", "640px", "important");
       el.style.setProperty("z-index", "2147483647", "important");
+      el.style.setProperty("display", "block", "important");
+      el.style.setProperty("visibility", "visible", "important");
+      el.style.setProperty("opacity", "1", "important");
       el.style.setProperty("pointer-events", "auto", "important");
     }
 
-    function findDialog(): HTMLElement | null {
-      return (
-        (document.getElementById("CybotCookiebotDialog") as HTMLElement) ||
-        (document.querySelector('[id^="CybotCookiebot"]') as HTMLElement) ||
-        (document.querySelector(".CybotCookiebotDialog") as HTMLElement) ||
-        null
-      );
+    function enforce(el: HTMLElement) {
+      // decide layout by checking classes or attributes set by Cookiebot
+      const cls = (el.className || "").toLowerCase();
+      // heuristics: if admin set "bar" layout, Cookiebot often renders banner elements with 'scroll container' at bottom.
+      const looksLikeBar =
+        cls.includes("bar") ||
+        (!!el.querySelector(".CybotCookiebotScrollContainer") && getComputedStyle(el).width === "100%") ||
+        !!document.querySelector(".CybotCookiebotDialogDetailFooter"); // fallback heuristic
+
+      if (looksLikeBar) applyBarStyle(el);
+      else applyDialogStyle(el);
     }
 
-    function makeVisibleAndObserve(el: HTMLElement) {
-      // ensure it's in body
-      try {
-        if (el.parentElement !== document.body) document.body.appendChild(el);
-      } catch (e) {}
-      applyStyles(el);
-
-      // remove hide-classes if present
-      el.classList.remove("CybotCookiebotDialogHide", "cybot-cookiebot-hide", "hidden");
-
-      // observe changes on this element and re-apply styles if someone hides it
-      const mo = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-          if (m.type === "attributes") {
-            const display = getComputedStyle(el).display;
-            if (
-              display === "none" ||
-              getComputedStyle(el).visibility === "hidden" ||
-              +getComputedStyle(el).opacity === 0
-            ) {
-              // re-apply quickly
-              applyStyles(el);
-              // also try to call Cookiebot.show/forceShow if available
-              try {
-                const cb = (window as any).Cookiebot;
-                if (cb) {
-                  if (typeof cb.forceShow === "function") cb.forceShow();
-                  else if (typeof cb.show === "function") cb.show(true);
-                }
-              } catch (e) {}
-            }
-          }
-          // if childList changed (re-render), attempt to reattach
-          if (m.type === "childList" && (m.removedNodes.length || m.addedNodes.length)) {
-            applyStyles(el);
-          }
-        }
-      });
-
-      mo.observe(el, { attributes: true, childList: true, subtree: true });
-      // stop observer after 30s (best-effort)
-      setTimeout(() => mo.disconnect(), 30000);
-    }
-
-    function tryMoveAndKeep() {
+    function tryMove() {
       tries++;
       const el = findDialog();
       if (!el) {
-        if (tries < MAX_TRIES) return setTimeout(tryMoveAndKeep, TRY_INTERVAL);
+        if (tries < MAX_TRIES) return setTimeout(tryMove, TRY_INTERVAL);
         return;
       }
 
-      makeVisibleAndObserve(el);
-
-      // Also add a document-level observer to catch re-insertions or re-hides
+      // move to body to avoid clipping
       try {
-        const docObserver = new MutationObserver(() => {
-          const current = findDialog();
-          if (current) {
-            makeVisibleAndObserve(current);
+        if (el.parentElement !== document.body) document.body.appendChild(el);
+      } catch (e) {}
+
+      // remove any hide classes if present
+      ["CybotCookiebotDialogHide", "cybot-cookiebot-hide", "hidden", "hide"].forEach((cl) => el.classList.remove(cl));
+
+      enforce(el);
+
+      // observe element for attribute changes and re-enforce
+      try {
+        const mo = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            if (m.type === "attributes" || m.type === "childList") {
+              enforce(el);
+            }
           }
         });
-        docObserver.observe(document.documentElement || document.body, { childList: true, subtree: true });
-        setTimeout(() => docObserver.disconnect(), 30000);
-      } catch (e) {
-        /* ignore */
-      }
+        mo.observe(el, { attributes: true, childList: true, subtree: true });
+        setTimeout(() => mo.disconnect(), 30000);
+      } catch (e) {}
     }
 
-    // initial delay to let uc.js finish
-    setTimeout(tryMoveAndKeep, 500);
+    setTimeout(tryMove, 500);
   })();
 }
