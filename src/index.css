@@ -321,13 +321,15 @@
   }
 }
 
-/* Hide Cookiebot's default banner - we use a custom React component */
+/* Hide Cookiebot's default banner - we use a custom React component
+   (empty rule kept intentionally: Cookiebot markup will be controlled via overrides below) */
 #CybotCookiebotDialog,
 #CybotCookiebotDialogBodyUnderlay,
 #CookiebotWidget,
 .CookiebotWidget,
 [id^="Cookiebot"],
 [class^="Cookiebot"] {
+  /* intentionally blank: specific overrides appear at end of file */
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
@@ -740,49 +742,9 @@ All colors MUST be HSL.
   }
 }
 
-/* Minimal safe Cookiebot CSS — let Cookiebot control layout */
-iframe[src*="consent.cookiebot.com"],
-iframe[id*="CybotCookiebot"] {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  pointer-events: auto !important;
-  /* do not force width/transform here */
-}
+/* --- COOKIEBOT RESPONSIVE CLEAN OVERRIDES (single copy) --- */
 
-/* Centered dialog (if Cookiebot chooses dialog layout) */
-#CybotCookiebotDialog.CybotCookiebotDialogActive,
-.CybotCookiebotDialog.CybotCookiebotDialogActive {
-  position: fixed !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  bottom: 10px !important;
-  max-width: 640px !important;
-  width: auto !important;
-  z-index: 2147483648 !important;
-  visibility: visible !important;
-  display: block !important;
-}
-
-/* Bottom-bar template (if Cookiebot uses bottom template) */
-.CybotCookiebotDialog[data-template="bottom"],
-#CybotCookiebotDialog[data-template="bottom"] {
-  left: 0 !important;
-  right: 0 !important;
-  transform: none !important;
-  width: 100% !important;
-  max-width: none !important;
-  bottom: 0 !important;
-  z-index: 2147483647 !important;
-}
-
-/* prevent content being covered by the bar */
-body.cookiebot-visible {
-  padding-bottom: 140px !important;
-} /* banner balandligiga moslang */
-
-/* Cookiebot responsive overrides — add at end of index.css */
-
-/* Ensure dialog is centered on desktop but full-width on small screens */
+/* Base: ensure dialog visible and centered on large screens */
 #CybotCookiebotDialog,
 .CybotCookiebotDialog {
   position: fixed !important;
@@ -790,19 +752,26 @@ body.cookiebot-visible {
   left: 50% !important;
   transform: translateX(-50%) !important;
   bottom: 10px !important;
-  max-width: 980px !important; /* desktop width */
+  max-width: 980px !important;
   width: auto !important;
   visibility: visible !important;
+  box-sizing: border-box !important;
 }
 
-/* Desktop: keep buttons on right or centered as Cookiebot prefers */
+/* Desktop tweaks */
 @media (min-width: 1024px) {
-  #CybotCookiebotDialog .CybotCookiebotBody {
-    padding-bottom: 20px;
+  #CybotCookiebotDialog .CybotCookiebotBody,
+  .CybotCookiebotDialog .CybotCookiebotBody {
+    padding-bottom: 20px !important;
+  }
+
+  /* reserve space so content not hidden (desktop) */
+  body.cookiebot-visible {
+    padding-bottom: 140px !important;
   }
 }
 
-/* Mobile: make Cookiebot full width bottom sheet, big buttons */
+/* Mobile: bottom-sheet style, full width, large stacked buttons */
 @media (max-width: 767px) {
   #CybotCookiebotDialog,
   .CybotCookiebotDialog,
@@ -819,13 +788,12 @@ body.cookiebot-visible {
     box-sizing: border-box !important;
   }
 
-  /* Make main content readable and buttons tall & full width */
   #CybotCookiebotDialog .CybotCookiebotBody,
   .CybotCookiebotDialog .CybotCookiebotBody {
     padding: 0.75rem 1rem 1.25rem !important;
   }
 
-  /* Buttons: stack vertical and full-width */
+  /* Buttons vertical, full-width, tappable */
   #CybotCookiebotDialog .CybotCookiebotButtonContainer,
   .CybotCookiebotDialog .CybotCookiebotButtonContainer {
     display: flex !important;
@@ -837,30 +805,37 @@ body.cookiebot-visible {
 
   #CybotCookiebotDialog button,
   .CybotCookiebotDialog button {
-    min-height: 48px !important;
+    min-height: 52px !important;
     font-size: 16px !important;
     border-radius: 10px !important;
     width: 100% !important;
   }
 
-  /* Ensure "Show details" is visible (not tiny) */
+  /* Make "Show details" readable */
   #CybotCookiebotDialog .CybotCookiebotDetailsToggler,
   .CybotCookiebotDialog .CybotCookiebotDetailsToggler {
     font-size: 15px !important;
     padding: 0.5rem 0.75rem !important;
   }
 
-  /* Reserve space so page content not hidden */
+  /* Reserve more bottom space on mobile so page not covered */
   body.cookiebot-visible {
-    padding-bottom: 220px !important; /* oshiring/kemiting banner balandligiga qarab */
+    padding-bottom: 220px !important;
   }
 }
 
-/* Safety: allow iframe visible but let Cookiebot handle size */
+/* Ensure iframe itself visible but don't force width (Cookiebot's HTML handles it) */
 iframe[src*="consent.cookiebot.com"],
 iframe[id*="CybotCookiebot"] {
   position: fixed !important;
   z-index: 2147483647 !important;
   pointer-events: auto !important;
-  /* do not force width/transform here — overrides above handle layout */
+}
+
+/* If you use a bottom drawer/nav, push it down when cookie visible */
+body.cookiebot-visible [data-vaul-drawer],
+body.cookiebot-visible .bottom-nav,
+body.cookiebot-visible .site-footer-fixed {
+  transform: translateY(220px) !important;
+  transition: transform 0.2s ease !important;
 }
