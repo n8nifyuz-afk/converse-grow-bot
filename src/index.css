@@ -840,66 +840,80 @@ body.cookiebot-visible .site-footer-fixed {
   transition: transform 0.2s ease !important;
 }
 
-/* ----- COOKIEBOT STABILITY PATCH ----- */
+/* ----- COOKIEBOT FINAL STABILITY PATCH ----- */
 /* Put this at the END of your index.css file */
 
-/* Force dialog centered and constrained nicely on very wide screens */
 #CybotCookiebotDialog,
 .CybotCookiebotDialog {
   position: fixed !important;
-  left: 50% !important;
-  right: auto !important; /* avoid conflicting right values */
+  inset: auto auto 10px 50% !important;
   transform: translateX(-50%) !important;
-  bottom: 10px !important;
-  width: min(980px, calc(100% - 48px)) !important; /* responsive width */
-  max-width: 1280px !important; /* allow bigger, but bounded */
+  width: min(980px, calc(100% - 48px)) !important;
+  max-width: 1280px !important;
   box-sizing: border-box !important;
   visibility: visible !important;
-  z-index: 2147483647 !important; /* on top of everything */
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  margin: 0 !important;
+  will-change: transform, left, right !important;
 }
 
-/* Ensure Cookiebot body and buttons visible */
+@media (min-width: 1024px) {
+  body.cookiebot-visible {
+    padding-bottom: 180px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  #CybotCookiebotDialog,
+  .CybotCookiebotDialog {
+    width: 980px !important;
+    max-width: 1200px !important;
+    inset: auto auto 20px 50% !important;
+  }
+
+  body.cookiebot-visible {
+    padding-bottom: 240px !important;
+  }
+}
+
+#CybotCookiebotDialog[data-template="bottom"],
+.CybotCookiebotDialog[data-template="bottom"] {
+  inset: auto auto 0 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(100%, 980px) !important;
+  max-width: 1200px !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
 #CybotCookiebotDialog .CybotCookiebotBody,
 .CybotCookiebotDialog .CybotCookiebotBody {
   overflow: visible !important;
   box-sizing: border-box !important;
 }
 
-/* For extremely wide screens keep dialog centered and not offscreen */
-@media (min-width: 1280px) {
-  #CybotCookiebotDialog,
-  .CybotCookiebotDialog {
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 980px !important;
-    max-width: 1200px !important;
-  }
-
-  /* add a safety margin so fixed bottom navs won't overlap it */
-  body.cookiebot-visible {
-    padding-bottom: 240px !important;
-  }
-}
-
-/* If Cookiebot swaps to 'bottom' template, make sure it stays full-width and above nav */
-#CybotCookiebotDialog[data-template="bottom"],
-.CybotCookiebotDialog[data-template="bottom"] {
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
-  width: min(100%, 980px) !important;
-  max-width: 1200px !important;
-}
-
-/* Make sure iframe isn't transformed by parent and stays visible */
 iframe[src*="consent.cookiebot.com"],
 iframe[id*="CybotCookiebot"] {
   position: fixed !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   bottom: 0 !important;
-  width: 100% !important;
+  width: min(100%, 1200px) !important;
   max-width: 1200px !important;
   z-index: 2147483647 !important;
   pointer-events: auto !important;
+}
+
+body.cookiebot-visible [data-vaul-drawer],
+body.cookiebot-visible .bottom-nav,
+body.cookiebot-visible .site-footer-fixed {
+  transform: translateY(220px) !important;
+  transition: transform 0.18s ease !important;
+}
+
+#CybotCookiebotDialog,
+.CybotCookiebotDialog,
+iframe[src*="consent.cookiebot.com"] {
+  transform-origin: center bottom !important;
+  -webkit-transform-origin: center bottom !important;
 }
