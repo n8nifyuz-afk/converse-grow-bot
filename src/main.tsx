@@ -173,7 +173,7 @@ createRoot(document.getElementById("root")!).render(
   </React.StrictMode>,
 );
 
-// paste AFTER createRoot(...).render(...)
+// KEEP THIS ONE — paste ONCE AFTER createRoot(...).render(...)
 (function ensureCookiebotOnBody() {
   const MAX_TRIES = 40,
     TRY_INTERVAL = 300;
