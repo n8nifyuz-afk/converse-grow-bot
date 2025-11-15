@@ -108,7 +108,7 @@ if (typeof window !== "undefined") {
 
       // Polling fallback: cookiebot not ready yet — wait up to 20s
       let waited = 0;
-      const pollInterval = 300;
+      const pollInterval = 1000;
       const timeoutMs = 20000;
       const iv = setInterval(() => {
         try {
@@ -173,11 +173,13 @@ createRoot(document.getElementById("root")!).render(
   </React.StrictMode>,
 );
 
-// KEEP THIS ONE — paste ONCE AFTER createRoot(...).render(...)
+// REPLACE your whole ensureCookiebotOnBody IIFE with this safe version
 (function ensureCookiebotOnBody() {
-  const MAX_TRIES = 40,
-    TRY_INTERVAL = 300;
+  const MAX_TRIES = 12;
+  const TRY_INTERVAL = 500;
   let tries = 0;
+  let mo: MutationObserver | null = null;
+  let pending = false;
 
   function findIframe() {
     return document.querySelector('iframe[src*="consent.cookiebot.com"], iframe[id*="CybotCookiebot"]');
@@ -189,18 +191,19 @@ createRoot(document.getElementById("root")!).render(
       document.querySelector('[id^="CybotCookiebot"]')
     );
   }
-  function ensureOnBody(el) {
+  function ensureOnBody(el: Element | null) {
     if (!el) return;
     try {
       if (el.parentElement !== document.body) document.body.appendChild(el);
     } catch (e) {}
     try {
-      el.style.setProperty("z-index", "2147483647", "important");
-      el.style.setProperty("pointer-events", "auto", "important");
-      el.style.removeProperty("width");
-      el.style.removeProperty("transform");
+      (el as HTMLElement).style.setProperty("z-index", "2147483647", "important");
+      (el as HTMLElement).style.setProperty("pointer-events", "auto", "important");
+      (el as HTMLElement).style.removeProperty("width");
+      (el as HTMLElement).style.removeProperty("transform");
     } catch (e) {}
   }
+
   function tryFix() {
     tries++;
     const iframe = findIframe();
@@ -210,15 +213,35 @@ createRoot(document.getElementById("root")!).render(
       ensureOnBody(dialog);
       document.body.classList.add("cookiebot-visible");
     }
+
     if (!iframe && !dialog && tries < MAX_TRIES) {
       setTimeout(tryFix, TRY_INTERVAL);
       return;
     }
-    try {
-      const mo = new MutationObserver(() => tryFix());
-      mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
-      setTimeout(() => mo.disconnect(), 120000);
-    } catch (e) {}
   }
+
+  // run initial attempts
   setTimeout(tryFix, 500);
+
+  // Install ONE debounced MutationObserver for up to 20s
+  try {
+    mo = new MutationObserver(() => {
+      if (pending) return;
+      pending = true;
+      setTimeout(() => {
+        tryFix();
+        pending = false;
+      }, 250); // debounce 250ms
+    });
+    mo.observe(document.documentElement || document.body!, { childList: true, subtree: true });
+    // disconnect after 20s to avoid permanent observation
+    setTimeout(() => {
+      try {
+        mo?.disconnect();
+      } catch (e) {}
+      mo = null;
+    }, 20000);
+  } catch (e) {
+    // ignore — observer not supported/allowed
+  }
 })();
