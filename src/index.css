@@ -200,7 +200,7 @@
   font-weight: 700;
   color: hsl(var(--primary));
   flex-shrink: 0;
-  font-family: "Courier New", monospace;
+  font-family: 'Courier New', monospace;
 }
 
 .no-results {
@@ -239,16 +239,16 @@
     min-width: 70px;
     padding: 0.625rem 0.625rem;
   }
-
+  
   .country-phone-input-wrapper .dial-code {
     font-size: 0.875rem;
   }
-
+  
   .country-phone-input-wrapper .phone-input {
     padding: 0.625rem 0.75rem;
     font-size: 0.9375rem;
   }
-
+  
   .country-dropdown {
     position: fixed;
     top: auto;
@@ -261,7 +261,7 @@
     border-radius: 1rem;
     transition: bottom 0.2s ease;
   }
-
+  
   .country-dropdown.keyboard-open {
     bottom: 12rem;
     margin: 0;
@@ -270,24 +270,24 @@
     display: flex;
     flex-direction: column;
   }
-
+  
   .country-list {
     max-height: 180px;
   }
-
+  
   .country-search {
     font-size: 0.9375rem;
     padding: 0.875rem 1rem;
   }
-
+  
   .country-option {
     padding: 1rem;
   }
-
+  
   .country-name {
     font-size: 0.9375rem;
   }
-
+  
   .country-dial-code {
     font-size: 0.8125rem;
   }
@@ -299,11 +299,11 @@
     min-width: 90px;
     padding: 0.875rem 1rem;
   }
-
+  
   .country-phone-input-wrapper .dial-code {
     font-size: 1.0625rem;
   }
-
+  
   .country-phone-input-wrapper .phone-input {
     padding: 0.875rem 1.125rem;
     font-size: 1.0625rem;
@@ -315,10 +315,23 @@
   .country-phone-input-wrapper .country-selector {
     min-width: 95px;
   }
-
+  
   .country-phone-input-wrapper .phone-input {
     font-size: 1.0625rem;
   }
+}
+
+/* Hide Cookiebot's default banner - we use a custom React component */
+#CybotCookiebotDialog,
+#CybotCookiebotDialogBodyUnderlay,
+#CookiebotWidget,
+.CookiebotWidget,
+[id^="Cookiebot"],
+[class^="Cookiebot"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
@@ -348,7 +361,7 @@ All colors MUST be HSL.
     --input: 0 0% 100%; /* White input fields */
     --ring: 217 91% 60%;
     --radius: 0.75rem; /* More rounded like ChatGPT */
-
+    
     /* ChatGPT Light Sidebar - very light gray */
     --sidebar-background: 0 0% 98%; /* #fcfcfc - very light gray */
     --sidebar-foreground: 0 0% 6%;
@@ -366,7 +379,7 @@ All colors MUST be HSL.
     --accent-orange: 25 95% 53%;
     --accent-red: 0 84% 60%;
     --user-message-bg: 217 100% 94%; /* Default light blue for user messages */
-
+    
     /* Premium upgrade button colors */
     --gold: 43 74% 49%; /* Warm gold for premium features */
     --gold-foreground: 0 0% 100%;
@@ -393,7 +406,7 @@ All colors MUST be HSL.
     --border: 0 0% 20%; /* Dark borders */
     --input: 0 0% 12%; /* Dark input fields */
     --ring: 217 91% 60%;
-
+    
     /* ChatGPT Dark Sidebar - extremely dark like reference */
     --sidebar-background: 0 0% 9%; /* #181818 - Dark sidebar */
     --sidebar-foreground: 0 0% 86%;
@@ -403,14 +416,14 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 86%;
     --sidebar-border: 0 0% 12%;
     --sidebar-ring: 217 91% 60%;
-
+    
     /* ChatGPT specific backgrounds */
     --chat-user-bg: 0 0% 12%; /* User message background */
     --chat-ai-bg: 0 0% 8%; /* AI message background */
     --chat-input-bg: 0 0% 12%; /* Input field */
     --chat-hover: 0 0% 15%; /* Hover states */
     --user-message-bg: 0 0% 19%; /* #303030 - Consistent dark user message bg */
-
+    
     /* Premium upgrade button colors for dark mode */
     --gold: 43 74% 49%; /* Warm gold for premium features */
     --gold-foreground: 0 0% 100%;
@@ -506,56 +519,50 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family:
-      "Inter",
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      "Roboto",
-      sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
-
+  
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
-
+  
   /* ChatGPT utility classes */
   .chat-user-bg {
     background: hsl(var(--chat-user-bg, var(--secondary)));
   }
-
+  
   .chat-ai-bg {
     background: hsl(var(--chat-ai-bg, var(--card)));
   }
-
+  
   .chat-input-bg {
     background: hsl(var(--chat-input-bg, var(--muted)));
   }
-
+  
   .chat-hover {
     background: hsl(var(--chat-hover, var(--accent)));
   }
-
+  
   /* Custom scrollbar - ChatGPT style */
   ::-webkit-scrollbar {
     width: 4px;
   }
-
+  
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-
+  
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--muted-foreground) / 0.2);
     border-radius: 2px;
   }
-
+  
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.4);
   }
-
+  
   /* Focus visible improvements */
   .focus-visible\:outline-none:focus-visible {
     outline: 2px solid hsl(var(--sidebar-primary));
@@ -575,8 +582,7 @@ All colors MUST be HSL.
 
 /* Waveform animation for voice recording */
 @keyframes waveform {
-  0%,
-  100% {
+  0%, 100% {
     transform: scaleY(0.5);
     opacity: 0.7;
   }
@@ -608,22 +614,22 @@ All colors MUST be HSL.
   animation: scroll-left 16s linear infinite;
 }
 
-.animate-scroll-left-ultra-fast {
-  animation: scroll-left 10s linear infinite;
-}
-
-.animate-seamless-scroll {
-  animation: seamless-scroll 30s linear infinite;
-}
-
-@keyframes seamless-scroll {
-  0% {
-    transform: translateX(0);
+  .animate-scroll-left-ultra-fast {
+    animation: scroll-left 10s linear infinite;
   }
-  100% {
-    transform: translateX(-33.333%);
+
+  .animate-seamless-scroll {
+    animation: seamless-scroll 30s linear infinite;
   }
-}
+
+  @keyframes seamless-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
 
 .animate-scroll-left:hover,
 .animate-scroll-left-fast:hover,
@@ -642,7 +648,7 @@ All colors MUST be HSL.
     transform: none !important;
     transition: none !important;
   }
-
+  
   /* Prevent input focus from causing any movement */
   [data-vaul-drawer] input:focus,
   [data-vaul-drawer] textarea:focus {
@@ -663,20 +669,20 @@ All colors MUST be HSL.
     will-change: auto !important;
     -webkit-transform: translate3d(0, 0, 0) !important;
   }
-
+  
   /* Prevent any position changes on drawer wrapper */
   [data-vaul-drawer-wrapper] {
     position: fixed !important;
     inset: 0 !important;
   }
-
+  
   /* Lock drawer content height and scrolling */
   [data-vaul-drawer-content] {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
   }
-
+  
   /* Completely disable scroll-into-view on iOS */
   [data-vaul-drawer] input,
   [data-vaul-drawer] textarea,
@@ -685,7 +691,7 @@ All colors MUST be HSL.
     scroll-margin-top: 0 !important;
     scroll-margin-bottom: 0 !important;
   }
-
+  
   /* Force no transforms on focus */
   [data-vaul-drawer] input:focus,
   [data-vaul-drawer] textarea:focus,
@@ -694,7 +700,7 @@ All colors MUST be HSL.
     -webkit-transform: translate3d(0, 0, 0) !important;
     transition: none !important;
   }
-
+  
   /* Lock parent containers when input is focused */
   [data-vaul-drawer]:has(input:focus),
   [data-vaul-drawer]:has(textarea:focus),
@@ -705,7 +711,7 @@ All colors MUST be HSL.
     position: fixed !important;
     bottom: 0 !important;
   }
-
+  
   /* Disable all animations and transitions */
   [data-vaul-drawer],
   [data-vaul-drawer] * {
@@ -714,12 +720,12 @@ All colors MUST be HSL.
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }
-
+  
   /* Prevent viewport changes from affecting layout */
   [data-vaul-drawer] {
     scroll-behavior: auto !important;
   }
-
+  
   /* iOS-specific: prevent any visual viewport changes from affecting positioning */
   @supports (-webkit-touch-callout: none) {
     [data-vaul-drawer][data-vaul-drawer-visible] {
@@ -728,70 +734,5 @@ All colors MUST be HSL.
       height: auto !important;
       max-height: 90vh !important;
     }
-  }
-}
-
-/* --- Cookiebot: force full-width bottom bar and remove transforms --- */
-/* Targets dialog element and typical Cookiebot selectors */
-#CybotCookiebotDialog,
-.CybotCookiebotDialog,
-.CybotCookiebotDialogActive,
-div[id^="CybotCookiebot"],
-div.CybotCookiebotDialog {
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  transform: none !important;
-  visibility: visible !important;
-  display: block !important;
-  opacity: 1 !important;
-  z-index: 2147483647 !important;
-  pointer-events: auto !important;
-  border-radius: 0 !important;
-  box-shadow: none !important; /* optional */
-}
-
-/* ensure inner wrapper stretches */
-#CybotCookiebotDialog .CybotCookiebotDialogContentWrapper,
-.CybotCookiebotDialog .CybotCookiebotDialogContentWrapper,
-.CybotCookiebotScrollContainer {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-/* If Cookiebot UI is rendered inside an iframe element, style the iframe element itself */
-iframe[src*="consent.cookiebot.com"],
-iframe[id*="CybotCookiebot"],
-iframe[src*="cookiebot"] {
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: auto !important; /* allow Cookiebot to size itself vertically */
-  max-width: none !important;
-  border: 0 !important;
-  z-index: 2147483647 !important;
-  pointer-events: auto !important;
-}
-
-/* Prevent the site content from being covered by the bar:
-   body gets bottom padding when cookiebar is visible */
-body.cookiebot-visible {
-  padding-bottom: 120px !important; /* adjust to match your banner height */
-}
-
-/* optional: ensure small-screen look */
-@media (max-width: 640px) {
-  #CybotCookiebotDialog,
-  iframe[src*="consent.cookiebot.com"] {
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
   }
 }
