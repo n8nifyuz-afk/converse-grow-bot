@@ -777,5 +777,5 @@ iframe[id*="CybotCookiebot"] {
 
 /* prevent content being covered by the bar */
 body.cookiebot-visible {
-  padding-bottom: 140px !important;
+  padding-bottom: unset !important;
 } /* banner balandligiga moslang */
