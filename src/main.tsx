@@ -175,105 +175,77 @@ createRoot(document.getElementById("root")!).render(
 
 // --- Robust Cookiebot keep-visible helper (paste into src/main.tsx after mount) ---
 if (typeof window !== "undefined") {
-  (function smartCookiebotPortal() {
-    const MAX_TRIES = 12;
+  // main.tsx ichida, render qilinganidan keyin bir marta chaqiring
+  (function ensureCookiebotOnBody() {
+    const MAX_TRIES = 40;
     const TRY_INTERVAL = 300;
     let tries = 0;
 
-    function findDialog(): HTMLElement | null {
-      return (document.getElementById("CybotCookiebotDialog") ||
-        document.querySelector('[id^="CybotCookiebot"]') ||
-        document.querySelector(".CybotCookiebotDialog")) as HTMLElement | null;
+    function findIframe() {
+      return document.querySelector(
+        'iframe[src*="consent.cookiebot.com"], iframe[id*="CybotCookiebot"]',
+      ) as HTMLIFrameElement | null;
     }
 
-    function applyBarStyle(el: HTMLElement) {
-      // keep Cookiebot's own look but force full-width bottom bar
-      el.style.setProperty("position", "fixed", "important");
-      el.style.setProperty("left", "0", "important");
-      el.style.setProperty("right", "0", "important");
-      el.style.setProperty("bottom", "0", "important");
-      el.style.setProperty("width", "100%", "important");
-      el.style.setProperty("max-width", "none", "important");
-      el.style.setProperty("margin", "0", "important");
-      el.style.setProperty("border-radius", "0", "important");
-      el.style.setProperty("z-index", "2147483647", "important");
-      el.style.setProperty("display", "block", "important");
-      el.style.setProperty("visibility", "visible", "important");
-      el.style.setProperty("opacity", "1", "important");
-      el.style.setProperty("pointer-events", "auto", "important");
+    function findDialog() {
+      return (
+        document.getElementById("CybotCookiebotDialog") ||
+        document.querySelector('[id^="CybotCookiebot"]') ||
+        document.querySelector(".CybotCookiebotDialog")
+      );
+    }
 
-      // ensure inner content stretches
+    function styleElement(el: HTMLElement) {
       try {
-        const inner = el.querySelector(
-          ".CybotCookiebotDialogContentWrapper, .CybotCookiebotScrollContainer, .CybotCookiebotDialogBodyContent",
-        );
-        if (inner && inner instanceof HTMLElement) {
-          inner.style.setProperty("width", "100%", "important");
-        }
+        el.style.setProperty("position", "fixed", "important");
+        el.style.setProperty("left", "0", "important");
+        el.style.setProperty("right", "0", "important");
+        el.style.setProperty("bottom", "0", "important");
+        el.style.setProperty("width", "100%", "important");
+        el.style.setProperty("max-width", "none", "important");
+        el.style.setProperty("transform", "none", "important");
+        el.style.setProperty("z-index", "2147483647", "important");
+        el.style.setProperty("pointer-events", "auto", "important");
+        el.style.setProperty("display", "block", "important");
+        el.style.setProperty("visibility", "visible", "important");
+        el.style.setProperty("opacity", "1", "important");
       } catch (e) {}
     }
 
-    function applyDialogStyle(el: HTMLElement) {
-      // keep as dialog but ensure visible and centered
-      el.style.setProperty("position", "fixed", "important");
-      el.style.setProperty("left", "50%", "important");
-      el.style.setProperty("transform", "translateX(-50%)", "important");
-      el.style.setProperty("bottom", "10px", "important");
-      el.style.setProperty("right", "auto", "important");
-      el.style.setProperty("width", "auto", "important");
-      el.style.setProperty("max-width", "640px", "important");
-      el.style.setProperty("z-index", "2147483647", "important");
-      el.style.setProperty("display", "block", "important");
-      el.style.setProperty("visibility", "visible", "important");
-      el.style.setProperty("opacity", "1", "important");
-      el.style.setProperty("pointer-events", "auto", "important");
-    }
-
-    function enforce(el: HTMLElement) {
-      // decide layout by checking classes or attributes set by Cookiebot
-      const cls = (el.className || "").toLowerCase();
-      // heuristics: if admin set "bar" layout, Cookiebot often renders banner elements with 'scroll container' at bottom.
-      const looksLikeBar =
-        cls.includes("bar") ||
-        (!!el.querySelector(".CybotCookiebotScrollContainer") && getComputedStyle(el).width === "100%") ||
-        !!document.querySelector(".CybotCookiebotDialogDetailFooter"); // fallback heuristic
-
-      if (looksLikeBar) applyBarStyle(el);
-      else applyDialogStyle(el);
-    }
-
-    function tryMove() {
+    function tryFix() {
       tries++;
-      const el = findDialog();
-      if (!el) {
-        if (tries < MAX_TRIES) return setTimeout(tryMove, TRY_INTERVAL);
+      const iframe = findIframe();
+      const dialog = findDialog() as HTMLElement | null;
+
+      if (iframe) {
+        try {
+          if (iframe.parentElement !== document.body) document.body.appendChild(iframe);
+        } catch (e) {}
+        styleElement(iframe);
+      }
+
+      if (dialog) {
+        try {
+          if (dialog.parentElement !== document.body) document.body.appendChild(dialog);
+        } catch (e) {}
+        styleElement(dialog);
+        document.body.classList.add("cookiebot-visible");
+      }
+
+      if (!iframe && !dialog && tries < MAX_TRIES) {
+        setTimeout(tryFix, TRY_INTERVAL);
         return;
       }
 
-      // move to body to avoid clipping
+      // kuzatishni davom ettiramiz: agar Cookiebot keyin o'zgartirsa — qayta qo'llaymiz
       try {
-        if (el.parentElement !== document.body) document.body.appendChild(el);
-      } catch (e) {}
-
-      // remove any hide classes if present
-      ["CybotCookiebotDialogHide", "cybot-cookiebot-hide", "hidden", "hide"].forEach((cl) => el.classList.remove(cl));
-
-      enforce(el);
-
-      // observe element for attribute changes and re-enforce
-      try {
-        const mo = new MutationObserver((mutations) => {
-          for (const m of mutations) {
-            if (m.type === "attributes" || m.type === "childList") {
-              enforce(el);
-            }
-          }
-        });
-        mo.observe(el, { attributes: true, childList: true, subtree: true });
-        setTimeout(() => mo.disconnect(), 30000);
+        const target = document.documentElement || document.body;
+        const mo = new MutationObserver(() => tryFix());
+        mo.observe(target!, { childList: true, subtree: true });
+        setTimeout(() => mo.disconnect(), 120000); // 2 daqiqa kuzatish
       } catch (e) {}
     }
 
-    setTimeout(tryMove, 500);
+    setTimeout(tryFix, 500);
   })();
 }

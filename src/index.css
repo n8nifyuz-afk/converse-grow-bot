@@ -321,6 +321,15 @@
   }
 }
 
+/* Hide Cookiebot's default banner - we use a custom React component */
+#CybotCookiebotDialog,
+#CybotCookiebotDialogBodyUnderlay,
+#CookiebotWidget,
+.CookiebotWidget,
+[id^="Cookiebot"],
+[class^="Cookiebot"] {
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -730,3 +739,31 @@ All colors MUST be HSL.
     }
   }
 }
+
+/* FORCE Cookiebot dialog/iframe to be fixed on the viewport */
+iframe[src*="consent.cookiebot.com"],
+iframe[id*="CybotCookiebot"],
+#CybotCookiebotDialog,
+.CybotCookiebotDialog,
+div[id^="CybotCookiebot"],
+div.CybotCookiebotDialog {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  transform: none !important;
+  visibility: visible !important;
+  display: block !important;
+  opacity: 1 !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* prevent content being covered by the bar */
+body.cookiebot-visible {
+  padding-bottom: 140px !important;
+} /* banner balandligiga moslang */
