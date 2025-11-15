@@ -79,6 +79,30 @@ if (typeof window !== "undefined") {
   });
 }
 
+// --- Initialize Cookiebot banner ---
+if (typeof window !== "undefined") {
+  const ensureCookiebotVisible = () => {
+    try {
+      const cookiebot = (window as any).Cookiebot;
+      // Only show if Cookiebot is loaded and user hasn't consented yet
+      if (cookiebot && !cookiebot.consented && !cookiebot.declined) {
+        // Cookiebot handles its own display - just ensure it's not blocked
+        if (typeof cookiebot.show === 'function') {
+          cookiebot.show();
+        }
+      }
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn("[DEBUG] Cookiebot initialization check:", e);
+    }
+  };
+
+  // Check after a short delay to ensure Cookiebot script has loaded
+  setTimeout(ensureCookiebotVisible, 1000);
+  
+  // Also listen for page load
+  window.addEventListener('load', ensureCookiebotVisible);
+}
+
 // --- GTM init: only when Cookiebot consent allows (statistics or marketing) ---
 // This wrapper ensures:
 //  - initializeGTMWithGCLID() is called only after consent
