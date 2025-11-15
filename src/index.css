@@ -839,3 +839,67 @@ body.cookiebot-visible .site-footer-fixed {
   transform: translateY(220px) !important;
   transition: transform 0.2s ease !important;
 }
+
+/* ----- COOKIEBOT STABILITY PATCH ----- */
+/* Put this at the END of your index.css file */
+
+/* Force dialog centered and constrained nicely on very wide screens */
+#CybotCookiebotDialog,
+.CybotCookiebotDialog {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important; /* avoid conflicting right values */
+  transform: translateX(-50%) !important;
+  bottom: 10px !important;
+  width: min(980px, calc(100% - 48px)) !important; /* responsive width */
+  max-width: 1280px !important; /* allow bigger, but bounded */
+  box-sizing: border-box !important;
+  visibility: visible !important;
+  z-index: 2147483647 !important; /* on top of everything */
+}
+
+/* Ensure Cookiebot body and buttons visible */
+#CybotCookiebotDialog .CybotCookiebotBody,
+.CybotCookiebotDialog .CybotCookiebotBody {
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+/* For extremely wide screens keep dialog centered and not offscreen */
+@media (min-width: 1280px) {
+  #CybotCookiebotDialog,
+  .CybotCookiebotDialog {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 980px !important;
+    max-width: 1200px !important;
+  }
+
+  /* add a safety margin so fixed bottom navs won't overlap it */
+  body.cookiebot-visible {
+    padding-bottom: 240px !important;
+  }
+}
+
+/* If Cookiebot swaps to 'bottom' template, make sure it stays full-width and above nav */
+#CybotCookiebotDialog[data-template="bottom"],
+.CybotCookiebotDialog[data-template="bottom"] {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: min(100%, 980px) !important;
+  max-width: 1200px !important;
+}
+
+/* Make sure iframe isn't transformed by parent and stays visible */
+iframe[src*="consent.cookiebot.com"],
+iframe[id*="CybotCookiebot"] {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
