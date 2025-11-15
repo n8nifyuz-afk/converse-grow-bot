@@ -16,20 +16,6 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    // Ignore third-party script errors
-    const errorMessage = error.message || error.toString();
-    const isThirdPartyError = 
-      errorMessage.includes('Script error') ||
-      errorMessage.includes('gsi') ||
-      errorMessage.includes('Cookiebot') ||
-      errorMessage.includes('gtm') ||
-      errorMessage === 'Script error.';
-    
-    if (isThirdPartyError) {
-      // Don't show error UI for third-party errors
-      return { hasError: false };
-    }
-    
     // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }

@@ -18,81 +18,65 @@ if (typeof window !== "undefined") {
   } catch (e) {}
 }
 
-// --- Global error handlers (prevent third-party errors from breaking app) ---
+// --- Global error handlers (softer; show full errors in DEV) ---
 if (typeof window !== "undefined") {
   const thirdPartyDomains = [
     "googletagmanager.com",
     "google-analytics.com",
-    "googleidentityservice",
-    "accounts.google.com",
     "cookiebot.com",
     "consent.cookiebot.com",
     "gstatic.com",
     "doubleclick.net",
   ];
 
-  // Capture errors as early as possible with highest priority
   window.addEventListener("error", (event) => {
     const filename = event.filename || "";
-    const message = event.message || "";
-    
-    // Identify third-party errors
     const isThirdPartyError =
-      message === "Script error." ||
-      message.includes("gsi") ||
-      message.includes("Cookiebot") ||
+      event.message === "Script error." ||
       !event.filename ||
       event.lineno === 0 ||
       thirdPartyDomains.some((domain) => filename.includes(domain));
 
     if (isThirdPartyError) {
-      // Prevent third-party errors from propagating to React
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      
+      // DEV: show non-fatal third-party errors but don't block render
       if (import.meta.env.DEV) {
-        console.warn("[DEBUG] Blocked third-party error:", {
-          message: message || "Script error.",
+        console.warn("[DEBUG] Non-critical external script error (allowed):", {
+          message: event.message,
           filename: filename || "unknown",
           lineno: event.lineno,
           colno: event.colno,
         });
       }
+      // Don't call event.preventDefault() here during debug — allow browser logging.
       return;
     }
 
-    // Critical app errors only
-    console.error("[CRITICAL] App error:", event.error || event.message, {
-      filename,
+    // Critical (app) errors: always log full info
+    console.error("[CRITICAL] window.error:", event.error || event.message, {
+      filename: filename,
       lineno: event.lineno,
       colno: event.colno,
       stack: (event.error && (event.error as any).stack) || null,
     });
-  }, true); // Use capture phase for earliest interception
+  });
 
   window.addEventListener("unhandledrejection", (event) => {
     const reason = event.reason || {};
     const reasonMsg = typeof reason === "string" ? reason : reason.message || "";
-    
     const isThirdPartyRejection =
       reasonMsg.includes &&
-      (reasonMsg.includes("cookiebot") ||
-       reasonMsg.includes("Cookiebot") ||
-       reasonMsg.includes("gtm") ||
-       reasonMsg.includes("gsi") ||
-       reasonMsg.includes("analytics"));
+      (reasonMsg.includes("cookiebot") || reasonMsg.includes("gtm") || reasonMsg.includes("analytics"));
 
     if (isThirdPartyRejection) {
-      event.preventDefault();
       if (import.meta.env.DEV) {
-        console.warn("[DEBUG] Blocked third-party rejection:", event.reason);
+        console.warn("[DEBUG] Non-critical third-party unhandled rejection:", event.reason);
       }
       return;
     }
 
-    console.error("[CRITICAL] Unhandled rejection:", event.reason);
-  }, true);
+    // Log all other rejections
+    console.error("[CRITICAL] unhandledrejection:", event.reason);
+  });
 }
 
 // --- GTM init: only when Cookiebot consent allows (statistics or marketing) ---
