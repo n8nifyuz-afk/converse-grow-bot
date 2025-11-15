@@ -173,68 +173,51 @@ createRoot(document.getElementById("root")!).render(
   </React.StrictMode>,
 );
 
-// --- Robust Cookiebot keep-visible helper (paste into src/main.tsx after mount) ---
-if (typeof window !== "undefined") {
-  // main.tsx ichida, render qilinganidan keyin bir marta chaqiring
-  // paste this replacement into src/main.tsx (replace previous ensureCookiebotOnBody block)
-  (function ensureCookiebotOnBody() {
-    const MAX_TRIES = 40;
-    const TRY_INTERVAL = 300;
-    let tries = 0;
-
-    function findIframe() {
-      return document.querySelector(
-        'iframe[src*="consent.cookiebot.com"], iframe[id*="CybotCookiebot"]',
-      ) as HTMLIFrameElement | null;
+// paste AFTER createRoot(...).render(...)
+(function ensureCookiebotOnBody() {
+  const MAX_TRIES = 40,
+    TRY_INTERVAL = 300;
+  let tries = 0;
+  function findIframe() {
+    return document.querySelector('iframe[src*="consent.cookiebot.com"], iframe[id*="CybotCookiebot"]');
+  }
+  function findDialog() {
+    return (
+      document.getElementById("CybotCookiebotDialog") ||
+      document.querySelector(".CybotCookiebotDialog") ||
+      document.querySelector('[id^="CybotCookiebot"]')
+    );
+  }
+  function ensureOnBody(el) {
+    if (!el) return;
+    try {
+      if (el.parentElement !== document.body) document.body.appendChild(el);
+    } catch (e) {}
+    try {
+      el.style.setProperty("z-index", "2147483647", "important");
+      el.style.setProperty("pointer-events", "auto", "important");
+      el.style.removeProperty("width");
+      el.style.removeProperty("transform");
+    } catch (e) {}
+  }
+  function tryFix() {
+    tries++;
+    const iframe = findIframe();
+    const dialog = findDialog();
+    if (iframe) ensureOnBody(iframe);
+    if (dialog) {
+      ensureOnBody(dialog);
+      document.body.classList.add("cookiebot-visible");
     }
-
-    function findDialog() {
-      return (
-        document.getElementById("CybotCookiebotDialog") ||
-        document.querySelector('[id^="CybotCookiebot"]') ||
-        document.querySelector(".CybotCookiebotDialog")
-      );
+    if (!iframe && !dialog && tries < MAX_TRIES) {
+      setTimeout(tryFix, TRY_INTERVAL);
+      return;
     }
-
-    function ensureOnBody(el: Element | null) {
-      if (!el) return;
-      try {
-        if (el.parentElement !== document.body) document.body.appendChild(el);
-      } catch (e) {}
-      // minimal changes: only ensure visibility and z-index; do NOT force width/transform
-      try {
-        const htmlEl = el as HTMLElement;
-        htmlEl.style.setProperty("z-index", "2147483647", "important");
-        htmlEl.style.setProperty("pointer-events", "auto", "important");
-        htmlEl.style.removeProperty("width"); // allow Cookiebot to size itself
-        htmlEl.style.removeProperty("transform");
-      } catch (e) {}
-    }
-
-    function tryFix() {
-      tries++;
-      const iframe = findIframe();
-      const dialog = findDialog() as HTMLElement | null;
-
-      if (iframe) ensureOnBody(iframe);
-      if (dialog) {
-        ensureOnBody(dialog);
-        document.body.classList.add("cookiebot-visible");
-      }
-
-      if (!iframe && !dialog && tries < MAX_TRIES) {
-        setTimeout(tryFix, TRY_INTERVAL);
-        return;
-      }
-
-      // Observe for late insertions, re-run tryFix if Cookiebot recreates nodes
-      try {
-        const mo = new MutationObserver(() => tryFix());
-        mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
-        setTimeout(() => mo.disconnect(), 120000);
-      } catch (e) {}
-    }
-
-    setTimeout(tryFix, 500);
-  })();
-}
+    try {
+      const mo = new MutationObserver(() => tryFix());
+      mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+      setTimeout(() => mo.disconnect(), 120000);
+    } catch (e) {}
+  }
+  setTimeout(tryFix, 500);
+})();
