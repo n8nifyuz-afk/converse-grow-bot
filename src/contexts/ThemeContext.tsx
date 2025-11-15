@@ -30,7 +30,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(
     window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   );
-  const { user } = useAuth();
+  
+  // Safely get auth context - may be null during initialization
+  let user = null;
+  try {
+    const authContext = useAuth();
+    user = authContext?.user || null;
+  } catch (error) {
+    // Auth context not ready yet - will load from localStorage instead
+    console.debug('Auth context not available during theme initialization');
+  }
 
   useEffect(() => {
     // Load saved preferences from user metadata if user is authenticated
