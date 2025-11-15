@@ -47,7 +47,8 @@ if (typeof window !== "undefined") {
           colno: event.colno,
         });
       }
-      // Don't call event.preventDefault() here during debug — allow browser logging.
+      // Prevent third-party errors from reaching React's ErrorBoundary
+      event.preventDefault();
       return;
     }
 
