@@ -47,7 +47,8 @@ if (typeof window !== "undefined") {
           colno: event.colno,
         });
       }
-      // Don't call event.preventDefault() here during debug — allow browser logging.
+      // Prevent this error from blocking app execution
+      event.preventDefault();
       return;
     }
 
@@ -166,9 +167,44 @@ if (typeof window !== "undefined") {
   scheduleInit();
 }
 
-// --- Finally mount React ---
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+// --- Finally mount React with error recovery ---
+try {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
+    throw new Error("Root element not found");
+  }
+
+  createRoot(rootElement).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+} catch (error) {
+  console.error("[CRITICAL] Failed to mount React app:", error);
+  
+  // Fallback UI if React fails to mount
+  const rootElement = document.getElementById("root");
+  if (rootElement) {
+    rootElement.innerHTML = `
+      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="max-width: 500px; text-align: center;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+          <h1 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Failed to Load Application</h1>
+          <p style="color: #666; margin-bottom: 1.5rem;">
+            We encountered an error while starting the app. Please try refreshing the page.
+          </p>
+          <button 
+            onclick="window.location.reload()" 
+            style="background: #000; color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;"
+          >
+            Refresh Page
+          </button>
+          <details style="margin-top: 1.5rem; text-align: left; padding: 1rem; background: #f5f5f5; border-radius: 0.5rem;">
+            <summary style="cursor: pointer; font-weight: 500;">Error Details</summary>
+            <pre style="margin-top: 0.5rem; font-size: 0.875rem; overflow: auto;">${error instanceof Error ? error.message : String(error)}</pre>
+          </details>
+        </div>
+      </div>
+    `;
+  }
+}
