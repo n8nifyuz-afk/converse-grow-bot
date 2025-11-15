@@ -67,7 +67,12 @@
     <!-- Tracking scripts (GTM + GA4) -->
     <script>
       (function() {
-        function loadTracking() {
+        var trackingLoaded = false;
+
+        function loadTrackingOnce() {
+          if (trackingLoaded) return;
+          trackingLoaded = true;
+
           // Google Tag Manager
           (function(w,d,s,l,i){
             w[l]=w[l]||[];
@@ -93,45 +98,46 @@
           document.head.appendChild(gtagScript);
         }
 
-        function shouldLoadByCookiebot() {
+        function cookiebotHasConsent() {
           try {
-            if (window.Cookiebot && window.Cookiebot.consent) {
-              return !!(window.Cookiebot.consent.statistics || window.Cookiebot.consent.marketing);
-            }
-            return false;
-          } catch(e) {
+            // Cookiebot.consent statistik yoki marketing uchun rozilikni tekshiradi
+            return !!(window.Cookiebot && window.Cookiebot.consent && (window.Cookiebot.consent.statistics || window.Cookiebot.consent.marketing));
+          } catch (e) {
             return false;
           }
         }
 
         function waitForConsentThenLoad() {
-          if (shouldLoadByCookiebot()) {
-            actuallyLoadTracking();
+          if (cookiebotHasConsent()) {
+            loadTrackingOnce();
             return;
           }
 
           var waited = 0;
           var interval = setInterval(function() {
-            if (shouldLoadByCookiebot()) {
+            if (cookiebotHasConsent()) {
               clearInterval(interval);
-              actuallyLoadTracking();
+              loadTrackingOnce();
             } else {
               waited += 500;
-              if (waited > 20000) {
+              if (waited > 20000) { // 20s timeout
                 clearInterval(interval);
               }
             }
           }, 500);
         }
 
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', loadTracking);
-        } else {
-          loadTracking();
-        }
+        // DARHOL consent-ni kutib yuklashni boshlaymiz (DOMContentLoaded ga bog'liq emas)
+        waitForConsentThenLoad();
 
+        // Qo'shimcha: agar Cookiebot onAccept eventi mavjud bo'lsa, unga ham moslashamiz
         if (window.addEventListener) {
           window.addEventListener('CookiebotOnAccept', function(){
+            waitForConsentThenLoad();
+          }, false);
+
+          // ba'zi implementatsiyalarda: Cookiebot.consentUpdated kabi event bo'lishi mumkin
+          window.addEventListener('CookiebotOnConsentChanged', function(){
             waitForConsentThenLoad();
           }, false);
         }
