@@ -173,95 +173,103 @@ createRoot(document.getElementById("root")!).render(
   </React.StrictMode>,
 );
 
-// --- Cookiebot portal & force-show helper (PASTE to src/main.tsx after React mount) ---
+// --- Robust Cookiebot keep-visible helper (paste into src/main.tsx after mount) ---
 if (typeof window !== "undefined") {
-  (function ensureCookiebotVisible() {
-    const MAX_TRIES = 10;
+  (function keepCookiebotVisible() {
+    const MAX_TRIES = 20;
     const TRY_INTERVAL = 300; // ms
-
     let tries = 0;
-    const tryMove = () => {
+
+    function applyStyles(el: HTMLElement) {
+      el.style.setProperty("display", "block", "important");
+      el.style.setProperty("visibility", "visible", "important");
+      el.style.setProperty("opacity", "1", "important");
+      el.style.setProperty("position", "fixed", "important");
+      el.style.setProperty("bottom", "10px", "important");
+      el.style.setProperty("right", "10px", "important");
+      el.style.setProperty("z-index", "2147483647", "important");
+      el.style.setProperty("pointer-events", "auto", "important");
+    }
+
+    function findDialog(): HTMLElement | null {
+      return (
+        (document.getElementById("CybotCookiebotDialog") as HTMLElement) ||
+        (document.querySelector('[id^="CybotCookiebot"]') as HTMLElement) ||
+        (document.querySelector(".CybotCookiebotDialog") as HTMLElement) ||
+        null
+      );
+    }
+
+    function makeVisibleAndObserve(el: HTMLElement) {
+      // ensure it's in body
       try {
-        const el =
-          document.getElementById("CybotCookiebotDialog") ||
-          document.querySelector('[id^="CybotCookiebot"]') ||
-          document.querySelector(".CybotCookiebotDialog");
+        if (el.parentElement !== document.body) document.body.appendChild(el);
+      } catch (e) {}
+      applyStyles(el);
 
-        if (!el) {
-          tries++;
-          if (tries < MAX_TRIES) return setTimeout(tryMove, TRY_INTERVAL);
-          return; // give up after MAX_TRIES
-        }
+      // remove hide-classes if present
+      el.classList.remove("CybotCookiebotDialogHide", "cybot-cookiebot-hide", "hidden");
 
-        // If element is already a child of body and visible, nothing to do
-        if (el.parentElement === document.body && getComputedStyle(el).display !== "none") {
-          return;
-        }
-
-        // Move to body (portal) so it's not clipped by app containers
-        try {
-          document.body.appendChild(el);
-        } catch (e) {
-          // in rare cases append may fail; try again later
-          tries++;
-          if (tries < MAX_TRIES) setTimeout(tryMove, TRY_INTERVAL);
-          return;
-        }
-
-        // Force inline styles to make it visible and accessible
-        el.style.setProperty("display", "block", "important");
-        el.style.setProperty("visibility", "visible", "important");
-        el.style.setProperty("opacity", "1", "important");
-        el.style.setProperty("position", "fixed", "important");
-        el.style.setProperty("bottom", "10px", "important");
-        el.style.setProperty("right", "10px", "important");
-        el.style.setProperty("z-index", "2147483647", "important");
-        el.style.setProperty("pointer-events", "auto", "important");
-
-        // Also ensure parent nodes do not hide it (best-effort)
-        let p = el.parentElement;
-        for (let i = 0; i < 6 && p; i++) {
-          if (getComputedStyle(p).display === "none") p.style.display = "block";
-          if (getComputedStyle(p).visibility === "hidden") p.style.visibility = "visible";
-          p = p.parentElement;
-        }
-
-        // Optionally call Cookiebot.show/forceShow if available
-        if ((window as any).Cookiebot) {
-          try {
-            if (typeof (window as any).Cookiebot.forceShow === "function") {
-              (window as any).Cookiebot.forceShow();
-            } else if (typeof (window as any).Cookiebot.show === "function") {
-              (window as any).Cookiebot.show(true);
+      // observe changes on this element and re-apply styles if someone hides it
+      const mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.type === "attributes") {
+            const display = getComputedStyle(el).display;
+            if (
+              display === "none" ||
+              getComputedStyle(el).visibility === "hidden" ||
+              +getComputedStyle(el).opacity === 0
+            ) {
+              // re-apply quickly
+              applyStyles(el);
+              // also try to call Cookiebot.show/forceShow if available
+              try {
+                const cb = (window as any).Cookiebot;
+                if (cb) {
+                  if (typeof cb.forceShow === "function") cb.forceShow();
+                  else if (typeof cb.show === "function") cb.show(true);
+                }
+              } catch (e) {}
             }
-          } catch (e) {
-            // ignore; element already forced visible
+          }
+          // if childList changed (re-render), attempt to reattach
+          if (m.type === "childList" && (m.removedNodes.length || m.addedNodes.length)) {
+            applyStyles(el);
           }
         }
-      } catch (err) {
-        // swallow and retry a few times
-        tries++;
-        if (tries < MAX_TRIES) setTimeout(tryMove, TRY_INTERVAL);
-      }
-    };
-
-    // Delay slightly to let uc.js fully run; then attempt moving
-    setTimeout(tryMove, 500);
-
-    // Also observe DOM in case Cookiebot is (re)inserted later
-    try {
-      const mo = new MutationObserver(() => {
-        // if dialog not child of body, try moving again
-        const el = document.querySelector('[id^="CybotCookiebot"], .CybotCookiebotDialog');
-        if (el && el.parentElement !== document.body) {
-          tryMove();
-        }
       });
-      mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+
+      mo.observe(el, { attributes: true, childList: true, subtree: true });
       // stop observer after 30s (best-effort)
       setTimeout(() => mo.disconnect(), 30000);
-    } catch (e) {
-      // ignore observer failures in older browsers
     }
+
+    function tryMoveAndKeep() {
+      tries++;
+      const el = findDialog();
+      if (!el) {
+        if (tries < MAX_TRIES) return setTimeout(tryMoveAndKeep, TRY_INTERVAL);
+        return;
+      }
+
+      makeVisibleAndObserve(el);
+
+      // Also add a document-level observer to catch re-insertions or re-hides
+      try {
+        const docObserver = new MutationObserver(() => {
+          const current = findDialog();
+          if (current) {
+            makeVisibleAndObserve(current);
+          }
+        });
+        docObserver.observe(document.documentElement || document.body, { childList: true, subtree: true });
+        setTimeout(() => docObserver.disconnect(), 30000);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    // initial delay to let uc.js finish
+    setTimeout(tryMoveAndKeep, 500);
   })();
 }
