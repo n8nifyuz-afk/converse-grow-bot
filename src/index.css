@@ -740,27 +740,39 @@ All colors MUST be HSL.
   }
 }
 
-/* FORCE Cookiebot dialog/iframe to be fixed on the viewport */
+/* Minimal safe Cookiebot CSS — let Cookiebot control layout */
 iframe[src*="consent.cookiebot.com"],
-iframe[id*="CybotCookiebot"],
-#CybotCookiebotDialog,
-.CybotCookiebotDialog,
-div[id^="CybotCookiebot"],
-div.CybotCookiebotDialog {
+iframe[id*="CybotCookiebot"] {
   position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  max-width: none !important;
-  transform: none !important;
-  visibility: visible !important;
-  display: block !important;
-  opacity: 1 !important;
   z-index: 2147483647 !important;
   pointer-events: auto !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  /* do not force width/transform here */
+}
+
+/* Centered dialog (if Cookiebot chooses dialog layout) */
+#CybotCookiebotDialog.CybotCookiebotDialogActive,
+.CybotCookiebotDialog.CybotCookiebotDialogActive {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: 10px !important;
+  max-width: 640px !important;
+  width: auto !important;
+  z-index: 2147483648 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Bottom-bar template (if Cookiebot uses bottom template) */
+.CybotCookiebotDialog[data-template="bottom"],
+#CybotCookiebotDialog[data-template="bottom"] {
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  bottom: 0 !important;
+  z-index: 2147483647 !important;
 }
 
 /* prevent content being covered by the bar */

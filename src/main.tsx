@@ -176,6 +176,7 @@ createRoot(document.getElementById("root")!).render(
 // --- Robust Cookiebot keep-visible helper (paste into src/main.tsx after mount) ---
 if (typeof window !== "undefined") {
   // main.tsx ichida, render qilinganidan keyin bir marta chaqiring
+  // paste this replacement into src/main.tsx (replace previous ensureCookiebotOnBody block)
   (function ensureCookiebotOnBody() {
     const MAX_TRIES = 40;
     const TRY_INTERVAL = 300;
@@ -195,20 +196,18 @@ if (typeof window !== "undefined") {
       );
     }
 
-    function styleElement(el: HTMLElement) {
+    function ensureOnBody(el: Element | null) {
+      if (!el) return;
       try {
-        el.style.setProperty("position", "fixed", "important");
-        el.style.setProperty("left", "0", "important");
-        el.style.setProperty("right", "0", "important");
-        el.style.setProperty("bottom", "0", "important");
-        el.style.setProperty("width", "100%", "important");
-        el.style.setProperty("max-width", "none", "important");
-        el.style.setProperty("transform", "none", "important");
-        el.style.setProperty("z-index", "2147483647", "important");
-        el.style.setProperty("pointer-events", "auto", "important");
-        el.style.setProperty("display", "block", "important");
-        el.style.setProperty("visibility", "visible", "important");
-        el.style.setProperty("opacity", "1", "important");
+        if (el.parentElement !== document.body) document.body.appendChild(el);
+      } catch (e) {}
+      // minimal changes: only ensure visibility and z-index; do NOT force width/transform
+      try {
+        const htmlEl = el as HTMLElement;
+        htmlEl.style.setProperty("z-index", "2147483647", "important");
+        htmlEl.style.setProperty("pointer-events", "auto", "important");
+        htmlEl.style.removeProperty("width"); // allow Cookiebot to size itself
+        htmlEl.style.removeProperty("transform");
       } catch (e) {}
     }
 
@@ -217,18 +216,9 @@ if (typeof window !== "undefined") {
       const iframe = findIframe();
       const dialog = findDialog() as HTMLElement | null;
 
-      if (iframe) {
-        try {
-          if (iframe.parentElement !== document.body) document.body.appendChild(iframe);
-        } catch (e) {}
-        styleElement(iframe);
-      }
-
+      if (iframe) ensureOnBody(iframe);
       if (dialog) {
-        try {
-          if (dialog.parentElement !== document.body) document.body.appendChild(dialog);
-        } catch (e) {}
-        styleElement(dialog);
+        ensureOnBody(dialog);
         document.body.classList.add("cookiebot-visible");
       }
 
@@ -237,12 +227,11 @@ if (typeof window !== "undefined") {
         return;
       }
 
-      // kuzatishni davom ettiramiz: agar Cookiebot keyin o'zgartirsa — qayta qo'llaymiz
+      // Observe for late insertions, re-run tryFix if Cookiebot recreates nodes
       try {
-        const target = document.documentElement || document.body;
         const mo = new MutationObserver(() => tryFix());
-        mo.observe(target!, { childList: true, subtree: true });
-        setTimeout(() => mo.disconnect(), 120000); // 2 daqiqa kuzatish
+        mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+        setTimeout(() => mo.disconnect(), 120000);
       } catch (e) {}
     }
 
