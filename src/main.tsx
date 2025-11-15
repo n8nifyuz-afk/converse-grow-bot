@@ -47,8 +47,7 @@ if (typeof window !== "undefined") {
           colno: event.colno,
         });
       }
-      // Prevent this error from blocking app execution
-      event.preventDefault();
+      // Don't call event.preventDefault() here during debug — allow browser logging.
       return;
     }
 
@@ -167,44 +166,102 @@ if (typeof window !== "undefined") {
   scheduleInit();
 }
 
-// --- Finally mount React with error recovery ---
-try {
-  const rootElement = document.getElementById("root");
-  if (!rootElement) {
-    throw new Error("Root element not found");
-  }
+// --- Finally mount React ---
+createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
 
-  createRoot(rootElement).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
-  );
-} catch (error) {
-  console.error("[CRITICAL] Failed to mount React app:", error);
-  
-  // Fallback UI if React fails to mount
-  const rootElement = document.getElementById("root");
-  if (rootElement) {
-    rootElement.innerHTML = `
-      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; font-family: system-ui, -apple-system, sans-serif;">
-        <div style="max-width: 500px; text-align: center;">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-          <h1 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">Failed to Load Application</h1>
-          <p style="color: #666; margin-bottom: 1.5rem;">
-            We encountered an error while starting the app. Please try refreshing the page.
-          </p>
-          <button 
-            onclick="window.location.reload()" 
-            style="background: #000; color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;"
-          >
-            Refresh Page
-          </button>
-          <details style="margin-top: 1.5rem; text-align: left; padding: 1rem; background: #f5f5f5; border-radius: 0.5rem;">
-            <summary style="cursor: pointer; font-weight: 500;">Error Details</summary>
-            <pre style="margin-top: 0.5rem; font-size: 0.875rem; overflow: auto;">${error instanceof Error ? error.message : String(error)}</pre>
-          </details>
-        </div>
-      </div>
-    `;
-  }
+// --- Cookiebot portal & force-show helper (PASTE to src/main.tsx after React mount) ---
+if (typeof window !== "undefined") {
+  (function ensureCookiebotVisible() {
+    const MAX_TRIES = 10;
+    const TRY_INTERVAL = 300; // ms
+
+    let tries = 0;
+    const tryMove = () => {
+      try {
+        const el =
+          document.getElementById("CybotCookiebotDialog") ||
+          document.querySelector('[id^="CybotCookiebot"]') ||
+          document.querySelector(".CybotCookiebotDialog");
+
+        if (!el) {
+          tries++;
+          if (tries < MAX_TRIES) return setTimeout(tryMove, TRY_INTERVAL);
+          return; // give up after MAX_TRIES
+        }
+
+        // If element is already a child of body and visible, nothing to do
+        if (el.parentElement === document.body && getComputedStyle(el).display !== "none") {
+          return;
+        }
+
+        // Move to body (portal) so it's not clipped by app containers
+        try {
+          document.body.appendChild(el);
+        } catch (e) {
+          // in rare cases append may fail; try again later
+          tries++;
+          if (tries < MAX_TRIES) setTimeout(tryMove, TRY_INTERVAL);
+          return;
+        }
+
+        // Force inline styles to make it visible and accessible
+        el.style.setProperty("display", "block", "important");
+        el.style.setProperty("visibility", "visible", "important");
+        el.style.setProperty("opacity", "1", "important");
+        el.style.setProperty("position", "fixed", "important");
+        el.style.setProperty("bottom", "10px", "important");
+        el.style.setProperty("right", "10px", "important");
+        el.style.setProperty("z-index", "2147483647", "important");
+        el.style.setProperty("pointer-events", "auto", "important");
+
+        // Also ensure parent nodes do not hide it (best-effort)
+        let p = el.parentElement;
+        for (let i = 0; i < 6 && p; i++) {
+          if (getComputedStyle(p).display === "none") p.style.display = "block";
+          if (getComputedStyle(p).visibility === "hidden") p.style.visibility = "visible";
+          p = p.parentElement;
+        }
+
+        // Optionally call Cookiebot.show/forceShow if available
+        if ((window as any).Cookiebot) {
+          try {
+            if (typeof (window as any).Cookiebot.forceShow === "function") {
+              (window as any).Cookiebot.forceShow();
+            } else if (typeof (window as any).Cookiebot.show === "function") {
+              (window as any).Cookiebot.show(true);
+            }
+          } catch (e) {
+            // ignore; element already forced visible
+          }
+        }
+      } catch (err) {
+        // swallow and retry a few times
+        tries++;
+        if (tries < MAX_TRIES) setTimeout(tryMove, TRY_INTERVAL);
+      }
+    };
+
+    // Delay slightly to let uc.js fully run; then attempt moving
+    setTimeout(tryMove, 500);
+
+    // Also observe DOM in case Cookiebot is (re)inserted later
+    try {
+      const mo = new MutationObserver(() => {
+        // if dialog not child of body, try moving again
+        const el = document.querySelector('[id^="CybotCookiebot"], .CybotCookiebotDialog');
+        if (el && el.parentElement !== document.body) {
+          tryMove();
+        }
+      });
+      mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+      // stop observer after 30s (best-effort)
+      setTimeout(() => mo.disconnect(), 30000);
+    } catch (e) {
+      // ignore observer failures in older browsers
+    }
+  })();
 }
