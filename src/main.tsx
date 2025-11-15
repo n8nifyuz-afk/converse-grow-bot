@@ -261,10 +261,11 @@ createRoot(document.getElementById("root")!).render(
     } catch (e) {
       rect = { height: el.offsetHeight || 0 };
     }
+    const iframe = el as HTMLIFrameElement;
     const h =
       rect.height ||
-      (el.contentWindow && el.contentWindow.document && el.contentWindow.document.body
-        ? el.contentWindow.document.body.scrollHeight
+      (iframe.contentWindow && iframe.contentWindow.document && iframe.contentWindow.document.body
+        ? iframe.contentWindow.document.body.scrollHeight
         : 0) ||
       0;
     if (h !== lastHeight) {
@@ -306,7 +307,8 @@ createRoot(document.getElementById("root")!).render(
     tries++;
     measureAndApply();
     observeMutations();
-    observeResize();
+    const dialog = findDialogEl();
+    if (dialog) observeResize(dialog);
     if (tries > MAX_TRIES) clearInterval(interval);
   }, 300);
 
