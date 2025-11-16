@@ -1198,13 +1198,11 @@ export default function Admin() {
   // Quick date presets
   const setDatePreset = (preset: 'today' | 'yesterday' | 'week' | 'month' | 'all') => {
     const today = startOfToday();
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     
     switch (preset) {
       case 'today':
         setTempDateFilter({ from: today, to: today });
-        setTempTimeFilter({ fromTime: '00:00', toTime: currentTime });
+        setTempTimeFilter({ fromTime: '00:00', toTime: '23:59' });
         break;
       case 'yesterday':
         const yesterday = subDays(today, 1);
