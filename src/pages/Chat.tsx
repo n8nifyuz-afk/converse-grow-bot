@@ -1262,51 +1262,229 @@ export default function Chat() {
     try {
       // Send webhook for text-based models only
       // Image generation models are handled separately
-      console.log('[AI-RESPONSE] Calling Supabase edge function with model:', selectedModel);
+      console.log('[AI-RESPONSE] Calling webhook with type: text, model:', selectedModel);
       
-      // Call Supabase edge function instead of N8n webhook
-      const { data: functionResponse, error: functionError } = await supabase.functions.invoke('chat-with-ai-optimized', {
-        body: {
-          message: userMessage,
-          chat_id: originalChatId,
-          user_id: user.id,
-          model: selectedModel
+      // Get webhook metadata
+      const metadata = await getWebhookMetadata();
+      
+      // Check if this is the user's first message (by checking if they have any chats)
+      let isFirstMessage = false;
+      try {
+        // Use direct REST API call to avoid TS type inference issues
+        const response = await fetch(
+          `https://lciaiunzacgvvbvcshdh.supabase.co/rest/v1/chats?user_id=eq.${user.id}&select=id&limit=1`,
+          {
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjaWFpdW56YWNndnZidmNzaGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2Nzc3NjQsImV4cCI6MjA3MzI1Mzc2NH0.zpQgi6gkTSfP-znoV6u_YiyzKRp8fklxrz_xszGtPLI',
+              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const existingChats = await response.json();
+          isFirstMessage = !existingChats || existingChats.length === 0;
+          console.log('[AI-RESPONSE] First time user:', isFirstMessage);
+        } else {
+          console.warn('[AI-RESPONSE] Failed to check first message, status:', response.status);
+          isFirstMessage = false; // Default to false on error
         }
-      });
-      
-      console.log('[AI-RESPONSE] Edge function response:', functionResponse);
-      
-      if (functionError) {
-        console.error('[AI-RESPONSE] Edge function error:', functionError);
-        throw new Error(`Edge function error: ${functionError.message}`);
+      } catch (error) {
+        console.error('[AI-RESPONSE] Error checking first message:', error);
       }
       
-      if (!functionResponse) {
-        throw new Error('No response from edge function');
+      // Fetch user's external_id and email from profiles
+      let externalId = null;
+      let userEmail = user.email || null;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('external_id, email')
+          .eq('user_id', user.id)
+          .single();
+        externalId = profile?.external_id;
+        userEmail = profile?.email || user.email || null;
+      } catch (error) {
+        console.error('[AI-RESPONSE] Error fetching profile data:', error);
       }
       
-      console.log('[AI-RESPONSE] Received response from edge function:', { 
-        hasResponse: !!functionResponse?.response, 
-        hasContent: !!functionResponse?.content, 
-        hasText: !!functionResponse?.text,
-        hasImageUrl: !!functionResponse?.image_url,
-        type: functionResponse?.type
+      const webhookResponse = await fetch('https://adsgbt.app.n8n.cloud/webhook/adamGPT', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'text',
+          message: userMessage,
+          userId: user.id,
+          chatId: originalChatId,
+          model: selectedModel,
+          isFirstMessage,
+          externalId,
+          userEmail,
+          sessionId: metadata.sessionId,
+          userIP: metadata.userIP,
+          countryCode: metadata.countryCode,
+          isMobile: metadata.isMobile,
+          gclid: metadata.gclid,
+          urlParams: JSON.stringify(metadata.urlParams || {}), // Stringified JSON
+          referer: metadata.referer ? String(metadata.referer) : "null", // String format
+          hasDocument: "false"
+        })
       });
       
-      // Edge function returns the response directly - no polling needed
-      // The response already contains the AI's answer
+      console.log('[AI-RESPONSE] Webhook response status:', webhookResponse.status);
+      
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook request failed: ${webhookResponse.status}`);
+      }
+      
+      const aiResponse = await webhookResponse.json();
+      console.log('[AI-RESPONSE] Received response from webhook:', { 
+        hasResponse: !!aiResponse?.response, 
+        hasContent: !!aiResponse?.content, 
+        hasText: !!aiResponse?.text,
+        hasImageUrl: !!aiResponse?.image_url,
+        hasImageBase64: !!aiResponse?.image_base64,
+        success: aiResponse?.success,
+        messageId: aiResponse?.message_id
+      });
+      
+      // If webhook returns success but no content, it means the message was saved by webhook-handler
+      // Start polling to ensure we get the response even if realtime doesn't fire
+      if (aiResponse?.success && !aiResponse?.response && !aiResponse?.content && !aiResponse?.text) {
+        console.log('[AI-RESPONSE] Webhook saved message to DB, starting polling...');
+        
+        // Polling mechanism as fallback for when real-time doesn't fire
+        let pollAttempts = 0;
+        const maxPollAttempts = 30; // Poll for up to ~45 seconds
+        
+        const pollForNewMessages = async () => {
+          if (pollAttempts >= maxPollAttempts) {
+            console.log('[AI-RESPONSE-POLLING] Max attempts reached');
+            setIsGeneratingResponse(false);
+            return;
+          }
+          
+          pollAttempts++;
+          console.log(`[AI-RESPONSE-POLLING] Attempt ${pollAttempts}/${maxPollAttempts}`);
+          
+          try {
+            const { data: latestMessages, error: fetchError } = await supabase
+              .from('messages')
+              .select('*')
+              .eq('chat_id', originalChatId)
+              .order('created_at', { ascending: false })
+              .limit(5);
+            
+            if (fetchError) {
+              console.error('[AI-RESPONSE-POLLING] Error fetching messages:', fetchError);
+              const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
+              setTimeout(pollForNewMessages, nextPollDelay);
+              return;
+            }
+            
+            // Check if there's a new assistant message after the user message
+            // CRITICAL: Fetch the actual user message from the database to get its timestamp
+            // Don't rely on state or Date.now() which can cause timing issues
+            const { data: userMessageData } = await supabase
+              .from('messages')
+              .select('created_at')
+              .eq('id', userMessageId)
+              .single();
+            
+            const userMessageTime = userMessageData 
+              ? new Date(userMessageData.created_at).getTime() 
+              : new Date(latestMessages[0]?.created_at || 0).getTime() - 1000;
+            
+            console.log('[AI-RESPONSE-POLLING] Comparing timestamps:', {
+              userMessageId,
+              userMessageTime: new Date(userMessageTime).toISOString(),
+              latestMessagesCount: latestMessages?.length || 0,
+              latestMessages: latestMessages?.map(m => ({
+                id: m.id,
+                role: m.role,
+                created_at: m.created_at,
+                isAfterUser: new Date(m.created_at).getTime() > userMessageTime
+              }))
+            });
+            
+            const newAssistantMessage = latestMessages?.find(
+              msg => msg.role === 'assistant' && 
+                     msg.id !== userMessageId &&
+                     new Date(msg.created_at).getTime() > userMessageTime
+            );
+            
+            if (newAssistantMessage) {
+              console.log('[AI-RESPONSE-POLLING] ✅ Found matching assistant message:', newAssistantMessage.id);
+            } else {
+              console.log('[AI-RESPONSE-POLLING] ❌ No matching assistant message found');
+            }
+            
+            if (newAssistantMessage) {
+              console.log('[AI-RESPONSE-POLLING] ✅ Found new assistant message!', newAssistantMessage.id);
+              
+              // Check if already in state
+              setMessages(prev => {
+                const exists = prev.some(m => m.id === newAssistantMessage.id);
+                if (exists) {
+                  console.log('[AI-RESPONSE-POLLING] Message already in state');
+                  return prev;
+                }
+                
+                console.log('[AI-RESPONSE-POLLING] Adding message to state');
+                const messageToAdd: Message = {
+                  id: newAssistantMessage.id,
+                  chat_id: newAssistantMessage.chat_id,
+                  content: newAssistantMessage.content,
+                  role: newAssistantMessage.role as 'assistant' | 'user',
+                  created_at: newAssistantMessage.created_at,
+                  file_attachments: (newAssistantMessage.file_attachments as any) || []
+                };
+                
+                const newMessages = [...prev, messageToAdd].sort((a, b) => 
+                  new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                );
+                
+                return newMessages;
+              });
+              
+              // Clear ALL loading states after adding message
+              setIsGeneratingResponse(false);
+              setLoading(false);
+              requestAnimationFrame(() => scrollToBottom());
+              
+              // Stop polling
+              return;
+            }
+            
+            console.log('[AI-RESPONSE-POLLING] No new assistant message yet, retrying...');
+            // Use faster polling for first 10 attempts (500ms), then slower (2s)
+            const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
+            setTimeout(pollForNewMessages, nextPollDelay);
+          } catch (pollError) {
+            console.error('[AI-RESPONSE-POLLING] Error during polling:', pollError);
+            const nextPollDelay = pollAttempts <= 10 ? 500 : 2000;
+            setTimeout(pollForNewMessages, nextPollDelay);
+          }
+        };
+        
+        // Start polling immediately for faster response
+        setTimeout(pollForNewMessages, 100);
+        return;
+      }
       
       // Handle image_base64 by uploading to storage first
-      if (functionResponse?.image_base64) {
+      if (aiResponse?.image_base64) {
         console.log('[AI-RESPONSE] Image base64 detected, calling webhook-handler to upload...');
         try {
           const { data: handlerData, error: handlerError } = await supabase.functions.invoke('webhook-handler', {
             body: {
               chat_id: originalChatId,
               user_id: user.id,
-              image_base64: functionResponse.image_base64,
-              image_name: functionResponse.image_name || `generated_${Date.now()}.png`,
-              image_type: functionResponse.image_type || 'image/png'
+              image_base64: aiResponse.image_base64,
+              image_name: aiResponse.image_name || `generated_${Date.now()}.png`,
+              image_type: aiResponse.image_type || 'image/png'
             }
           });
           
@@ -1315,33 +1493,33 @@ export default function Chat() {
           } else {
             console.log('[AI-RESPONSE] Image uploaded successfully via webhook-handler');
           }
-        } catch (uploadError) {
-          console.error('[AI-RESPONSE] Error uploading image:', uploadError);
+        } catch (err) {
+          console.error('[AI-RESPONSE] Failed to upload image:', err);
         }
         // The webhook-handler will insert the message with the image, so we can return early
         return;
       }
       
-      if (functionResponse?.response || functionResponse?.content || functionResponse?.text) {
-        const responseContent = functionResponse.response || functionResponse.content || functionResponse.text;
+      if (aiResponse?.response || aiResponse?.content || aiResponse?.text) {
+        const responseContent = aiResponse.response || aiResponse.content || aiResponse.text;
 
         // Handle image URL responses (legacy/direct URL format)
         let fileAttachments: FileAttachment[] = [];
-        if (functionResponse.image_url) {
-          console.log('[AI-RESPONSE] Image URL received from edge function:', functionResponse.image_url);
+        if (aiResponse.image_url) {
+          console.log('[AI-RESPONSE] Image URL received from webhook:', aiResponse.image_url);
           fileAttachments = [{
             id: crypto.randomUUID(),
             name: `generated_image_${Date.now()}.png`,
             size: 0,
             // Unknown size for generated images
             type: 'image/png',
-            url: functionResponse.image_url
+            url: aiResponse.image_url
           }];
         }
         const assistantMessage: Message = {
           id: crypto.randomUUID(),
           chat_id: originalChatId,
-          content: functionResponse.image_url ? '' : responseContent, // Don't show text for image generation
+          content: aiResponse.image_url ? '' : responseContent, // Don't show text for image generation
           role: 'assistant',
           created_at: new Date().toISOString(),
           file_attachments: fileAttachments,
@@ -1374,7 +1552,7 @@ export default function Chat() {
         }).select().single();
         
         // If an image was generated, refresh usage limits
-        if (functionResponse.image_url) {
+        if (aiResponse.image_url) {
           console.log('[AI-RESPONSE] Dispatching event to refresh usage limits');
           window.dispatchEvent(new CustomEvent('refresh-usage-limits'));
         }
