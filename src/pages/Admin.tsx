@@ -304,22 +304,43 @@ export default function Admin() {
   }, [searchQuery]);
   const checkAdminAccess = async () => {
     if (!user) {
+      console.log('[ADMIN] No user found, redirecting to home');
       navigate('/');
       return;
     }
+    
+    console.log('[ADMIN] Checking admin access for user:', user.id);
+    
     try {
       const {
         data,
         error
-      } = await supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
-      if (error) throw error;
+      } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      console.log('[ADMIN] Query result:', { data, error });
+      
+      if (error) {
+        console.error('[ADMIN] Database error:', error);
+        throw error;
+      }
+      
       if (!data) {
+        console.log('[ADMIN] User is not admin, redirecting to home');
+        toast.error('Admin access required');
         navigate('/');
         return;
       }
+      
+      console.log('[ADMIN] Admin access granted');
       setIsAdmin(true);
     } catch (error) {
-      console.error('Admin access check error:', error);
+      console.error('[ADMIN] Admin access check error:', error);
+      toast.error('Failed to verify admin access');
       navigate('/');
     } finally {
       setLoading(false);
