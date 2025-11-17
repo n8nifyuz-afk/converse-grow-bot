@@ -20,6 +20,9 @@ const requestSchema = z.object({
   initialReferer: z.string().max(1000).optional(),
   ipAddress: z.string().max(50).optional(),
   country: z.string().max(2).optional(),
+  // Bot protection fields
+  website: z.string().optional(), // honeypot field
+  timeElapsed: z.number().optional(), // time in milliseconds
 });
 
 const logStep = (step: string, details?: any) => {
@@ -68,9 +71,35 @@ serve(async (req) => {
       );
     }
 
-    const { email, password, gclid, urlParams, initialReferer, ipAddress, country } = validationResult.data;
+    const { email, password, gclid, urlParams, initialReferer, ipAddress, country, website, timeElapsed } = validationResult.data;
     
     logStep("Request received", { email });
+
+    // BOT PROTECTION 1: Honeypot validation
+    if (website && website.trim() !== '') {
+      logStep("Bot detected - honeypot field filled", { email, website });
+      return new Response(
+        JSON.stringify({ error: "Invalid request" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // BOT PROTECTION 2: Time-based validation (minimum 2 seconds)
+    if (timeElapsed !== undefined && timeElapsed < 2000) {
+      logStep("Bot detected - form submitted too quickly", { email, timeElapsed });
+      return new Response(
+        JSON.stringify({ error: "Please wait a moment before submitting" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    logStep("Bot protection checks passed", { timeElapsed });
 
     // RATE LIMITING: Check signup attempts for this email
     logStep("Checking rate limits");
