@@ -159,9 +159,7 @@ interface FileAttachment {
 import { ImageEditModal } from '@/components/ImageEditModal';
 export default function Chat() {
   const { chatId } = useParams();
-const location = useLocation();
-const searchParams = new URLSearchParams(location.search);
-const authParam = searchParams.get('auth') as 'signin' | 'signup' | 'reset' | null;
+  const location = useLocation();
   const { t } = useTranslation();
   const { user, userProfile, subscriptionStatus, loadingSubscription } = useAuth();
   const { actualTheme } = useTheme();
@@ -269,14 +267,7 @@ const authParam = searchParams.get('auth') as 'signin' | 'signup' | 'reset' | nu
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [regeneratingMessageId, setRegeneratingMessageId] = useState<string | null>(null);
-const regeneratingMessageIdRef = useRef<string | null>(null); // Ref to track current regenerating message ID
-
-// Open auth modal automatically when auth intent is present in URL
-useEffect(() => {
-  if (authParam && !showAuthModal) {
-    setShowAuthModal(true);
-  }
-}, [authParam, showAuthModal]);
+  const regeneratingMessageIdRef = useRef<string | null>(null); // Ref to track current regenerating message ID
   const [hiddenMessageIds, setHiddenMessageIds] = useState<Set<string>>(new Set());
   const [selectedModel, setSelectedModel] = useState(() => {
     // Free users can only use gpt-4o-mini
@@ -4761,7 +4752,6 @@ Error: ${error instanceof Error ? error.message : 'PDF processing failed'}`;
       {/* Auth Modal */}
       <AuthModal 
         isOpen={showAuthModal} 
-        initialMode={authParam ?? undefined}
         onClose={() => {
           setShowAuthModal(false);
         }} 

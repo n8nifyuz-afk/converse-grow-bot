@@ -17,13 +17,11 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  initialMode?: 'signin' | 'signup' | 'reset';
 }
 export default function AuthModal({
   isOpen,
   onClose,
-  onSuccess,
-  initialMode
+  onSuccess
 }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -72,14 +70,7 @@ export default function AuthModal({
   } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-const { t } = useTranslation();
-
-// If an initial mode is provided, apply it when the modal opens
-useEffect(() => {
-  if (isOpen && initialMode) {
-    setMode(initialMode);
-  }
-}, [isOpen, initialMode]);
+  const { t } = useTranslation();
 
   // Close modal and call onSuccess when user is authenticated
   // BUT NOT if we're in complete-profile mode OR if phone modal is open (phone auth may need profile completion)
@@ -233,9 +224,9 @@ useEffect(() => {
         body: { 
           email, 
           password,
-          gclid: gclid || '',
+          gclid,
           urlParams: urlParams ? JSON.parse(urlParams) : {},
-          initialReferer: initialReferer || '',
+          initialReferer,
           ipAddress: ip,
           country
         }
@@ -791,9 +782,7 @@ useEffect(() => {
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
                  <h2 className="text-2xl md:text-3xl font-bold leading-tight">
-                    {mode === 'signup' ? t('authModal.signUp') 
-                      : mode === 'reset' ? t('authModal.resetPassword') 
-                      : t('authModal.title')}
+                   {t('authModal.title')}
                  </h2>
                </div>
              )}
@@ -1217,10 +1206,6 @@ useEffect(() => {
                            } else {
                              setShowEmailPasswordInline(true);
                            }
-                           // Ensure the correct auth flow when opening the email/password form
-                           if (initialMode) {
-                             setMode(initialMode);
-                           }
                          }}
                          className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
                        />
@@ -1294,14 +1279,14 @@ useEffect(() => {
                   <div className="mt-4 text-center space-x-2 text-sm">
                     {mode === 'signin' ? <>
                         <span className="text-muted-foreground">{t('authModal.dontHaveAccount')}</span>
-                        <button type="button" onClick={() => {
+                        <button onClick={() => {
                           setMode('signup');
                           setError('');
                         }} className="text-primary hover:underline font-medium">
                           {t('authModal.signUp')}
                         </button>
                         <span className="text-muted-foreground">|</span>
-                        <button type="button" onClick={() => {
+                        <button onClick={() => {
                           setMode('reset');
                           setError('');
                         }} className="text-primary hover:underline">
@@ -1309,7 +1294,7 @@ useEffect(() => {
                         </button>
                       </> : <>
                         <span className="text-muted-foreground">{t('authModal.alreadyHaveAccount')}</span>
-                        <button type="button" onClick={() => {
+                        <button onClick={() => {
                           setMode('signin');
                           setError('');
                         }} className="text-primary hover:underline font-medium">
