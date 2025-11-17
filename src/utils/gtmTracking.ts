@@ -31,6 +31,8 @@ export const clearTrackingData = () => {
   
   try {
     localStorage.removeItem('gclid');
+    localStorage.removeItem('gbraid');
+    localStorage.removeItem('wbraid');
     localStorage.removeItem('gclid_timestamp');
     localStorage.removeItem('url_params');
     localStorage.removeItem('url_params_timestamp');
@@ -40,365 +42,494 @@ export const clearTrackingData = () => {
 };
 
 /**
- * Clear tracking data after successful conversion
- * Call this after signup/payment is tracked
+ * Get GA4 client_id from _ga cookie
+ * Format: GA1.1.1234567890.9876543210
+ * Returns: "1234567890.9876543210"
  */
-export const clearTrackingDataAfterConversion = () => {
-  if (typeof window === 'undefined') return;
+export const getGaClientId = (): string | null => {
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)_ga=([^;]+)/);
+    if (!match) return null;
+    
+    const parts = decodeURIComponent(match[1]).split('.');
+    // Expected: GA1.1.1234567890.9876543210
+    if (parts.length < 4) return null;
+    
+    return parts[2] + '.' + parts[3]; // "1234567890.9876543210"
+  } catch (error) {
+    console.error('Error getting GA client_id:', error);
+    return null;
+  }
+};
+
+/**
+ * Get Google Ads identifiers from URL
+ * Returns: { gclid, gbraid, wbraid }
+ */
+export const getGoogleAdsIdsFromUrl = (): Record<string, string> => {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  const ids: Record<string, string> = {};
+  
+  ['gclid', 'gbraid', 'wbraid'].forEach((key) => {
+    const val = params.get(key);
+    if (val) ids[key] = val;
+  });
+  
+  return ids;
+};
+
+/**
+ * Persist Google Ads IDs in localStorage
+ */
+export const persistGoogleAdsIds = (ids: Record<string, string>) => {
+  if (!ids || Object.keys(ids).length === 0) return;
   
   try {
-    localStorage.removeItem('gclid');
-    localStorage.removeItem('gclid_timestamp');
-    localStorage.removeItem('url_params');
-    localStorage.removeItem('url_params_timestamp');
+    Object.entries(ids).forEach(([key, value]) => {
+      localStorage.setItem(key, value);
+      localStorage.setItem(`${key}_timestamp`, Date.now().toString());
+    });
   } catch (error) {
-    // Silent error
+    console.error('Error persisting Google Ads IDs:', error);
   }
+};
+
+/**
+ * Get stored Google Ads IDs from localStorage
+ */
+export const getStoredGoogleAdsIds = (): Record<string, string> => {
+  const ids: Record<string, string> = {};
+  
+  try {
+    ['gclid', 'gbraid', 'wbraid'].forEach((key) => {
+      const value = localStorage.getItem(key);
+      if (value) ids[key] = value;
+    });
+  } catch (error) {
+    console.error('Error getting stored Google Ads IDs:', error);
+  }
+  
+  return ids;
 };
 
 /**
  * Initialize GTM with GCLID and URL parameters
- * This should be called on app initialization to ensure Google Ads can track conversions
+ * This should be called on app initialization
  */
 export const initializeGTMWithGCLID = () => {
-  console.log('═══════════════════════════════════════════════════');
-  console.log('🔍 [GTM-INIT] Initializing GTM with GCLID tracking...');
-  console.log('═══════════════════════════════════════════════════');
+  if (typeof window === 'undefined' || !window.dataLayer) return;
   
-  if (typeof window === 'undefined' || !window.dataLayer) {
-    console.error('❌ [GTM-INIT] Window or dataLayer not available!');
-    console.log('💡 Make sure GTM script is loaded in index.html');
-    return;
-  }
-  
-  console.log('✅ [GTM-INIT] Window and dataLayer available');
-  console.log('📊 [GTM-INIT] Current dataLayer length:', window.dataLayer.length);
-
   try {
+    // Capture Google Ads IDs from URL
+    const adsIds = getGoogleAdsIdsFromUrl();
+    if (Object.keys(adsIds).length > 0) {
+      persistGoogleAdsIds(adsIds);
+    }
+    
     // Get GCLID from URL or localStorage
     const urlParams = new URLSearchParams(window.location.search);
     const gclidFromUrl = urlParams.get('gclid');
     const gclidFromStorage = localStorage.getItem('gclid');
     
-    console.log('📍 [GTM] GCLID from URL:', gclidFromUrl || 'Not found');
-    console.log('💾 [GTM] GCLID from storage:', gclidFromStorage || 'Not found');
-    
     // Check if stored GCLID has expired
     const hasExpiredGCLID = gclidFromStorage && isGCLIDExpired();
     if (hasExpiredGCLID) {
-      console.log('⏰ [GTM] Stored GCLID expired, clearing...');
       clearTrackingData();
     }
     
     const gclid = gclidFromUrl || (hasExpiredGCLID ? null : gclidFromStorage);
 
-    // CRITICAL: Store GCLID with timestamp if found in URL
-    // Only store if not already present (preserves original tracking)
+    // Store GCLID with timestamp if found in URL
     if (gclidFromUrl && !gclidFromStorage) {
-      console.log('💾 [GTM] Storing new GCLID:', gclidFromUrl);
       localStorage.setItem('gclid', gclidFromUrl);
       localStorage.setItem('gclid_timestamp', Date.now().toString());
-    } else if (gclid) {
-      console.log('✅ [GTM] Using existing GCLID:', gclid);
     }
 
     // Collect all URL parameters for attribution
     const allUrlParams: Record<string, string> = {};
     urlParams.forEach((value, key) => {
-      // Skip internal/system parameters that shouldn't be tracked
       if (!key.startsWith('__') && key !== 'code' && key !== 'state') {
         allUrlParams[key] = value;
       }
     });
 
-    // CRITICAL: MERGE new URL parameters with existing ones (never overwrite)
-    // This ensures utm_source, utm_medium, gad_source, etc. persist through OAuth redirects
-    const existingParamsStr = localStorage.getItem('url_params');
-    let mergedParams = allUrlParams;
-    
-    if (existingParamsStr) {
-      try {
-        const existingParams = JSON.parse(existingParamsStr);
-        // Merge: keep existing params, only add new ones if they don't exist
-        mergedParams = { ...allUrlParams, ...existingParams };
-      } catch (e) {
-        // Silent error - continue with current params
-      }
-    }
+    // Merge with stored params (preserves first-touch attribution)
+    const storedParams = localStorage.getItem('url_params');
+    const mergedParams = storedParams ? 
+      { ...JSON.parse(storedParams), ...allUrlParams } : 
+      allUrlParams;
 
-    // Only save if we have tracking parameters (not just system parameters)
-    if (Object.keys(mergedParams).length > 0) {
+    if (Object.keys(allUrlParams).length > 0) {
       localStorage.setItem('url_params', JSON.stringify(mergedParams));
       localStorage.setItem('url_params_timestamp', Date.now().toString());
     }
 
-    // If we have GCLID or URL params, push to dataLayer
-    if (gclid || Object.keys(allUrlParams).length > 0) {
-      const eventData: Record<string, any> = {
+    // Push to dataLayer if we have tracking data
+    if (gclid || Object.keys(mergedParams).length > 0) {
+      const eventData: any = {
         event: 'gtm_init',
+        url_params: mergedParams
       };
-
+      
       if (gclid) {
         eventData.gclid = gclid;
-        console.log('✅ [GTM-INIT] Adding GCLID to event:', gclid);
       }
-
-      if (Object.keys(allUrlParams).length > 0) {
-        eventData.url_params = allUrlParams;
-        console.log('✅ [GTM-INIT] Adding URL params:', allUrlParams);
-      }
-
-      console.log('═══════════════════════════════════════════════════');
-      console.log('📤 [GTM-INIT] Pushing gtm_init event to dataLayer:');
-      console.log(JSON.stringify(eventData, null, 2));
-      console.log('═══════════════════════════════════════════════════');
       
       window.dataLayer.push(eventData);
-      
-      console.log('✅ [GTM-INIT] Event pushed successfully!');
-      console.log('📊 [GTM-INIT] Full dataLayer:', window.dataLayer);
-      console.log('═══════════════════════════════════════════════════');
-    } else {
-      console.log('ℹ️ [GTM-INIT] No tracking data to push (no GCLID or URL params)');
-      console.log('═══════════════════════════════════════════════════');
     }
   } catch (error) {
-    console.error('❌ [GTM] Error initializing:', error);
+    console.error('Error initializing GTM:', error);
   }
 };
 
 /**
- * Get current GCLID for event tracking
+ * Wait for GTM to be loaded
  */
-const getCurrentGCLID = (): string | null => {
+export const waitForGTM = (): Promise<void> => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+
+    if (window.dataLayer) {
+      resolve();
+      return;
+    }
+
+    const checkInterval = setInterval(() => {
+      if (window.dataLayer) {
+        clearInterval(checkInterval);
+        resolve();
+      }
+    }, 100);
+
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve();
+    }, 5000);
+  });
+};
+
+/**
+ * Get current GCLID from URL or localStorage
+ */
+export const getCurrentGCLID = (): string | null => {
   if (typeof window === 'undefined') return null;
   
   const urlParams = new URLSearchParams(window.location.search);
   const gclidFromUrl = urlParams.get('gclid');
-  const gclidFromStorage = localStorage.getItem('gclid');
   
-  return gclidFromUrl || gclidFromStorage;
+  if (gclidFromUrl) return gclidFromUrl;
+  
+  const gclidFromStorage = localStorage.getItem('gclid');
+  if (gclidFromStorage && !isGCLIDExpired()) {
+    return gclidFromStorage;
+  }
+  
+  return null;
 };
 
 /**
- * Wait for GTM to be ready before firing events
+ * Track sign_up event
+ * Fire after the backend confirms account creation
  */
-const waitForGTM = (): Promise<void> => {
-  return new Promise((resolve) => {
-    // Check if GTM is already loaded
-    if (typeof window !== 'undefined' && window.dataLayer) {
-      const gtmLoaded = window.dataLayer.some((item: any) => 
-        item.event === 'gtm.js' || item.event === 'gtm.load'
-      );
-      
-      if (gtmLoaded) {
-        console.log('✅ [GTM-READY] GTM already loaded');
-        resolve();
-        return;
-      }
-    }
-    
-    // Wait for GTM to load (max 3 seconds)
-    console.log('⏳ [GTM-READY] Waiting for GTM to load...');
-    const maxWait = 3000;
-    const checkInterval = 100;
-    let elapsed = 0;
-    
-    const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && window.dataLayer) {
-        const gtmLoaded = window.dataLayer.some((item: any) => 
-          item.event === 'gtm.js' || item.event === 'gtm.load'
-        );
-        
-        if (gtmLoaded) {
-          console.log('✅ [GTM-READY] GTM loaded after', elapsed, 'ms');
-          clearInterval(interval);
-          resolve();
-          return;
-        }
-      }
-      
-      elapsed += checkInterval;
-      if (elapsed >= maxWait) {
-        console.warn('⚠️ [GTM-READY] GTM not loaded after', maxWait, 'ms, proceeding anyway');
-        clearInterval(interval);
-        resolve();
-      }
-    }, checkInterval);
-  });
-};
-
-export const trackRegistrationComplete = async () => {
-  try {
-    console.log('═══════════════════════════════════════════════════');
-    console.log('🎯 [GTM-REGISTRATION] trackRegistrationComplete() called');
-    console.log('═══════════════════════════════════════════════════');
-    
-    if (typeof window !== 'undefined' && window.dataLayer) {
-      console.log('✅ [GTM-REGISTRATION] dataLayer is available');
-      
-      // Wait for GTM to be ready
-      await waitForGTM();
-      
-      const gclid = getCurrentGCLID();
-      console.log('📍 [GTM-REGISTRATION] Current GCLID:', gclid || 'None');
-      
-      // Get URL params
-      const urlParamsStr = localStorage.getItem('url_params');
-      let urlParams = {};
-      if (urlParamsStr) {
-        try {
-          urlParams = JSON.parse(urlParamsStr);
-          console.log('📍 [GTM-REGISTRATION] Stored URL params:', urlParams);
-        } catch (e) {
-          console.error('❌ [GTM-REGISTRATION] Error parsing URL params');
-        }
-      }
-      
-      const eventData: Record<string, any> = {
-        event: 'registration_complete'
-      };
-      
-      if (gclid) {
-        eventData.gclid = gclid;
-        console.log('✅ [GTM-REGISTRATION] Adding GCLID to event');
-      }
-      
-      console.log('═══════════════════════════════════════════════════');
-      console.log('📤 [GTM-REGISTRATION] Pushing event to dataLayer:');
-      console.log(JSON.stringify(eventData, null, 2));
-      console.log('═══════════════════════════════════════════════════');
-      
-      window.dataLayer.push(eventData);
-      
-      console.log('✅ [GTM-REGISTRATION] Event pushed successfully!');
-      console.log('📊 [GTM-REGISTRATION] Full dataLayer:', window.dataLayer);
-      console.log('═══════════════════════════════════════════════════');
-    } else {
-      console.error('❌ [GTM-REGISTRATION] Window or dataLayer not available!');
-      console.log('═══════════════════════════════════════════════════');
-    }
-  } catch (error) {
-    console.error('❌ [GTM-REGISTRATION] Fatal error in trackRegistrationComplete:', error);
-  }
-};
-
-export const trackChatStart = (chatId?: string) => {
-  console.log('═══════════════════════════════════════════════════');
-  console.log('🎯 [GTM-CHAT] Tracking chat_start event');
-  console.log('💬 [GTM-CHAT] Chat ID:', chatId || 'None');
-  console.log('═══════════════════════════════════════════════════');
+export const trackSignUp = async (userId: string, method: string, signupFlow?: string) => {
+  await waitForGTM();
   
   if (typeof window !== 'undefined' && window.dataLayer) {
-    const trackedKey = chatId ? `gtm_chat_start_${chatId}` : 'gtm_chat_start_temp';
-    const trackedChats = sessionStorage.getItem('gtm_tracked_chats') || '';
-    
-    if (trackedChats.includes(trackedKey)) {
-      console.log('⏭️ [GTM-CHAT] Chat start already tracked, skipping');
-      console.log('📝 [GTM-CHAT] Tracked chats:', trackedChats);
-      console.log('═══════════════════════════════════════════════════');
-      return;
-    }
-    
-    const gclid = getCurrentGCLID();
-    console.log('📍 [GTM-CHAT] Current GCLID:', gclid || 'None');
-    
-    // Get URL params
-    const urlParamsStr = localStorage.getItem('url_params');
-    let urlParams = {};
-    if (urlParamsStr) {
-      try {
-        urlParams = JSON.parse(urlParamsStr);
-        console.log('📍 [GTM-CHAT] Stored URL params:', urlParams);
-      } catch (e) {
-        console.error('❌ [GTM-CHAT] Error parsing URL params');
+    try {
+      const gclid = getCurrentGCLID();
+      const urlParams = localStorage.getItem('url_params');
+      const parsedParams = urlParams ? JSON.parse(urlParams) : {};
+      
+      const eventData: any = {
+        event: 'sign_up',
+        user_id: userId,
+        method: method, // google|facebook|microsoft|apple|manual
+      };
+      
+      if (signupFlow) {
+        eventData.signup_flow = signupFlow;
       }
+      
+      if (gclid) {
+        eventData.gclid = gclid;
+      }
+      
+      if (Object.keys(parsedParams).length > 0) {
+        eventData.url_params = parsedParams;
+      }
+      
+      window.dataLayer.push(eventData);
+    } catch (error) {
+      console.error('Error tracking sign_up:', error);
     }
-    
-    const eventData: Record<string, any> = {
-      event: 'chat_start'
-    };
-    
-    if (gclid) {
-      eventData.gclid = gclid;
-      console.log('✅ [GTM-CHAT] Adding GCLID to event');
-    }
-    
-    console.log('═══════════════════════════════════════════════════');
-    console.log('📤 [GTM-CHAT] Pushing event to dataLayer:');
-    console.log(JSON.stringify(eventData, null, 2));
-    console.log('═══════════════════════════════════════════════════');
-    
-    window.dataLayer.push(eventData);
-    
-    const newTrackedChats = trackedChats ? `${trackedChats},${trackedKey}` : trackedKey;
-    sessionStorage.setItem('gtm_tracked_chats', newTrackedChats);
-    
-    console.log('✅ [GTM-CHAT] Event pushed successfully!');
-    console.log('📊 [GTM-CHAT] Full dataLayer:', window.dataLayer);
-    console.log('═══════════════════════════════════════════════════');
-  } else {
-    console.error('❌ [GTM-CHAT] Window or dataLayer not available!');
-    console.log('═══════════════════════════════════════════════════');
   }
 };
 
-export const trackPaymentComplete = async (
-  planType: 'Pro' | 'Ultra',
-  planDuration: 'monthly' | '3_months' | 'yearly',
-  planPrice: number
+/**
+ * Track login event
+ * Fire on successful login / token issued, not every page load
+ */
+export const trackLogin = async (userId: string, method: string) => {
+  await waitForGTM();
+  
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    try {
+      const eventData: any = {
+        event: 'login',
+        user_id: userId,
+        method: method, // google|facebook|microsoft|apple|password
+        interface: 'web'
+      };
+      
+      window.dataLayer.push(eventData);
+    } catch (error) {
+      console.error('Error tracking login:', error);
+    }
+  }
+};
+
+/**
+ * Track chat_start event
+ * Fire when the user sends the first message in a conversation
+ */
+export const trackChatStart = async (
+  userId: string,
+  conversationId: string,
+  modelName: string,
+  isNewConversation: boolean = true
 ) => {
-  try {
-    console.log('═══════════════════════════════════════════════════');
-    console.log('🎯 [GTM-PAYMENT] Tracking payment_complete event');
-    console.log('💰 [GTM-PAYMENT] Plan:', planType, planDuration, '$' + planPrice);
-    console.log('═══════════════════════════════════════════════════');
-    
-    if (typeof window !== 'undefined' && window.dataLayer) {
-      console.log('✅ [GTM-PAYMENT] dataLayer is available');
+  await waitForGTM();
+  
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    try {
+      // Check if this chat has already been tracked
+      const trackedChats = sessionStorage.getItem('gtm_tracked_chats') || '';
+      const trackedKey = `${userId}:${conversationId}`;
       
-      // Wait for GTM to be ready
-      await waitForGTM();
+      if (trackedChats.includes(trackedKey)) {
+        return;
+      }
       
+      const eventData: any = {
+        event: 'chat_start',
+        user_id: userId,
+        conversation_id: conversationId,
+        model_name: modelName,
+        interface: 'web',
+        is_new_conversation: isNewConversation
+      };
+      
+      window.dataLayer.push(eventData);
+      
+      // Mark this chat as tracked
+      const newTrackedChats = trackedChats ? `${trackedChats},${trackedKey}` : trackedKey;
+      sessionStorage.setItem('gtm_tracked_chats', newTrackedChats);
+    } catch (error) {
+      console.error('Error tracking chat_start:', error);
+    }
+  }
+};
+
+/**
+ * Track project_create event
+ * Fire when user creates a new folder/project
+ */
+export const trackProjectCreate = async (
+  userId: string,
+  projectId: string,
+  projectName: string,
+  entityType: 'folder' | 'project' = 'project',
+  templateUsed?: string
+) => {
+  await waitForGTM();
+  
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    try {
+      const eventData: any = {
+        event: 'project_create',
+        user_id: userId,
+        project_id: projectId,
+        project_name: projectName,
+        entity_type: entityType,
+      };
+      
+      if (templateUsed) {
+        eventData.template_used = templateUsed;
+      }
+      
+      window.dataLayer.push(eventData);
+    } catch (error) {
+      console.error('Error tracking project_create:', error);
+    }
+  }
+};
+
+/**
+ * Track begin_checkout event
+ * Fire after Stripe Checkout session is successfully created and right before redirecting
+ */
+export const trackBeginCheckout = async (
+  userId: string,
+  planId: string,
+  planName: string,
+  billingPeriod: 'monthly' | 'yearly',
+  currency: string,
+  value: number,
+  itemId: string,
+  itemName: string
+) => {
+  await waitForGTM();
+  
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    try {
+      const eventData: any = {
+        event: 'begin_checkout',
+        user_id: userId,
+        plan_id: planId,
+        plan_name: planName,
+        billing_period: billingPeriod,
+        ecommerce: {
+          currency: currency,
+          value: value,
+          items: [
+            {
+              item_id: itemId,
+              item_name: itemName,
+              item_category: 'subscription',
+              item_brand: 'chatl.ai',
+              price: value,
+              quantity: 1
+            }
+          ]
+        }
+      };
+      
+      window.dataLayer.push(eventData);
+    } catch (error) {
+      console.error('Error tracking begin_checkout:', error);
+    }
+  }
+};
+
+/**
+ * Track purchase event
+ * Fire on your success URL once you've validated that the Stripe session is paid / subscription active
+ */
+export const trackPurchase = async (
+  userId: string,
+  purchaseType: 'initial' | 'upgrade' | 'downgrade' | 'renewal',
+  planId: string,
+  planName: string,
+  billingPeriod: 'monthly' | 'yearly',
+  stripeSessionId: string,
+  transactionId: string,
+  currency: string,
+  value: number,
+  itemId: string,
+  itemName: string
+) => {
+  await waitForGTM();
+  
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    try {
       const gclid = getCurrentGCLID();
-      console.log('📍 [GTM-PAYMENT] Current GCLID:', gclid || 'None');
       
-      const eventData: Record<string, any> = {
-        event: 'payment_complete',
-        plan_type: planType,
-        plan_duration: planDuration,
-        plan_price: planPrice,
-        currency: 'USD',
-        value: planPrice,
-        transaction_id: `payment_${Date.now()}`
+      const eventData: any = {
+        event: 'purchase',
+        user_id: userId,
+        event_source: 'web',
+        purchase_type: purchaseType,
+        plan_id: planId,
+        plan_name: planName,
+        billing_period: billingPeriod,
+        stripe_mode: 'subscription',
+        checkout_id: stripeSessionId,
+        transaction_id: transactionId,
+        ecommerce: {
+          currency: currency,
+          value: value,
+          transaction_id: transactionId,
+          items: [
+            {
+              item_id: itemId,
+              item_name: itemName,
+              item_category: 'subscription',
+              item_brand: 'chatl.ai',
+              price: value,
+              quantity: 1
+            }
+          ]
+        }
       };
       
       if (gclid) {
         eventData.gclid = gclid;
-        console.log('✅ [GTM-PAYMENT] Adding GCLID to event');
       }
       
-      console.log('═══════════════════════════════════════════════════');
-      console.log('📤 [GTM-PAYMENT] Pushing event to dataLayer:');
-      console.log(JSON.stringify(eventData, null, 2));
-      console.log('═══════════════════════════════════════════════════');
-      
       window.dataLayer.push(eventData);
-      
-      console.log('✅ [GTM-PAYMENT] Event pushed successfully!');
-      console.log('📊 [GTM-PAYMENT] Full dataLayer:', window.dataLayer);
-      console.log('═══════════════════════════════════════════════════');
-      
-      // Clear tracking data after successful payment conversion
-      setTimeout(() => {
-        console.log('🧹 [GTM-PAYMENT] Clearing tracking data after conversion');
-        clearTrackingDataAfterConversion();
-      }, 2000); // Delay to ensure GTM processes the event
-    } else {
-      console.error('❌ [GTM-PAYMENT] Window or dataLayer not available!');
-      console.log('═══════════════════════════════════════════════════');
+    } catch (error) {
+      console.error('Error tracking purchase:', error);
     }
-  } catch (error) {
-    console.error('❌ [GTM-PAYMENT] Fatal error in trackPaymentComplete:', error);
   }
 };
+
+/**
+ * Track purchase_fail event
+ * Fire on cancel URL or when you detect a failed / canceled Stripe session
+ */
+export const trackPurchaseFail = async (
+  userId: string,
+  planId: string,
+  planName: string,
+  billingPeriod: 'monthly' | 'yearly',
+  stripeSessionId: string,
+  failureOrigin: 'web' | 'stripe' | 'bank',
+  failureReason: string,
+  currency: string,
+  value: number,
+  itemId: string,
+  itemName: string
+) => {
+  await waitForGTM();
+  
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    try {
+      const eventData: any = {
+        event: 'purchase_fail',
+        user_id: userId,
+        plan_id: planId,
+        plan_name: planName,
+        billing_period: billingPeriod,
+        checkout_id: stripeSessionId,
+        failure_origin: failureOrigin,
+        failure_reason: failureReason,
+        ecommerce: {
+          currency: currency,
+          value: value,
+          items: [
+            {
+              item_id: itemId,
+              item_name: itemName,
+              item_category: 'subscription',
+              item_brand: 'chatl.ai',
+              price: value,
+              quantity: 1
+            }
+          ]
+        }
+      };
+      
+      window.dataLayer.push(eventData);
+    } catch (error) {
+      console.error('Error tracking purchase_fail:', error);
+    }
+  }
+};
+
+// Legacy function names for backward compatibility
+export const trackRegistrationComplete = trackSignUp;
+export const trackPaymentComplete = trackPurchase;
