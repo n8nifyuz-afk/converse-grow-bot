@@ -270,7 +270,6 @@ export type Database = {
         Row: {
           avatar_url: string | null
           browser_info: Json | null
-          client_id: string | null
           country: string | null
           created_at: string
           date_of_birth: string | null
@@ -278,7 +277,6 @@ export type Database = {
           display_name: string | null
           email: string | null
           external_id: string | null
-          gbraid: string | null
           gclid: string | null
           gender: string | null
           id: string
@@ -297,13 +295,11 @@ export type Database = {
           updated_at: string
           url_params: Json | null
           user_id: string
-          wbraid: string | null
           welcome_email_sent: boolean | null
         }
         Insert: {
           avatar_url?: string | null
           browser_info?: Json | null
-          client_id?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -311,7 +307,6 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           external_id?: string | null
-          gbraid?: string | null
           gclid?: string | null
           gender?: string | null
           id?: string
@@ -330,13 +325,11 @@ export type Database = {
           updated_at?: string
           url_params?: Json | null
           user_id: string
-          wbraid?: string | null
           welcome_email_sent?: boolean | null
         }
         Update: {
           avatar_url?: string | null
           browser_info?: Json | null
-          client_id?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -344,7 +337,6 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           external_id?: string | null
-          gbraid?: string | null
           gclid?: string | null
           gender?: string | null
           id?: string
@@ -363,7 +355,6 @@ export type Database = {
           updated_at?: string
           url_params?: Json | null
           user_id?: string
-          wbraid?: string | null
           welcome_email_sent?: boolean | null
         }
         Relationships: []
@@ -398,39 +389,6 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      signup_rate_limits: {
-        Row: {
-          attempt_count: number
-          blocked_until: string | null
-          created_at: string
-          first_attempt_at: string
-          id: string
-          identifier: string
-          last_attempt_at: string
-          updated_at: string
-        }
-        Insert: {
-          attempt_count?: number
-          blocked_until?: string | null
-          created_at?: string
-          first_attempt_at?: string
-          id?: string
-          identifier: string
-          last_attempt_at?: string
-          updated_at?: string
-        }
-        Update: {
-          attempt_count?: number
-          blocked_until?: string | null
-          created_at?: string
-          first_attempt_at?: string
-          id?: string
-          identifier?: string
-          last_attempt_at?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -835,15 +793,6 @@ export type Database = {
           remaining: number
           reset_date: string
         }[]
-      }
-      check_signup_rate_limit: {
-        Args: {
-          p_block_minutes?: number
-          p_identifier: string
-          p_max_attempts?: number
-          p_window_minutes?: number
-        }
-        Returns: Json
       }
       cleanup_expired_verifications: { Args: never; Returns: undefined }
       delete_user_account: { Args: never; Returns: undefined }
