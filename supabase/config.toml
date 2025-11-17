@@ -52,6 +52,10 @@ verify_jwt = true
 [functions.export-user-chats]
 verify_jwt = true
 
+# Admin function to check admin status (server-side verification)
+[functions.check-admin-status]
+verify_jwt = true
+
 # Scheduled cleanup for expired subscriptions (called by cron)
 [functions.cleanup-expired-subscriptions]
 verify_jwt = false

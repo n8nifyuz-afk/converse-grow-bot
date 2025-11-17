@@ -392,6 +392,39 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_rate_limits: {
+        Row: {
+          attempt_count: number
+          blocked_until: string | null
+          created_at: string
+          first_attempt_at: string
+          id: string
+          identifier: string
+          last_attempt_at: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          first_attempt_at?: string
+          id?: string
+          identifier: string
+          last_attempt_at?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          first_attempt_at?: string
+          id?: string
+          identifier?: string
+          last_attempt_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stripe_products: {
         Row: {
           created_at: string
@@ -793,6 +826,15 @@ export type Database = {
           remaining: number
           reset_date: string
         }[]
+      }
+      check_signup_rate_limit: {
+        Args: {
+          p_block_minutes?: number
+          p_identifier: string
+          p_max_attempts?: number
+          p_window_minutes?: number
+        }
+        Returns: Json
       }
       cleanup_expired_verifications: { Args: never; Returns: undefined }
       delete_user_account: { Args: never; Returns: undefined }

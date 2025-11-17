@@ -312,24 +312,21 @@ export default function Admin() {
     console.log('[ADMIN] Checking admin access for user:', user.id);
     
     try {
-      const {
-        data,
-        error
-      } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
+      // Use server-side admin check edge function for security
+      const { data, error } = await supabase.functions.invoke('check-admin-status', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
       
-      console.log('[ADMIN] Query result:', { data, error });
+      console.log('[ADMIN] Admin check result:', { data, error });
       
       if (error) {
-        console.error('[ADMIN] Database error:', error);
+        console.error('[ADMIN] Admin check error:', error);
         throw error;
       }
       
-      if (!data) {
+      if (!data?.isAdmin) {
         console.log('[ADMIN] User is not admin, redirecting to home');
         toast.error('Admin access required');
         navigate('/');
