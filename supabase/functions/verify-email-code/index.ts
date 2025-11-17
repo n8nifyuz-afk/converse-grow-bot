@@ -4,7 +4,6 @@ import { Resend } from "https://esm.sh/resend@4.0.0";
 import { renderAsync } from 'https://esm.sh/@react-email/components@0.0.22';
 import React from 'https://esm.sh/react@18.3.1';
 import { EmailLinkedEmail } from './_templates/email-linked.tsx';
-import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -12,15 +11,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-// Input validation schema
-const requestSchema = z.object({
-  code: z.string().length(6, { message: "Code must be 6 digits" }),
-  email: z.string().trim().email({ message: "Invalid email address" }).max(255),
-  gclid: z.string().max(500).optional(),
-  urlParams: z.record(z.string()).optional(),
-  initialReferer: z.string().max(1000).optional(),
-});
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -36,25 +26,12 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const rawBody = await req.json();
+    const { code, email, gclid, urlParams, initialReferer } = await req.json();
     
-    // Validate input
-    const validationResult = requestSchema.safeParse(rawBody);
-    if (!validationResult.success) {
-      logStep("Validation failed", { errors: validationResult.error.errors });
-      return new Response(
-        JSON.stringify({ 
-          error: validationResult.error.errors[0]?.message || "Invalid input"
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (!code || !email) {
+      throw new Error("Code and email are required");
     }
 
-    const { code, email, gclid, urlParams, initialReferer } = validationResult.data;
-    
     logStep("Verification attempt", { email });
 
     // Initialize Supabase admin client
@@ -89,8 +66,8 @@ serve(async (req) => {
       throw new Error("This code has already been used");
     }
 
-    // Get the HASHED password from the verification record
-    const hashedPassword = verification.password_hash;
+    // Get the password from the verification record
+    const password = verification.password_hash;
 
     logStep("Code verified, checking if user exists");
 
@@ -146,7 +123,7 @@ serve(async (req) => {
       }
     }
 
-    logStep("Creating new user with hashed password");
+    logStep("Creating new user");
 
     // Use tracking data from verification record, fallback to request body
     const finalGclid = verification.gclid || gclid || null;
@@ -155,11 +132,10 @@ serve(async (req) => {
     const finalIpAddress = verification.ip_address || null;
     const finalCountry = verification.country || null;
 
-    // SECURITY: Create user with the HASHED password stored in verification
-    // Supabase will handle the password correctly since it's already hashed
+    // Create new user with verified email
     const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
       email: email,
-      password: hashedPassword,
+      password: password,
       email_confirm: true, // Auto-confirm the email
       user_metadata: {
         signup_method: 'email',

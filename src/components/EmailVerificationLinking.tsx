@@ -16,12 +16,6 @@ export function EmailVerificationLinking() {
   const [step, setStep] = useState<'input' | 'verify'>('input');
   const [loading, setLoading] = useState(false);
   const [verificationId, setVerificationId] = useState('');
-  
-  // Bot protection: honeypot field (should remain empty)
-  const [website, setWebsite] = useState('');
-  
-  // Bot protection: track form display time
-  const [formStartTime] = useState(Date.now());
 
   const handleSendCode = async () => {
     if (!email || !password) {
@@ -50,17 +44,11 @@ export function EmailVerificationLinking() {
         return;
       }
 
-      // Calculate time elapsed since form was displayed
-      const timeElapsed = Date.now() - formStartTime;
-
       const { data, error } = await supabase.functions.invoke('send-verification-code', {
         body: {
           email,
           password,
           userId: user?.id,
-          // Bot protection fields
-          website, // honeypot - should be empty
-          timeElapsed, // time in milliseconds
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -214,19 +202,6 @@ export function EmailVerificationLinking() {
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
           className="h-9 text-sm"
-        />
-      </div>
-
-      {/* Honeypot field - hidden from real users, visible to bots */}
-      <div className="absolute left-[-9999px] opacity-0 pointer-events-none" aria-hidden="true">
-        <Label htmlFor="website">Website</Label>
-        <Input
-          id="website"
-          type="text"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-          tabIndex={-1}
-          autoComplete="off"
         />
       </div>
 

@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import bcrypt from "https://esm.sh/bcryptjs@2.4.3";
-import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -10,20 +8,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-// Input validation schema
-const requestSchema = z.object({
-  email: z.string().trim().email({ message: "Invalid email address" }).max(255),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(128),
-  gclid: z.string().max(500).optional().nullable(),
-  urlParams: z.record(z.string()).optional().nullable(),
-  initialReferer: z.string().max(1000).optional().nullable(),
-  ipAddress: z.string().max(50).optional().nullable(),
-  country: z.string().max(2).optional().nullable(),
-  // Bot protection fields
-  website: z.string().optional(), // honeypot field
-  timeElapsed: z.number().optional(), // time in milliseconds
-});
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -53,16 +37,14 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    logStep("Parsing and validating request body");
-    const rawBody = await req.json();
+    logStep("Parsing request body");
+    const { email, password, gclid, urlParams, initialReferer, ipAddress, country } = await req.json();
     
-    // Validate input
-    const validationResult = requestSchema.safeParse(rawBody);
-    if (!validationResult.success) {
-      logStep("Validation failed", { errors: validationResult.error.errors });
+    if (!email || !password) {
+      logStep("Missing email or password");
       return new Response(
         JSON.stringify({ 
-          error: validationResult.error.errors[0]?.message || "Invalid input"
+          error: "Email and password are required"
         }),
         {
           status: 400,
@@ -71,64 +53,7 @@ serve(async (req) => {
       );
     }
 
-    const { email, password, gclid, urlParams, initialReferer, ipAddress, country, website, timeElapsed } = validationResult.data;
-    
     logStep("Request received", { email });
-
-    // BOT PROTECTION 1: Honeypot validation
-    if (website && website.trim() !== '') {
-      logStep("Bot detected - honeypot field filled", { email, website });
-      return new Response(
-        JSON.stringify({ error: "Invalid request" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // BOT PROTECTION 2: Time-based validation (minimum 2 seconds)
-    if (timeElapsed !== undefined && timeElapsed < 2000) {
-      logStep("Bot detected - form submitted too quickly", { email, timeElapsed });
-      return new Response(
-        JSON.stringify({ error: "Please wait a moment before submitting" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    logStep("Bot protection checks passed", { timeElapsed });
-
-    // RATE LIMITING: Check signup attempts for this email
-    logStep("Checking rate limits");
-    const { data: rateLimitCheck, error: rateLimitError } = await supabaseAdmin
-      .rpc('check_signup_rate_limit', { 
-        p_identifier: email.toLowerCase(),
-        p_max_attempts: 5,
-        p_window_minutes: 60,
-        p_block_minutes: 60
-      });
-
-    if (rateLimitError) {
-      logStep("Rate limit check failed", { error: rateLimitError });
-      // Continue anyway - don't block on rate limit failures
-    } else if (rateLimitCheck && !rateLimitCheck.allowed) {
-      logStep("Rate limit exceeded", { email, ...rateLimitCheck });
-      return new Response(
-        JSON.stringify({ 
-          error: rateLimitCheck.reason || "Too many attempts. Please try again later.",
-          blockedUntil: rateLimitCheck.blocked_until
-        }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    logStep("Rate limit check passed", rateLimitCheck);
 
     // Check if email already exists in auth.users
     logStep("Checking if email exists");
@@ -171,24 +96,22 @@ serve(async (req) => {
       }
     }
 
-    // SECURITY: Hash the password before storing
-    logStep("Hashing password");
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    logStep("Password hashed successfully");
-
     // Generate a 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     logStep("Generated verification code", { email, expiresAt });
-    // Store the verification code with HASHED password
+
+    // Store the verification code in Supabase
+    // Note: password_hash column stores the plain password (Supabase encrypts at rest)
+    // It will be used to create the user account after verification
     let verificationRecord;
     const { data: verification, error: storeError } = await supabaseAdmin
       .from('email_verifications')
       .insert({
         email,
         code: code,
-        password_hash: hashedPassword, // Store HASHED password
+        password_hash: password, // Store plain password (encrypted by Supabase)
         expires_at: expiresAt.toISOString(),
         gclid: gclid || null,
         url_params: urlParams || {},
@@ -205,7 +128,7 @@ serve(async (req) => {
         .from('email_verifications')
         .update({
           code: code,
-          password_hash: hashedPassword, // Store HASHED password
+          password_hash: password, // Store plain password (encrypted by Supabase)
           expires_at: expiresAt.toISOString(),
           verified: false,
           gclid: gclid || null,
