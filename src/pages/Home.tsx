@@ -30,7 +30,7 @@ const Home = () => {
         event_label: 'homepage_cta'
       });
     }
-    navigate('/');
+navigate('/?auth=signup');
   };
   return <div className="min-h-screen bg-background text-foreground">
       <SEO title="AI Assistant for Everyone" description="Access GPT-4o, Claude, Gemini and more powerful AI models from a single interface. AI chatbot, image generation, PDF analysis and writing tools." canonical="https://adamchat.app/home" />
@@ -50,7 +50,7 @@ const Home = () => {
           </p>
           
           <div className="flex justify-center">
-            <Button size="lg" onClick={() => navigate('/')} className="w-full sm:w-auto text-lg px-8 py-4 h-auto bg-black text-white hover:bg-black/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200" aria-label="Start using ChatLearn now">
+            <Button size="lg" onClick={() => navigate('/?auth=signup')} className="w-full sm:w-auto text-lg px-8 py-4 h-auto bg-black text-white hover:bg-black/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200" aria-label="Start using ChatLearn now">
               {t('hero.startNow')}
             </Button>
           </div>

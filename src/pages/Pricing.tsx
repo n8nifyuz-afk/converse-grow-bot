@@ -471,6 +471,7 @@ const Pricing = () => {
 
       <AuthModal
         isOpen={showAuthModal}
+        initialMode="signup"
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
       />
