@@ -1217,6 +1217,10 @@ useEffect(() => {
                            } else {
                              setShowEmailPasswordInline(true);
                            }
+                           // Ensure the correct auth flow when opening the email/password form
+                           if (initialMode) {
+                             setMode(initialMode);
+                           }
                          }}
                          className="h-11 md:h-12 border-2 border-gray-400 dark:border-gray-600 text-base cursor-pointer" 
                        />
