@@ -782,7 +782,9 @@ export default function AuthModal({
              {mode !== 'complete-profile' && (
                <div className="mb-6 md:mb-7 text-center">
                  <h2 className="text-2xl md:text-3xl font-bold leading-tight">
-                   {t('authModal.title')}
+                    {mode === 'signup' ? t('authModal.signUp') 
+                      : mode === 'reset' ? t('authModal.resetPassword') 
+                      : t('authModal.title')}
                  </h2>
                </div>
              )}
