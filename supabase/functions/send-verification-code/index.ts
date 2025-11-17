@@ -15,11 +15,11 @@ const corsHeaders = {
 const requestSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(128),
-  gclid: z.string().max(500).optional(),
-  urlParams: z.record(z.string()).optional(),
-  initialReferer: z.string().max(1000).optional(),
-  ipAddress: z.string().max(50).optional(),
-  country: z.string().max(2).optional(),
+  gclid: z.string().max(500).nullish(),
+  urlParams: z.record(z.string()).nullish(),
+  initialReferer: z.string().max(1000).nullish(),
+  ipAddress: z.string().max(50).nullish(),
+  country: z.string().max(2).nullish(),
   // Bot protection fields
   website: z.string().optional(), // honeypot field
   timeElapsed: z.number().optional(), // time in milliseconds
