@@ -270,6 +270,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           browser_info: Json | null
+          client_id: string | null
           country: string | null
           created_at: string
           date_of_birth: string | null
@@ -277,6 +278,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           external_id: string | null
+          gbraid: string | null
           gclid: string | null
           gender: string | null
           id: string
@@ -295,11 +297,13 @@ export type Database = {
           updated_at: string
           url_params: Json | null
           user_id: string
+          wbraid: string | null
           welcome_email_sent: boolean | null
         }
         Insert: {
           avatar_url?: string | null
           browser_info?: Json | null
+          client_id?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -307,6 +311,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           external_id?: string | null
+          gbraid?: string | null
           gclid?: string | null
           gender?: string | null
           id?: string
@@ -325,11 +330,13 @@ export type Database = {
           updated_at?: string
           url_params?: Json | null
           user_id: string
+          wbraid?: string | null
           welcome_email_sent?: boolean | null
         }
         Update: {
           avatar_url?: string | null
           browser_info?: Json | null
+          client_id?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -337,6 +344,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           external_id?: string | null
+          gbraid?: string | null
           gclid?: string | null
           gender?: string | null
           id?: string
@@ -355,6 +363,7 @@ export type Database = {
           updated_at?: string
           url_params?: Json | null
           user_id?: string
+          wbraid?: string | null
           welcome_email_sent?: boolean | null
         }
         Relationships: []
