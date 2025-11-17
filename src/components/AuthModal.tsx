@@ -233,9 +233,9 @@ useEffect(() => {
         body: { 
           email, 
           password,
-          gclid,
+          gclid: gclid || '',
           urlParams: urlParams ? JSON.parse(urlParams) : {},
-          initialReferer,
+          initialReferer: initialReferer || '',
           ipAddress: ip,
           country
         }
