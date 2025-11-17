@@ -93,7 +93,7 @@ const Header = () => {
               )}
             </Button>
             <Button 
-              onClick={() => navigate('/')} 
+              onClick={() => navigate('/?auth=signup')} 
               className="bg-black text-white hover:bg-black/90 focus:ring-2 focus:ring-black focus:ring-offset-2"
               onMouseEnter={() => {
                 // Prefetch / route

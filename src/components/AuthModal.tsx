@@ -17,11 +17,13 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialMode?: 'signin' | 'signup' | 'reset';
 }
 export default function AuthModal({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  initialMode
 }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -70,7 +72,14 @@ export default function AuthModal({
   } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { t } = useTranslation();
+const { t } = useTranslation();
+
+// If an initial mode is provided, apply it when the modal opens
+useEffect(() => {
+  if (isOpen && initialMode) {
+    setMode(initialMode);
+  }
+}, [isOpen, initialMode]);
 
   // Close modal and call onSuccess when user is authenticated
   // BUT NOT if we're in complete-profile mode OR if phone modal is open (phone auth may need profile completion)
